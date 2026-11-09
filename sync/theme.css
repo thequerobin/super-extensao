@@ -51,3 +51,23 @@ html,body{margin:0;background:var(--super-bg);color:var(--super-text);font-famil
   .v-content__wrap>.container,.v-main__wrap>.container,
   .v-content__wrap>div>.width,.v-main__wrap>div>.width{width:calc(100% - 24px)!important}
 }
+
+/* The same app can run inside the Super Extensão popup. */
+html[data-embedded="true"] .super-sync-header{grid-template-columns:1fr auto;gap:12px;width:100%;margin:4px auto 12px}
+html[data-embedded="true"] .super-sync-header>img,
+html[data-embedded="true"] .super-sync-header>div{display:none}
+html[data-embedded="true"] .super-sync-header>.super-back{grid-column:1;grid-row:1;justify-self:start}
+html[data-embedded="true"] .super-sync-header>label{grid-column:2;grid-row:1;width:auto;max-width:180px}
+html[data-embedded="true"] .super-oauth{width:100%;margin-bottom:12px;padding:12px;font-size:12px}
+html[data-embedded="true"] .v-content__wrap>.container,
+html[data-embedded="true"] .v-main__wrap>.container,
+html[data-embedded="true"] .v-content__wrap>div>.width,
+html[data-embedded="true"] .v-main__wrap>div>.width{width:100%!important;margin-top:12px!important}
+html[data-embedded="true"] .v-application .v-content,
+html[data-embedded="true"] .v-application .v-main{padding-bottom:12px!important}
+html[data-embedded="true"] .v-navigation-drawer{display:none!important}
+html[data-embedded="true"] .v-stepper__content{padding:12px!important}
+html[data-embedded="true"] .v-stepper__content .v-form,
+html[data-embedded="true"] .v-stepper__content .headline,
+html[data-embedded="true"] .v-stepper__content .form-buttons{padding-left:0!important;padding-right:0!important}
+html[data-embedded="true"] .v-container.mt-12{margin-top:12px!important;padding-top:12px!important}

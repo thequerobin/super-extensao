@@ -116,7 +116,7 @@ A página Nova guia incorpora [Tabliss 2.6.0](https://github.com/joelshepherd/ta
 
 ## Sincronização de favoritos
 
-Abra **Sincronização de favoritos ↗** no painel. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+Abra **Sincronização** no menu principal. O painel completo fica incorporado à própria seção, com perfis, assistente, opções e importação/exportação. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
 
 Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
 
@@ -129,3 +129,5 @@ As permissões adicionais são `bookmarks` (ler e modificar as pastas escolhidas
 Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
 
 Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.
+
+Versão 1.4.3: painel de sincronização incorporado ao popup, com navegação interna, tema compartilhado e altura ajustada ao espaço disponível. Conferido no popup nativo do Edge e com perfis fictícios: criação, opções e importação/exportação permaneceram dentro da seção, sem abrir novas guias. O login nos provedores continua usando a janela de autorização do serviço. As configurações existentes permanecem no armazenamento da extensão.

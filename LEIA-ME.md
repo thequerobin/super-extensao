@@ -1,4 +1,4 @@
-# Super Extensão 1.4.2
+# Super Extensão 1.4.3
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
@@ -102,7 +102,7 @@ Referências das APIs: https://developer.chrome.com/docs/extensions/reference/ap
 
 ## Sincronização de favoritos
 
-Abra **Sincronização de favoritos ↗** no painel. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+Abra **Sincronização** no menu principal. O painel completo fica incorporado à própria seção, com perfis, assistente, opções e importação/exportação. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
 
 Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
 
@@ -117,4 +117,6 @@ Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Lice
 
 Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.
 
-Na versão 1.4.2, o menu principal reúne Limpeza, Autoplay, Abas e Sincronização. Limpeza contém os submenus O que apagar, Cookies e Favoritos, preservando a seleção ao trocar de seção. Sincronização abre o painel completo por um botão dentro de sua seção.
+Na versão 1.4.2, o menu principal reúne Limpeza, Autoplay, Abas e Sincronização. Limpeza contém os submenus O que apagar, Cookies e Favoritos, preservando a seleção ao trocar de seção. Na versão 1.4.3, Sincronização incorpora o painel completo na própria seção, sem botão de redirecionamento.
+
+Versão 1.4.3: painel de sincronização incorporado ao popup, com navegação interna, tema compartilhado e altura ajustada ao espaço disponível. Conferido no popup nativo do Edge e com perfis fictícios: criação, opções e importação/exportação permaneceram dentro da seção, sem abrir novas guias. O login nos provedores continua usando a janela de autorização do serviço. As configurações existentes permanecem no armazenamento da extensão.

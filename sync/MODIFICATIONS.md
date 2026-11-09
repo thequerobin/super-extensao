@@ -9,3 +9,5 @@ Alterações: interface e marca próprias, temas compartilhados, catálogos some
 Para recompilar: em vendor/floccus-source, execute npm ci --ignore-scripts e npx webpack --config webpack.super.cjs. Copie dist-super/js para sync/js e super-theme.css para sync/theme.css na raiz da extensão. Não copie node_modules para a extensão distribuída. O HTML é sync/html/options.html. As credenciais JSON da origem foram substituídas por modelos vazios; configure OAuth pela interface, sem incluí-las no repositório.
 
 Versão 1.4.1: largura e bordas compartilhadas entre cabeçalho, conexão, cartões, assistente e opções; controles superiores agrupados; campos contidos e layout responsivo.
+
+Versão 1.4.3: incorporação do aplicativo na seção Sincronização. sync/embedded.js identifica o contexto incorporado e mantém as rotas internas no mesmo quadro; o tema adapta cabeçalho, navegação, formulários e espaçamento para a largura do popup. A página independente continua disponível e as chaves de armazenamento existentes foram mantidas.

@@ -74,9 +74,7 @@
     </section>
     <section id="panel-sync" aria-labelledby="tab-sync" hidden>
       <div class="section-heading"><h2>Sincronização de favoritos</h2></div>
-      <p class="note">Sincronize suas pastas entre navegadores e dispositivos usando o serviço que você escolher.</p>
-      <div class="sync-summary"><strong>Perfis e conexões</strong><p class="note">Adicione perfis, escolha as pastas, configure o agendamento e acompanhe os resultados no painel de sincronização.</p><button id="openSync" class="full secondary">Abrir painel de sincronização ↗</button></div>
-      <p class="note">Google Drive, Dropbox, WebDAV, Nextcloud, S3, Git e outros conectores. O painel abre em uma guia com espaço para todas as opções.</p>
+      <iframe id="syncPanel" title="Perfis e configurações da sincronização" data-src="sync/html/options.html?embedded=1"></iframe>
     </section>
   </main>
   <footer><button id="openNewtab" class="full secondary">Abrir Nova guia personalizada ↗</button><button id="clearNow" class="full danger">Limpar agora</button><p id="status" role="status" aria-live="polite"></p><p class="footer-note">Limpeza e controles locais · Nova guia e sincronização opcionais</p></footer>

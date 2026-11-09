@@ -30,8 +30,15 @@ nav { display:flex; gap:3px; padding:4px; background:var(--surface); border:1px 
 .sub-nav { margin-top:-6px; padding:4px; background:transparent; border-color:transparent; border-bottom-color:var(--line); border-radius:0; gap:8px; }
 .sub-nav .tab { flex:0 1 auto; padding:7px 12px; font-size:11px; }
 .sub-nav .tab.active { background:var(--accent-bg); color:var(--accent); }
-.sync-summary { margin:16px 0; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
-.sync-summary button { margin-top:12px; }
+#syncPanel { display:block; width:100%; height:clamp(240px,calc(100dvh - 190px),660px); border:0; border-radius:10px; background:var(--bg); }
+body[data-active-tab="sync"] { min-height:580px; }
+body[data-active-tab="sync"] .report,
+body[data-active-tab="sync"] .automation,
+body[data-active-tab="sync"] #pauseMenu,
+body[data-active-tab="sync"] #pauseRow,
+body[data-active-tab="sync"] footer { display:none!important; }
+body[data-active-tab="sync"] header { padding-bottom:12px; }
+body[data-active-tab="sync"] #panel-sync .section-heading { margin-bottom:4px; }
 .current-site { margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .current-site strong { display:block; margin-top:5px; overflow-wrap:anywhere; }
 .search-input { width:100%; margin-bottom:8px; }
@@ -77,4 +84,5 @@ footer { padding:14px 20px 16px; border-top:1px solid var(--line); margin-top:16
 .error { color:var(--danger); } .pause { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--warning); }
 .pause button { font-size:11px; padding:4px 8px; } .pause-menu { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; } .pause-menu button { font-size:11px; padding:5px 8px; }
 @media (min-width:700px) { body { width:620px; padding:20px 0; } }
+@media (min-width:700px) { #syncPanel { height:clamp(280px,calc(100dvh - 240px),660px); } }
 @media (prefers-reduced-motion:no-preference) { button,input[role="switch"] { transition:background .15s,color .15s; } }

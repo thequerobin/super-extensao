@@ -29,6 +29,8 @@ function applyTheme(theme) {
 }
 let lastCleanupTab = "cleanup";
 function activateTab(tab) {
+  document.body.dataset.activeTab = tab;
+  if (tab === "sync" && !$("syncPanel").getAttribute("src")) $("syncPanel").src = $("syncPanel").dataset.src;
   const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
@@ -199,7 +201,6 @@ async function init() {
     })();
   });
   $("goImport").addEventListener("click", () => activateTab("bookmarks"));
-  $("openSync").addEventListener("click", handle(() => chrome.tabs.create({url:chrome.runtime.getURL("sync/html/options.html")})));
   $("openNewtab").addEventListener("click", handle(() => chrome.tabs.create({url:chrome.runtime.getURL("newtab/index.html")})));
   $("loadFolders").addEventListener("click", () => { loadBookmarks().catch(showError); });
   $("bookmarkFolder").addEventListener("change", handle(refreshPreview));
