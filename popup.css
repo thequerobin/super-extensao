@@ -27,6 +27,11 @@ button:hover { filter:brightness(1.12); } button:disabled { opacity:.5; cursor:d
 nav { display:flex; gap:3px; padding:4px; background:var(--surface); border:1px solid var(--line); border-radius:10px; }
 .tab { flex:1; border:0; color:var(--muted); background:transparent; padding:8px 4px; font-size:12px; }
 .tab.active { background:var(--raised); color:var(--text); }
+.sub-nav { margin-top:-6px; padding:4px; background:transparent; border-color:transparent; border-bottom-color:var(--line); border-radius:0; gap:8px; }
+.sub-nav .tab { flex:0 1 auto; padding:7px 12px; font-size:11px; }
+.sub-nav .tab.active { background:var(--accent-bg); color:var(--accent); }
+.sync-summary { margin:16px 0; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.sync-summary button { margin-top:12px; }
 .current-site { margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .current-site strong { display:block; margin-top:5px; overflow-wrap:anywhere; }
 .search-input { width:100%; margin-bottom:8px; }

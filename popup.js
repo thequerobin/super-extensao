@@ -27,8 +27,14 @@ function serializeMutation(action) {
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
 }
+let lastCleanupTab = "cleanup";
 function activateTab(tab) {
-  for (const name of ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs"]) {
+  const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
+  if (isCleanup) lastCleanupTab = tab;
+  $("cleanupSubmenu").hidden = !isCleanup;
+  $("section-cleanup").classList.toggle("active", isCleanup);
+  $("section-cleanup").setAttribute("aria-pressed", String(isCleanup));
+  for (const name of ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync"]) {
     $("panel-" + name).hidden = name !== tab;
     $("tab-" + name).classList.toggle("active", name === tab);
     $("tab-" + name).setAttribute("aria-pressed", String(name === tab));
@@ -152,6 +158,7 @@ async function init() {
   }));
   systemTheme.addEventListener("change", () => applyTheme($("theme").value));
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
+  $("section-cleanup").addEventListener("click", () => activateTab(lastCleanupTab));
   for (const key of TOGGLES) $(key).addEventListener("change", handle(async () => {
     if (key === "clearCookies" && $(key).checked && !confirm("Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?")) {
       $(key).checked = false; return;
