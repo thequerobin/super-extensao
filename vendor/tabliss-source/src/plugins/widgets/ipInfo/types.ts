@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { API } from "../../types";
 
 type Data = {
@@ -21,7 +22,7 @@ type Cache = IpData;
 export type Props = API<Data, Cache>;
 
 export const defaultData: Data = {
-  ip: "Fetching IP data...",
+  ip: t("Fetching IP data..."),
   city: "",
   country: "",
   displayCity: true,

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React from "react";
 import { useToggle } from "../../../hooks";
 import { Icon } from "../../../views/shared";
@@ -19,20 +20,20 @@ const GeocodeInput: React.FC<Props> = ({ onChange }) => {
     geocodeLocation(query)
       .then((coords) => onChange({ ...coords, name: query }))
       .catch(() => {
-        alert("Unable to find location. Please try again.");
+        alert(t("Unable to find location. Please try again."));
       });
   };
 
   return (
     <form onSubmit={handleGeocode}>
       <div className="grid" style={{ gridTemplateColumns: "1fr auto" }}>
-        <label htmlFor="LocationInput__query">Search for city</label>
+        <label htmlFor="LocationInput__query">{t("Search for city")}</label>
 
         <div />
 
         <input
           id="LocationInput__query"
-          placeholder="City or location"
+          placeholder={t("City or location")}
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
@@ -56,7 +57,7 @@ const CoordinateInput: React.FC<Props> = ({
   const handleLocate = () => {
     requestLocation()
       .then(onChange)
-      .catch((err) => alert(`Cannot determine your location: ${err.message}`));
+      .catch((err) => alert(`${t("Cannot determine your location:")} ${err.message}`));
   };
 
   return (
@@ -69,9 +70,9 @@ const CoordinateInput: React.FC<Props> = ({
             : "1fr 1fr",
         }}
       >
-        <label htmlFor="LocationInput__latitude">Latitude</label>
+        <label htmlFor="LocationInput__latitude">{t("Latitude")}</label>
 
-        <label htmlFor="LocationInput__longitude">Longitude</label>
+        <label htmlFor="LocationInput__longitude">{t("Longitude")}</label>
 
         {geolocationAvailable && <div />}
 
@@ -124,7 +125,7 @@ const LocationInput: React.FC<Props> = ({ onChange, ...props }) => {
       )}
 
       <a onClick={toggleLookUp}>
-        {lookUp ? "Enter coordinates" : "Search for city"}
+        {lookUp ? t("Enter coordinates") : t("Search for city")}
       </a>
     </div>
   );

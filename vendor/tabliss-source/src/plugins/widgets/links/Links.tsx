@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { useKeyPress, useToggle } from "../../../hooks";
@@ -39,7 +40,7 @@ const Links: FC<Props> = ({ data = defaultData }) => {
           />
         ))
       ) : (
-        <a onClick={toggleVisible} title="Show quick links">
+        <a onClick={toggleVisible} title={t("Show quick links")}>
           <Icon name="link-2" />
         </a>
       )}

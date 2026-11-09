@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 import LocationInput from "./LocationInput";
 import { defaultData, Props } from "./types";
@@ -13,11 +14,10 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
     {data.latitude && data.latitude ? (
       <>
         <label>
-          Name
-          <input
+          {t("Name")}<input
             type="text"
             value={data.name || ""}
-            placeholder="Optional name"
+            placeholder={t("Optional name")}
             onChange={(event) =>
               setData({ ...data, name: event.target.value || undefined })
             }
@@ -34,8 +34,7 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
               setData({ ...data, showDetails: !data.showDetails })
             }
           />{" "}
-          Show extended details
-        </label>
+          {t("Show extended details")}</label>
 
         <label>
           <input
@@ -43,8 +42,7 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
             checked={data.units === "si"}
             onChange={() => setData({ ...data, units: "si" })}
           />{" "}
-          Metric units
-        </label>
+          {t("Metric units")}</label>
 
         <label>
           <input
@@ -52,8 +50,7 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
             checked={data.units === "us"}
             onChange={() => setData({ ...data, units: "us" })}
           />{" "}
-          Imperial units
-        </label>
+          {t("Imperial units")}</label>
 
         <p>
           <a
@@ -61,8 +58,7 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
             rel="noopener noreferrer"
             target="_blank"
           >
-            Weather data by Open-Meteo.com
-          </a>
+            {t("Weather data by Open-Meteo.com")}</a>
         </p>
       </>
     ) : null}

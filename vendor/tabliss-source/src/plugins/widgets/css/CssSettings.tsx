@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -5,8 +6,7 @@ import { Props, defaultData } from "./types";
 const CssSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="CssSettings">
     <label>
-      CSS Snippet
-      <textarea
+      {t("CSS Snippet")}<textarea
         rows={3}
         style={{ fontFamily: "monospace" }}
         value={data.input}
@@ -15,9 +15,7 @@ const CssSettings: FC<Props> = ({ data = defaultData, setData }) => (
     </label>
 
     <p className="info">
-      Warning: this functionality is intended for advanced users. Custom styles
-      may break at any time.
-    </p>
+      {t("Warning: this functionality is intended for advanced users. Custom styles may break at any time.")}</p>
   </div>
 );
 

@@ -1,3 +1,4 @@
+import { t, iconLabel } from "../../../locales/ui";
 import icons from "feather-icons/dist/icons.json";
 import React, { FC } from "react";
 
@@ -23,22 +24,22 @@ const Input: FC<Props> = (props) => (
   <div className="LinkInput">
     <h5>
       <div className="title--buttons">
-        <IconButton onClick={props.onRemove} title="Remove link">
+        <IconButton onClick={props.onRemove} title={t("Remove link")}>
           <RemoveIcon />
         </IconButton>
         {props.onMoveDown && (
-          <IconButton onClick={props.onMoveDown} title="Move link down">
+          <IconButton onClick={props.onMoveDown} title={t("Move link down")}>
             <DownIcon />
           </IconButton>
         )}
         {props.onMoveUp && (
-          <IconButton onClick={props.onMoveUp} title="Move link up">
+          <IconButton onClick={props.onMoveUp} title={t("Move link up")}>
             <UpIcon />
           </IconButton>
         )}
       </div>
 
-      {props.number <= 9 ? `Keyboard shortcut ${props.number}` : "Shortcut"}
+      {props.number <= 9 ? `${t("Keyboard shortcut")} ${props.number}` : t("Shortcut")}
     </h5>
 
     <label>
@@ -51,7 +52,7 @@ const Input: FC<Props> = (props) => (
     </label>
 
     <label>
-      Name <span className="text--grey">(optional)</span>
+      {t("Name ")}<span className="text--grey">{t("(optional)")}</span>
       <input
         type="text"
         value={props.name}
@@ -60,16 +61,16 @@ const Input: FC<Props> = (props) => (
     </label>
 
     <label>
-      Icon <span className="text--grey">(optional)</span>
+      {t("Icon ")}<span className="text--grey">{t("(optional)")}</span>
       <select
         value={props.icon}
         onChange={(event) => props.onChange({ icon: event.target.value })}
       >
-        <option value={""}>None</option>
-        <option value="_favicon">Website Icon</option>
+        <option value={""}>{t("None")}</option>
+        <option value="_favicon">{t("Website Icon")}</option>
         <optgroup label="Feather Icons">
           {iconList.map((key) => (
-            <option key={key}>{key}</option>
+            <option key={key} value={key}>{iconLabel(key)}</option>
           ))}
         </optgroup>
       </select>

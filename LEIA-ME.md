@@ -1,4 +1,4 @@
-# Super Extensão 1.2.1
+# Super Extensão 1.3.0
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
@@ -26,6 +26,8 @@ As configurações do dashboard usam o namespace `tabliss/config` em `storage.sy
 O componente mantém sua licença GPL-3.0, avisos e código-fonte em `vendor/tabliss-source`. Os detalhes das adaptações estão em `newtab/MODIFICATIONS.md`. O envio de erros ao Sentry foi desativado.
 
 Na versão 1.2.1, o painel de Nova guia passou a usar a logo, o espaçamento e os temas da Super Extensão. Os blocos finais de persistência, doação, links e crédito de tradução foram removidos da interface. Importação/exportação/reset e os controles de fundos e widgets permanecem disponíveis.
+
+Na versão 1.3.0, os controles, dicas e mensagens do dashboard foram traduzidos para português do Brasil, incluindo fundos, widgets, ícones, busca, clima, relógio e tarefas. O seletor oferece somente **Português do Brasil** e **English**. Preferências antigas em português de Portugal ou idiomas removidos são migradas para PT-BR; variantes de inglês usam English. Personalizações, notas, imagens e atalhos são preservados. Os catálogos excedentes foram removidos do código-fonte e do pacote compilado.
 
 A identidade desta versão é diferente da original: não há chave da loja nem URL de atualização. As configurações da extensão original não são importadas automaticamente. Na primeira instalação, apenas a exclusão do histórico fica ativada.
 
@@ -71,7 +73,7 @@ Para realmente fechar o navegador, use o X da janela ou a opção Sair. A prote�
 
 ## Verificação
 
-Passaram 14 testes automatizados isolados para limpeza, domínios/favoritos, recuperação de falhas, regras de autoplay e transições de abas, inclusive desativação, fechamento de janela, reconhecimento da Nova guia integrada e preservação da reserva que foi navegada pelo usuário. O teste de interface, também aprovado, utiliza favoritos fictícios e APIs simuladas e confere temas, navegação, domínios, favoritos, limpeza, autoplay e controles de abas, sem erros de JavaScript nem transbordamento horizontal.
+Passaram 16 testes automatizados isolados para limpeza, domínios/favoritos, recuperação de falhas, regras de autoplay, transições de abas e integridade dos catálogos bilíngues. A revisão de navegador também confirmou migração de idioma, alternância PT-BR/English, controles dos widgets e preservação de notas escritas pelo usuário. O teste de interface utiliza favoritos fictícios e APIs simuladas e confere temas, navegação, domínios, favoritos, limpeza, autoplay e controles de abas.
 
 A extensão também foi carregada no Edge com um perfil temporário novo: o popup abriu sem erros, a permissão de favoritos permaneceu opcional e a API real preservou um cookie de teste em `example.com`, apagando outro em `example.org`. Nenhum dado do perfil do usuário foi apagado durante o desenvolvimento. As imagens de prévia fornecidas foram geradas com dados fictícios.
 

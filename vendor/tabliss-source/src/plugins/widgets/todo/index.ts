@@ -1,11 +1,12 @@
+import { t } from "../../../locales/ui";
 import { Config } from "../../types";
 import Todo from "./Todo";
 import TodoSettings from "./TodoSettings";
 
 const config: Config = {
   key: "widget/todo",
-  name: "Todos",
-  description: "Add reminders to procrastinate.",
+  get name() { return t("Todos"); },
+  get description() { return t("Add reminders to procrastinate."); },
   dashboardComponent: Todo,
   settingsComponent: TodoSettings,
 };

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { Quote } from "./types";
 
 const apiEndpoint =
@@ -18,7 +19,7 @@ export async function getQuoteByTimeCode(timeCode: string): Promise<Quote> {
 
   if (res.status === 429) {
     return {
-      title: "Too many requests at this time",
+      title: t("Too many requests at this time"),
     };
   }
 

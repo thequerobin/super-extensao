@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { setBackground } from "../../db/action";
@@ -51,10 +52,10 @@ const Background: React.FC = () => {
           )}
 
           {plugin.supportsBackdrop && (
-            <ToggleSection name="Display Settings">
+            <ToggleSection name={t("Display Settings")}>
               <>
                 <label>
-                  Blur <br />
+                  {t("Blur ")}<br />
                   <input
                     type="range"
                     list="blur-markers"
@@ -75,7 +76,7 @@ const Background: React.FC = () => {
                 </label>
 
                 <label>
-                  Luminosity <br />
+                  {t("Luminosity ")}<br />
                   <input
                     type="range"
                     list="luminosity-markers"
@@ -90,9 +91,9 @@ const Background: React.FC = () => {
                     }
                   />
                   <datalist id="luminosity-markers">
-                    <option value="-1" label="Darken" />
+                    <option value="-1" label={t("Darken")} />
                     <option value="0" />
-                    <option value="1" label="Lighten" />
+                    <option value="1" label={t("Lighten")} />
                   </datalist>
                 </label>
               </>

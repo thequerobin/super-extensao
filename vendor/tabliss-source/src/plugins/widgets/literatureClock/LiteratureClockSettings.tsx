@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -15,8 +16,7 @@ const LiteratureClockSettings: FC<Props> = ({
           setData({ ...data, showBookAndAuthor: !data.showBookAndAuthor })
         }
       />{" "}
-      Display book and author
-    </label>
+      {t("Display book and author")}</label>
 
     <label>
       <input
@@ -24,8 +24,7 @@ const LiteratureClockSettings: FC<Props> = ({
         checked={data.centerText}
         onChange={() => setData({ ...data, centerText: !data.centerText })}
       />{" "}
-      Align text at center
-    </label>
+      {t("Align text at center")}</label>
   </div>
 );
 

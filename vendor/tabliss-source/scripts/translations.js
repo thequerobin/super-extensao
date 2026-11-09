@@ -7,49 +7,7 @@ const parser = require("typescript-react-intl").default;
 // Add your language here
 // `xx` and `xx-XX` formats are accepted (e.g. 'en' or 'en-AU')
 // Then run `npm run translations` to create your language files!
-const languages = [
-  "ca-ES",
-  "cs",
-  "de",
-  "el",
-  "en-AU",
-  "en-CA",
-  "en-GB",
-  "es",
-  "fa",
-  "fi",
-  "fr",
-  "ga",
-  "gd",
-  "gl",
-  "gu",
-  "hi",
-  "hu",
-  "id",
-  "it",
-  "ja",
-  "ko",
-  "lb",
-  "lt",
-  "ne",
-  "nl",
-  "no",
-  "pl",
-  "pt",
-  "pt-BR",
-  "ro",
-  "ru",
-  "sk",
-  "sr",
-  "sv",
-  "ta",
-  "th",
-  "tr",
-  "vi",
-  "zh-CN",
-  "zh-TW",
-  "uk",
-];
+const languages = ["en", "pt-BR"];
 
 async function main() {
   // Extract messages from source

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC, useState } from "react";
 
 import { Props, defaultData } from "./types";
@@ -9,8 +10,7 @@ const JsSettings: FC<Props> = ({ data = defaultData, setData }) => {
   return (
     <div className="JsSettings">
       <label>
-        JavaScript Snippet
-        <textarea
+        {t("JavaScript Snippet")}<textarea
           rows={3}
           style={{ fontFamily: "monospace" }}
           value={input}
@@ -18,14 +18,10 @@ const JsSettings: FC<Props> = ({ data = defaultData, setData }) => {
         />
       </label>
 
-      <button onClick={handleSave}>Apply</button>
+      <button onClick={handleSave}>{t("Apply")}</button>
 
       <p className="info">
-        Warning: this functionality is intended for advanced users. Custom
-        scripts may break at any time. The snippet will run once after the
-        dashboard has loaded. Be careful of persisting event listeners when
-        editing the snippet.
-      </p>
+        {t("Warning: this functionality is intended for advanced users. Custom scripts may break at any time. The snippet will run once after the dashboard has loaded. Be careful of persisting event listeners when editing the snippet.")}</p>
     </div>
   );
 };

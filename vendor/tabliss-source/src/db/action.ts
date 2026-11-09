@@ -1,3 +1,4 @@
+import { t } from "../locales/ui";
 import { nanoid } from "nanoid";
 import { DB } from "../lib";
 import migrateFrom2 from "./migrations/migrate2";
@@ -58,7 +59,7 @@ export const setWidgetDisplay = (
   display: Partial<WidgetDisplay>,
 ) => {
   const widget = DB.get(db, `widget/${id}`);
-  if (!widget) throw new Error("Widget not found while");
+  if (!widget) throw new Error(t("Widget not found while"));
   DB.put(db, `widget/${id}`, {
     ...widget,
     display: { ...widget.display, ...display },
@@ -78,7 +79,7 @@ export const toggleFocus = () => {
 export const importStore = (dump: any): void => {
   // TODO: Add proper schema validation
   if (typeof dump !== "object" || dump === null)
-    throw new TypeError("Unexpected format");
+    throw new TypeError(t("Unexpected format"));
 
   resetStore();
   if ("backgrounds" in dump) {
@@ -91,10 +92,10 @@ export const importStore = (dump: any): void => {
     delete dump.version;
   } else if (dump.version > 3) {
     // Future version
-    throw new TypeError("Settings exported from an newer version of Tabliss");
+    throw new TypeError(t("Settings exported from an newer version of Tabliss"));
   } else {
     // Unknown version
-    throw new TypeError("Unknown settings version");
+    throw new TypeError(t("Unknown settings version"));
   }
   // @ts-ignore
   Object.entries(dump).forEach(([key, val]) => DB.put(db, key, val));

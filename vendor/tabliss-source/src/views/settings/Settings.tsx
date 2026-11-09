@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { UiContext } from "../../contexts/ui";
 import { exportStore, importStore, resetStore } from "../../db/action";
@@ -14,7 +15,7 @@ const Settings: React.FC = () => {
   const handleReset = () => {
     if (
       confirm(
-        "Are you sure you want to delete all of your Tabliss settings? This cannot be undone.",
+        t("Are you sure you want to delete all of your Tabliss settings? This cannot be undone."),
       )
     )
       resetStore();
@@ -52,9 +53,7 @@ const Settings: React.FC = () => {
               importStore(state);
             } catch (error) {
               alert(
-                `Invalid import file: ${
-                  error instanceof Error ? error.message : "Uknown error"
-                }`,
+                (t("Invalid import file: ") + String(error instanceof Error ? error.message : "Uknown error") + ""),
               );
             }
           }
@@ -82,10 +81,9 @@ const Settings: React.FC = () => {
         <System />
 
         <p style={{ marginBottom: "2rem" }}>
-          <a onClick={handleImport}>Import</a>,{" "}
-          <a onClick={handleExport}>export</a> or{" "}
-          <a onClick={handleReset}>reset</a> your settings
-        </p>
+          <a onClick={handleImport}>{t("Import")}</a>,{" "}
+          <a onClick={handleExport}>{t("export")}</a> {t(" or")}{" "}
+          <a onClick={handleReset}>{t("reset")}</a> {t(" your settings")}</p>
 
       </div>
     </div>

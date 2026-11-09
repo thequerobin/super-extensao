@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React from "react";
 import { Icon } from "../../../views/shared";
 import { DebounceInput } from "../../shared";
@@ -8,24 +9,23 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="UnsplashSettings">
     <label>
       <span style={{ float: "right" }}>
-        {data.paused ? <span className="text--grey">(Paused) </span> : null}
+        {data.paused ? <span className="text--grey">{t("(Paused) ")}</span> : null}
         <a onClick={() => setData({ ...data, paused: !data.paused })}>
           <Icon name={data.paused ? "play" : "pause"} />
         </a>
       </span>
-      Show a new photo
-      <select
+      {t("Show a new photo")}<select
         value={data.timeout}
         onChange={(event) =>
           setData({ ...data, timeout: Number(event.target.value) })
         }
       >
-        <option value="0">Every new tab</option>
-        <option value="300">Every 5 minutes</option>
-        <option value="900">Every 15 minutes</option>
-        <option value="3600">Every hour</option>
-        <option value="86400">Every day</option>
-        <option value="604800">Every week</option>
+        <option value="0">{t("Every new tab")}</option>
+        <option value="300">{t("Every 5 minutes")}</option>
+        <option value="900">{t("Every 15 minutes")}</option>
+        <option value="3600">{t("Every hour")}</option>
+        <option value="86400">{t("Every day")}</option>
+        <option value="604800">{t("Every week")}</option>
       </select>
     </label>
 
@@ -35,8 +35,7 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.by === "official"}
         onChange={() => setData({ ...data, by: "official" })}
       />{" "}
-      Official Collection
-    </label>
+      {t("Official Collection")}</label>
 
     <label>
       <input
@@ -44,8 +43,7 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.by === "topics"}
         onChange={() => setData({ ...data, by: "topics" })}
       />{" "}
-      Topic
-    </label>
+      {t("Topic")}</label>
 
     <label>
       <input
@@ -53,8 +51,7 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.by === "search"}
         onChange={() => setData({ ...data, by: "search" })}
       />{" "}
-      Search
-    </label>
+      {t("Search")}</label>
 
     <label>
       <input
@@ -62,19 +59,17 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.by === "collections"}
         onChange={() => setData({ ...data, by: "collections" })}
       />{" "}
-      Collection
-    </label>
+      {t("Collection")}</label>
 
     {data.by === "topics" && (
       <label>
-        Topic
-        <select
+        {t("Topic")}<select
           value={data.topics}
           onChange={(event) => setData({ ...data, topics: event.target.value })}
         >
           {topics.map((topic) => (
             <option key={topic.id} value={topic.id}>
-              {topic.title}
+              {t(topic.title)}
             </option>
           ))}
         </select>
@@ -84,11 +79,10 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
     {data.by === "search" && (
       <>
         <label>
-          Tags
-          <DebounceInput
+          {t("Tags")}<DebounceInput
             type="text"
             value={data.search}
-            placeholder="Try landscapes or animals..."
+            placeholder={t("Try landscapes or animals...")}
             onChange={(value) => setData({ ...data, search: value })}
             wait={500}
           />
@@ -100,18 +94,16 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
             checked={data.featured}
             onChange={(event) => setData({ ...data, featured: !data.featured })}
           />{" "}
-          Only featured images
-        </label>
+          {t("Only featured images")}</label>
       </>
     )}
 
     {data.by === "collections" && (
       <label>
-        Collection
-        <DebounceInput
+        {t("Collection")}<DebounceInput
           type="text"
           value={data.collections}
-          placeholder="Collection ID number"
+          placeholder={t("Collection ID number")}
           onChange={(value) => setData({ ...data, collections: value })}
           wait={500}
         />

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import categories from "./categories";
@@ -5,7 +6,7 @@ import { Props, defaultData } from "./types";
 
 const QuoteSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="QuoteSettings">
-    <h5>Daily Quotes</h5>
+    <h5>{t("Daily Quotes")}</h5>
     {categories.map((category) => (
       <label key={category.key}>
         <input
@@ -17,7 +18,7 @@ const QuoteSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
       </label>
     ))}
     <p>
-      Powered by{" "}
+      {t("Powered by")}{" "}
       <a
         href="https://theysaidso.com/"
         target="_blank"
@@ -26,24 +27,22 @@ const QuoteSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         They Said So
       </a>
     </p>
-    <h5>Hourly Quotes</h5>
+    <h5>{t("Hourly Quotes")}</h5>
     <label>
       <input
         type="radio"
         checked={data.category === "developerexcuses"}
         onChange={() => setData({ category: "developerexcuses" })}
       />{" "}
-      Developer Excuses
-    </label>
+      {t("Developer Excuses")}</label>
     <p>
-      Powered by{" "}
+      {t("Powered by")}{" "}
       <a
         href="http://www.developerexcuses.com/"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Developer Excuses
-      </a>
+        {t("Developer Excuses")}</a>
     </p>
   </div>
 );

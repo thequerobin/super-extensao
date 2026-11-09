@@ -1,3 +1,4 @@
+import { t } from "../locales/ui";
 import React from "react";
 import { defineMessages, useIntl } from "react-intl";
 import { usePushError } from "../api";
@@ -34,7 +35,7 @@ const Root: React.FC = () => {
     (message: string, showError: boolean) => (error: Error) => {
       pushError({ message });
       console.error(error);
-      console.error("Caused by:", error.cause);
+      console.error(t("Caused by:"), error.cause);
       if (showError) setError(true);
     };
 
@@ -46,14 +47,14 @@ const Root: React.FC = () => {
           Stream.subscribe(
             errors,
             handleError(
-              "Cannot save your settings. You may have hit the maximum storage capacity.",
+              t("Cannot save your settings. You may have hit the maximum storage capacity."),
               true,
             ),
           ),
         )
         .catch(
           handleError(
-            "Cannot open settings storage. Your settings cannot be loaded or saved.",
+            t("Cannot open settings storage. Your settings cannot be loaded or saved."),
             true,
           ),
         ),
@@ -63,14 +64,14 @@ const Root: React.FC = () => {
           Stream.subscribe(
             errors,
             handleError(
-              "Cannot save cache. Start up performance may be degraded.",
+              t("Cannot save cache. Start up performance may be degraded."),
               false,
             ),
           ),
         )
         .catch(
           handleError(
-            "Cannot open cache. Start up performance may be degraded.",
+            t("Cannot open cache. Start up performance may be degraded."),
             false,
           ),
         ),

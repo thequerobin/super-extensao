@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { WidgetPosition } from "../../db/state";
 import { Icon, IconButton } from "../shared";
@@ -49,7 +50,7 @@ type Props = {
 
 const PositionInput: React.FC<Props> = ({ value, onChange }) => (
   <div className="PositionInput">
-    <label>Position</label>
+    <label>{t("Position")}</label>
 
     <div className="grid">
       {positions.map((position) => (

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 /**
  * Literature Clock Widget for Tabliss
  * Forked by Ngoc L.B. <contact@ngoclb.com>
@@ -12,8 +13,8 @@ import LiteratureClockSettings from "./LiteratureClockSettings";
 
 const config: Config = {
   key: "widget/literature-clock",
-  name: "Literature Clock",
-  description: "Check the time, with sophistication.",
+  get name() { return t("Literature Clock"); },
+  get description() { return t("Check the time, with sophistication."); },
   dashboardComponent: LiteratureClock,
   settingsComponent: LiteratureClockSettings,
 };

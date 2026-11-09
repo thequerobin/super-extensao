@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { engines } from "./engines";
@@ -6,8 +7,7 @@ import { Props, defaultData } from "./types";
 const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="SearchSettings">
     <label>
-      Search Provider
-      <select
+      {t("Search Provider")}<select
         onChange={(event) =>
           setData({ ...data, searchEngine: event.target.value })
         }
@@ -23,16 +23,14 @@ const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
 
     {BUILD_TARGET === "web" && (
       <label>
-        Suggestions Provider
-        <select
+        {t("Suggestions Provider")}<select
           onChange={(event) =>
             setData({ ...data, suggestionsEngine: event.target.value })
           }
           value={data.suggestionsEngine}
         >
           <option key="off" value="">
-            Off
-          </option>
+            {t("Off")}</option>
           {engines
             .filter(({ suggest_url }) => Boolean(suggest_url))
             .map(({ key, name }) => (
@@ -46,8 +44,7 @@ const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
 
     {data.suggestionsEngine && (
       <label>
-        Suggestion Quanitity
-        <input
+        {t("Suggestion Quanitity")}<input
           type="number"
           min="1"
           max="10"

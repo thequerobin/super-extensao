@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -5,21 +6,19 @@ import { Props, defaultData } from "./types";
 const TodoSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="SearchSettings">
     <label>
-      Tasks to show
-      <input
+      {t("Tasks to show")}<input
         type="number"
         min="0"
         onChange={(event) =>
           setData({ ...data, show: Number(event.target.value) })
         }
-        placeholder="Number of todo items to show"
+        placeholder={t("Number of todo items to show")}
         value={data.show}
       />
     </label>
 
     <label>
-      New task keybind
-      <input
+      {t("New task keybind")}<input
         type="text"
         maxLength={1}
         onChange={(event) =>

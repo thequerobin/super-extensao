@@ -1,10 +1,11 @@
+import { t } from "../../../locales/ui";
 import { Config } from "../../types";
 import { Notes } from "./Notes";
 
 const config: Config = {
   key: "widget/notes",
-  name: "Notes",
-  description: "Jot something down.",
+  get name() { return t("Notes"); },
+  get description() { return t("Jot something down."); },
   dashboardComponent: Notes,
 };
 

@@ -2,12 +2,13 @@
 
 <img src="icons/icon128.png" width="88" height="88" alt="Ícone da Super Extensão">
 
-Uma extensão para Helium e navegadores Chromium que reúne a Nova guia completa do Tabliss, limpeza ao sair, controle de reprodução automática e proteção da última aba. Controles da Super Extensão em português, com temas escuro, claro e do sistema; dashboard com as traduções e configurações originais do Tabliss.
+Uma extensão para Helium e navegadores Chromium que reúne a Nova guia completa do Tabliss, limpeza ao sair, controle de reprodução automática e proteção da última aba. Interface em português do Brasil, com temas escuro, claro e do sistema; o dashboard oferece somente **PT-BR e inglês**.
 
 ## Recursos
 
 - **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
 - **Painel unificado:** marca da Super Extensão, largura de 460 px e temas Escuro/Claro/Sistema sincronizados com o popup. Os blocos finais de persistência, apoio e links sociais foram removidos da interface.
+- **Tradução completa dos controles:** fundos, widgets, dicas, mensagens, ícones e seletores em PT-BR, com inglês preservado. Idiomas excedentes foram removidos e preferências antigas são migradas sem apagar personalizações.
 - **Limpeza:** histórico, cache, cookies, histórico de downloads, formulários e localStorage. Modos Seguro, Padrão e Forte, pausa temporária, limpeza manual e relatório do último resultado.
 - **Cookies:** exceções por domínio e importação de domínios de uma pasta dos favoritos, com prévia, subpastas opcionais e deduplicação. As exceções se aplicam somente a cookies.
 - **Autoplay:** liga/desliga, padrão global, regras por site e subdomínio, ajuste do site atual, busca e importação/exportação JSON.
@@ -84,7 +85,7 @@ npm test
 
 Não é necessário executar `npm install`: os testes usam módulos nativos do Node. A suíte cobre limpeza, exceções, favoritos, pausa, falhas e recuperação, regras de autoplay e transições de abas, com APIs de navegador simuladas.
 
-A suíte Node tem 14 testes. As funções de limpeza, cookies, autoplay e abas também foram verificadas em um perfil temporário do Edge. Na versão 1.2.0, passaram ainda os testes offline da Nova guia real, editor, cinco provedores disponíveis, notas, imagem própria, persistência, importação/exportação, preservação dos dados durante a limpeza e deduplicação da página integrada. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node. O funcionamento ao vivo dos serviços externos não foi validado por esses testes offline.
+A suíte Node tem 16 testes. As funções de limpeza, cookies, autoplay e abas também foram verificadas em um perfil temporário do Edge. Passaram ainda os testes offline da Nova guia real, editor, provedores, notas, imagem própria, importação/exportação, limpeza e organização de abas. Na versão 1.3.0, foram conferidos a migração de português de Portugal para PT-BR, os dois únicos idiomas disponíveis, a troca de idioma em tempo real e os controles dos widgets, sem alterar notas do usuário. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node. O funcionamento ao vivo dos serviços externos não foi validado por esses testes offline.
 
 O fechamento nativo pelo X e a recuperação após encerrar o processo ainda precisam ser conferidos no Helium. O ambiente Edge headless usado nos testes não fechou a janela por `windows.remove()`. Não há garantia de concluir a limpeza antes do encerramento do navegador.
 

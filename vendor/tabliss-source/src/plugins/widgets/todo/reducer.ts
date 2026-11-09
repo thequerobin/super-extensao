@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { Action } from "./actions";
 
 type Todo = {
@@ -35,6 +36,6 @@ export function reducer(state: State, action: Action) {
       );
 
     default:
-      throw new Error("Unknown action");
+      throw new Error(t("Unknown action"));
   }
 }

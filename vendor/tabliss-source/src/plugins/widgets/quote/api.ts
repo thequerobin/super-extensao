@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { API } from "../../types";
 import { Quote } from "./types";
 
@@ -12,7 +13,7 @@ async function getDeveloperExcuse() {
     };
   } catch (err) {
     return {
-      quote: "Unable to get a new developer excuse.",
+      quote: t("Unable to get a new developer excuse."),
     };
   }
 }
@@ -27,7 +28,7 @@ async function getQuoteOfTheDay(category?: string) {
   if (res.status === 429) {
     return {
       author: body.error.message.split(".")[1] + ".",
-      quote: "Too many requests this hour.",
+      quote: t("Too many requests this hour."),
     };
   }
 
@@ -58,7 +59,7 @@ async function getBibleVerse() {
   if (res.status === 429) {
     return {
       author: body.error.message.split(".")[1] + ".",
-      quote: "Too many requests this hour.",
+      quote: t("Too many requests this hour."),
     };
   }
 

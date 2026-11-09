@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { addWidget, removeWidget, reorderWidget } from "../../db/action";
@@ -27,8 +28,7 @@ const Widgets: React.FC = () => {
           className="primary"
         >
           <option disabled value="">
-            Add a new widget
-          </option>
+            {t("Add a new widget")}</option>
           {widgetConfigs.map((plugin) => (
             <option key={plugin.key} value={plugin.key}>
               {plugin.name}

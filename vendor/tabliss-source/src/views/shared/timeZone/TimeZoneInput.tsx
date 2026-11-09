@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { getTimezoneOffset } from "date-fns-tz";
 import React from "react";
 import zones from "./zones.json";
@@ -49,7 +50,7 @@ const TimeZoneInput: React.FC<Props> = ({ timeZone, onChange }) => {
       value={timeZone || ""}
       onChange={(event) => onChange(event.target.value || null)}
     >
-      <option value="">Automatic</option>
+      <option value="">{t("Automatic")}</option>
       {zoneOptions ? (
         zoneOptions.map((option) => (
           <option key={option.id} value={option.id}>
@@ -57,7 +58,7 @@ const TimeZoneInput: React.FC<Props> = ({ timeZone, onChange }) => {
           </option>
         ))
       ) : (
-        <option disabled>Loading...</option>
+        <option disabled>{t("Loading...")}</option>
       )}
     </select>
   );

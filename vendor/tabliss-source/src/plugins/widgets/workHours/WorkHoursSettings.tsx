@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -15,8 +16,7 @@ const daysList = [
 const WorkHoursSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="WorkHoursSettings">
     <label>
-      Start time
-      <input
+      {t("Start time")}<input
         type="time"
         value={data.startTime}
         onChange={(event) =>
@@ -25,8 +25,7 @@ const WorkHoursSettings: FC<Props> = ({ data = defaultData, setData }) => (
       />
     </label>
     <label>
-      End time
-      <input
+      {t("End time")}<input
         type="time"
         value={data.endTime}
         onChange={(event) => setData({ ...data, endTime: event.target.value })}
@@ -47,7 +46,7 @@ const WorkHoursSettings: FC<Props> = ({ data = defaultData, setData }) => (
               })
             }
           />
-          {day}
+          {t(day)}
         </label>
       </div>
     ))}

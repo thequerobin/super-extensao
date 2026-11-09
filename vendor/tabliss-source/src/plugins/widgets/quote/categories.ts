@@ -1,38 +1,39 @@
+import { t } from "../../../locales/ui";
 export default [
   {
     key: "inspire",
-    name: "Inspiring",
+    get name() { return t("Inspiring"); },
   },
   {
     key: "management",
-    name: "Management",
+    get name() { return t("Management"); },
   },
   {
     key: "sports",
-    name: "Sports",
+    get name() { return t("Sports"); },
   },
   {
     key: "life",
-    name: "Life",
+    get name() { return t("Life"); },
   },
   {
     key: "funny",
-    name: "Funny",
+    get name() { return t("Funny"); },
   },
   {
     key: "love",
-    name: "Love",
+    get name() { return t("Love"); },
   },
   {
     key: "art",
-    name: "Art",
+    get name() { return t("Art"); },
   },
   {
     key: "students",
-    name: "Students",
+    get name() { return t("Students"); },
   },
   {
     key: "bible",
-    name: "Bible Verses",
+    get name() { return t("Bible Verses"); },
   },
 ];

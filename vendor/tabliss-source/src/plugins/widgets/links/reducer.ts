@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { Link } from "./types";
 import { Action } from "./actions";
 
@@ -22,6 +23,6 @@ export function reducer(state: State, action: Action) {
       return links;
 
     default:
-      throw new Error("Unknown action");
+      throw new Error(t("Unknown action"));
   }
 }

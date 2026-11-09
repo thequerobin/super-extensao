@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { useSavedReducer } from "../../../hooks";
@@ -13,8 +14,7 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
   return (
     <div className="LinksSettings">
       <label>
-        Number of columns
-        <input
+        {t("Number of columns")}<input
           type="number"
           value={data.columns}
           onChange={(event) =>
@@ -30,8 +30,7 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
           checked={data.visible}
           onChange={() => setData({ ...data, visible: !data.visible })}
         />
-        Links are always visible
-      </label>
+        {t("Links are always visible")}</label>
 
       <label>
         <input
@@ -41,8 +40,7 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
             setData({ ...data, linkOpenStyle: !data.linkOpenStyle })
           }
         />
-        Links open in a new tab
-      </label>
+        {t("Links open in a new tab")}</label>
 
       <hr />
 
@@ -73,8 +71,7 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
           className="button button--primary"
           onClick={() => dispatch(addLink())}
         >
-          Add link
-        </button>
+          {t("Add link")}</button>
       </p>
     </div>
   );

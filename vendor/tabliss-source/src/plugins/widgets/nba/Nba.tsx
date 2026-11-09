@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React from "react";
 import { db } from "../../../db/state";
 import { useCachedEffect } from "../../../hooks";
@@ -27,7 +28,7 @@ const Nba: React.FC<Props> = ({
   );
 
   if (!cache || cache.games.length < 1) {
-    return <div>No games today</div>;
+    return <div>{t("No games today")}</div>;
   }
 
   return (

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React from "react";
 import { defineMessages } from "react-intl";
 import { useCachedEffect, useFormatMessages, useTime } from "../../../hooks";
@@ -40,7 +41,7 @@ const Weather: React.FC<Props> = ({
       <div
         className="summary"
         onClick={() => setData({ ...data, showDetails: !data.showDetails })}
-        title="Toggle weather details"
+        title={t("Toggle weather details")}
       >
         {data.name ? <span>{data.name}</span> : null}
         <Icon name={weatherCodes[conditions.weatherCode]} />

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import { format } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 import { Game } from "./types";
@@ -14,15 +15,15 @@ export function getPeriod(game: Game, timeZone: string | null) {
 
   if (game.isGameActivated || period.current > 0) {
     if (period.isHalftime) {
-      periodStr = "Halftime";
+      periodStr = t("Halftime");
     } else if (period.current === period.maxRegular && !game.clock) {
-      periodStr = "Final";
+      periodStr = t("Final");
     } else if (period.isEndOfPeriod) {
-      periodStr = `End of ${period.current}Q`;
+      periodStr = `${t("End of")} ${period.current}${t("Q")}`;
     } else if (period.current <= 4) {
-      periodStr = `${period.current}Q ${game.clock} `;
+      periodStr = `${period.current}${t("Q")} ${game.clock} `;
     } else {
-      periodStr = `OT ${game.clock}`;
+      periodStr = `${t("OT")} ${game.clock}`;
     }
   }
 

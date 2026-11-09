@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -6,15 +7,14 @@ import { DebounceInput } from "../../shared";
 const GiphySettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="GiphySettings">
     <label>
-      Tag
-      <DebounceInput
+      {t("Tag")}<DebounceInput
         type="text"
         value={data.tag}
         onChange={(value) => setData({ ...data, tag: value })}
         wait={500}
       />
     </label>
-    <p className="info">Separate multiple tags with a comma</p>
+    <p className="info">{t("Separate multiple tags with a comma")}</p>
 
     <label>
       <input
@@ -22,8 +22,7 @@ const GiphySettings: FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.expand}
         onChange={(event) => setData({ ...data, expand: !data.expand })}
       />{" "}
-      Stretch to fill screen
-    </label>
+      {t("Stretch to fill screen")}</label>
 
     <label>
       <input
@@ -31,8 +30,7 @@ const GiphySettings: FC<Props> = ({ data = defaultData, setData }) => (
         checked={!data.nsfw}
         onChange={(event) => setData({ ...data, nsfw: !data.nsfw })}
       />{" "}
-      Safe Search
-    </label>
+      {t("Safe Search")}</label>
   </div>
 );
 

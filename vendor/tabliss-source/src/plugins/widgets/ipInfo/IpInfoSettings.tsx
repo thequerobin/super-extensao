@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -10,8 +11,7 @@ const IpInfoSettings: FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.displayCity}
         onChange={() => setData({ ...data, displayCity: !data.displayCity })}
       />
-      Display City
-    </label>
+      {t("Display City")}</label>
 
     <label>
       <input
@@ -21,12 +21,10 @@ const IpInfoSettings: FC<Props> = ({ data = defaultData, setData }) => (
           setData({ ...data, displayCountry: !data.displayCountry })
         }
       />
-      Display Country
-    </label>
+      {t("Display Country")}</label>
 
     <label>
-      Refresh interval (minutes)
-      <input
+      {t("Refresh interval (minutes)")}<input
         type="number"
         value={data.refreshInterval}
         onChange={(event) =>

@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { setWidgetDisplay } from "../../db/action";
 import { WidgetState } from "../../db/state";
@@ -31,25 +32,25 @@ const Widget: React.FC<Props> = ({
   return (
     <fieldset className="Widget">
       <div className="title--buttons">
-        <IconButton onClick={onRemove} title="Remove widget">
+        <IconButton onClick={onRemove} title={t("Remove widget")}>
           <RemoveIcon />
         </IconButton>
 
         <IconButton
           onClick={toggleIsOpen}
-          title={`${isOpen ? "Close" : "Edit"} widget settings`}
+          title={t(isOpen ? "Close widget settings" : "Edit widget settings")}
         >
           <Icon name="settings" />
         </IconButton>
 
         {onMoveDown && (
-          <IconButton onClick={onMoveDown} title="Move widget down">
+          <IconButton onClick={onMoveDown} title={t("Move widget down")}>
             <DownIcon />
           </IconButton>
         )}
 
         {onMoveUp && (
-          <IconButton onClick={onMoveUp} title="Move widget up">
+          <IconButton onClick={onMoveUp} title={t("Move widget up")}>
             <UpIcon />
           </IconButton>
         )}
@@ -66,15 +67,14 @@ const Widget: React.FC<Props> = ({
             </div>
           )}
 
-          <ToggleSection name="Display Settings">
+          <ToggleSection name={t("Display Settings")}>
             <WidgetDisplay display={plugin.display} onChange={setDisplay} />
           </ToggleSection>
 
-          <ToggleSection name="Font Settings">
+          <ToggleSection name={t("Font Settings")}>
             <>
               <label>
-                Font
-                <input
+                {t("Font")}<input
                   type="text"
                   value={plugin.display.fontFamily}
                   onChange={(event) =>
@@ -84,8 +84,7 @@ const Widget: React.FC<Props> = ({
               </label>
 
               <label>
-                Weight
-                <select
+                {t("Weight")}<select
                   value={plugin.display.fontWeight}
                   onChange={(event) =>
                     setDisplay({
@@ -95,19 +94,18 @@ const Widget: React.FC<Props> = ({
                     })
                   }
                 >
-                  <option value="">Default</option>
-                  <option value="100">Thin</option>
-                  <option value="300">Light</option>
-                  <option value="400">Regular</option>
-                  <option value="500">Medium</option>
-                  <option value="700">Bold</option>
-                  <option value="900">Black</option>
+                  <option value="">{t("Default")}</option>
+                  <option value="100">{t("Thin")}</option>
+                  <option value="300">{t("Light")}</option>
+                  <option value="400">{t("Regular")}</option>
+                  <option value="500">{t("Medium")}</option>
+                  <option value="700">{t("Bold")}</option>
+                  <option value="900">{t("Black")}</option>
                 </select>
               </label>
 
               <label>
-                Colour
-                <input
+                {t("Colour")}<input
                   type="color"
                   value={plugin.display.colour ?? "#ffffff"}
                   onChange={(event) =>

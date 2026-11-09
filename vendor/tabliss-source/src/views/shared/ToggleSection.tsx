@@ -1,3 +1,4 @@
+import { t } from "../../locales/ui";
 import React from "react";
 import { useToggle } from "../../hooks";
 
@@ -13,7 +14,7 @@ const ToggleSection: React.FC<Props> = ({ name, children }) => {
     <>
       <p>
         <a onClick={toggleOpen}>
-          {isOpen ? "Close" : "Open"} {name}
+          {isOpen ? t("Close") : t("Open")} {name}
         </a>
       </p>
 

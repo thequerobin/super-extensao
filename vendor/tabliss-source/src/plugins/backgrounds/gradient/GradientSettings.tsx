@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -5,8 +6,7 @@ import { Props, defaultData } from "./types";
 const GradientSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="GradientSettings">
     <label>
-      From Colour
-      <input
+      {t("From Colour")}<input
         type="color"
         value={data.from}
         onChange={(event) => setData({ ...data, from: event.target.value })}
@@ -14,8 +14,7 @@ const GradientSettings: FC<Props> = ({ data = defaultData, setData }) => (
     </label>
 
     <label>
-      To Colour
-      <input
+      {t("To Colour")}<input
         type="color"
         value={data.to}
         onChange={(event) => setData({ ...data, to: event.target.value })}
@@ -23,8 +22,7 @@ const GradientSettings: FC<Props> = ({ data = defaultData, setData }) => (
     </label>
 
     <label>
-      Angle (0-360)
-      <input
+      {t("Angle (0-360)")}<input
         type="number"
         value={data.angle}
         onChange={(event) =>

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -5,8 +6,7 @@ import { Props, defaultData } from "./types";
 const GreetingSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="GreetingSettings">
     <label>
-      Name
-      <input
+      {t("Name")}<input
         type="text"
         value={data.name}
         onChange={(event) => setData({ name: event.target.value })}

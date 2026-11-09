@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React from "react";
 import { useObjectUrls } from "../../../hooks";
 import { IconButton, RemoveIcon } from "../../../views/shared";
@@ -35,7 +36,7 @@ const ImageSettings: React.FC<Props> = ({ cache = defaultCache, setCache }) => {
               <img src={url} />
               <IconButton
                 onClick={() => removeImage(index)}
-                title="Remove image"
+                title={t("Remove image")}
               >
                 <RemoveIcon />
               </IconButton>
@@ -44,10 +45,10 @@ const ImageSettings: React.FC<Props> = ({ cache = defaultCache, setCache }) => {
       </div>
 
       {largeImages && (
-        <p className="info">Large images may affect performance.</p>
+        <p className="info">{t("Large images may affect performance.")}</p>
       )}
 
-      <p className="info">Images do not sync between devices.</p>
+      <p className="info">{t("Images do not sync between devices.")}</p>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
 import { Props, defaultData } from "./types";
@@ -10,8 +11,7 @@ const NbaSettings: FC<Props> = ({ data = defaultData, setData }) => (
         checked={data.displayLogo}
         onChange={() => setData({ ...data, displayLogo: !data.displayLogo })}
       />{" "}
-      Display team logo
-    </label>
+      {t("Display team logo")}</label>
   </div>
 );
 
