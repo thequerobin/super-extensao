@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="tile" x1="12" y1="8" x2="112" y2="124" gradientUnits="userSpaceOnUse"><stop stop-color="#29223e"/><stop offset="1" stop-color="#111b2b"/></linearGradient>
+    <linearGradient id="ribbon" x1="48" y1="30" x2="78" y2="96" gradientUnits="userSpaceOnUse"><stop stop-color="#b49aff"/><stop offset=".42" stop-color="#9c8bff"/><stop offset=".7" stop-color="#6bc8de"/><stop offset="1" stop-color="#58f1cf"/></linearGradient>
+  </defs>
+  <rect x="3" y="3" width="122" height="122" rx="31" fill="url(#tile)"/>
+  <rect x="3.75" y="3.75" width="120.5" height="120.5" rx="30.25" fill="none" stroke="#796b9d" stroke-opacity=".5" stroke-width="1.5"/>
+  <path d="M88 33H52L34 51V58H77L94 75V78L76 96H40" fill="none" stroke="url(#ribbon)" stroke-width="17" stroke-linecap="square" stroke-linejoin="round"/>
+</svg>

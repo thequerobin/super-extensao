@@ -1,0 +1,373 @@
+{
+   "addBtn": {
+      "message": "Adicionar"
+   },
+   "browsingHistory": {
+      "message": "Histórico de navegação"
+   },
+   "cache": {
+      "message": "Cache"
+   },
+   "clearFailed": {
+      "message": "Falha na limpeza"
+   },
+   "clearNow": {
+      "message": "Limpar agora"
+   },
+   "cleared": {
+      "message": "Limpo!"
+   },
+   "clearing": {
+      "message": "Limpando…"
+   },
+   "confirmCookiesClear": {
+      "message": "Os cookies fora da lista de exceções serão apagados. Isso desconecta sites, incluindo Google, e pode pausar o Chrome Sync. Continuar?"
+   },
+   "confirmCookiesEnable": {
+      "message": "A limpeza de cookies desconecta os sites fora da lista de exceções. Cookies do Google podem pausar o Chrome Sync. Ativar a limpeza?"
+   },
+   "confirmStrongPreset": {
+      "message": "O modo completo apaga histórico, cache, cookies, histórico de downloads, formulários e armazenamento local. Desconecta sites, incluindo Google, e pode pausar o Chrome Sync. Continuar?"
+   },
+   "cookieSyncWarning": {
+      "message": "Desconecta sites, incluindo Google, e pode pausar o Chrome Sync. Não remove a conta do perfil do Chrome."
+   },
+   "cookies": {
+      "message": "Cookies"
+   },
+   "desktopNotifBody": {
+      "message": "Limpeza: $TRIGGER$ ($TIME$):\n$TYPES$",
+      "placeholders": {
+         "TIME": {
+            "content": "$2"
+         },
+         "TRIGGER": {
+            "content": "$1"
+         },
+         "TYPES": {
+            "content": "$3"
+         }
+      }
+   },
+   "desktopNotifContext": {
+      "message": "Apagado: $TYPES$",
+      "placeholders": {
+         "TYPES": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifDeferredBody": {
+      "message": "Os dados já foram apagados ao fechar o Chrome ($TIME$). Esta notificação está atrasada.",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifDeferredTitle": {
+      "message": "Sessão anterior limpa"
+   },
+   "desktopNotifExit": {
+      "message": "Ao fechar o Chrome"
+   },
+   "desktopNotifExitBody": {
+      "message": "Limpeza concluída ao fechar o Chrome ($TIME$). Clique para abrir as configurações.",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifExitTitle": {
+      "message": "Dados de navegação apagados"
+   },
+   "desktopNotifManual": {
+      "message": "Manual"
+   },
+   "desktopNotifRecoveryBody": {
+      "message": "A limpeza anterior estava incompleta. Ela foi concluída nesta inicialização ($TIME$).",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifSettings": {
+      "message": "Abrir configurações"
+   },
+   "desktopNotifStartup": {
+      "message": "Limpeza anterior concluída na inicialização"
+   },
+   "desktopNotifTitle": {
+      "message": "Auto Clear History – Concluído"
+   },
+   "downloadHistory": {
+      "message": "Histórico de downloads"
+   },
+   "emptyExclude": {
+      "message": "Nenhum site preservado ainda"
+   },
+   "enabled": {
+      "message": "Ativado"
+   },
+   "excludePlaceholder": {
+      "message": "ex.: google.com"
+   },
+   "extDescription": {
+      "message": "Apague o histórico e os dados selecionados ao fechar o Chrome, com nova tentativa na próxima inicialização."
+   },
+   "extName": {
+      "message": "Auto Clear History on Exit"
+   },
+   "faqAccountHistoryA": {
+      "message": "Não. Apaga apenas o histórico local do Chrome. O histórico do Google é gerenciado separadamente em Atividade na Web e de apps."
+   },
+   "faqAccountHistoryQ": {
+      "message": "Apaga o histórico de pesquisa da Conta Google?"
+   },
+   "faqCookieA": {
+      "message": "A opção vem desativada. Ao ativá-la, muitos sites serão desconectados. Adicione primeiro os sites que deseja preservar às exceções."
+   },
+   "faqCookieQ": {
+      "message": "O que acontece ao apagar cookies?"
+   },
+   "faqGoogleA": {
+      "message": "Sim, a menos que o Google esteja nas exceções. Apaga a sessão web do Google e pode pausar o Chrome Sync, mas não remove a conta do perfil."
+   },
+   "faqGoogleQ": {
+      "message": "A limpeza de cookies me desconecta do Google?"
+   },
+   "faqMacA": {
+      "message": "Normalmente, a limpeza começa ao fechar a última janela. Se o Chrome encerrar antes de terminar, uma nova tentativa ocorre na próxima inicialização."
+   },
+   "faqMacQ": {
+      "message": "Fechar uma janela no macOS inicia a limpeza?"
+   },
+   "feedbackEmailBody": {
+      "message": "Olá, Kuuloa,\n\nTenho um comentário sobre o Auto Clear History on Exit:\n\n"
+   },
+   "footerMsg": {
+      "message": "Limpa ao fechar a última janela; se interrompido, tenta novamente na próxima inicialização."
+   },
+   "formData": {
+      "message": "Dados de formulários"
+   },
+   "headerTitle": {
+      "message": "Auto Clear History"
+   },
+   "invalidDomain": {
+      "message": "Digite um domínio válido"
+   },
+   "keepAdded": {
+      "message": "Adicionado à lista de exceções"
+   },
+   "keepAlreadyAdded": {
+      "message": "Já adicionado"
+   },
+   "keepLoginNote": {
+      "message": "Os cookies destes domínios são excluídos da limpeza de cookies."
+   },
+   "lastClearDetail": {
+      "message": "$REASON$ / Apagado: $TYPES$",
+      "placeholders": {
+         "REASON": {
+            "content": "$1"
+         },
+         "TYPES": {
+            "content": "$2"
+         }
+      }
+   },
+   "lastClearEmptyDetail": {
+      "message": "Limpa ao fechar a última janela e tenta novamente na próxima inicialização se interrompido."
+   },
+   "lastClearEmptyTitle": {
+      "message": "Nenhuma limpeza registrada"
+   },
+   "lastClearFailedDetail": {
+      "message": "Os dados pendentes serão processados na próxima inicialização. Verifique as configurações ou use Limpar agora."
+   },
+   "lastClearFailedTitle": {
+      "message": "Última limpeza falhou: $TIME$",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "lastClearTitle": {
+      "message": "Última limpeza: $TIME$",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "localStorage": {
+      "message": "Armazenamento local"
+   },
+   "notifAuto": {
+      "message": "Limpo automaticamente"
+   },
+   "notifDeleted": {
+      "message": "Apagado: $TYPES$",
+      "placeholders": {
+         "TYPES": {
+            "content": "$1"
+         }
+      }
+   },
+   "notifExit": {
+      "message": "Limpo ao fechar"
+   },
+   "notifManual": {
+      "message": "Limpo manualmente"
+   },
+   "notifStartup": {
+      "message": "Limpeza anterior concluída na inicialização"
+   },
+   "onboardingCookies": {
+      "message": "Ative Cookies para desconectar os sites (desativado por padrão)."
+   },
+   "onboardingDone": {
+      "message": "Usar estas configurações"
+   },
+   "onboardingGoogle": {
+      "message": "Apagar cookies do Google pode pausar o Chrome Sync."
+   },
+   "onboardingKeepLogins": {
+      "message": "Definir exceções de login"
+   },
+   "onboardingSafe": {
+      "message": "Por padrão, apenas o histórico de navegação é apagado."
+   },
+   "onboardingTitle": {
+      "message": "Comece com configurações seguras"
+   },
+   "pause30": {
+      "message": "30 min"
+   },
+   "pause60": {
+      "message": "1 hora"
+   },
+   "pauseBtn": {
+      "message": "Pausar"
+   },
+   "pauseManual": {
+      "message": "Até retomar"
+   },
+   "pauseToday": {
+      "message": "Até o fim de hoje"
+   },
+   "pausedManual": {
+      "message": "Pausado (retomada manual)"
+   },
+   "pausedUntil": {
+      "message": "Pausado (até $TIME$)",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "presetApplied": {
+      "message": "Modo de limpeza atualizado"
+   },
+   "presetSafeDesc": {
+      "message": "Modo padrão com menor risco de desconexão"
+   },
+   "presetSafeTitle": {
+      "message": "Seguro: só histórico"
+   },
+   "presetStandardDesc": {
+      "message": "Limpeza leve para o dia a dia"
+   },
+   "presetStandardTitle": {
+      "message": "Padrão: histórico + cache"
+   },
+   "presetStrongDesc": {
+      "message": "Desconecta sites, incluindo Google; pode pausar a sincronização"
+   },
+   "presetStrongTitle": {
+      "message": "Completo: cookies e armazenamento também"
+   },
+   "privacyPromise": {
+      "message": "Privacidade: URLs visitados não são armazenados nem enviados. As configurações ficam apenas neste navegador."
+   },
+   "quickChatGPT": {
+      "message": "ChatGPT"
+   },
+   "quickGitHub": {
+      "message": "GitHub"
+   },
+   "quickGoogle": {
+      "message": "Google"
+   },
+   "quickMicrosoft": {
+      "message": "Microsoft"
+   },
+   "quickNotion": {
+      "message": "Notion"
+   },
+   "quickSlack": {
+      "message": "Slack"
+   },
+   "resumeBtn": {
+      "message": "Retomar"
+   },
+   "reviewPrivacyNote": {
+      "message": "Esta pesquisa não envia nada automaticamente. Sua escolha fica salva apenas neste navegador."
+   },
+   "reviewPromptBody": {
+      "message": "Escolha uma avaliação pública na Chrome Web Store ou um comentário privado por e-mail. Experiências positivas e sugestões são igualmente bem-vindas."
+   },
+   "reviewPromptDismiss": {
+      "message": "Não mostrar novamente"
+   },
+   "reviewPromptEyebrow": {
+      "message": "Compartilhe sua experiência"
+   },
+   "reviewPromptFeedback": {
+      "message": "Enviar comentário por e-mail"
+   },
+   "reviewPromptLater": {
+      "message": "Mais tarde"
+   },
+   "reviewPromptReview": {
+      "message": "Escrever avaliação"
+   },
+   "reviewPromptTitle": {
+      "message": "Como o Auto Clear History está funcionando para você?"
+   },
+   "reviewWindowHeader": {
+      "message": "Auto Clear History on Exit"
+   },
+   "sectionDataToClear": {
+      "message": "Dados a apagar ao fechar"
+   },
+   "sectionExclude": {
+      "message": "Sites para manter conectados (preservar cookies)"
+   },
+   "sectionFaq": {
+      "message": "Perguntas frequentes"
+   },
+   "sectionPreset": {
+      "message": "Modo de limpeza"
+   },
+   "settingsReviewLink": {
+      "message": "Escrever avaliação (opcional)"
+   },
+   "settingsReviewNote": {
+      "message": "Compartilhe sua experiência na Chrome Web Store. Todos os comentários são bem-vindos."
+   },
+   "tabBasic": {
+      "message": "Configurações"
+   },
+   "tabExclude": {
+      "message": "Manter login"
+   },
+   "tabFaq": {
+      "message": "Perguntas frequentes"
+   }
+}

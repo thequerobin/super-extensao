@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Extensão</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><img class="brand-icon" src="icons/icon48.png" alt="" width="36" height="36"><div><h1>Super Extensão</h1><p>Limpeza, mídia e abas.</p></div></div>
+    <label class="theme-label">Tema<select id="theme"><option value="dark">Escuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></label>
+  </header>
+  <main>
+    <section class="report" aria-labelledby="reportTitle"><div class="eyebrow">ÚLTIMA LIMPEZA</div><h2 id="reportTitle">Carregando…</h2><p id="reportDetail"></p></section>
+    <div id="error" class="message error" role="alert" hidden></div>
+    <div class="automation"><label class="toggle-line" for="enabled"><span>Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch"></label><button id="pauseToggle" class="quiet" aria-expanded="false" aria-controls="pauseMenu">Pausar</button></div>
+    <div id="pauseMenu" class="pause-menu" hidden><button data-duration="30">30 minutos</button><button data-duration="60">1 hora</button><button data-duration="today">Até amanhã</button><button data-duration="0">Até retomar</button></div>
+    <div id="pauseRow" class="message pause" hidden><span id="pauseStatus"></span><button id="resume">Retomar</button></div>
+    <nav aria-label="Seções"><button class="tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true">Limpeza</button><button class="tab" id="tab-exceptions" data-tab="exceptions" aria-pressed="false">Cookies</button><button class="tab" id="tab-bookmarks" data-tab="bookmarks" aria-pressed="false">Favoritos</button><button class="tab" id="tab-autoplay" data-tab="autoplay" aria-pressed="false">Autoplay</button><button class="tab" id="tab-tabs" data-tab="tabs" aria-pressed="false">Abas</button></nav>
+    <section id="panel-cleanup" aria-labelledby="tab-cleanup">
+      <div class="section-heading"><h2>O que apagar</h2><span>Salvo automaticamente</span></div>
+      <div class="presets" aria-label="Modos de limpeza"><button data-preset="safe"><strong>Seguro</strong><small>Histórico</small></button><button data-preset="standard"><strong>Padrão</strong><small>+ cache</small></button><button data-preset="strong"><strong>Forte</strong><small>Todos os tipos</small></button></div>
+      <div class="options">
+        <label class="toggle-line"><span>Histórico de navegação</span><input id="clearHistory" type="checkbox" role="switch"></label>
+        <label class="toggle-line"><span>Cache do navegador</span><input id="clearCache" type="checkbox" role="switch"></label>
+        <label class="toggle-line"><span>Cookies<small>Pode desconectar contas fora das exceções</small></span><input id="clearCookies" type="checkbox" role="switch"></label>
+        <label class="toggle-line"><span>Histórico de downloads<small>Os arquivos baixados são preservados</small></span><input id="clearDownloads" type="checkbox" role="switch"></label>
+        <label class="toggle-line"><span>Dados de formulários</span><input id="clearFormData" type="checkbox" role="switch"></label>
+        <label class="toggle-line"><span>Armazenamento local<small>localStorage dos sites</small></span><input id="clearLocalStorage" type="checkbox" role="switch"></label>
+      </div>
+      <p class="note">Senhas salvas não são apagadas. A limpeza pode ser concluída na próxima abertura se o navegador encerrar antes de terminar.</p>
+    </section>
+    <section id="panel-exceptions" aria-labelledby="tab-exceptions" hidden>
+      <div class="section-heading"><h2>Preservar cookies por site</h2></div>
+      <p class="note">Os cookies dos sites desta lista serão preservados durante a limpeza. Esta proteção não inclui cache nem armazenamento local, e não garante a preservação de todos os logins.</p>
+      <p class="scope">Cookies são protegidos para o domínio registrável inteiro: uma exceção para accounts.exemplo.com também preserva cookies de exemplo.com e seus subdomínios.</p>
+      <form id="domainForm"><label class="field" for="domainInput">Domínio ou URL</label><div class="input-row"><input id="domainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required><button type="submit">Adicionar</button></div></form>
+      <div class="list-heading"><span id="listCount">0 domínios</span><button id="goImport" class="link-button">Importar de favoritos →</button></div>
+      <ul id="domainList" class="domain-list"></ul><p id="emptyList" class="empty">Nenhum domínio nesta lista.</p>
+      <p class="note">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada na aba Limpeza.</p>
+    </section>
+    <section id="panel-bookmarks" aria-labelledby="tab-bookmarks" hidden>
+      <div class="section-heading"><h2>Importar dos favoritos</h2></div>
+      <p class="note">Importe os domínios de uma pasta para a lista de exceções de cookies. Os favoritos não serão modificados.</p>
+      <button id="loadFolders" class="full secondary">Escolher pasta de favoritos</button>
+      <div id="bookmarkControls" hidden>
+        <label class="field">Pasta<select id="bookmarkFolder"></select></label>
+        <label class="check-line"><input id="includeSubfolders" type="checkbox" checked> Incluir subpastas</label>
+        <div class="import-preview"><strong id="previewCount"></strong><p id="previewDetail"></p><ul id="previewDomains"></ul></div>
+        <button id="importBookmarks" class="full" disabled>Importar domínios</button>
+      </div>
+      <p class="note">O acesso aos favoritos será solicitado ao escolher uma pasta. A importação é uma cópia: mudanças futuras na pasta não atualizam as exceções. Links HTTP/HTTPS são aceitos e duplicados são ignorados.</p>
+    </section>
+    <section id="panel-autoplay" aria-labelledby="tab-autoplay" hidden>
+      <div class="section-heading"><h2>Controle da reprodução automática</h2></div>
+      <div class="options"><label class="toggle-line"><span>Ativar controle de autoplay<small>Vídeos e áudios em páginas HTTP/HTTPS</small></span><input id="autoplayEnabled" type="checkbox" role="switch"></label></div>
+      <label class="field">Comportamento padrão<select id="autoplayDefault"><option value="block">Bloquear reprodução automática</option><option value="allow">Permitir reprodução automática</option></select></label>
+      <div class="current-site"><span class="eyebrow">SITE ATUAL</span><strong id="currentAutoplayHost">Identificando…</strong><p id="currentAutoplayEffective" class="note"></p><label class="field">Regra deste site<select id="currentAutoplayRule" disabled><option value="default">Usar padrão / regra herdada</option><option value="allow">Permitir</option><option value="block">Bloquear</option></select></label></div>
+      <form id="autoplayForm"><label class="field" for="autoplayDomain">Adicionar regra por domínio</label><div class="input-row"><input id="autoplayDomain" type="text" placeholder="ex.: youtube.com" autocomplete="off" spellcheck="false" required><select id="autoplayPermission" aria-label="Permissão do domínio"><option value="allow">Permitir</option><option value="block">Bloquear</option></select><button type="submit">Salvar</button></div></form>
+      <label class="field" for="autoplaySearch">Buscar regras</label><input class="search-input" id="autoplaySearch" type="text" placeholder="Filtrar por domínio…">
+      <ul id="autoplayRules" class="domain-list"></ul><p id="autoplayEmpty" class="empty">Nenhuma regra por site.</p>
+      <div class="tool-actions"><button id="exportAutoplay" class="secondary">Exportar regras</button><button id="chooseAutoplayImport" class="secondary">Importar regras</button><input id="autoplayImportFile" type="file" accept="application/json,.json" hidden></div>
+      <p class="note">As regras valem para o domínio e seus subdomínios; a mais específica tem prioridade. Uma interação real na página libera a reprodução nesse quadro até a próxima navegação. As permissões nativas do navegador continuam valendo. Recarregue abas que já estavam abertas ao instalar ou atualizar a extensão.</p>
+    </section>
+    <section id="panel-tabs" aria-labelledby="tab-tabs" hidden>
+      <div class="section-heading"><h2>Manter a janela aberta</h2></div>
+      <div class="options"><label class="toggle-line"><span>Proteger a última aba<small>Uma aba de reserva evita o fechamento acidental</small></span><input id="tabGuardEnabled" type="checkbox" role="switch"></label></div>
+      <label class="field">Quais janelas proteger<select id="tabGuardScope"><option value="last">Somente a última janela aberta</option><option value="first">Primeira janela e última restante</option><option value="every">Todas as janelas</option></select></label>
+      <div class="options"><label class="toggle-line"><span>Uma única Nova guia por janela<small>Ignora abas fixadas e páginas em uso</small></span><input id="singleNewTab" type="checkbox" role="switch"></label><label class="toggle-line"><span>Manter Nova guia na última posição<small>Disponível com a opção acima ativada</small></span><input id="newTabLast" type="checkbox" role="switch"></label></div>
+      <p class="scope">Para encerrar de verdade, feche a janela pelo X ou saia do navegador. A limpeza ao sair só começa quando a última janela for fechada.</p>
+      <p class="note">A aba de reserva é criada apenas quando necessária e removida quando há outras abas suficientes. Abas fixadas por você são preservadas. Janelas anônimas exigem a autorização separada do navegador.</p>
+    </section>
+  </main>
+  <footer><button id="clearNow" class="full danger">Limpar agora</button><p id="status" role="status" aria-live="polite"></p><p class="footer-note">Configurações locais · Sem envio de dados</p></footer>
+  <script src="rules.js"></script><script src="navigation-rules.js"></script><script src="popup.js"></script><script src="tools-popup.js"></script>
+</body>
+</html>

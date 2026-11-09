@@ -1,0 +1,85 @@
+# Super Extensão
+
+<img src="icons/icon128.png" width="88" height="88" alt="Ícone da Super Extensão">
+
+Uma extensão para Helium e navegadores Chromium que reúne limpeza ao sair, controle de reprodução automática e proteção da última aba. Interface em português, com temas escuro, claro e do sistema.
+
+## Recursos
+
+- **Limpeza:** histórico, cache, cookies, histórico de downloads, formulários e localStorage. Modos Seguro, Padrão e Forte, pausa temporária, limpeza manual e relatório do último resultado.
+- **Cookies:** exceções por domínio e importação de domínios de uma pasta dos favoritos, com prévia, subpastas opcionais e deduplicação. As exceções se aplicam somente a cookies.
+- **Autoplay:** liga/desliga, padrão global, regras por site e subdomínio, ajuste do site atual, busca e importação/exportação JSON.
+- **Abas:** proteção da última aba por meio de uma reserva fixada, seleção das janelas protegidas, Nova guia única e opção de mantê-la na última posição.
+- **Ícone próprio:** S geométrico em roxo e turquesa, com SVG editável e PNGs de 16, 32, 48 e 128 pixels.
+
+## Instalação sem compactação
+
+1. Baixe o repositório em **Code → Download ZIP** e extraia os arquivos, ou clone:
+
+   ```sh
+   git clone https://github.com/thequerobin/super-extensao.git
+   ```
+
+2. Abra `chrome://extensions/` no navegador.
+3. Ative **Modo do desenvolvedor**.
+4. Clique em **Carregar sem compactação** e selecione a pasta que contém `manifest.json`.
+5. Recarregue as páginas já abertas para ativar o controle de autoplay nelas.
+
+Não há compilação nem instalação de dependências para usar a extensão. Mantenha a pasta no mesmo local. Após atualizar os arquivos, clique em **Recarregar** no cartão da extensão. Se usar as extensões originais descritas nos créditos, desative-as para evitar rotinas duplicadas.
+
+## Como funciona
+
+### Limpeza e exceções
+
+Por padrão, apenas a exclusão do histórico está habilitada. A limpeza é tentada ao fechar a última janela; se o processo encerrar antes de concluir, a extensão tenta novamente na próxima abertura. O resultado só é registrado como concluído após as APIs de remoção terminarem com sucesso.
+
+Exceções preservam cookies do domínio registrável inteiro, incluindo seus subdomínios. Elas **não preservam cache nem localStorage**. Por isso, não garantem a manutenção de todos os logins se outros dados de sites também forem apagados. Senhas salvas e arquivos baixados são preservados. O histórico da Conta Google não é apagado.
+
+A importação de favoritos adiciona os domínios à lista existente. Ela não altera os favoritos nem acompanha mudanças futuras na pasta. Links fora de HTTP/HTTPS são ignorados.
+
+### Autoplay
+
+O controle inicia ativado, com padrão **Bloquear**. A regra mais específica para o domínio/subdomínio tem prioridade. Uma interação real na página libera a reprodução naquele quadro até a próxima navegação; cliques sintetizados pelo site não contam. Cada quadro usa as regras do próprio domínio. Permitir na extensão não contorna as restrições nativas do navegador.
+
+Páginas internas e outras páginas protegidas pelo navegador não aceitam os scripts de controle. O comportamento pode variar em players e páginas que substituem as APIs de mídia.
+
+### Última aba
+
+A proteção inicia ativada, para a última janela normal restante. Uma aba de reserva é criada quando necessária e retirada quando há outras abas suficientes. Somente reservas criadas e identificadas pela extensão são removidas por essa rotina. Abas fixadas pelo usuário são preservadas.
+
+**Para encerrar e executar a limpeza ao sair, feche a janela pelo X ou saia do navegador.** Fechar a última aba de conteúdo pode manter a janela aberta intencionalmente. O uso no modo anônimo exige a autorização separada do navegador.
+
+## Permissões e privacidade
+
+| Permissão | Uso |
+| --- | --- |
+| `browsingData` | Executar a limpeza selecionada. |
+| `storage` | Salvar configurações e relatórios locais; identificar reservas durante a sessão. |
+| `alarms` | Retomar a automação após uma pausa. |
+| `notifications` | Exibir resultados da limpeza. |
+| `background` | Manter o comportamento em segundo plano quando permitido pelo navegador. |
+| `tabs` | Identificar o site atual e gerenciar abas. |
+| HTTP/HTTPS e content scripts | Controlar mídia nas páginas e seus quadros. |
+| `bookmarks` — opcional | Importar uma pasta de favoritos por solicitação do usuário. |
+
+A extensão não envia dados para servidores, não modifica os favoritos e não sincroniza configurações entre instalações. Os scripts das páginas recebem somente o estado de bloqueio de autoplay; não recebem listas de cookies, favoritos nem relatórios de limpeza.
+
+## Testes
+
+Com Node.js 20 ou superior:
+
+```sh
+npm test
+```
+
+Não é necessário executar `npm install`: os testes usam módulos nativos do Node. A suíte cobre limpeza, exceções, favoritos, pausa, falhas e recuperação, regras de autoplay e transições de abas, com APIs de navegador simuladas.
+
+A versão 1.1.1 também foi verificada em um perfil temporário do Edge: popup nativo, preservação/exclusão de cookies pela API real, autoplay nativo e por script, interação real/sintética, atualização de regras, shadow DOM, reserva de abas e preservação de abas fixadas. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node.
+
+O fechamento nativo pelo X e a recuperação após encerrar o processo ainda precisam ser conferidos no Helium. O ambiente Edge headless usado nos testes não fechou a janela por `windows.remove()`. Não há garantia de concluir a limpeza antes do encerramento do navegador.
+
+## Créditos
+
+O worker de limpeza e as traduções foram adaptados da [Auto Clear History on Exit 2.0.9](https://chromewebstore.google.com/detail/auto-clear-history-on-exi/hfdaikgklefacppkadgkncadaoehnlla), de Kuuloa.
+
+As funções de autoplay e proteção da última aba foram reimplementadas após a análise de [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib) e [Don't Close Window With Last Tab](https://chromewebstore.google.com/detail/dont-close-window-with-last/dlnpfhfhmkiebpnlllpehlmklgdggbhn). Este projeto é independente e não é uma versão oficial dessas extensões.

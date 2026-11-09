@@ -1,0 +1,373 @@
+{
+   "addBtn": {
+      "message": "Add"
+   },
+   "browsingHistory": {
+      "message": "Browsing History"
+   },
+   "cache": {
+      "message": "Cache"
+   },
+   "clearFailed": {
+      "message": "Clear failed"
+   },
+   "clearNow": {
+      "message": "Clear Now"
+   },
+   "cleared": {
+      "message": "Cleared!"
+   },
+   "clearing": {
+      "message": "Clearing…"
+   },
+   "confirmCookiesClear": {
+      "message": "Cookies outside the Keep login list will be deleted. This signs out sites including Google and may pause Chrome Sync. Continue?"
+   },
+   "confirmCookiesEnable": {
+      "message": "Cookie cleanup signs you out of websites outside Keep login. If Google cookies are included, Chrome Sync may be paused. Enable cookie cleanup?"
+   },
+   "confirmStrongPreset": {
+      "message": "Strong mode clears history, cache, cookies, download history, form data, and local storage. It signs out sites including Google and may pause Chrome Sync. Continue?"
+   },
+   "cookieSyncWarning": {
+      "message": "Signs out websites including Google and may pause Chrome Sync. It does not remove the account from your Chrome profile."
+   },
+   "cookies": {
+      "message": "Cookies"
+   },
+   "desktopNotifBody": {
+      "message": "Cleared $TRIGGER$ ($TIME$):\n$TYPES$",
+      "placeholders": {
+         "TIME": {
+            "content": "$2"
+         },
+         "TRIGGER": {
+            "content": "$1"
+         },
+         "TYPES": {
+            "content": "$3"
+         }
+      }
+   },
+   "desktopNotifContext": {
+      "message": "Deleted: $TYPES$",
+      "placeholders": {
+         "TYPES": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifDeferredBody": {
+      "message": "Data was already cleared when Chrome last closed ($TIME$). This is a delayed notification.",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifDeferredTitle": {
+      "message": "Previous session cleared"
+   },
+   "desktopNotifExit": {
+      "message": "On Chrome exit"
+   },
+   "desktopNotifExitBody": {
+      "message": "Auto-clear completed when Chrome closed ($TIME$). Click to open settings.",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifExitTitle": {
+      "message": "Browsing data cleared"
+   },
+   "desktopNotifManual": {
+      "message": "Manual"
+   },
+   "desktopNotifRecoveryBody": {
+      "message": "The previous cleanup was unfinished. It completed at this startup ($TIME$).",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "desktopNotifSettings": {
+      "message": "Open settings"
+   },
+   "desktopNotifStartup": {
+      "message": "Previous session cleared at startup"
+   },
+   "desktopNotifTitle": {
+      "message": "Auto Clear History - Done"
+   },
+   "downloadHistory": {
+      "message": "Download History"
+   },
+   "emptyExclude": {
+      "message": "No login-keep sites yet"
+   },
+   "enabled": {
+      "message": "Enabled"
+   },
+   "excludePlaceholder": {
+      "message": "e.g. google.com"
+   },
+   "extDescription": {
+      "message": "Clear Chrome history and selected browsing data on exit, with automatic retry on the next startup."
+   },
+   "extName": {
+      "message": "Auto Clear History on Exit"
+   },
+   "faqAccountHistoryA": {
+      "message": "No. It clears local Chrome history. History stored by Google is managed separately in Web & App Activity."
+   },
+   "faqAccountHistoryQ": {
+      "message": "Does it delete Google Account search history?"
+   },
+   "faqCookieA": {
+      "message": "Cookie cleanup is off by default. When enabled, it signs you out of many websites. Add sites you want to preserve to Keep login first."
+   },
+   "faqCookieQ": {
+      "message": "What happens if cookies are cleared?"
+   },
+   "faqGoogleA": {
+      "message": "Yes, unless Google is in Keep login. It clears the Google web session and may pause Chrome Sync, but does not remove the account from your Chrome profile."
+   },
+   "faqGoogleQ": {
+      "message": "Does cookie cleanup sign me out of Google?"
+   },
+   "faqMacA": {
+      "message": "Normally cleanup runs when the last window closes. If Chrome quits or is force-quit before it finishes, cleanup completes immediately on the next startup."
+   },
+   "faqMacQ": {
+      "message": "Does closing a window on macOS trigger cleanup?"
+   },
+   "feedbackEmailBody": {
+      "message": "Hi Kuuloa,\n\nI have feedback about Auto Clear History on Exit:\n\n"
+   },
+   "footerMsg": {
+      "message": "Clears at the last window; if interrupted, retries immediately on next startup."
+   },
+   "formData": {
+      "message": "Form Data"
+   },
+   "headerTitle": {
+      "message": "Auto Clear History"
+   },
+   "invalidDomain": {
+      "message": "Enter a valid domain"
+   },
+   "keepAdded": {
+      "message": "Added to login keep list"
+   },
+   "keepAlreadyAdded": {
+      "message": "Already added"
+   },
+   "keepLoginNote": {
+      "message": "When cookies are cleared, cookies for these domains are excluded from deletion."
+   },
+   "lastClearDetail": {
+      "message": "$REASON$ / Deleted: $TYPES$",
+      "placeholders": {
+         "REASON": {
+            "content": "$1"
+         },
+         "TYPES": {
+            "content": "$2"
+         }
+      }
+   },
+   "lastClearEmptyDetail": {
+      "message": "Clears at the last window and retries on next startup if interrupted."
+   },
+   "lastClearEmptyTitle": {
+      "message": "No clear record yet"
+   },
+   "lastClearFailedDetail": {
+      "message": "Pending data will be retried on the next startup. Check settings or try Clear Now."
+   },
+   "lastClearFailedTitle": {
+      "message": "Last cleanup failed: $TIME$",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "lastClearTitle": {
+      "message": "Last clear: $TIME$",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "localStorage": {
+      "message": "Local Storage"
+   },
+   "notifAuto": {
+      "message": "Auto cleared"
+   },
+   "notifDeleted": {
+      "message": "Deleted: $TYPES$",
+      "placeholders": {
+         "TYPES": {
+            "content": "$1"
+         }
+      }
+   },
+   "notifExit": {
+      "message": "Cleared on exit"
+   },
+   "notifManual": {
+      "message": "Manually cleared"
+   },
+   "notifStartup": {
+      "message": "Previous session cleared at startup"
+   },
+   "onboardingCookies": {
+      "message": "Turn on Cookies if you want websites to sign out (off by default)."
+   },
+   "onboardingDone": {
+      "message": "Start with this setup"
+   },
+   "onboardingGoogle": {
+      "message": "Removing Google cookies may pause Chrome Sync."
+   },
+   "onboardingKeepLogins": {
+      "message": "Set login keep list"
+   },
+   "onboardingSafe": {
+      "message": "By default, only browsing history is cleared."
+   },
+   "onboardingTitle": {
+      "message": "Start with a safe setup"
+   },
+   "pause30": {
+      "message": "30 min"
+   },
+   "pause60": {
+      "message": "1 hour"
+   },
+   "pauseBtn": {
+      "message": "Pause"
+   },
+   "pauseManual": {
+      "message": "Until resumed"
+   },
+   "pauseToday": {
+      "message": "Rest of today"
+   },
+   "pausedManual": {
+      "message": "Paused (manual resume)"
+   },
+   "pausedUntil": {
+      "message": "Paused (until $TIME$)",
+      "placeholders": {
+         "TIME": {
+            "content": "$1"
+         }
+      }
+   },
+   "presetApplied": {
+      "message": "Clear mode updated"
+   },
+   "presetSafeDesc": {
+      "message": "Default mode that is less likely to sign you out"
+   },
+   "presetSafeTitle": {
+      "message": "Safe: History only"
+   },
+   "presetStandardDesc": {
+      "message": "Light cleanup for everyday browsing"
+   },
+   "presetStandardTitle": {
+      "message": "Standard: History + cache"
+   },
+   "presetStrongDesc": {
+      "message": "Signs out websites including Google; may pause Sync"
+   },
+   "presetStrongTitle": {
+      "message": "Strong: Cookies/Storage too"
+   },
+   "privacyPromise": {
+      "message": "Privacy: Browsing URLs are not stored or sent. Settings stay in this browser only."
+   },
+   "quickChatGPT": {
+      "message": "ChatGPT"
+   },
+   "quickGitHub": {
+      "message": "GitHub"
+   },
+   "quickGoogle": {
+      "message": "Google"
+   },
+   "quickMicrosoft": {
+      "message": "Microsoft"
+   },
+   "quickNotion": {
+      "message": "Notion"
+   },
+   "quickSlack": {
+      "message": "Slack"
+   },
+   "resumeBtn": {
+      "message": "Resume"
+   },
+   "reviewPrivacyNote": {
+      "message": "This survey does not send anything automatically. Your choice is stored only in this browser."
+   },
+   "reviewPromptBody": {
+      "message": "Choose a public Chrome Web Store review or private email feedback. Positive experiences and improvement ideas are equally welcome."
+   },
+   "reviewPromptDismiss": {
+      "message": "Don't show again"
+   },
+   "reviewPromptEyebrow": {
+      "message": "Share your experience"
+   },
+   "reviewPromptFeedback": {
+      "message": "Email feedback"
+   },
+   "reviewPromptLater": {
+      "message": "Later"
+   },
+   "reviewPromptReview": {
+      "message": "Write review"
+   },
+   "reviewPromptTitle": {
+      "message": "Would you share how Auto Clear History is working for you?"
+   },
+   "reviewWindowHeader": {
+      "message": "Auto Clear History on Exit"
+   },
+   "sectionDataToClear": {
+      "message": "Data to clear on exit"
+   },
+   "sectionExclude": {
+      "message": "Sites to keep logged in (keep cookies)"
+   },
+   "sectionFaq": {
+      "message": "FAQ"
+   },
+   "sectionPreset": {
+      "message": "Clear mode"
+   },
+   "settingsReviewLink": {
+      "message": "Write a review (optional)"
+   },
+   "settingsReviewNote": {
+      "message": "Share your experience on the Chrome Web Store. All feedback is welcome."
+   },
+   "tabBasic": {
+      "message": "Settings"
+   },
+   "tabExclude": {
+      "message": "Keep login"
+   },
+   "tabFaq": {
+      "message": "FAQ"
+   }
+}

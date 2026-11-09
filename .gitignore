@@ -1,0 +1,13 @@
+node_modules/
+work/
+coverage/
+test-results/
+playwright-report/
+*.log
+*.zip
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+Desktop.ini
