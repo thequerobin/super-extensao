@@ -27,3 +27,27 @@ html,body{margin:0;background:var(--super-bg);color:var(--super-text);font-famil
 .v-application .v-stepper{background:var(--super-surface)!important;border:1px solid var(--super-line);border-radius:12px;box-shadow:none}
 
 .v-application .v-stepper{box-shadow:none!important}
+
+/* Shared edges for the header, connection settings and every sync view. */
+.super-sync-header,.super-oauth{width:calc(100% - 48px);max-width:912px;box-sizing:border-box}
+.super-sync-header{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;padding:0}
+.super-sync-header>div{min-width:0}
+.super-sync-header>.super-back{grid-column:3;margin-left:0;white-space:nowrap}
+.super-sync-header>label{grid-column:4;margin-left:0;max-width:190px}
+.super-oauth input,.super-sync-header select{box-sizing:border-box;min-width:0;max-width:100%}
+.v-application .v-content,.v-application .v-main{padding:0 0 40px!important}
+.v-content__wrap>.container,.v-main__wrap>.container,
+.v-content__wrap>div>.width,.v-main__wrap>div>.width{
+  width:calc(100% - 48px)!important;max-width:912px!important;padding:0!important;margin:24px auto 0!important
+}
+.v-content__wrap>.container>.options,.v-main__wrap>.container>.options{
+  width:100%;max-width:none!important;margin-left:0!important;margin-right:0!important
+}
+@media(max-width:600px){
+  .super-sync-header,.super-oauth{width:calc(100% - 24px)}
+  .super-sync-header{grid-template-columns:40px minmax(0,1fr) auto}
+  .super-sync-header>.super-back{grid-column:3;grid-row:1}
+  .super-sync-header>label{grid-column:2 / -1;grid-row:2;width:100%;max-width:none}
+  .v-content__wrap>.container,.v-main__wrap>.container,
+  .v-content__wrap>div>.width,.v-main__wrap>div>.width{width:calc(100% - 24px)!important}
+}

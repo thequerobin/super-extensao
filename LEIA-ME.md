@@ -1,4 +1,4 @@
-# Super Extensão 1.4.0
+# Super Extensão 1.4.1
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
