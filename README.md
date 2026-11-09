@@ -7,6 +7,7 @@ Uma extensão para Helium e navegadores Chromium que reúne a Nova guia completa
 ## Recursos
 
 - **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
+- **Painel unificado:** marca da Super Extensão, largura de 460 px e temas Escuro/Claro/Sistema sincronizados com o popup. Os blocos finais de persistência, apoio e links sociais foram removidos da interface.
 - **Limpeza:** histórico, cache, cookies, histórico de downloads, formulários e localStorage. Modos Seguro, Padrão e Forte, pausa temporária, limpeza manual e relatório do último resultado.
 - **Cookies:** exceções por domínio e importação de domínios de uma pasta dos favoritos, com prévia, subpastas opcionais e deduplicação. As exceções se aplicam somente a cookies.
 - **Autoplay:** liga/desliga, padrão global, regras por site e subdomínio, ajuste do site atual, busca e importação/exportação JSON.
@@ -32,7 +33,7 @@ Não há compilação nem instalação de dependências para usar a extensão. M
 
 ### Nova guia Tabliss
 
-A engrenagem do dashboard abre o editor original do Tabliss. O botão **Super Extensão** no canto superior direito abre os controles de limpeza, autoplay e abas. Para transferir a personalização de uma instalação separada do Tabliss, exporte o JSON nela e importe na página integrada. A importação substitui as configurações da Nova guia; imagens próprias devem ser selecionadas novamente porque não fazem parte do JSON original.
+A engrenagem do dashboard abre o editor de fundos e widgets com o visual da Super Extensão. O botão **Super Extensão** no canto superior direito abre os controles de limpeza, autoplay e abas. Para transferir a personalização de uma instalação separada do Tabliss, exporte o JSON nela e importe na página integrada. A importação substitui as configurações da Nova guia; imagens próprias devem ser selecionadas novamente porque não fazem parte do JSON original.
 
 O gradiente inicial funciona offline. Widgets e provedores online continuam disponíveis e dependem dos respectivos serviços, suas APIs e cotas. As preferências do dashboard usam `tabliss/config` em `storage.sync` e podem sincronizar se o navegador oferecer o recurso. Imagens e cache usam IndexedDB e não sincronizam. Esses dados ficam separados das preferências locais de limpeza/abas/autoplay e não são apagados pela limpeza configurada nesta extensão.
 

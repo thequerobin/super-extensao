@@ -1,12 +1,9 @@
 import React from "react";
-import { FormattedMessage } from "react-intl";
 import { UiContext } from "../../contexts/ui";
 import { exportStore, importStore, resetStore } from "../../db/action";
 import { useKeyPress } from "../../hooks";
-import { Icon } from "../shared";
 import Logo from "../shared/Logo";
 import Background from "./Background";
-import Persist from "./Persist";
 import "./Settings.sass";
 import System from "./System";
 import Widgets from "./Widgets";
@@ -90,50 +87,6 @@ const Settings: React.FC = () => {
           <a onClick={handleReset}>reset</a> your settings
         </p>
 
-        <Persist />
-
-        <div style={{ textAlign: "center" }} className="Widget">
-          <h4>Support Tabliss</h4>
-          <p>
-            <a
-              href="https://www.paypal.com/donate/?hosted_button_id=FK7VRWS9A2EW4"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="button button--primary"
-              title="I do love coffee"
-            >
-              <Icon name="coffee" /> Donate a coffee 😍
-            </a>
-          </p>
-          <p>
-            <a href="https://tabliss.io/" target="_blank">
-              <Icon name="globe" /> Website
-            </a>
-            &nbsp;&nbsp;
-            <a
-              href="https://twitter.com/tabliss"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Icon name="twitter" /> Twitter
-            </a>
-            &nbsp;&nbsp;
-            <a
-              href="https://github.com/joelshepherd/tabliss"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Icon name="github" /> GitHub
-            </a>
-          </p>
-        </div>
-
-        <FormattedMessage
-          id="settings.translationCredits"
-          description="Give yourself some credit :)"
-          defaultMessage=" "
-          tagName="p"
-        />
       </div>
     </div>
   );

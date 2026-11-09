@@ -1,4 +1,4 @@
-# Super Extensão 1.2.0
+# Super Extensão 1.2.1
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
@@ -24,6 +24,8 @@ Para migrar sua personalização, exporte as configurações na extensão Tablis
 As configurações do dashboard usam o namespace `tabliss/config` em `storage.sync` e podem sincronizar quando o navegador oferecer esse recurso. O cache e as imagens próprias ficam no IndexedDB, separados das preferências locais de limpeza, autoplay e abas. A limpeza não solicita remoção de dados de extensões.
 
 O componente mantém sua licença GPL-3.0, avisos e código-fonte em `vendor/tabliss-source`. Os detalhes das adaptações estão em `newtab/MODIFICATIONS.md`. O envio de erros ao Sentry foi desativado.
+
+Na versão 1.2.1, o painel de Nova guia passou a usar a logo, o espaçamento e os temas da Super Extensão. Os blocos finais de persistência, doação, links e crédito de tradução foram removidos da interface. Importação/exportação/reset e os controles de fundos e widgets permanecem disponíveis.
 
 A identidade desta versão é diferente da original: não há chave da loja nem URL de atualização. As configurações da extensão original não são importadas automaticamente. Na primeira instalação, apenas a exclusão do histórico fica ativada.
 
