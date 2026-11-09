@@ -2,10 +2,11 @@
 
 <img src="icons/icon128.png" width="88" height="88" alt="Ícone da Super Extensão">
 
-Uma extensão para Helium e navegadores Chromium que reúne limpeza ao sair, controle de reprodução automática e proteção da última aba. Interface em português, com temas escuro, claro e do sistema.
+Uma extensão para Helium e navegadores Chromium que reúne a Nova guia completa do Tabliss, limpeza ao sair, controle de reprodução automática e proteção da última aba. Controles da Super Extensão em português, com temas escuro, claro e do sistema; dashboard com as traduções e configurações originais do Tabliss.
 
 ## Recursos
 
+- **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
 - **Limpeza:** histórico, cache, cookies, histórico de downloads, formulários e localStorage. Modos Seguro, Padrão e Forte, pausa temporária, limpeza manual e relatório do último resultado.
 - **Cookies:** exceções por domínio e importação de domínios de uma pasta dos favoritos, com prévia, subpastas opcionais e deduplicação. As exceções se aplicam somente a cookies.
 - **Autoplay:** liga/desliga, padrão global, regras por site e subdomínio, ajuste do site atual, busca e importação/exportação JSON.
@@ -23,11 +24,19 @@ Uma extensão para Helium e navegadores Chromium que reúne limpeza ao sair, con
 2. Abra `chrome://extensions/` no navegador.
 3. Ative **Modo do desenvolvedor**.
 4. Clique em **Carregar sem compactação** e selecione a pasta que contém `manifest.json`.
-5. Recarregue as páginas já abertas para ativar o controle de autoplay nelas.
+5. Recarregue as páginas já abertas para ativar o controle de autoplay nelas. Abra uma nova guia para acessar o Tabliss integrado e aceite a alteração de Nova guia se o navegador solicitar.
 
 Não há compilação nem instalação de dependências para usar a extensão. Mantenha a pasta no mesmo local. Após atualizar os arquivos, clique em **Recarregar** no cartão da extensão. Se usar as extensões originais descritas nos créditos, desative-as para evitar rotinas duplicadas.
 
 ## Como funciona
+
+### Nova guia Tabliss
+
+A engrenagem do dashboard abre o editor original do Tabliss. O botão **Super Extensão** no canto superior direito abre os controles de limpeza, autoplay e abas. Para transferir a personalização de uma instalação separada do Tabliss, exporte o JSON nela e importe na página integrada. A importação substitui as configurações da Nova guia; imagens próprias devem ser selecionadas novamente porque não fazem parte do JSON original.
+
+O gradiente inicial funciona offline. Widgets e provedores online continuam disponíveis e dependem dos respectivos serviços, suas APIs e cotas. As preferências do dashboard usam `tabliss/config` em `storage.sync` e podem sincronizar se o navegador oferecer o recurso. Imagens e cache usam IndexedDB e não sincronizam. Esses dados ficam separados das preferências locais de limpeza/abas/autoplay e não são apagados pela limpeza configurada nesta extensão.
+
+O componente GPL-3.0 mantém licença, avisos e código-fonte. Veja [as adaptações e instruções de reconstrução](newtab/MODIFICATIONS.md) e [o código-fonte correspondente](vendor/tabliss-source/).
 
 ### Limpeza e exceções
 
@@ -62,7 +71,7 @@ A proteção inicia ativada, para a última janela normal restante. Uma aba de r
 | HTTP/HTTPS e content scripts | Controlar mídia nas páginas e seus quadros. |
 | `bookmarks` — opcional | Importar uma pasta de favoritos por solicitação do usuário. |
 
-A extensão não envia dados para servidores, não modifica os favoritos e não sincroniza configurações entre instalações. Os scripts das páginas recebem somente o estado de bloqueio de autoplay; não recebem listas de cookies, favoritos nem relatórios de limpeza.
+As rotinas de limpeza, autoplay e abas não enviam dados a servidores e não modificam favoritos. Os scripts das páginas recebem somente o estado de bloqueio de autoplay; não recebem listas de cookies, favoritos nem relatórios de limpeza. Os provedores e widgets online do dashboard fazem requisições aos serviços escolhidos, como Unsplash, GIPHY e serviços de clima. A sincronização de suas preferências depende do navegador; imagens próprias não sincronizam. O envio de erros do Tabliss ao Sentry foi desativado.
 
 ## Testes
 
@@ -74,7 +83,7 @@ npm test
 
 Não é necessário executar `npm install`: os testes usam módulos nativos do Node. A suíte cobre limpeza, exceções, favoritos, pausa, falhas e recuperação, regras de autoplay e transições de abas, com APIs de navegador simuladas.
 
-A versão 1.1.1 também foi verificada em um perfil temporário do Edge: popup nativo, preservação/exclusão de cookies pela API real, autoplay nativo e por script, interação real/sintética, atualização de regras, shadow DOM, reserva de abas e preservação de abas fixadas. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node.
+A suíte Node tem 14 testes. As funções de limpeza, cookies, autoplay e abas também foram verificadas em um perfil temporário do Edge. Na versão 1.2.0, passaram ainda os testes offline da Nova guia real, editor, cinco provedores disponíveis, notas, imagem própria, persistência, importação/exportação, preservação dos dados durante a limpeza e deduplicação da página integrada. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node. O funcionamento ao vivo dos serviços externos não foi validado por esses testes offline.
 
 O fechamento nativo pelo X e a recuperação após encerrar o processo ainda precisam ser conferidos no Helium. O ambiente Edge headless usado nos testes não fechou a janela por `windows.remove()`. Não há garantia de concluir a limpeza antes do encerramento do navegador.
 
@@ -83,3 +92,5 @@ O fechamento nativo pelo X e a recuperação após encerrar o processo ainda pre
 O worker de limpeza e as traduções foram adaptados da [Auto Clear History on Exit 2.0.9](https://chromewebstore.google.com/detail/auto-clear-history-on-exi/hfdaikgklefacppkadgkncadaoehnlla), de Kuuloa.
 
 As funções de autoplay e proteção da última aba foram reimplementadas após a análise de [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib) e [Don't Close Window With Last Tab](https://chromewebstore.google.com/detail/dont-close-window-with-last/dlnpfhfhmkiebpnlllpehlmklgdggbhn). Este projeto é independente e não é uma versão oficial dessas extensões.
+
+A página Nova guia incorpora [Tabliss 2.6.0](https://github.com/joelshepherd/tabliss/tree/2.6.0), de Joël Shepherd e colaboradores, com licença GPL-3.0, avisos de dependências e código-fonte incluídos. As modificações da integração são identificadas em `newtab/MODIFICATIONS.md`; esta não é uma publicação oficial do Tabliss.

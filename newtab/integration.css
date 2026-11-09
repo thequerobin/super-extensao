@@ -1,0 +1,6 @@
+html,body {background:#172039;}
+#super-settings {position:fixed;top:22px;right:24px;z-index:10;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #ffffff30;border-radius:12px;background:#1118279c;backdrop-filter:blur(12px);color:#fff;font:500 12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 20px #0002;}
+#super-settings:hover {background:#111827d9;}
+#super-settings:focus-visible {outline:2px solid #b49aff;outline-offset:4px;}
+#super-settings img {display:block;}
+@media(max-width:600px) {#super-settings {top:14px;right:14px;}#super-settings span {display:none;}}

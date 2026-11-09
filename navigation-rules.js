@@ -35,8 +35,16 @@
   function tabSettings(value = {}) {
     return {enabled:value?.enabled !== false, scope:["last","first","every"].includes(value?.scope) ? value.scope : "last", singleNewTab:value?.singleNewTab === true, newTabLast:value?.singleNewTab === true && value?.newTabLast === true};
   }
-  function isNewTab(tab) {
-    return /^(chrome|edge|helium|brave):\/\/newtab\/?(?:[?#].*)?$/u.test(tab?.pendingUrl || tab?.url || "");
+  function isNewTab(tab, dashboardUrl) {
+    const value = tab?.pendingUrl || tab?.url || "";
+    if (/^(chrome|edge|helium|brave):\/\/newtab\/?(?:[?#].*)?$/u.test(value)) return true;
+    if (dashboardUrl) {
+      try {
+        const current = new URL(value), dashboard = new URL(dashboardUrl);
+        return current.protocol === dashboard.protocol && current.host === dashboard.host && current.pathname === dashboard.pathname;
+      } catch {}
+    }
+    return false;
   }
   function protectsWindow(settings, windowId, firstId, windowCount) {
     return settings.enabled && (settings.scope === "every" || windowCount === 1 || (settings.scope === "first" && windowId === firstId));

@@ -7,6 +7,7 @@
   let closingWindows = new Set();
   const STATE_KEY = "tabGuardSession";
   const spareUrl = chrome.runtime.getURL("spare-tab.html");
+  const dashboardUrl = chrome.runtime.getURL("newtab/index.html");
   async function reconcile() {
     const data = await chrome.storage.local.get({tabGuard:SuperTools.TAB_DEFAULTS});
     const settings = SuperTools.tabSettings(data.tabGuard);
@@ -53,7 +54,7 @@
         }
       }
       if (!settings.enabled || !settings.singleNewTab) continue;
-      const blanks = tabs.filter(tab => !tab.pinned && !isOwned(tab) && SuperTools.isNewTab(tab));
+      const blanks = tabs.filter(tab => !tab.pinned && !isOwned(tab) && SuperTools.isNewTab(tab, dashboardUrl));
       const keep = blanks.find(tab => tab.active) || blanks[blanks.length - 1];
       for (const blank of blanks) if (blank.id !== keep.id) {
         await chrome.tabs.remove(blank.id); tabs = tabs.filter(tab => tab.id !== blank.id);

@@ -121,3 +121,15 @@ test('regras de autoplay priorizam subdomínios específicos e respeitam desliga
   assert.equal(S.isNewTab({url:'https://example.com/newtab/'}),false);
   assert.equal(S.isNewTab({url:'chrome://newtab/'}),true);
 });
+test('Nova guia personalizada é reconhecida sem confundir reservas ou páginas de outra extensão', () => {
+  const ctx=vm.createContext({URL});
+  vm.runInContext(fs.readFileSync(path.join(base,'navigation-rules.js'),'utf8'),ctx);
+  const S=ctx.SuperTools;
+  const dashboard='chrome-extension://super/newtab/index.html';
+  assert.equal(S.isNewTab({url:dashboard},dashboard),true);
+  assert.equal(S.isNewTab({url:dashboard+'?custom=1#settings'},dashboard),true);
+  assert.equal(S.isNewTab({url:'chrome-extension://super/spare-tab.html'},dashboard),false);
+  assert.equal(S.isNewTab({url:'chrome-extension://other/newtab/index.html'},dashboard),false);
+  assert.equal(S.isNewTab({url:'https://example.com/newtab/index.html'},dashboard),false);
+  assert.equal(S.isNewTab({url:dashboard,pendingUrl:'https://example.com'},dashboard),false);
+});

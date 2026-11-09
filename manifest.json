@@ -1,19 +1,75 @@
 {
   "manifest_version": 3,
   "name": "Super Extensão",
-  "version": "1.1.1",
-  "description": "Limpeza ao sair, exceções de cookies, bloqueio de autoplay e proteção da última aba.",
+  "version": "1.2.0",
+  "description": "Nova guia Tabliss completa, limpeza ao sair, exceções de cookies, autoplay e proteção da última aba.",
   "minimum_chrome_version": "116",
   "default_locale": "pt_BR",
-  "permissions": ["browsingData", "storage", "alarms", "notifications", "background", "tabs"],
-  "host_permissions": ["http://*/*", "https://*/*"],
-  "optional_permissions": ["bookmarks"],
-  "background": {"service_worker": "background.js"},
-  "action": {"default_title": "Super Extensão", "default_popup": "popup.html", "default_icon": {"16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png"}},
+  "permissions": [
+    "browsingData",
+    "storage",
+    "alarms",
+    "notifications",
+    "background",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "optional_permissions": [
+    "bookmarks"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Super Extensão",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "content_scripts": [
-    {"matches": ["http://*/*", "https://*/*"], "js": ["autoplay-main.js"], "run_at": "document_start", "all_frames": true, "match_about_blank": true, "world": "MAIN"},
-    {"matches": ["http://*/*", "https://*/*"], "js": ["navigation-rules.js", "autoplay-bridge.js"], "run_at": "document_start", "all_frames": true, "match_about_blank": true, "world": "ISOLATED"}
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "autoplay-main.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "navigation-rules.js",
+        "autoplay-bridge.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "world": "ISOLATED"
+    }
   ],
   "options_page": "popup.html",
-  "icons": {"16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png"}
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab/index.html"
+  }
 }
