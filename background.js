@@ -533,3 +533,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     chrome.action.setBadgeText({ text: "" });
   }
 });
+
+// Motor de sincronizacao isolado em superSync: e super-sync.
+importScripts("sync/js/background-script.js");

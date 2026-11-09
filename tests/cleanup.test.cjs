@@ -37,7 +37,7 @@ function worker(initial = {}) {
   const context = vm.createContext({chrome, URL, console, setTimeout:() => 0, crypto:require('node:crypto').webcrypto});
   // This suite isolates the existing cleanup worker; tab protection is covered
   // by the real-browser integration suite.
-  context.importScripts = (...files) => { for (const file of files) if (file !== 'tab-guard.js') vm.runInContext(fs.readFileSync(path.join(base, file), 'utf8'), context); };
+  context.importScripts = (...files) => { for (const file of files) if (file !== 'tab-guard.js' && !file.startsWith('sync/')) vm.runInContext(fs.readFileSync(path.join(base, file), 'utf8'), context); };
   vm.runInContext(fs.readFileSync(path.join(base, 'background.js'), 'utf8'), context);
   return {state, calls, listeners, context};
 }
@@ -97,10 +97,11 @@ test('snapshot manual inválido retorna erro ao popup', async () => {
   const response = await new Promise(resolve => w.listeners.message({action:'clearNow', settings:{excludedSites:['*.example.com']}}, {}, resolve));
   assert.equal(response.ok, false); assert.equal(w.calls.length, 0);
 });
-test('manifest usa identidade nova e favoritos opcionais', () => {
+test('manifest usa identidade nova e permissões da sincronização', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(base, 'manifest.json'), 'utf8'));
   assert.equal(manifest.manifest_version, 3); assert.equal(manifest.key, undefined); assert.equal(manifest.update_url, undefined);
-  assert.deepEqual(manifest.optional_permissions, ['bookmarks']);
+  assert.deepEqual(manifest.optional_permissions, ['history']);
+  for(const permission of ['bookmarks','identity','unlimitedStorage','tabGroups']) assert.ok(manifest.permissions.includes(permission));
   assert.deepEqual(manifest.host_permissions, ['http://*/*','https://*/*']);
   for (const file of ['background.js','popup.html','rules.js','popup.js','popup.css', ...Object.values(manifest.icons)]) assert.ok(fs.existsSync(path.join(base,file)), file);
 });

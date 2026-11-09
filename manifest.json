@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Super Extensão",
-  "version": "1.3.0",
-  "description": "Personalize sua nova guia, controle a reprodução automática, proteja a última aba e limpe os dados ao sair.",
+  "version": "1.4.0",
+  "description": "Personalize sua nova guia, sincronize favoritos, controle a reprodução automática e limpe os dados ao sair.",
   "minimum_chrome_version": "116",
   "default_locale": "pt_BR",
   "permissions": [
@@ -11,14 +11,18 @@
     "alarms",
     "notifications",
     "background",
-    "tabs"
+    "tabs",
+    "bookmarks",
+    "unlimitedStorage",
+    "tabGroups",
+    "identity"
   ],
   "host_permissions": [
     "http://*/*",
     "https://*/*"
   ],
   "optional_permissions": [
-    "bookmarks"
+    "history"
   ],
   "background": {
     "service_worker": "background.js"

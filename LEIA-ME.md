@@ -1,4 +1,4 @@
-# Super Extensão 1.3.0
+# Super Extensão 1.4.0
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
@@ -12,6 +12,7 @@ Verificado em 9 de novembro de 2026:
 | AutoplayStopper (MV3) | `gcendpekmacfohmhhkbhejjfbepkkkib` | [kenijo/AutoplayStopperMV3](https://github.com/kenijo/AutoplayStopperMV3) |
 | Don't Close Window With Last Tab | `dlnpfhfhmkiebpnlllpehlmklgdggbhn` | [moneytoo/DontCloseWindowWithLastTab](https://github.com/moneytoo/DontCloseWindowWithLastTab) |
 | Tabliss | `hipekcciheckooncpjeljhnekcoolahp` | [joelshepherd/tabliss](https://github.com/joelshepherd/tabliss) — versão integrada: 2.6.0 |
+| Floccus | `fnaicdffflnofjppbagibeoednhnbjhg` | [floccusaddon/floccus](https://github.com/floccusaddon/floccus) — versão integrada: 5.13.0 (MPL-2.0) |
 
 A ausência de um repositório confirmado para a extensão de limpeza não significa que ele não exista; apenas não foi localizado na verificação acima.
 
@@ -49,7 +50,7 @@ A identidade desta versão é diferente da original: não há chave da loja nem 
 
 - Tema escuro por padrão, com opções Claro e Sistema. A preferência é salva localmente.
 - Uma única lista de exceções, **somente para cookies**, conforme o escopo final solicitado.
-- Importação manual dos domínios de uma pasta de favoritos, com escolha de subpastas, prévia e remoção de duplicados. O acesso aos favoritos é opcional e só é solicitado ao clicar em **Escolher pasta de favoritos**.
+- Importação manual dos domínios de uma pasta de favoritos, com escolha de subpastas, prévia e remoção de duplicados. A importação é manual; a permissão de favoritos também atende ao módulo de sincronização.
 - Interface em português, relatório da última limpeza, modos Seguro/Padrão/Forte, pausa, retomada e limpeza manual.
 - Sem pedidos de avaliação do desenvolvedor original.
 - Aba **Autoplay**: liga/desliga, padrão global, regra para o site atual, regras por domínio/subdomínio, busca, exportação e importação JSON. Aceita os arquivos de regras do AutoplayStopper original e listas antigas de domínios permitidos. A importação mescla regras, sem apagar outras; em caso de mesmo domínio, a regra importada prevalece.
@@ -75,7 +76,7 @@ A API protege cookies para o domínio registrável inteiro. Por exemplo, adicion
 
 ## Permissões e privacidade
 
-`browsingData` executa a limpeza; `storage` guarda preferências e relatórios; `alarms` controla pausas; `notifications` informa resultados; `background` mantém o comportamento de execução em segundo plano quando permitido pelo navegador. `tabs` permite identificar o site atual e gerenciar abas. Os scripts em HTTP/HTTPS controlam reprodução de vídeo e áudio, inclusive em quadros e shadow DOM. `bookmarks` continua sendo uma permissão opcional para a importação iniciada pelo usuário. As rotinas de limpeza, autoplay e abas não enviam dados a servidores nem modificam favoritos. Provedores e widgets online da Nova guia fazem requisições aos serviços escolhidos, como Unsplash, GIPHY e serviços de clima, e dependem da disponibilidade desses serviços. A sincronização da Nova guia depende do suporte do navegador; imagens próprias não sincronizam.
+`browsingData` executa a limpeza; `storage` guarda preferências e relatórios; `alarms` controla pausas; `notifications` informa resultados; `background` mantém o comportamento de execução em segundo plano quando permitido pelo navegador. `tabs` permite identificar o site atual e gerenciar abas. Os scripts em HTTP/HTTPS controlam reprodução de vídeo e áudio, inclusive em quadros e shadow DOM. `bookmarks` permite a sincronização e a importação manual de domínios. As rotinas de limpeza, autoplay e abas não enviam dados a servidores nem modificam favoritos. Provedores e widgets online da Nova guia fazem requisições aos serviços escolhidos, como Unsplash, GIPHY e serviços de clima, e dependem da disponibilidade desses serviços. A sincronização da Nova guia depende do suporte do navegador; imagens próprias não sincronizam.
 
 ## Autoplay e proteção de abas
 
@@ -89,7 +90,7 @@ Para realmente fechar o navegador, use o X da janela ou a opção Sair. A prote�
 
 Passaram 16 testes automatizados isolados para limpeza, domínios/favoritos, recuperação de falhas, regras de autoplay, transições de abas e integridade dos catálogos bilíngues. A revisão de navegador também confirmou migração de idioma, alternância PT-BR/English, controles dos widgets e preservação de notas escritas pelo usuário. O teste de interface utiliza favoritos fictícios e APIs simuladas e confere temas, navegação, domínios, favoritos, limpeza, autoplay e controles de abas.
 
-A extensão também foi carregada no Edge com um perfil temporário novo: o popup abriu sem erros, a permissão de favoritos permaneceu opcional e a API real preservou um cookie de teste em `example.com`, apagando outro em `example.org`. Nenhum dado do perfil do usuário foi apagado durante o desenvolvimento. As imagens de prévia fornecidas foram geradas com dados fictícios.
+A extensão também foi carregada no Edge com um perfil temporário novo: o popup abriu sem erros, a permissão de favoritos era opcional antes do módulo de sincronização e a API real preservou um cookie de teste em `example.com`, apagando outro em `example.org`. Nenhum dado do perfil do usuário foi apagado durante o desenvolvimento. As imagens de prévia fornecidas foram geradas com dados fictícios.
 
 No navegador isolado, passaram ainda os testes reais de autoplay nativo e por script, clique real/sintético, regras e liga/desliga em tempo real, mídia em shadow DOM, reserva ao fechar a última aba, retirada da reserva, Nova guia única/última posição e preservação de abas fixadas pelo usuário. O fechamento nativo de janela não pôde ser validado no Edge headless deste ambiente: `windows.remove()` não fechou a janela de teste. A lógica dos eventos de fechamento foi validada isoladamente; confirme o X da janela no Helium após instalar.
 
@@ -98,3 +99,20 @@ O teste final de encerramento e reabertura no Helium depende do comportamento do
 Também passaram os testes reais do dashboard em um perfil temporário do Edge com rede externa bloqueada: abertura por `chrome://newtab/`, editor completo, cinco provedores disponíveis, notas, upload e persistência de imagem, importação/exportação e integração com limpeza e organização de abas. O uso ao vivo de provedores e widgets externos não foi validado nesses testes offline.
 
 Referências das APIs: https://developer.chrome.com/docs/extensions/reference/api/browsingData e https://developer.chrome.com/docs/extensions/reference/api/bookmarks.
+
+## Sincronização de favoritos
+
+Abra **Sincronização de favoritos ↗** no painel. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+
+Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
+
+**Google Drive e Dropbox:** abra o bloco de conexão no topo e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
+
+O idioma acompanha a preferência PT-BR/inglês da nova guia e o tema acompanha o painel principal. O módulo usa chaves `superSync:` e alarmes/mensagens `super-sync`, sem substituir regras de autoplay, exceções de cookies, preferências da nova guia ou o ícone principal.
+
+As permissões adicionais são `bookmarks` (ler e modificar as pastas escolhidas), `unlimitedStorage` (cache de sincronização), `tabGroups` (sincronização opcional de abas) e `identity` (login OAuth). `history` é opcional e usado somente se o usuário ativar contagem de visitas em um conector compatível. O acesso aos favoritos passa a ser obrigatório para o módulo; importar domínios para exceções continua sendo uma ação manual independente.
+
+Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
+
+
+Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.

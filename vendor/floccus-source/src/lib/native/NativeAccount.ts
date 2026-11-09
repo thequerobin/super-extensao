@@ -1,0 +1,210 @@
+import NativeAccountStorage from './NativeAccountStorage'
+import NativeMappingsStore from './NativeMappingsStore'
+import NativeTree from './NativeTree'
+import AdapterFactory from '../AdapterFactory'
+import Account from '../Account'
+import { IAccountData } from '../interfaces/AccountStorage'
+import {
+  ClientsideAdditionFailsafeError, ClientsideDeletionFailsafeError,
+  CreateBookmarkError,
+  FloccusError, GitPushError,
+  HttpError,
+  InconsistentBookmarksExistenceError, InvalidUrlError, S3BucketNotFoundError, LockFileError,
+  MissingItemOrderError,
+  ParseResponseError, ServersideAdditionFailsafeError, ServersideDeletionFailsafeError, UnexpectedFolderPathError,
+  UnexpectedServerFolder,
+  DropboxAmbiguousFileError,
+  UnknownFolderItemOrderError, UpdateBookmarkError
+} from '../../errors/Error'
+import Logger from '../Logger'
+import { i18n } from './I18n'
+
+export default class NativeAccount extends Account {
+  static async get(id:string):Promise<Account> {
+    const storage = new NativeAccountStorage(id)
+    const data = await storage.getAccountData(null)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // The tree hydrates itself when something actually needs it in memory:
+    // the UI browses the database directly (NativeTreeQuery), so reading every
+    // row here would be wasted work on most paths, getAllAccounts() included.
+    const tree = new NativeTree(storage)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new NativeAccount(id, storage, await AdapterFactory.factory(data), tree)
+  }
+
+  static async create(data: IAccountData): Promise<Account> {
+    const id = '' + Date.now() + Math.random()
+    const adapter = await AdapterFactory.factory(data)
+    const storage = new NativeAccountStorage(id)
+
+    await storage.setAccountData(data, null)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const tree = new NativeTree(storage)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new NativeAccount(id, storage, adapter, tree)
+  }
+
+  async init(): Promise<void> {
+    console.log('initializing account ' + this.id)
+
+    await this.storage.initMappings()
+    await this.storage.initCache()
+  }
+
+  async isInitialized(): Promise<boolean> {
+    try {
+      return await new NativeMappingsStore(this.storage.accountId).isInitialized()
+    } catch (e) {
+      console.log('Apparently not initialized, because:', e)
+      return false
+    }
+  }
+
+  async sync(...args) {
+    let localResource
+    try {
+      localResource = await this.getResource()
+      if (localResource instanceof NativeTree) {
+        await localResource.saveImmediately()
+      }
+    } catch (e) {
+      Logger.log(
+        'Failed to persist unsaved changes from NativeTree before sync:',
+        e
+      )
+      Logger.log('Continuing anyway.')
+    }
+    await super.sync(...args)
+    if (localResource instanceof NativeTree) {
+      await localResource.saveImmediately()
+    }
+  }
+
+  async updateFromStorage(): Promise<void> {
+    // empty
+  }
+
+  static async stringifyError(er: any): Promise<string> {
+    if (er instanceof UnknownFolderItemOrderError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.item,
+      ])
+    }
+    if (er instanceof MissingItemOrderError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.item,
+      ])
+    }
+    if (er instanceof HttpError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.status,
+        er.method,
+        er.statusMessage,
+      ])
+    }
+    if (er instanceof ParseResponseError) {
+      return (
+        i18n.getMessage('Error' + String(er.code).padStart(3, '0')) +
+        '\n' +
+        er.response
+      )
+    }
+    if (er instanceof InconsistentBookmarksExistenceError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.folder,
+        er.bookmark,
+      ])
+    }
+    if (er instanceof S3BucketNotFoundError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [er.bucket])
+    }
+    if (er instanceof LockFileError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.status,
+        er.lockFile,
+      ])
+    }
+    if (er instanceof ServersideDeletionFailsafeError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.percent,
+      ])
+    }
+    if (er instanceof ServersideAdditionFailsafeError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.percent,
+      ])
+    }
+    if (er instanceof ClientsideDeletionFailsafeError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.percent,
+      ])
+    }
+    if (er instanceof ClientsideAdditionFailsafeError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.percent,
+      ])
+    }
+    if (er instanceof CreateBookmarkError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.bookmark.inspect(),
+      ])
+    }
+    if (er instanceof UpdateBookmarkError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.bookmark.inspect(),
+      ])
+    }
+    if (er instanceof GitPushError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.errorMessage,
+      ])
+    }
+    if (er instanceof UnexpectedFolderPathError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.originalPath,
+        er.newPath,
+      ])
+    }
+    if (er instanceof InvalidUrlError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.url,
+      ])
+    }
+    if (er instanceof UnexpectedServerFolder) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.serverFolder,
+      ])
+    }
+    if (er instanceof DropboxAmbiguousFileError) {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'), [
+        er.paths.join(', '),
+      ])
+    }
+    if (er instanceof FloccusError && typeof er.code !== 'undefined') {
+      return i18n.getMessage('Error' + String(er.code).padStart(3, '0'))
+    }
+    if (er.list) {
+      return (
+        await Promise.all(
+          er.list.map((e) => {
+            Logger.log(e)
+            return this.stringifyError(e)
+          })
+        )
+      ).join('\n')
+    }
+    return er.message
+  }
+
+  static async getAllAccounts(): Promise<Account[]> {
+    return Promise.all(
+      (await NativeAccountStorage.getAllAccounts()).map((accountId) =>
+        Account.get(accountId)
+      )
+    )
+  }
+}

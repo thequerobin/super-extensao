@@ -2,7 +2,7 @@
 
 <img src="icons/icon128.png" width="88" height="88" alt="Ícone da Super Extensão">
 
-Uma extensão para Helium e navegadores Chromium que reúne a Nova guia completa do Tabliss, limpeza ao sair, controle de reprodução automática e proteção da última aba. Interface em português do Brasil, com temas escuro, claro e do sistema; o dashboard oferece somente **PT-BR e inglês**.
+Uma extensão para Helium e navegadores Chromium que reúne a Nova guia personalizada, sincronização de favoritos, limpeza ao sair, controle de reprodução automática e proteção da última aba. Interface em português do Brasil, com temas escuro, claro e do sistema; o dashboard oferece somente **PT-BR e inglês**.
 
 ## Recursos
 
@@ -71,7 +71,9 @@ A proteção inicia ativada, para a última janela normal restante. Uma aba de r
 | `background` | Manter o comportamento em segundo plano quando permitido pelo navegador. |
 | `tabs` | Identificar o site atual e gerenciar abas. |
 | HTTP/HTTPS e content scripts | Controlar mídia nas páginas e seus quadros. |
-| `bookmarks` — opcional | Importar uma pasta de favoritos por solicitação do usuário. |
+| `bookmarks` | Sincronizar as pastas escolhidas e importar domínios para exceções. |
+| `unlimitedStorage`, `tabGroups`, `identity` | Cache de sincronização, grupos de abas e login OAuth. |
+| `history` — opcional | Contagem de visitas em conectores compatíveis, quando ativada. |
 
 As rotinas de limpeza, autoplay e abas não enviam dados a servidores e não modificam favoritos. Os scripts das páginas recebem somente o estado de bloqueio de autoplay; não recebem listas de cookies, favoritos nem relatórios de limpeza. Os provedores e widgets online do dashboard fazem requisições aos serviços escolhidos, como Unsplash, GIPHY e serviços de clima. A sincronização de suas preferências depende do navegador; imagens próprias não sincronizam. O envio de erros do Tabliss ao Sentry foi desativado.
 
@@ -85,7 +87,7 @@ npm test
 
 Não é necessário executar `npm install`: os testes usam módulos nativos do Node. A suíte cobre limpeza, exceções, favoritos, pausa, falhas e recuperação, regras de autoplay e transições de abas, com APIs de navegador simuladas.
 
-A suíte Node tem 16 testes. As funções de limpeza, cookies, autoplay e abas também foram verificadas em um perfil temporário do Edge. Passaram ainda os testes offline da Nova guia real, editor, provedores, notas, imagem própria, importação/exportação, limpeza e organização de abas. Na versão 1.3.0, foram conferidos a migração de português de Portugal para PT-BR, os dois únicos idiomas disponíveis, a troca de idioma em tempo real e os controles dos widgets, sem alterar notas do usuário. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node. O funcionamento ao vivo dos serviços externos não foi validado por esses testes offline.
+A suíte Node tem 19 testes, incluindo isolamento do armazenamento da sincronização e integridade das traduções. As funções de limpeza, cookies, autoplay e abas também foram verificadas em um perfil temporário do Edge. Passaram ainda os testes offline da Nova guia real, editor, provedores, notas, imagem própria, importação/exportação, limpeza e organização de abas. Na versão 1.3.0, foram conferidos a migração de português de Portugal para PT-BR, os dois únicos idiomas disponíveis, a troca de idioma em tempo real e os controles dos widgets, sem alterar notas do usuário. Os testes de navegador executados durante o desenvolvimento não estão incluídos nesta suíte Node. O funcionamento ao vivo dos serviços externos não foi validado por esses testes offline.
 
 O fechamento nativo pelo X e a recuperação após encerrar o processo ainda precisam ser conferidos no Helium. O ambiente Edge headless usado nos testes não fechou a janela por `windows.remove()`. Não há garantia de concluir a limpeza antes do encerramento do navegador.
 
@@ -101,6 +103,7 @@ Verificado em 9 de novembro de 2026:
 | AutoplayStopper (MV3) | `gcendpekmacfohmhhkbhejjfbepkkkib` | [kenijo/AutoplayStopperMV3](https://github.com/kenijo/AutoplayStopperMV3) |
 | Don't Close Window With Last Tab | `dlnpfhfhmkiebpnlllpehlmklgdggbhn` | [moneytoo/DontCloseWindowWithLastTab](https://github.com/moneytoo/DontCloseWindowWithLastTab) |
 | Tabliss | `hipekcciheckooncpjeljhnekcoolahp` | [joelshepherd/tabliss](https://github.com/joelshepherd/tabliss) — versão integrada: 2.6.0 |
+| Floccus | `fnaicdffflnofjppbagibeoednhnbjhg` | [floccusaddon/floccus](https://github.com/floccusaddon/floccus) — versão integrada: 5.13.0 (MPL-2.0) |
 
 A ausência de um repositório confirmado para a extensão de limpeza não significa que ele não exista; apenas não foi localizado na verificação acima.
 
@@ -110,3 +113,19 @@ O worker de limpeza e as traduções foram adaptados da [Auto Clear History on E
 As funções de autoplay e proteção da última aba foram reimplementadas após a análise de [AutoplayStopper (MV3)](https://chromewebstore.google.com/detail/autoplaystopper-mv3/gcendpekmacfohmhhkbhejjfbepkkkib) e [Don't Close Window With Last Tab](https://chromewebstore.google.com/detail/dont-close-window-with-last/dlnpfhfhmkiebpnlllpehlmklgdggbhn). Este projeto é independente e não é uma versão oficial dessas extensões.
 
 A página Nova guia incorpora [Tabliss 2.6.0](https://github.com/joelshepherd/tabliss/tree/2.6.0), de Joël Shepherd e colaboradores, com licença GPL-3.0, avisos de dependências e código-fonte incluídos. As modificações da integração são identificadas em `newtab/MODIFICATIONS.md`; esta não é uma publicação oficial do Tabliss.
+
+## Sincronização de favoritos
+
+Abra **Sincronização de favoritos ↗** no painel. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+
+Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
+
+**Google Drive e Dropbox:** abra o bloco de conexão no topo e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
+
+O idioma acompanha a preferência PT-BR/inglês da nova guia e o tema acompanha o painel principal. O módulo usa chaves `superSync:` e alarmes/mensagens `super-sync`, sem substituir regras de autoplay, exceções de cookies, preferências da nova guia ou o ícone principal.
+
+As permissões adicionais são `bookmarks` (ler e modificar as pastas escolhidas), `unlimitedStorage` (cache de sincronização), `tabGroups` (sincronização opcional de abas) e `identity` (login OAuth). `history` é opcional e usado somente se o usuário ativar contagem de visitas em um conector compatível. O acesso aos favoritos passa a ser obrigatório para o módulo; importar domínios para exceções continua sendo uma ação manual independente.
+
+Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
+
+Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.

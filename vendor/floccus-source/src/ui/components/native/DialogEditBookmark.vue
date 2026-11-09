@@ -1,0 +1,183 @@
+<template>
+  <v-dialog
+    v-model="display"
+    max-width="500px">
+    <v-card>
+      <v-card-title
+        class="text-h5"
+        role="heading"
+        aria-level="2">
+        {{ isNew? t('LabelAddbookmark') : t('LabelEditbookmark') }}
+      </v-card-title>
+      <v-card-text>
+        <v-text-field
+          v-model="temporaryTitle"
+          :label="t('LabelTitle')"
+          hide-details />
+        <v-text-field
+          v-model="temporaryUrl"
+          :error="Boolean(urlError)"
+          :error-messages="urlError"
+          :label="t('LabelLink')" />
+        <v-combobox
+          v-if="supportsTags"
+          v-model="temporaryTags"
+          :items="tagSuggestions"
+          :label="t('LabelTags')"
+          :hint="t('DescriptionTags')"
+          persistent-hint
+          multiple
+          chips
+          deletable-chips
+          small-chips
+          hide-selected
+          prepend-inner-icon="mdi-tag-multiple" />
+        <v-text-field
+          v-model="parentTitle"
+          readonly
+          :label="t('LabelParentfolder')"
+          @click="onTriggerFolderChooser">
+          <template #append>
+            <v-icon
+              color="blue darken-1"
+              aria-hidden="true"
+              @click="onTriggerFolderChooser">
+              mdi-folder
+            </v-icon>
+          </template>
+        </v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="$emit('update:display', false)">
+          {{ t('LabelCancel') }}
+        </v-btn>
+        <v-btn
+          color="blue darken-1"
+          text
+          @click="onSave">
+          {{ t('LabelSave') }}
+        </v-btn>
+        <v-spacer />
+      </v-card-actions>
+    </v-card>
+    <DialogChooseFolder
+      v-model="temporaryParent"
+      :display.sync="displayFolderChooser"
+      :folder-tree="folderTree" />
+  </v-dialog>
+</template>
+
+<script>
+import DialogChooseFolder from './DialogChooseFolder'
+export default {
+  name: 'DialogEditBookmark',
+  components: { DialogChooseFolder },
+  props: {
+    bookmark: {
+      type: Object,
+      default: () => ({})
+    },
+    display: {
+      type: Boolean,
+    },
+    isNew: {
+      type: Boolean,
+    },
+    folderTree: {
+      type: Object,
+      required: true,
+    },
+    parentFolder: {
+      type: Number,
+      default: -1
+    },
+    supportsTags: {
+      type: Boolean,
+      default: false,
+    },
+    tagSuggestions: {
+      type: Array,
+      default: () => [],
+    }
+  },
+  data() {
+    return {
+      temporaryTitle: '',
+      temporaryUrl: '',
+      urlError: null,
+      temporaryParent: null,
+      temporaryTags: [],
+      displayFolderChooser: false,
+    }
+  },
+  computed: {
+    parentTitle() {
+      if (this.temporaryParent === null) {
+        return ''
+      }
+      const folder = this.folderTree.findFolder(this.temporaryParent)
+      return folder ? folder.title || this.t('LabelUntitledfolder') : ''
+    }
+  },
+  watch: {
+    temporaryUrl() {
+      this.urlError = null
+      try {
+        // eslint-disable-next-line
+        new URL(this.temporaryUrl)
+      } catch (e) {
+        this.urlError = 'Invalid URL'
+      }
+    },
+    display() {
+      if (!this.display) {
+        this.displayFolderChooser = false
+      }
+    }
+  },
+  mounted() {
+    this.temporaryTitle = this.bookmark.title || ''
+    this.temporaryUrl = this.bookmark.url || ''
+    this.temporaryTags = [...(this.bookmark.tags || [])]
+    const parentFolder = this.folderTree.findFolder(this.bookmark.parentId) ||
+        this.folderTree.findFolder(this.parentFolder) ||
+        this.folderTree.findFolder(this.$store.state.lastFolders[this.$route.params.accountId]) ||
+        this.folderTree.findFolder(this.folderTree.id)
+    this.temporaryParent = parentFolder.id
+  },
+  methods: {
+    onSave() {
+      if (!this.temporaryUrl || this.urlError) {
+        return
+      }
+      if (!this.folderTree.findFolder(this.temporaryParent)) {
+        return
+      }
+      this.$emit('save', {
+        title: this.temporaryTitle,
+        url: this.temporaryUrl,
+        parentId: this.temporaryParent,
+        // Leave tags alone entirely if this account can't sync them, so we
+        // don't clear tags that some other client set.
+        ...(this.supportsTags && {
+          tags: this.temporaryTags
+            .map((tag) => String(tag).trim())
+            .filter(Boolean),
+        }),
+      })
+      this.$emit('update:display', false)
+    },
+    onTriggerFolderChooser() {
+      this.displayFolderChooser = true
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

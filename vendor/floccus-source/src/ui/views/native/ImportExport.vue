@@ -1,0 +1,39 @@
+<template>
+  <div class="native-scroll-container">
+    <Drawer :visible.sync="drawer" />
+    <v-app-bar
+      fixed
+      app>
+      <v-app-bar-nav-icon
+        class="me-2 ms-n2"
+        @click="drawer = !drawer" />
+      <v-app-bar-title
+        role="heading"
+        aria-level="1">
+        {{ t('LabelImportExport') }}
+      </v-app-bar-title>
+    </v-app-bar>
+    <v-main>
+      <ImportExportContent />
+    </v-main>
+  </div>
+</template>
+
+<script>
+import Drawer from '../../components/native/Drawer'
+import ImportExportContent from '../ImportExport'
+
+export default {
+  name: 'ImportExport',
+  components: { Drawer, ImportExportContent },
+  data() {
+    return {
+      drawer: false,
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

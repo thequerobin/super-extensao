@@ -1,0 +1,502 @@
+import Account from '../../../lib/Account'
+import { actions, mutations } from '../definitions'
+import Logger from '../../../lib/Logger'
+import AdapterFactory from '../../../lib/AdapterFactory'
+import Controller from '../../../lib/Controller'
+import { i18n } from '../../../lib/native/I18n'
+import { CapacitorHttp as Http } from '@capacitor/core'
+import { Share } from '@capacitor/share'
+import Html from '../../../lib/serializers/Html'
+import { Bookmark, Folder } from '../../../lib/Tree'
+import { Browser } from '@capacitor/browser'
+import { App } from '@capacitor/app'
+import { Preferences } from '@capacitor/preferences'
+import NativeAccountStorage from '../../../lib/native/NativeAccountStorage'
+import NativeTreeQuery from '../../../lib/native/NativeTreeQuery'
+
+/**
+ * The folder hierarchy of an account, straight from the database.
+ *
+ * An account that has never been opened has no rows yet: hydrating its tree
+ * once seeds them (see NativeTree#load), and the query finds a root folder
+ * from then on.
+ */
+async function loadFolderTree(accountId) {
+  const query = new NativeTreeQuery(accountId)
+  const folderTree = await query.getFolderTree()
+  if (folderTree) {
+    return folderTree
+  }
+  const tree = await (await Account.get(accountId)).getResource()
+  await tree.getBookmarksTree()
+  await tree.save()
+  return query.getFolderTree()
+}
+
+/*
+ * A Nextcloud login flow (v2) has no way back into the app: we can only poll
+ * for the result while the browser is in front. Android freezes or kills our
+ * process in the meantime (#2393), so the flow is persisted and picked up
+ * again when the app comes back.
+ */
+const PENDING_LOGIN_FLOW_KEY = 'pendingLoginFlow'
+// Nextcloud expires login flow tokens after 20 minutes
+const LOGIN_FLOW_TTL = 20 * 60 * 1000
+
+async function getPendingLoginFlow() {
+  let flow = null
+  try {
+    const { value } = await Preferences.get({ key: PENDING_LOGIN_FLOW_KEY })
+    flow = value ? JSON.parse(value) : null
+  } catch (e) {
+    flow = null
+  }
+  if (flow && Date.now() - flow.startedAt < LOGIN_FLOW_TTL) {
+    return flow
+  }
+  if (flow) {
+    await clearPendingLoginFlow()
+  }
+  return null
+}
+
+function clearPendingLoginFlow() {
+  return Preferences.remove({ key: PENDING_LOGIN_FLOW_KEY })
+}
+
+let runningLoginFlow = null
+
+async function pollLoginFlow(commit, state, flow) {
+  // Poll right away when the user comes back instead of waiting for the next tick
+  let wake = null
+  const onReturn = () => wake && wake()
+  const listeners = await Promise.all([
+    App.addListener('resume', onReturn),
+    Browser.addListener('browserFinished', onReturn),
+  ])
+  let res
+  try {
+    do {
+      await new Promise(resolve => {
+        const timeout = setTimeout(resolve, 1000)
+        wake = () => {
+          clearTimeout(timeout)
+          resolve()
+        }
+      })
+      wake = null
+      if (Date.now() - flow.startedAt >= LOGIN_FLOW_TTL) {
+        res = { status: 404 }
+        break
+      }
+      try {
+        const data = new URLSearchParams()
+        data.set('token', flow.token)
+        res = await Http.request({
+          url: flow.endpoint,
+          method: 'POST',
+          data: data.toString(),
+          headers: {'Content-type': 'application/x-www-form-urlencoded'}
+        })
+      } catch (e) {
+        res = { status: 404 }
+      }
+    } while ((res.status === 404 || !res.data.appPassword) && state.loginFlow.isRunning)
+  } finally {
+    await Promise.all(listeners.map(listener => listener.remove()))
+    commit(mutations.SET_LOGIN_FLOW_STATE, false)
+    await clearPendingLoginFlow()
+  }
+  await Browser.close()
+  if (res.status !== 200 || !res.data.appPassword) {
+    throw new Error(i18n.getMessage('LabelLoginFlowError'))
+  }
+  return {username: res.data.loginName, password: res.data.appPassword}
+}
+
+function runLoginFlow(commit, state, flow) {
+  runningLoginFlow = pollLoginFlow(commit, state, flow).finally(() => {
+    runningLoginFlow = null
+  })
+  return runningLoginFlow
+}
+
+export const actionsDefinition = {
+  async [actions.LOAD_ACCOUNTS]({ commit, dispatch, state }) {
+    commit(mutations.LOADING_START, 'accounts')
+    const accountsArray = await Account.getAllAccounts()
+    const accounts = {}
+    await Promise.all(
+      accountsArray.map(async(acc) => {
+        accounts[acc.id] = {
+          data: acc.getData(),
+          id: acc.id,
+          label: acc.getLabel()
+        }
+      })
+    )
+    await commit(mutations.LOAD_ACCOUNTS, accounts)
+    const lastAccount = await NativeAccountStorage.getEntry('lastAccount', null)
+    if (lastAccount) await commit(mutations.SET_LAST_ACCOUNT, lastAccount)
+    const lastFolders = await NativeAccountStorage.getEntry('lastFolders', {})
+    await Promise.all(Object.entries(lastFolders).map(async([accountId, folderId]) => {
+      await commit(mutations.SET_LAST_FOLDER, {accountId, folderId})
+    }))
+    commit(mutations.LOADING_END, 'accounts')
+  },
+  /**
+   * Everything the UI needs to render the hierarchy. Bookmarks are not part of
+   * it -- they are queried per folder (LOAD_CHILDREN) and per search
+   * (SEARCH_ITEMS), so that browsing doesn't cost a copy of the whole tree.
+   */
+  async [actions.LOAD_FOLDERS]({ commit, dispatch, state }, id) {
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(id))
+    await dispatch(actions.LOAD_TAG_SUPPORT, id)
+    await dispatch(actions.SET_LAST_ACCOUNT, id)
+  },
+  async [actions.LOAD_CHILDREN]({ commit, dispatch, state }, { accountId, folderId }) {
+    return new NativeTreeQuery(accountId).getChildren(folderId)
+  },
+  async [actions.LOAD_TAGS]({ commit, dispatch, state }, { accountId, folderId = null }) {
+    return new NativeTreeQuery(accountId).getTags(folderId)
+  },
+  async [actions.SEARCH_ITEMS]({ commit, dispatch, state }, { accountId, query }) {
+    return new NativeTreeQuery(accountId).search(query)
+  },
+  async [actions.FIND_BOOKMARK_BY_URL]({ commit, dispatch, state }, { accountId, url }) {
+    return new NativeTreeQuery(accountId).findBookmarkByUrl(url)
+  },
+  async [actions.LOAD_TAG_SUPPORT]({ commit }, id) {
+    const account = await Account.get(id)
+    const [localTree, server] = [await account.getResource(), await account.getServer()]
+    // Both getCapabilities() implementations answer from local state, so this
+    // doesn't hit the network.
+    const [localCapabilities, serverCapabilities] = await Promise.all([
+      localTree.getCapabilities(),
+      server.getCapabilities(),
+    ])
+    await commit(mutations.SET_TAG_SUPPORT, {
+      accountId: id,
+      supportsTags: Boolean(localCapabilities.supportsTags && serverCapabilities.supportsTags),
+    })
+  },
+  /**
+   * On resume the database may have been written to while we were away, so
+   * re-read it. This is the one read path that still hydrates the in-memory
+   * tree, because that is what tells us whether anything changed.
+   */
+  async [actions.LOAD_FOLDERS_FROM_DISK]({ commit, dispatch, state }, id) {
+    const account = await Account.get(id)
+    if (account.syncing) {
+      return
+    }
+    const tree = await account.getResource()
+    const changed = await tree.load()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(id))
+    if (changed) {
+      await dispatch(actions.TRIGGER_SYNC, id)
+    }
+  },
+  async [actions.CREATE_BOOKMARK]({commit}, {accountId, bookmark}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.createBookmark(bookmark)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.CREATE_BOOKMARKS]({commit}, {accountId, bookmarks}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    for (const bookmark of bookmarks) {
+      await tree.createBookmark(bookmark)
+    }
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.EDIT_BOOKMARK]({commit}, {accountId, bookmark}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.updateBookmark(bookmark)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+  },
+  async [actions.COUNT_BOOKMARK_CLICK]({state}, {accountId, bookmark}) {
+    if (!state.accounts[accountId].data.clickCountEnabled) {
+      return
+    }
+    const account = await Account.get(accountId)
+    const tree = await account.getServer()
+    if (!tree.countClick) {
+      return
+    }
+    await tree.countClick(bookmark.url)
+  },
+  async [actions.DELETE_BOOKMARK]({commit}, {accountId, bookmark}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.removeBookmark(bookmark)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.SHARE_BOOKMARK]({commit}, bookmark) {
+    await Share.share({
+      title: bookmark.title,
+      url: bookmark.url,
+    })
+  },
+  async [actions.CREATE_FOLDER]({commit}, {accountId, folder}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.createFolder(folder)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.EDIT_FOLDER]({commit}, {accountId, folder}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.updateFolder(folder)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.DELETE_FOLDER]({commit}, {accountId, folder}) {
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await tree.removeFolder(folder)
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+    const controller = await Controller.getSingleton()
+    controller.scheduleSync(accountId, true)
+  },
+  async [actions.IMPORT_BOOKMARKS]({ commit }, {accountId, parentFolder, html}) {
+    const folder = Html.deserialize(html)
+    const account = await Account.get(accountId)
+    const tree = await account.getResource()
+    await Promise.all(folder.children.map(async child => {
+      child.parentId = parentFolder
+      if (child instanceof Bookmark) {
+        await tree.createBookmark(child)
+      }
+      if (child instanceof Folder) {
+        const folderId = await tree.createFolder(child)
+        await tree.bulkImportFolder(folderId, child)
+      }
+    }))
+    await tree.save()
+    await commit(mutations.LOAD_FOLDERS, await loadFolderTree(accountId))
+  },
+  async [actions.CREATE_ACCOUNT]({commit, dispatch, state}, data) {
+    const defaultData = await AdapterFactory.getDefaultValues(data.type)
+    const account = await Account.create({...defaultData, ...data})
+    await dispatch(actions.LOAD_ACCOUNTS)
+    return account.id
+  },
+  async [actions.IMPORT_ACCOUNTS]({commit, dispatch, state}, accounts) {
+    // OAuth profiles can be imported just like in the browser: Account.import
+    // drops their refresh token and the user is sent to the options to log in again.
+    const ids = await Account.import(accounts)
+    await dispatch(actions.LOAD_ACCOUNTS)
+    return ids
+  },
+  async [actions.EXPORT_ACCOUNTS]({commit, dispatch, state}, accountIds) {
+    const data = await Account.export(accountIds)
+    const blob = new Blob([JSON.stringify(data, null, '  ')], {
+      type: 'text/plain',
+      endings: 'native'
+    })
+    Logger.download('floccus.export.json', blob)
+  },
+  async [actions.DELETE_ACCOUNT]({commit, dispatch, state}, id) {
+    const account = await Account.get(id)
+    await account.delete()
+    commit(mutations.REMOVE_ACCOUNT, id)
+  },
+  async [actions.RESET_ACCOUNT]({commit, dispatch, state}, id) {
+    const account = await Account.get(id)
+    await account.storage.initCache()
+    await account.storage.initMappings()
+  },
+  async [actions.STORE_ACCOUNT]({ commit, dispatch, state }, { id,data }) {
+    const account = await Account.get(id)
+    const oldData = account.getData()
+    await account.setData(data)
+    if (oldData.localRoot !== data.localRoot) {
+      await account.init()
+    }
+    if (oldData.bookmark_file !== data.bookmark_file) {
+      await account.init()
+    }
+    if (oldData.bookmark_file_type !== data.bookmark_file_type) {
+      await account.init()
+    }
+    commit(mutations.STORE_ACCOUNT_DATA, {id, data})
+  },
+  async [actions.TRIGGER_SYNC]({ commit, dispatch, state }, accountId) {
+    const controller = await Controller.getSingleton()
+    controller.syncAccount(accountId)
+  },
+  async [actions.FORCE_SYNC]({ commit, dispatch, state }, accountId) {
+    const controller = await Controller.getSingleton()
+    controller.syncAccount(accountId, null, true)
+  },
+  async [actions.TRIGGER_SYNC_DOWN]({ commit, dispatch, state }, accountId) {
+    const controller = await Controller.getSingleton()
+    await controller.syncAccount(accountId, 'slave')
+  },
+  async [actions.TRIGGER_SYNC_UP]({ commit, dispatch, state }, accountId) {
+    const controller = await Controller.getSingleton()
+    await controller.syncAccount(accountId, 'overwrite')
+  },
+  async [actions.CANCEL_SYNC]({ commit, dispatch, state }, accountId) {
+    const controller = await Controller.getSingleton()
+    await controller.cancelSync(accountId, true)
+  },
+  async [actions.DOWNLOAD_LOGS]({ commit, dispatch, state }, anonymous) {
+    await Logger.downloadLogs(anonymous)
+  },
+  async [actions.EXPORT_BOOKMARKS]({commit, dispatch, state}, accountId) {
+    const account = await Account.get(accountId)
+    const tree = await account.localTree.getBookmarksTree()
+    const data = Html.serialize(tree)
+    const blob = new Blob([data], {
+      type: 'text/html',
+      endings: 'native'
+    })
+    Logger.download('floccus-' + new Date().toISOString().slice(0, 10) + '.export.html', blob)
+  },
+  async [actions.TEST_WEBDAV_SERVER]({commit, dispatch, state}, {rootUrl, username, password}) {
+    // noop, because capacitor Http doesn't support PROPFIND
+    return true
+  },
+  async [actions.TEST_S3_SERVER]({commit, dispatch, state}, data) {
+    const S3Adapter = (await import('../../../lib/adapters/S3')).default
+    await new S3Adapter(data).testConnection()
+    return true
+  },
+  async [actions.TEST_LINKWARDEN_SERVER]({commit, dispatch, state}, {rootUrl, token}) {
+    let res = await Http.request({
+      url: `${rootUrl}/api/v1/collections`,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Floccus bookmarks sync',
+        Authorization: 'Bearer ' + token,
+      }
+    })
+    if (res.status !== 200) {
+      throw new Error(i18n.getMessage('LabelLinkwardenconnectionerror'))
+    }
+    return true
+  },
+  async [actions.TEST_KARAKEEP_SERVER]({commit, dispatch, state}, {rootUrl, token}) {
+    let res = await Http.request({
+      url: `${rootUrl}/api/v1/users/me`,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Floccus bookmarks sync',
+        Authorization: 'Bearer ' + token,
+      }
+    })
+    if (res.status !== 200) {
+      throw new Error(i18n.getMessage('LabelKarakeepconnectionerror'))
+    }
+    return true
+  },
+  async [actions.TEST_NEXTCLOUD_SERVER]({commit, dispatch, state}, rootUrl) {
+    let res = await Http.request({
+      url: `${rootUrl}/index.php/login/v2`,
+      method: 'POST',
+      headers: {'User-Agent': 'Floccus bookmarks sync'}
+    })
+    if (res.status !== 200) {
+      throw new Error(i18n.getMessage('LabelLoginFlowError'))
+    }
+    return true
+  },
+  async [actions.START_LOGIN_FLOW]({commit, dispatch, state}, rootUrl) {
+    commit(mutations.SET_LOGIN_FLOW_STATE, true)
+    let res = await Http.request({
+      url: `${rootUrl}/index.php/login/v2`,
+      method: 'POST',
+      headers: {'User-Agent': 'Floccus bookmarks sync'}
+    })
+    if (res.status !== 200 || !state.loginFlow.isRunning) {
+      commit(mutations.SET_LOGIN_FLOW_STATE, false)
+      throw new Error(i18n.getMessage('LabelLoginFlowError'))
+    }
+    const flow = {
+      server: rootUrl,
+      endpoint: res.data.poll.endpoint,
+      token: res.data.poll.token,
+      startedAt: Date.now(),
+    }
+    await Preferences.set({ key: PENDING_LOGIN_FLOW_KEY, value: JSON.stringify(flow) })
+    try {
+      await Browser.open({ url: res.data.login })
+    } catch (e) {
+      commit(mutations.SET_LOGIN_FLOW_STATE, false)
+      await clearPendingLoginFlow()
+      throw e
+    }
+    return runLoginFlow(commit, state, flow)
+  },
+  async [actions.GET_PENDING_LOGIN_FLOW]() {
+    const flow = await getPendingLoginFlow()
+    return flow ? { server: flow.server } : null
+  },
+  async [actions.RESUME_LOGIN_FLOW]({commit, state}) {
+    if (runningLoginFlow) {
+      return runningLoginFlow
+    }
+    const flow = await getPendingLoginFlow()
+    if (!flow) {
+      throw new Error(i18n.getMessage('LabelLoginFlowError'))
+    }
+    commit(mutations.SET_LOGIN_FLOW_STATE, true)
+    return runLoginFlow(commit, state, flow)
+  },
+  async [actions.STOP_LOGIN_FLOW]({commit}) {
+    commit(mutations.SET_LOGIN_FLOW_STATE, false)
+    await clearPendingLoginFlow()
+  },
+  async [actions.SET_SORTBY]({state}, {accountId, sortBy, sortDirection}) {
+    const account = await Account.get(accountId)
+    await account.setData({ sortBy, sortDirection })
+  },
+  async [actions.SET_LAST_FOLDER]({commit}, {accountId, folderId}) {
+    await NativeAccountStorage.changeEntry('lastFolders', (lastFolders) => {
+      lastFolders[accountId] = folderId
+      return lastFolders
+    }, {})
+    await commit(mutations.SET_LAST_FOLDER, {accountId, folderId})
+  },
+  /**
+   * The folder the user last browsed in this account, which Tree.vue opens
+   * again. Not the same as lastFolders, which is where bookmarks were last
+   * saved to.
+   */
+  async [actions.LOAD_LAST_VIEWED_FOLDER](_, accountId) {
+    const lastViewedFolders = await NativeAccountStorage.getEntry('lastViewedFolders', {})
+    return lastViewedFolders[accountId]
+  },
+  async [actions.SET_LAST_VIEWED_FOLDER](_, {accountId, folderId}) {
+    await NativeAccountStorage.changeEntry('lastViewedFolders', (lastViewedFolders) => {
+      lastViewedFolders[accountId] = folderId
+      return lastViewedFolders
+    }, {})
+  },
+  async [actions.SET_LAST_ACCOUNT]({commit}, accountId) {
+    await NativeAccountStorage.changeEntry('lastAccount', () => {
+      return accountId
+    }, null)
+    await commit(mutations.SET_LAST_ACCOUNT, accountId)
+  }
+}

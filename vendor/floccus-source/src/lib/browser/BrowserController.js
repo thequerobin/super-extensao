@@ -1,0 +1,704 @@
+import browser from '../browser-api'
+import Controller from '../Controller'
+import BrowserAccount from './BrowserAccount'
+import BrowserTree from './BrowserTree'
+import Cryptography from '../Crypto'
+import packageJson from '../../../package.json'
+import BrowserAccountStorage from './BrowserAccountStorage'
+import uniqBy from 'lodash/uniqBy'
+import Account from '../Account'
+import { STATUS_ALLGOOD, STATUS_DISABLED, STATUS_ERROR, STATUS_NEEDS_SYNC, STATUS_SYNCING } from '../interfaces/Controller'
+import { onWakeUp } from '../on-wake-up'
+import { i18n } from '../native/I18n'
+import { getDueAction, isNotifyOnly } from '../SyncSchedule'
+
+const INACTIVITY_TIMEOUT = 7 * 1000 // 7 seconds
+const NETWORK_SETTLE_TIMEOUT = 5 * 1000 // 5 seconds
+const STALE_SYNC_TIME = 1000 * 60 * 60 * 24 * 2 // two days
+const INTERVENTION_INTERVAL = 1000 * 60 * 60 * 24 * 182 // 182 days
+const PENDING_NOTIFICATION_PREFIX = 'floccus-pending-'
+
+class AlarmManager {
+  constructor(ctl) {
+    this.ctl = ctl
+  }
+
+  async checkStorage() {
+    // empty
+  }
+
+  /**
+   * @param {boolean} networkRestored - the connection just came back, see isSyncDue
+   */
+  async checkSync(networkRestored = false) {
+    const online = isOnline()
+    // We may have missed the online event while the service worker was asleep.
+    // It doesn't survive that, so neither would a property on this object: keep
+    // the last state we saw in storage.
+    const { wasOnline } = await browser.storage.local.get({ wasOnline: true })
+    if (online && !wasOnline) {
+      networkRestored = true
+    }
+    if (online !== wasOnline) {
+      await browser.storage.local.set({ wasOnline: online })
+    }
+    const accounts = await BrowserAccountStorage.getAllAccounts()
+    for (let accountId of accounts) {
+      const account = await Account.get(accountId)
+      const action = getDueAction(account.getData(), Date.now(), online, networkRestored)
+      if (action === 'sync') {
+        await this.ctl.scheduleSync(accountId)
+      } else if (action === 'check') {
+        await this.ctl.scheduleCheck(accountId)
+      }
+    }
+  }
+}
+
+/**
+ * Whether two results of a check differ enough to tell the user again
+ *
+ * @param {import('../interfaces/AccountStorage').IPendingChanges|null|undefined} a
+ * @param {import('../interfaces/AccountStorage').IPendingChanges|null|undefined} b
+ */
+function samePendingChanges(a, b) {
+  if (!a || !b) return !a && !b
+  return a.local === b.local && a.server === b.server && Boolean(a.initial) === Boolean(b.initial)
+}
+
+function isOnline() {
+  // navigator.onLine can only tell us for certain that we're offline
+  return typeof navigator === 'undefined' || navigator.onLine !== false
+}
+
+export default class BrowserController {
+  constructor() {
+    this.schedule = {}
+    this.listeners = []
+
+    this.alarms = new AlarmManager(this)
+
+    this.unlocked = true
+    this.setEnabled(true)
+
+    Controller.singleton = this
+
+    if (self.constructor.name !== 'ServiceWorkerGlobalScope') {
+      // If we're running in a static background page
+      onWakeUp(() => {
+        // reload
+        window.location = window.location.toString()
+      })
+    }
+
+    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) =>
+      this.onTabsChanged(tabId)
+    )
+    browser.tabs.onRemoved.addListener((tabId, changeInfo, tab) =>
+      this.onTabsChanged(tabId)
+    )
+    browser.tabs.onMoved.addListener((tabId, changeInfo, tab) =>
+      this.onTabsChanged(tabId)
+    )
+    browser.tabs.onDetached.addListener((tabId, changeInfo, tab) =>
+      this.onTabsChanged(tabId)
+    )
+
+    if (typeof browser.tabGroups !== 'undefined') {
+      browser.tabGroups.onCreated.addListener((tabId, changeInfo, tab) =>
+        this.onTabsChanged(tabId)
+      )
+      browser.tabGroups.onMoved.addListener((tabId, changeInfo, tab) =>
+        this.onTabsChanged(tabId)
+      )
+      browser.tabGroups.onRemoved.addListener((tabId, changeInfo, tab) =>
+        this.onTabsChanged(tabId)
+      )
+      browser.tabGroups.onUpdated.addListener((tabId, changeInfo, tab) =>
+        this.onTabsChanged(tabId)
+      )
+    }
+
+    if (typeof browser.bookmarks !== 'undefined') {
+      // set up change listener
+      browser.bookmarks.onChanged.addListener((localId, details) =>
+        this.onchange(localId, details)
+      )
+      browser.bookmarks.onMoved.addListener((localId, details) =>
+        this.onchange(localId, details)
+      )
+      browser.bookmarks.onRemoved.addListener((localId, details) =>
+        this.onchange(localId, details)
+      )
+      browser.bookmarks.onCreated.addListener((localId, details) =>
+        this.onchange(localId, details)
+      )
+    }
+
+    // The notifications API only exists once its optional permission was granted
+    this.notificationListenerAdded = false
+    this.addNotificationListener()
+    if (browser.permissions.onAdded) {
+      browser.permissions.onAdded.addListener(() => this.addNotificationListener())
+    }
+
+    try {
+      browser.permissions.contains({ permissions: ['history'] }).then((historyAllowed) => {
+        if (historyAllowed) {
+          browser.history.onVisited.addListener((historyItem) => this.onVisitUrl(historyItem))
+        }
+      })
+    } catch (error) {
+      console.warn('Could not set up history listener', error)
+    }
+
+    // Set up the alarms
+
+    browser.alarms.create('super-sync:checkStorage', { periodInMinutes: 15 })
+    browser.alarms.create('super-sync:checkSync', { periodInMinutes: 1 })
+    browser.alarms.onAlarm.addListener(async alarm => {
+      if (!alarm.name.startsWith('super-sync:')) return
+      const name=alarm.name.slice('super-sync:'.length)
+      if(typeof this.alarms[name] === 'function') await this.alarms[name]()
+    })
+
+    // Retry failed syncs once the connection is back, instead of waiting out the backoff
+    if (typeof addEventListener !== 'undefined') {
+      addEventListener('online', () => {
+        // Give the network a moment to settle (DNS, captive portals, ...)
+        setTimeout(() => this.alarms.checkSync(true), NETWORK_SETTLE_TIMEOUT)
+      })
+    }
+
+    // lock accounts when locking is enabled
+
+    browser.storage.local.get('accountsLocked').then(async d => {
+      this.setEnabled(!d.accountsLocked)
+      this.unlocked = !d.accountsLocked
+      if (d.accountsLocked) {
+        this.key = null
+      }
+    })
+
+    // Super Extensão: no upstream uninstall URL, update or donation tabs.
+    // Set correct badge after waiting a bit
+    setTimeout(() => this.updateStatus(), 3000)
+
+    // Setup service worker messaging
+
+    // eslint-disable-next-line no-undef
+    if (!navigator.userAgent.includes('Firefox') && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+      addEventListener('message', (event) => this._receiveEvent(event.data, (data) => event.source.postMessage(data)))
+    }
+    {
+      browser.runtime.onMessage.addListener((data) => void (this._receiveEvent(data, (data) => {
+        try {
+          browser.runtime.sendMessage(data).catch(() => {})
+        } catch (e) {
+          console.warn(e)
+        }
+      })))
+    }
+    this.onStatusChange(async() => {
+      if (self?.clients) {
+        const clientList = await self.clients.matchAll()
+        clientList.forEach(client => {
+          try {
+            client.postMessage({ channel:'super-sync',type: 'status:update', params: [] })
+          } catch (e) {
+            console.warn(e)
+          }
+        })
+      }
+      {
+        try {
+          await browser.runtime.sendMessage({ channel:'super-sync',type: 'status:update', params: [] })
+        } catch (e) {
+          console.warn(e)
+        }
+      }
+    })
+
+    // Run some things on browser startup
+    browser.runtime.onStartup.addListener(() => this.onStartup())
+  }
+
+  async _receiveEvent(data, sendResponse) {
+    if (!data || data.channel !== 'super-sync' || !Array.isArray(data.params)) return
+    const {type, params} = data
+    if (!['cancelSync','scheduleSync','scheduleAll','setEnabled','syncAccount','unlock','getUnlocked'].includes(type)) return
+    let result
+    try { result = await this[type](...params) }
+    catch(error) { sendResponse({channel:'super-sync',type:type+'Response',error:error.message,params:[]});return }
+    sendResponse({channel:'super-sync',type: type + 'Response', params: [result]})
+
+    // checkSync after waiting a bit
+    setTimeout(() => this.alarms.checkSync(), 3000)
+  }
+
+  setEnabled(enabled) {
+    this.enabled = enabled
+    if (enabled) {
+      // Sync after 7s
+      setTimeout(() => {
+        this.alarms.checkSync()
+      }, 7000)
+    }
+  }
+
+  async unlock(key) {
+    let d = await browser.storage.local.get({ 'accountsLocked': null })
+    if (d.accountsLocked) {
+      let hashedKey = await Cryptography.sha256(key)
+      let decryptedHash = await Cryptography.decryptAES(
+        key,
+        d.accountsLocked,
+        'FLOCCUS'
+      )
+
+      if (decryptedHash !== hashedKey) {
+        throw new Error(i18n.getMessage('ErrorUnlockwrongkey'))
+      }
+      this.key = key
+    }
+    this.unlocked = true
+    this.setEnabled(true)
+
+    // remove encryption
+    this.key = null
+    await browser.storage.local.set({ accountsLocked: null })
+    const accountIds = await BrowserAccountStorage.getAllAccounts()
+    for (let accountId of accountIds) {
+      const storage = new BrowserAccountStorage(accountId)
+      const data = await storage.getAccountData(key)
+      await storage.setAccountData(data, null)
+    }
+    let accounts = await BrowserAccount.getAllAccounts()
+    await Promise.all(accounts.map(a => a.updateFromStorage()))
+  }
+
+  getUnlocked() {
+    return Promise.resolve(this.unlocked)
+  }
+
+  async onchange(localId, details) {
+    if (!this.enabled) {
+      return
+    }
+    // Debounce this function
+    this.setEnabled(false)
+
+    const allAccounts = await BrowserAccount.getAllAccounts()
+
+    // Check which accounts contain the bookmark and which used to contain (track) it
+    const trackingAccountsFilter = await Promise.all(
+      allAccounts.map(account => {
+        return account.tracksBookmark(localId)
+      })
+    )
+
+    let accountsToSync = allAccounts
+      // Filter out any accounts that are not tracking the bookmark
+      .filter((account, i) => trackingAccountsFilter[i])
+
+    // Now we check the account of the new folder
+
+    let containingAccounts = []
+    try {
+      const ancestors = await BrowserTree.getIdPathFromLocalId(localId)
+      containingAccounts = await BrowserAccount.getAccountsContainingLocalId(
+        localId,
+        ancestors,
+        allAccounts
+      )
+    } catch (e) {
+      console.log(e)
+      console.log('Could not detect containing account from localId ', localId)
+    }
+
+    accountsToSync = uniqBy(
+      accountsToSync.concat(containingAccounts),
+      acc => acc.id
+    )
+      // Filter out accounts that are not enabled
+      .filter(account => account.getData().enabled)
+      // Filter out accounts that are syncing, because the event may stem from the sync run
+      .filter(account => !account.getData().syncing)
+
+    // schedule a new sync (or check) for all accounts involved
+    accountsToSync.forEach(account => this.scheduleSyncOrCheck(account, true))
+
+    this.setEnabled(true)
+  }
+
+  async onTabsChanged() {
+    if (!this.enabled) {
+      return
+    }
+    // Debounce this function
+    this.setEnabled(false)
+
+    const allAccounts = await BrowserAccount.getAllAccounts()
+
+    // Check which accounts contain the bookmark and which used to contain (track) it
+    const tabAccounts = allAccounts.filter(account => {
+      return account.getData().localRoot === 'tabs'
+    })
+
+    const accountsToSync = tabAccounts
+      // Filter out accounts that are not enabled
+      .filter(account => account.getData().enabled)
+      // Filter out accounts that are syncing, because the event may stem from the sync run
+      .filter(account => !account.getData().syncing)
+
+    // schedule a new sync (or check) for all accounts involved
+    accountsToSync.forEach(account => this.scheduleSyncOrCheck(account, true))
+
+    this.setEnabled(true)
+  }
+
+  async scheduleSync(accountId, wait) {
+    if (wait) {
+      if (this.schedule[accountId]) {
+        clearTimeout(this.schedule[accountId])
+      }
+      console.log('scheduleSync: setting a timeout in ms :', INACTIVITY_TIMEOUT)
+      this.schedule[accountId] = setTimeout(
+        () => this.scheduleSync(accountId),
+        INACTIVITY_TIMEOUT
+      )
+      return
+    }
+
+    let account = await Account.get(accountId)
+    if (account.getData().syncing) {
+      return
+    }
+
+    const status = await this.getStatus()
+    if (status === STATUS_SYNCING) {
+      await account.setData({ scheduled: account.getData().scheduled || true })
+      return
+    }
+
+    if (account.getData().scheduled === true) {
+      await this.syncAccount(accountId)
+    } else {
+      await this.syncAccount(accountId, account.getData().scheduled)
+    }
+  }
+
+  /**
+   * What a profile's own triggers (local changes, startup) start: a sync, or
+   * for a notify-only profile a check for pending changes
+   */
+  scheduleSyncOrCheck(account, wait) {
+    if (isNotifyOnly(account.getData())) {
+      return this.scheduleCheck(account.id, wait)
+    }
+    return this.scheduleSync(account.id, wait)
+  }
+
+  async scheduleCheck(accountId, wait) {
+    const key = 'check:' + accountId
+    if (wait) {
+      if (this.schedule[key]) {
+        clearTimeout(this.schedule[key])
+      }
+      this.schedule[key] = setTimeout(
+        () => this.scheduleCheck(accountId),
+        INACTIVITY_TIMEOUT
+      )
+      return
+    }
+
+    let account = await Account.get(accountId)
+    if (account.getData().syncing) {
+      return
+    }
+
+    const status = await this.getStatus()
+    if (status === STATUS_SYNCING) {
+      // Check once the other profiles are done, see getDueAction
+      await account.setData({ checkScheduled: true })
+      return
+    }
+
+    await this.checkAccount(accountId)
+  }
+
+  async checkAccount(accountId) {
+    if (!this.enabled) {
+      return
+    }
+    let account = await Account.get(accountId)
+    if (account.getData().syncing) {
+      return
+    }
+    const before = account.getData().pendingChanges
+    // executes long-running async work without letting the service worker to die
+    const interval = setInterval(() => browser.tabs.getCurrent(), 2e4)
+    let pendingChanges
+    try {
+      pendingChanges = await account.detectChanges()
+    } catch (error) {
+      console.error(error)
+    }
+    clearInterval(interval)
+    if (typeof pendingChanges !== 'undefined') {
+      if (!pendingChanges) {
+        await this.clearPendingNotification(accountId)
+      } else if (!samePendingChanges(before, pendingChanges)) {
+        await this.showPendingNotification(account, pendingChanges)
+      }
+    }
+    this.updateStatus()
+  }
+
+  async hasNotificationPermission() {
+    try {
+      return await browser.permissions.contains({ permissions: ['notifications'] })
+    } catch (e) {
+      return false
+    }
+  }
+
+  async addNotificationListener() {
+    if (this.notificationListenerAdded || !browser.notifications || !(await this.hasNotificationPermission())) {
+      return
+    }
+    this.notificationListenerAdded = true
+    browser.notifications.onClicked.addListener(async(notificationId) => {
+      if (!notificationId.startsWith(PENDING_NOTIFICATION_PREFIX)) {
+        return
+      }
+      browser.notifications.clear(notificationId)
+      // Show the pending changes and leave syncing them to the user
+      try {
+        await browser.tabs.create({ url: '/sync/html/options.html#/' })
+      } catch (e) {
+        // Not available everywhere, or not outside of a user action
+        await browser.tabs.create({ url: '/sync/html/options.html#/' })
+      }
+    })
+  }
+
+  async showPendingNotification(account, pendingChanges) {
+    const data = account.getData()
+    if (!data.notificationsEnabled || !browser.notifications || !(await this.hasNotificationPermission())) {
+      return
+    }
+    await this.addNotificationListener()
+    if (!this.i18nLoaded) {
+      // Nothing else in the background is shown to the user in their language
+
+      this.i18nLoaded = i18n.load()
+    }
+    await this.i18nLoaded
+    const label = data.label || account.getLabel()
+    const message = pendingChanges.initial
+      ? i18n.getMessage('DescriptionPendingInitialSync')
+      : i18n.getMessage('DescriptionPendingChanges', [String(pendingChanges.local), String(pendingChanges.server)])
+    try {
+      await browser.notifications.create(PENDING_NOTIFICATION_PREFIX + account.id, {
+        type: 'basic',
+        iconUrl: browser.runtime.getURL('/icons/icon128.png'),
+        title: i18n.getMessage('NotificationPendingChangesTitle', [label]),
+        message,
+      })
+    } catch (e) {
+      console.warn('Could not show notification', e)
+    }
+  }
+
+  async clearPendingNotification(accountId) {
+    if (!browser.notifications) {
+      return
+    }
+    try {
+      await browser.notifications.clear(PENDING_NOTIFICATION_PREFIX + accountId)
+    } catch (e) {
+      console.warn(e)
+    }
+  }
+
+  async scheduleAll() {
+    const accounts = await Account.getAllAccounts()
+    for (const account of accounts) {
+      await account.setData({ scheduled: true })
+    }
+    this.updateStatus()
+  }
+
+  async cancelSync(accountId, keepEnabled) {
+    let account = await Account.get(accountId)
+    // Avoid starting it again automatically
+    if (!keepEnabled) {
+      await account.setData({ enabled: false })
+    }
+    await account.cancelSync()
+  }
+
+  async syncAccount(accountId, strategy, forceSync = false) {
+    if (!this.enabled) {
+      return
+    }
+    let account = await Account.get(accountId)
+    if (account.getData().syncing) {
+      return
+    }
+    // executes long-running async work without letting the service worker to die
+    const interval = setInterval(() => browser.tabs.getCurrent(), 2e4)
+    setTimeout(() => this.updateStatus(), 500)
+    try {
+      await account.sync(strategy, forceSync)
+    } catch (error) {
+      console.error(error)
+    }
+    clearInterval(interval)
+    if (!account.getData().pendingChanges) {
+      await this.clearPendingNotification(accountId)
+    }
+    this.updateStatus()
+  }
+
+  async updateStatus() {
+    await this.updateBadge()
+    this.listeners.forEach(fn => fn())
+  }
+
+  onStatusChange(listener) {
+    this.listeners.push(listener)
+    let unregistered = false
+    return () => {
+      if (unregistered) return
+      this.listeners.splice(this.listeners.indexOf(listener), 1)
+      unregistered = true
+    }
+  }
+
+  async getStatus() {
+    if (!this.unlocked) {
+      return STATUS_ERROR
+    }
+    const accounts = await Account.getAllAccounts()
+    let overallStatus = accounts.reduce((status, account) => {
+      const accData = account.getData()
+      if (status === STATUS_SYNCING || accData.syncing || account.syncing) {
+        // Show syncing symbol if any account is syncing
+        return STATUS_SYNCING
+      } else if (status === STATUS_ERROR || (accData.error && !accData.syncing) || (accData.enabled && !isNotifyOnly(accData) && accData.lastSync < Date.now() - STALE_SYNC_TIME)) {
+        // Show error symbol if any account has an error and not currently syncing, or if any account is enabled but hasn't been synced for two days
+        // (a notify-only profile is synced when its user says so)
+        return STATUS_ERROR
+      } else if (status === STATUS_NEEDS_SYNC || accData.pendingChanges) {
+        // A check found changes that wait for the user to sync them
+        return STATUS_NEEDS_SYNC
+      } else {
+        // show allgood symbol otherwise
+        return STATUS_ALLGOOD
+      }
+    }, STATUS_ALLGOOD)
+
+    if (overallStatus === STATUS_ALLGOOD) {
+      if (
+        accounts.every(
+          (account) =>
+            !account.getData().enabled &&
+            !account.getData().syncIntervalEnabled &&
+            !account.getData().syncOnStartupEnabled
+        )
+      ) {
+        // if status is allgood but no account is enabled, show disabled
+        overallStatus = STATUS_DISABLED
+      }
+    }
+
+    return overallStatus
+  }
+
+  async updateBadge() {
+    await this.setStatusBadge(await this.getStatus())
+  }
+
+  async setStatusBadge(status) {
+    // Sync status remains in the sync page; preserve the app icon/pause badge.
+  }
+
+  async onStartup() {
+    const accounts = await Account.getAllAccounts()
+    await Promise.all(
+      accounts.map(async acc => {
+        if (acc.getData().syncing) {
+          // A notify-only profile leaves the sync to its user: it just looks again
+          const notifyOnly = isNotifyOnly(acc.getData())
+          await acc.setData({
+            syncing: false,
+            scheduled: notifyOnly ? false : acc.getData().enabled,
+            checkScheduled: notifyOnly && Boolean(acc.getData().enabled),
+          })
+        }
+        if (acc.getData().localRoot === 'tabs') {
+          await acc.init()
+        }
+        if (acc.getData().syncOnStartupEnabled) {
+          this.scheduleSyncOrCheck(acc)
+        }
+      })
+    )
+  }
+
+  async onLoad() {
+    const accounts = await Account.getAllAccounts()
+    await Promise.all(
+      accounts.map(async acc => {
+        if (acc.getData().syncing) {
+          // A notify-only profile leaves the sync to its user: it just looks again
+          const notifyOnly = isNotifyOnly(acc.getData())
+          await acc.setData({
+            syncing: false,
+            scheduled: notifyOnly ? false : acc.getData().enabled,
+            checkScheduled: notifyOnly && Boolean(acc.getData().enabled),
+          })
+        }
+      })
+    )
+  }
+
+  async onVisitUrl(historyItem) {
+    if (!historyItem.url) {
+      return
+    }
+    let accounts = await Account.getAllAccounts()
+    accounts = accounts.filter(account => account.getData().clickCountEnabled)
+    if (!accounts.length) {
+      return
+    }
+    const bookmarks = await browser.bookmarks.search({url: historyItem.url})
+    for (let bookmark of bookmarks) {
+      let matchingAccounts = []
+      try {
+        const ancestors = await BrowserTree.getIdPathFromLocalId(bookmark.id)
+        matchingAccounts = await BrowserAccount.getAccountsContainingLocalId(
+          bookmark.id,
+          ancestors,
+          accounts,
+          true
+        )
+      } catch (e) {
+        console.log(e)
+        console.log('Could not detect containing account from localId ', bookmark.id)
+      }
+      if (matchingAccounts.length) {
+        await Promise.all(
+          matchingAccounts.map(async account => {
+            const server = await account.getServer()
+            if (server.countClick) {
+              await server.countClick(historyItem.url)
+            }
+          })
+        )
+      }
+    }
+  }
+}

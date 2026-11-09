@@ -1,0 +1,27 @@
+{
+  "appId": "org.handmadeideas.floccus",
+  "appName": "floccus",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist-native",
+  "loggingBehavior": "production",
+  "server": {
+    "androidScheme": "http"
+  },
+  "plugins": {
+    "SplashScreen": {
+        "launchAutoHide": false,
+        "androidScaleType": "CENTER_INSIDE",
+        "backgroundColor": "#ffffff"
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
+  "cordova": {},
+  "android": {
+    "adjustMarginsForEdgeToEdge": "force",
+    "minWebViewVersion": 109,
+    "minHuaweiWebViewVersion": 12
+  }
+}

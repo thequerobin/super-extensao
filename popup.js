@@ -192,6 +192,7 @@ async function init() {
     })();
   });
   $("goImport").addEventListener("click", () => activateTab("bookmarks"));
+  $("openSync").addEventListener("click", handle(() => chrome.tabs.create({url:chrome.runtime.getURL("sync/html/options.html")})));
   $("openNewtab").addEventListener("click", handle(() => chrome.tabs.create({url:chrome.runtime.getURL("newtab/index.html")})));
   $("loadFolders").addEventListener("click", () => { loadBookmarks().catch(showError); });
   $("bookmarkFolder").addEventListener("change", handle(refreshPreview));

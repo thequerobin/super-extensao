@@ -1,0 +1,146 @@
+<template>
+  <v-dialog
+    :value="display"
+    max-width="500"
+    :style="{height: '500px !important'}"
+    @input="$emit('update:display', $event)">
+    <v-card
+      class="d-flex flex-column"
+      max-height="calc(100vh - 100px)">
+      <!-- Fixed header row -->
+      <div class="d-flex align-center justify-space-between px-4 py-2">
+        <span
+          class="text-h6"
+          role="heading"
+          aria-level="2">{{ t('LabelChoosefolder') }}</span>
+        <v-btn
+          color="primary"
+          @click="onSave">
+          {{ t('LabelSelect') }}
+        </v-btn>
+      </div>
+
+      <!-- Scrollable area -->
+      <v-card-text class="flex-grow-1 overflow-y-auto">
+        <v-treeview
+          class="pa-4"
+          activatable
+          :item-text="'title'"
+          :item-key="'id'"
+          :active="[value]"
+          :open="[folderTree.id]"
+          :items="[privateTree]"
+          dense
+          @update:active="onUpdateSelection">
+          <template #prepend="{ open }">
+            <v-icon aria-hidden="true">
+              {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
+            </v-icon>
+          </template>
+          <template #label="{item}">
+            {{ item.title || t('LabelUntitledfolder') }}
+          </template>
+          <template #append="{item}">
+            <v-btn
+              small
+              rounded
+              :aria-label="t('LabelAddfolder')"
+              @click="onCreate(item.id)">
+              <v-icon aria-hidden="true">
+                mdi-plus
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-treeview>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>
+
+<script>
+import { actions} from '../../store/definitions'
+import { Folder } from '../../../lib/Tree'
+
+export default {
+  name: 'DialogChooseFolder',
+  components: {},
+  props: {
+    value: {
+      type: Number,
+      default: undefined
+    },
+    display: {
+      type: Boolean,
+      default: false,
+    },
+    folderTree: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      selectedFolder: this.value,
+      privateTree: [],
+    }
+  },
+  computed: {
+    accountId() {
+      return this.$route.params.accountId
+    },
+    sortBy() {
+      return this.accountId && this.$store.state.accounts[this.accountId].data.sortBy
+    }
+  },
+  watch: {
+    async folderTree(newTree, oldTree) {
+      if (await newTree.hash() === await oldTree.hash()) {
+        return
+      }
+      this.privateTree = this.toTreeviewItem(newTree)
+    }
+  },
+  mounted() {
+    this.privateTree = this.toTreeviewItem(this.folderTree)
+  },
+  methods: {
+    /**
+     * v-treeview mutates what it is handed (it tracks open/active state on the
+     * nodes), so it gets plain copies rather than the store's folders.
+     */
+    toTreeviewItem(folder) {
+      let children = folder.children.map(child => this.toTreeviewItem(child))
+      if (this.sortBy === 'title') {
+        children = children.toSorted((a, b) =>
+          a.title < b.title ? -1 : a.title > b.title ? 1 : 0)
+      }
+      return {
+        ...folder,
+        children,
+      }
+    },
+    onUpdateSelection(active) {
+      this.selectedFolder = active[0]
+    },
+    onCreate(parentId) {
+      const title = prompt(this.t('LabelAddfolder'))
+      if (!title) {
+        return
+      }
+      this.$store.dispatch(actions.CREATE_FOLDER, {
+        accountId: this.accountId,
+        folder: new Folder({title, id: null, parentId})
+      })
+    },
+    onSave() {
+      this.$store.dispatch(actions.SET_LAST_FOLDER, {folderId: this.selectedFolder, accountId: this.$route.params.accountId})
+      this.$emit('update:display', false)
+      this.$emit('input', this.selectedFolder)
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

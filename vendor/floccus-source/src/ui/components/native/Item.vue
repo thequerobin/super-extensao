@@ -1,0 +1,191 @@
+<template>
+  <v-list-item
+    :key="item.type+item.id"
+    class="ps-3"
+    @click="$emit('click')">
+    <v-list-item-avatar>
+      <v-icon
+        v-if="item.type === 'folder'"
+        color="blue darken-1"
+        large
+        aria-hidden="true">
+        mdi-folder
+      </v-icon>
+      <FaviconImage
+        v-else
+        :url="item.url"
+        :use-network="useNetwork" />
+    </v-list-item-avatar>
+
+    <v-list-item-content>
+      <v-list-item-title>{{ item.title }}</v-list-item-title>
+      <v-list-item-subtitle v-if="item.type === 'bookmark'">
+        {{ item.url | hostname }}
+      </v-list-item-subtitle>
+      <v-list-item-subtitle v-if="showFolderPath">
+        <Breadcrumbs
+          in-item
+          :items="item.type === 'bookmark' ? getBookmarkPath(item) : getFolderPath(item)"
+          :folder-tree="folderTree" />
+      </v-list-item-subtitle>
+      <v-list-item-subtitle v-if="tags.length">
+        <v-chip
+          v-for="tag in tags"
+          :key="tag"
+          class="me-1 tag-chip"
+          x-small
+          label
+          outlined
+          color="blue darken-1"
+          :aria-label="t('LabelSearchbytag', [tag])"
+          @click.stop="$emit('tag', tag)">
+          {{ tag }}
+        </v-chip>
+      </v-list-item-subtitle>
+    </v-list-item-content>
+
+    <v-list-item-action>
+      <v-menu
+        bottom
+        offset-y
+        left>
+        <template #activator="{ on, attrs }">
+          <v-btn
+            icon
+            :aria-label="t('LabelMoreactions')"
+            v-bind="attrs"
+            v-on="on">
+            <v-icon aria-hidden="true">
+              mdi-dots-vertical
+            </v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item @click="$emit('edit')">
+            <v-list-item-avatar>
+              <v-icon aria-hidden="true">
+                mdi-pencil
+              </v-icon>
+            </v-list-item-avatar>
+            <v-list-item-title>
+              {{ t('LabelEdititem') }}
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            v-if="item.type === 'bookmark'"
+            @click="$emit('share')">
+            <v-list-item-avatar>
+              <v-icon aria-hidden="true">
+                mdi-share
+              </v-icon>
+            </v-list-item-avatar>
+            <v-list-item-title>
+              {{ t('LabelShareitem') }}
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="$emit('delete')">
+            <v-list-item-avatar>
+              <v-icon aria-hidden="true">
+                mdi-delete
+              </v-icon>
+            </v-list-item-avatar>
+            <v-list-item-title>
+              {{ t('LabelDeleteitem') }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-list-item-action>
+  </v-list-item>
+</template>
+
+<script>
+import FaviconImage from './FaviconImage.vue'
+import Breadcrumbs from './Breadcrumbs.vue'
+
+export default {
+  name: 'Item',
+  components: { Breadcrumbs, FaviconImage },
+  filters: {
+    hostname(url) {
+      try {
+        return new URL(url).hostname
+      } catch (e) {
+        console.error(`${e}: ${url}`)
+        return '(bad url)'
+      }
+    },
+  },
+  props: {
+    item: {
+      type: Object,
+      default: undefined
+    },
+    showFolderPath: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    accountId() {
+      return this.$route.params.accountId
+    },
+    loading() {
+      return (!this.$store.state.accounts[this.accountId] || !this.$store.state.accounts[this.accountId].data || !Object.keys(this.$store.state.accounts[this.accountId].data).length || !this.folderTree)
+    },
+    folderTree() {
+      return this.$store.state.folderTree
+    },
+    useNetwork() {
+      if (this.loading) {
+        return false
+      }
+      return this.$store.state.accounts[this.accountId].data.allowNetwork
+    },
+    tags() {
+      if (!this.item || this.item.type !== 'bookmark') {
+        return []
+      }
+      return this.item.tags || []
+    },
+  },
+  methods: {
+    getFolderPath(item) {
+      const folders = [item]
+      while (this.folderTree && folders[folders.length - 1 ] && String(folders[folders.length - 1 ].id) !== String(this.folderTree.id)) {
+        folders.push(this.findItem(folders[folders.length - 1 ].parentId, this.folderTree))
+      }
+      folders.pop() // remove last folder
+      return folders.reverse()
+    },
+    getBookmarkPath(item) {
+      const folders = [item]
+      while (this.folderTree && folders[folders.length - 1 ] && String(folders[folders.length - 1 ].id) !== String(this.folderTree.id)) {
+        folders.push(this.findItem(folders[folders.length - 1 ].parentId, this.folderTree))
+      }
+      folders.reverse()
+      folders.pop() // remove bookmark
+      return folders
+    },
+    findItem(id, tree) {
+      if (!tree) {
+        return null
+      }
+      if (tree.id === id) {
+        return tree
+      }
+      if (tree.url) {
+        return false
+      }
+      return tree.findFolder(id)
+    },
+  }
+}
+</script>
+
+<style scoped>
+.tag-chip {
+  height: 18px;
+}
+</style>
