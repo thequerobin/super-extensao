@@ -53,6 +53,8 @@ html,body{margin:0;background:var(--super-bg);color:var(--super-text);font-famil
 }
 
 /* The same app can run inside the Super Extensão popup. */
+html[data-embedded="true"] { scrollbar-width:none; }
+html[data-embedded="true"]::-webkit-scrollbar { display:none; }
 html[data-embedded="true"] .super-sync-header{grid-template-columns:1fr auto;gap:12px;width:100%;margin:4px auto 12px}
 html[data-embedded="true"] .super-sync-header>img,
 html[data-embedded="true"] .super-sync-header>div{display:none}
