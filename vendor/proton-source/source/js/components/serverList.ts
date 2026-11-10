@@ -56,6 +56,7 @@ export const serverList = (
 	secureCore: boolean,
 	skipSorting: boolean = false,
 	extraConnectionAttributes: Record<string, string | number> = {},
+	showFlag = false,
 ) =>
 	(skipSorting ? logicals : sortByScore(logicals))
 		.map((logical) => {
@@ -118,7 +119,7 @@ export const serverList = (
 						>${
 							secureCore
 								? `<span class="country-flag">${getCountryFlag(logical.EntryCountry)}</span> ${via('top-small')} ${logical.Translations?.EntryCountryName || logical.EntryCountryName}`
-								: serverName
+								: `${showFlag ? `<span class="country-flag">${getCountryFlag(logical.ExitCountry)}</span> ` : ''}${escapeHtml(serverName)}`
 						}</span>${
 							logical.City &&
 							(logical.Translations?.City || logical.City) !== upperTitle

@@ -5,7 +5,7 @@
 1. Atualize os arquivos da extensão e clique em **Recarregar** em `chrome://extensions` (ou no gerenciador do Helium).
 2. Abra a Super Extensão, selecione **VPN** e clique em **Entrar com a conta Proton**. A permissão de proxy já declarada pelo app não exige um novo aviso quando já concedida.
 3. Entre na sua conta na página oficial do Proton. A senha é digitada no Proton; a Super Extensão recebe a sessão de autorização.
-4. Escolha um país e um servidor disponível para o seu plano. Em contas Free, o seletor completo permite escolher os servidores gratuitos retornados pela API. Servidores pagos continuam restritos.
+4. Abaixo de **País mais rápido**, abra **Servidores gratuitos (N)** para ver todos os servidores Free retornados pela API, com bandeira, ocupação e indicação de manutenção. Clique em um servidor disponível para conectar. Você também pode escolher um país e um servidor disponível para o seu plano. Em contas Free, o seletor completo permite escolher os servidores gratuitos retornados pela API. Servidores pagos continuam restritos.
 5. Em **Recursos → Tunelamento dividido**, escolha excluir sites da VPN ou usar a VPN apenas nos sites listados. As regras podem incluir subdomínios. Salvar uma alteração também atualiza a conexão ativa.
 
 O proxy vale para o tráfego deste navegador. Não altera a rede dos demais aplicativos. A disponibilidade de servidores e a autorização de conexão continuam sob controle do Proton.
@@ -26,7 +26,7 @@ O proxy vale para o tráfego deste navegador. Não altera a rede dos demais apli
 
 ## Validação
 
-Compilação de produção com verificação TypeScript e 28 testes automatizados, cobrindo também seleção por plano, tunelamento em contas Free, isolamento de dados e rejeição de mensagens indevidas.
+Compilação de produção com verificação TypeScript e 32 testes automatizados, cobrindo também seleção por plano, tunelamento em contas Free, isolamento de dados e rejeição de mensagens indevidas.
 
 O ambiente de desenvolvimento bloqueou a inicialização do Chromium com extensões (`socket() failed: Operation not permitted`). Não foram validados visualmente login, conexão real, mudança de IP, aplicação das regras no tráfego ou recuperação da VPN após reiniciar. Esses fluxos precisam de teste no navegador do usuário com uma conta Proton antes de considerar a integração validada para uso diário.
 

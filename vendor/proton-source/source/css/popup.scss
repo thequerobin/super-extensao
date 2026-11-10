@@ -2111,3 +2111,28 @@ body:not(.auto-theme, .light-theme) {
 		}
 	}
 }
+
+.free-servers-summary {
+	display: flex;
+	align-items: center;
+	padding: 0 0.4em;
+	cursor: pointer;
+	border-radius: $border-radius;
+
+	&:hover {
+		background: rgb(127, 127, 127, 0.1);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--feature-color);
+		outline-offset: -2px;
+	}
+
+	&::-webkit-details-marker {
+		display: none;
+	}
+}
+
+.free-servers[open] > summary .free-servers-chevron {
+	transform: rotate(90deg);
+}

@@ -220,3 +220,44 @@ test('local recent connections are displayed for Free accounts and respect the h
     assert.equal(await locationList({}, {tier}, {value:false}, {config:{value:false}}), '<countries>');
   }
 });
+
+const freeListMocks = {
+  '../tools/translate': {c: () => ({t: (parts, ...values) => parts.reduce((s, part, i) => s + part + (values[i] ?? ''), '')})},
+  '../config': {paidOnly: false, simplifiedUi: false},
+  '../vpn/getLogicals': {isLogicalUp: logical => logical.Enabled !== false},
+  './upgradeButton': {upgradeButton: () => '<upgrade>'},
+  '../account/upgradeAttributes': {upgradeAttributes: 'data-upgrade="1"'}
+};
+
+test('free list includes nested city servers once, excludes paid and Secure Core, and retains maintenance status', () => {
+  const {getFreeServers, freeServerList} = load('components/freeServerList', freeListMocks);
+  const free = {ID: 'free-us', Name: 'US-FREE#143', Tier: 0, Features: 0, ExitCountry: 'US', Load: 45};
+  const down = {...free, ID: 'free-jp', Name: 'JP-FREE#1', ExitCountry: 'JP', Enabled: false};
+  const countries = {US: {logicals: [free], groups: {City: {logicals: [free, {...free, ID: 'paid', Tier: 2}]}}},
+    JP: {groups: {Free: {logicals: [down, {...free, ID: 'sc', Features: 1}]}}}};
+  assert.deepEqual(plain(getFreeServers(countries)).map(l => l.ID), ['free-us', 'free-jp']);
+  for (const tier of [0, 2]) {
+    const html = freeServerList(countries, {tier});
+    assert.match(html, /<details class="free-servers country-block">/);
+    assert.match(html, /Free servers \(2\)/);
+    assert.match(html, /data-id="free-us"/);
+    assert.match(html, /country-flag/);
+    assert.match(html, /45%/);
+    assert.match(html, /class="server in-maintenance"/);
+    assert.doesNotMatch(html, /data-id="(?:paid|sc|free-jp)"|data-upgrade|<upgrade>/);
+  }
+  assert.equal(freeServerList({}, {tier: 0}), '');
+});
+
+test('free section follows fastest country only in the main non Secure Core list', () => {
+  const {countryFilteredList} = load('components/countryList', {
+    './countryBlock': {countryBlock: () => '<country>'},
+    './fastestCountry': {fastestCountry: () => '<fastest>'},
+    './freeServerList': {freeServerList: () => '<free-list>'}
+  });
+  const countries = {US: {name: 'US', logicals: [{Tier: 0}]}};
+  const render = (secureCore, withFastest) => countryFilteredList(countries, {tier: 0}, () => true, undefined, secureCore, {}, false, withFastest);
+  assert.equal(render(false, true), '<fastest><free-list><country>');
+  assert.equal(render(true, true), '<fastest><country>');
+  assert.equal(render(false, false), '<country>');
+});

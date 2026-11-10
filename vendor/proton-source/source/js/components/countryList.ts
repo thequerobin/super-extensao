@@ -1,5 +1,6 @@
 import {countryBlock} from './countryBlock';
 import {fastestCountry} from './fastestCountry';
+import {freeServerList} from './freeServerList';
 import {comp, Sorter} from '../tools/comp';
 import {getKeys} from '../tools/getKeys';
 import type {Logical} from '../vpn/Logical';
@@ -79,7 +80,10 @@ export const countryFilteredList = (
 		(header
 			? `<div class="servers-group group-section">${header(count)}</div>`
 			: '') +
-		(withFastest ? fastestCountry(secureCoreValue) : '') +
+		(withFastest
+			? fastestCountry(secureCoreValue) +
+				(secureCoreValue ? '' : freeServerList(countries, userContext))
+			: '') +
 		keys
 			.map((country) =>
 				countryBlock(
