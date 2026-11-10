@@ -121,11 +121,6 @@ import {configureGoToButtons} from './components/goToButton';
 import {updateAccessSentenceWithCounts} from './components/accessSentence';
 import {configureLinks, setNewTabLinkTitle} from './components/links';
 import {configureModalButtons} from './components/modals/modals';
-import {
-	configureRatingModalButtons,
-	maybeShowRatingModal,
-} from './components/modals/ratingModal';
-import {setReviewInfoStateOnConnectAction} from './vpn/reviewInfo';
 import {filterLogicalsWithCurrentFeatures} from './vpn/filterLogicalsWithCurrentFeatures';
 import {getActivityCheckInterval} from './intervals';
 import {closeErrorModal} from './components/modals/closeErrorModal';
@@ -1061,8 +1056,6 @@ export const start = async (area: HTMLElement) => {
 			});
 		});
 
-	const rateUsModal = area.querySelector<HTMLDialogElement>('#rate-us');
-
 	const connectToServer = async (logical: Logical) => {
 		connectEventHandler.connect(logical);
 
@@ -1119,8 +1112,6 @@ export const start = async (area: HTMLElement) => {
 				);
 			}
 
-			await setReviewInfoStateOnConnectAction();
-			maybeShowRatingModal(rateUsModal, user);
 		} catch (e) {
 			setError(e as Error);
 		}
@@ -1475,7 +1466,6 @@ export const start = async (area: HTMLElement) => {
 	}
 
 	configureModalButtons(area.querySelector<HTMLDivElement>('#modals')!);
-	configureRatingModalButtons(rateUsModal);
 
 	watchBroadcastMessages({
 		logicalUpdate(logicalsInput: Logical[]) {
@@ -1564,7 +1554,6 @@ export const start = async (area: HTMLElement) => {
 	viewMemoryReady = true;
 	area.querySelector('.page-view')?.addEventListener('scroll', saveViewPosition, {passive: true});
 
-	maybeShowRatingModal(rateUsModal, user);
 
 	setTimeout(updateLastActivityTime, 1);
 	setInterval(updateLastActivityTime, getActivityCheckInterval());
