@@ -28,7 +28,7 @@ A ausência de um repositório confirmado para a extensão de limpeza não signi
 
 Se esta pasta já estava carregada, clique em **Recarregar** no cartão da extensão. As novas funções usam a permissão `tabs` e scripts em páginas HTTP/HTTPS. O navegador pode pedir que você confirme as novas permissões ou reative a extensão. Recarregue os sites que já estavam abertos para injetar o controle de autoplay. As configurações existentes de limpeza permanecem salvas.
 
-A versão 1.2.0 também define uma Nova guia personalizada. Abra uma nova aba após recarregar e aceite a alteração de Nova guia se o navegador solicitar. O botão **Abrir Nova guia personalizada** no popup abre o dashboard diretamente.
+A versão 1.2.0 também define uma Nova guia personalizada. Abra uma nova aba após recarregar e aceite a alteração de Nova guia se o navegador solicitar.
 
 ## Nova guia Tabliss completa
 
