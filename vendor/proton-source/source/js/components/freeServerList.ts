@@ -2,6 +2,7 @@ import type {CountryItem, CountryList} from './countryList';
 import type {UserContext} from '../account/user/UserContext';
 import type {Logical} from '../vpn/Logical';
 import {Feature} from '../vpn/Feature';
+import {getPrimaryLanguage} from '../tools/locale';
 import {c} from '../tools/translate';
 import {serverList} from './serverList';
 
@@ -29,6 +30,17 @@ export const freeServerList = (
 	if (!count) {
 		return '';
 	}
+	const byCountry = new Map<string, Logical[]>();
+	for (const logical of logicals) {
+		const country = logical.ExitCountry;
+		if (!byCountry.has(country)) byCountry.set(country, []);
+		byCountry.get(country)!.push(logical);
+	}
+	const collator = new Intl.Collator(getPrimaryLanguage());
+	const countryName = (code: string) => countries[code]?.name || code;
+	const countryCodes = [...byCountry.keys()].sort(
+		(a, b) => collator.compare(countryName(a), countryName(b)) || collator.compare(a, b),
+	);
 	const title = c('Label').t`Free servers (${count})`;
 	return `
 		<details class="free-servers country-block">
@@ -39,7 +51,9 @@ export const freeServerList = (
 				</svg>
 			</summary>
 			<div class="server-items servers-list">
-				${serverList(userContext, logicals, title, false, false, {}, true)}
+				${countryCodes.map((code) =>
+					serverList(userContext, byCountry.get(code)!, title, false, false, {}, true),
+				).join('')}
 			</div>
 		</details>
 	`;

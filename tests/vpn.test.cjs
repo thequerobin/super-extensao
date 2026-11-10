@@ -223,6 +223,7 @@ test('local recent connections are displayed for Free accounts and respect the h
 
 const freeListMocks = {
   '../tools/translate': {c: () => ({t: (parts, ...values) => parts.reduce((s, part, i) => s + part + (values[i] ?? ''), '')})},
+  '../tools/locale': {getPrimaryLanguage: () => 'pt'},
   '../config': {paidOnly: false, simplifiedUi: false},
   '../vpn/getLogicals': {isLogicalUp: logical => logical.Enabled !== false},
   './upgradeButton': {upgradeButton: () => '<upgrade>'},
@@ -247,6 +248,21 @@ test('free list includes nested city servers once, excludes paid and Secure Core
     assert.doesNotMatch(html, /data-id="(?:paid|sc|free-jp)"|data-upgrade|<upgrade>/);
   }
   assert.equal(freeServerList({}, {tier: 0}), '');
+});
+
+test('free servers render by localized country name before server score', () => {
+  const {freeServerList} = load('components/freeServerList', freeListMocks);
+  const server = (ID, ExitCountry, Score) => ({
+    ID, ExitCountry, Score, Name: ID, Tier: 0, Features: 0, Load: 40
+  });
+  const countries = {
+    NL: {name: 'Países Baixos', logicals: [server('NL-FREE#1', 'NL', 1)]},
+    JP: {name: 'Japão', logicals: [server('JP-FREE#1', 'JP', 2)]},
+    US: {name: 'Estados Unidos', logicals: [server('US-FREE#1', 'US', 4), server('US-FREE#2', 'US', 3)]}
+  };
+  const html = freeServerList(countries, {tier: 0});
+  assert.deepEqual([...html.matchAll(/data-server-id="([^"]+)"/g)].map(match => match[1]),
+    ['US-FREE#2', 'US-FREE#1', 'JP-FREE#1', 'NL-FREE#1']);
 });
 
 test('free section follows fastest country only in the main non Secure Core list', () => {
