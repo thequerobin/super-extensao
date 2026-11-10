@@ -53,27 +53,24 @@ export default class Controller implements IController {
     }
     if (IS_BROWSER) {
       const browser = (await import('../lib/browser-api')).default
+      const listeners = new Set<(data: any) => void>()
       return {
         postMessage: (data) => {
-          try {
-            // Responses use the isolated broadcast channel, not the callback port.
-            browser.runtime.sendMessage(data).catch(() => {})
-          } catch (e) {
-            console.warn(e)
-          }
+          browser.runtime.sendMessage(data).then(
+            response => listeners.forEach(listener => listener(response)),
+            error => {
+              const response = { channel: data.channel, type: data.type + 'Response', error: error.message, params: [] }
+              listeners.forEach(listener => listener(response))
+              console.warn(error)
+            },
+          )
         },
-        addEventListener: (fn) => {
-          try {
-            browser.runtime.onMessage.addListener(fn)
-          } catch (e) {
-            console.warn(e)
-          }
+        addEventListener: (listener) => {
+          listeners.add(listener)
+          browser.runtime.onMessage.addListener(listener)
           return () => {
-            try {
-              browser.runtime.onMessage.removeListener(fn)
-            } catch (e) {
-              console.warn(e)
-            }
+            listeners.delete(listener)
+            browser.runtime.onMessage.removeListener(listener)
           }
         },
       }
@@ -161,12 +158,12 @@ export default class Controller implements IController {
     console.log('Waiting for service worker readiness')
     const worker = await this.getWorker()
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const eventListener = (data) => {
         if (data.type === 'getUnlockedResponse') {
-          resolve(data.params[0])
-
           removeEventListener()
+          if (data.error) reject(new Error(data.error))
+          else resolve(data.params[0])
         }
       }
       const removeEventListener = worker.addEventListener(eventListener)

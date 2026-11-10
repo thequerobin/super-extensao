@@ -188,17 +188,17 @@ export default class BrowserController {
 
     // eslint-disable-next-line no-undef
     if (!navigator.userAgent.includes('Firefox') && typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-      addEventListener('message', (event) => this._receiveEvent(event.data, (data) => event.source.postMessage(data)))
-    }
-    {
-      browser.runtime.onMessage.addListener((data) => void (this._receiveEvent(data, (data) => {
-        try {
-          browser.runtime.sendMessage(data).catch(() => {})
-        } catch (e) {
-          console.warn(e)
+      addEventListener('message', (event) => {
+        if (this._isRequest(event.data)) {
+          event.waitUntil(this._receiveEvent(event.data, (data) => event.source.postMessage(data)))
         }
-      })))
+      })
     }
+    browser.runtime.onMessage.addListener((data, sender, sendResponse) => {
+      if (!this._isRequest(data)) return
+      this._receiveEvent(data, sendResponse)
+      return true
+    })
     this.onStatusChange(async() => {
       if (self?.clients) {
         const clientList = await self.clients.matchAll()
@@ -214,7 +214,9 @@ export default class BrowserController {
         try {
           await browser.runtime.sendMessage({ channel:'super-sync',type: 'status:update', params: [] })
         } catch (e) {
-          console.warn(e)
+          if (!/receiving end does not exist|message port closed before a response/i.test(e?.message ?? String(e))) {
+            console.warn(e)
+          }
         }
       }
     })
@@ -223,10 +225,12 @@ export default class BrowserController {
     browser.runtime.onStartup.addListener(() => this.onStartup())
   }
 
-  async _receiveEvent(data, sendResponse) {
-    if (!data || data.channel !== 'super-sync' || !Array.isArray(data.params)) return
-    const {type, params} = data
-    if (!['cancelSync','scheduleSync','scheduleAll','setEnabled','syncAccount','unlock','getUnlocked'].includes(type)) return
+  _isRequest(data) {
+    return data?.channel === 'super-sync' && Array.isArray(data.params) &&
+      ['cancelSync', 'scheduleSync', 'scheduleAll', 'setEnabled', 'syncAccount', 'unlock', 'getUnlocked'].includes(data.type)
+  }
+
+  async _receiveEvent({ type, params }, sendResponse) {
     let result
     try { result = await this[type](...params) }
     catch(error) { sendResponse({channel:'super-sync',type:type+'Response',error:error.message,params:[]});return }

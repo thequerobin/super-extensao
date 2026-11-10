@@ -72,21 +72,40 @@ test('VPN background ignores other modules and page requests to connect', async 
     '../account/RefreshTokenError': {RefreshTokenError: class extends Error {}},
     '../state': {logOut() {}}, '../account/createSession': {createSession() {}},
     '../messaging/forkSession': {forkSession() {}},
-    '../tools/triggerPromise': {triggerPromise() {}},
     '../tools/executeOnTab': {executeOnTab() {}},
     '../account/partner/partners': {getPartnerById() {}},
     '../tools/delay': {delay() {}},
-    '../tools/getRuntime': {getRuntime: () => runtime}
+    '../tools/getRuntime': {getRuntime: () => runtime},
+    './handleAccountFork': {handleAccountFork: async () => ({handled: true})}
   }).initMessaging();
   const internal = {url: 'chrome-extension://test/vpn/popup.html'};
   assert.equal(listener({type: 'clearNow'}, internal), undefined);
   assert.equal(listener({channel: 'super-sync', type: 'state'}, internal), undefined);
   assert.equal(listener({channel: 'super-vpn', type: 'connect'}, {url: 'https://account.proton.me/'}), undefined);
   assert.equal(listener({channel: 'super-vpn', type: 'fork'}, internal), undefined);
+  assert.equal(listener({channel: 'super-vpn', type: 'changeState', respondTo: 'none'}, internal), undefined);
   assert.equal(calls.length, 0);
-  const response = await listener({channel: 'super-vpn', type: 'state'}, internal);
+  const response = await new Promise(resolve => {
+    assert.equal(listener({channel: 'super-vpn', type: 'state'}, internal, resolve), true);
+  });
   assert.equal(response.success, true);
   assert.equal(calls.length, 1);
+});
+
+test('VPN popup uses a direct reply and rejects when the receiver disappears', async () => {
+  const runtime = {
+    async sendMessage(...args) {
+      assert.deepEqual(plain(args), [{channel: 'super-vpn', type: 'state'}]);
+      return {received: true, result: 'connected'};
+    }
+  };
+  const {sendMessageTo} = load('tools/sendMessageTo', {'./getRuntime': {getRuntime: () => runtime}});
+  assert.equal(await sendMessageTo('state'), 'connected');
+
+  runtime.sendMessage = async () => {throw new Error('Receiving end does not exist.');};
+  await assert.rejects(sendMessageTo('state'), /Receiving end does not exist/);
+  runtime.sendMessage = async () => undefined;
+  await assert.rejects(sendMessageTo('state'), /did not answer/);
 });
 
 test('VPN storage cannot overwrite or delete host settings', async () => {

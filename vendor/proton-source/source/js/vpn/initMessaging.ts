@@ -5,7 +5,6 @@ import {createSession} from '../account/createSession';
 import {BackgroundAction} from '../messaging/MessageType';
 import type {ForkMessage, MessageBase} from '../messaging/Message';
 import {forkSession} from '../messaging/forkSession';
-import {triggerPromise} from '../tools/triggerPromise';
 import {executeOnTab} from '../tools/executeOnTab';
 import {getPartnerById} from '../account/partner/partners';
 import {delay} from '../tools/delay';
@@ -23,64 +22,40 @@ type WorkerExternalMessage = MessageBase &
 
 const getMessageResponse = async (message: any) => {
 	try {
-		return await routeMessage(message);
+		const result = await routeMessage(message);
+		return {received: true, success: !result?.error, result};
 	} catch (error) {
 		if (error instanceof RefreshTokenError) {
 			logOut(false);
 			await createSession();
-
-			return {error};
 		}
-
-		return {error};
+		return failedResponse(error);
 	}
 };
+
+const failedResponse = (error: unknown) => ({
+	received: true,
+	success: false,
+	result: {error: error instanceof Error ? {...error, message: error.message} : error},
+});
 
 export const initMessaging = () => {
 	const runtime = getRuntime();
 
-	runtime?.onMessage.addListener((message: any, sender) => {
-		if (message?.channel !== 'super-vpn') return undefined;
+	runtime?.onMessage.addListener((message: any, sender, sendResponse) => {
+		if (message?.channel !== 'super-vpn' || message.respondTo === 'none') return undefined;
 		const accountOrigins = ['https://account.proton.me', 'https://account.protonvpn.com'];
 		const senderUrl = sender.url || sender.tab?.url || '';
 		const fromAccount = accountOrigins.some(origin => senderUrl.startsWith(origin + '/'));
 		const internal = senderUrl.startsWith(runtime.getURL(''));
 		if (message.type === BackgroundAction.FORK ? !fromAccount : !internal) return undefined;
-		if (message.type === BackgroundAction.FORK) return handleAccountFork(message);
-		// eslint-disable-next-line no-async-promise-executor
-		const promise = new Promise(async (resolve) => {
-			const result = await getMessageResponse(message);
-
-			resolve({
-				received: true,
-				success:
-					!result || !(typeof result === 'object' && (result as any).error),
-				result,
-			});
-		});
-
-		if (message.respondTo === 'broadcast') {
-			promise.then((response) => {
-				triggerPromise(
-					runtime.sendMessage(runtime.id, {
-						channel: 'super-vpn',
-						type: 'answer:' + message.requestId,
-						respondTo: 'none',
-						data: (() => {
-							try {
-								return JSON.parse(JSON.stringify(response));
-							} catch (error) {
-								return {result: {error: `${error}`}};
-							}
-						})(),
-					}),
-				);
-			});
-
-			return undefined;
+		if (message.type === BackgroundAction.FORK) {
+			void handleAccountFork(message).then(sendResponse, () => sendResponse({handled: false}));
+		} else {
+			void getMessageResponse(message).then(sendResponse, error => sendResponse(failedResponse(error)));
 		}
 
-		return promise;
+		return true;
 	});
 
 	/**

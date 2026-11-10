@@ -18,9 +18,9 @@
       <v-btn class="primary" @click="saveOAuth">{{ t('SuperSave') }}</v-btn>
       <span role="status">{{ savedMessage }}</span>
     </details>
-    <v-content>
+    <v-main>
       <router-view />
-    </v-content>
+    </v-main>
     <v-dialog
       v-model="locked"
       :max-width="600"

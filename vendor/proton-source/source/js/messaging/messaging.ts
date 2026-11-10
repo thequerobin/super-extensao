@@ -1,5 +1,4 @@
 'use background';
-import {getRegisteredLocaleFromUser} from '../account/user/getRegisteredLocaleFromUser';
 import {readSession} from '../account/readSession';
 import {getFreshUser} from '../account/user/getUser';
 import {getPmUser} from '../account/user/getPmUser';
@@ -14,10 +13,8 @@ import {
 	SettingChange,
 	StateChange,
 } from './MessageType';
-import {triggerPromise} from '../tools/triggerPromise';
 import {sendForkResponse} from '../tools/openTabs';
 import {setupHandleProxyRequest} from '../tools/setupHandleProxyRequest';
-import {sendMessageToBackground} from '../tools/sendMessageToBackground';
 import {record} from '../log/record';
 import {forkSession} from './forkSession';
 import type {Logical} from '../vpn/Logical';
@@ -53,19 +50,7 @@ export const routeMessage = async <T extends BackgroundMessage>(message: {
 				throw new Error('No session');
 			}
 
-			const user = await getPmUser(true);
-
-			try {
-				triggerPromise(
-					sendMessageToBackground(BackgroundData.LOCALE, {
-						locale: getRegisteredLocaleFromUser(user),
-					}),
-				);
-			} catch {
-				// Fallback to browser language
-			}
-
-			return user;
+			return await getPmUser(true);
 		}
 
 		case StateChange.SIGN_OUT:

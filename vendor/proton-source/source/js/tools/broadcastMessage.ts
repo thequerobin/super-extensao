@@ -1,4 +1,4 @@
-import {sendMessageTo} from './sendMessageTo';
+import {getRuntime} from './getRuntime';
 import type {ApiError} from '../api';
 import type {ProxyServer} from '../vpn/ConnectionState';
 import {error} from '../log/log';
@@ -30,8 +30,10 @@ export const broadcastMessage = <
 	type: T['type'],
 	data: T['data'] | undefined = undefined,
 ): void => {
-	sendMessageTo(type, data).catch((e: any) => {
-		if (!`${e?.message || e}`.includes('Receiving end does not exist.')) {
+	const notification = {channel: 'super-vpn', type, data, respondTo: 'none'};
+	void getRuntime().sendMessage(notification).catch((e: any) => {
+		const noListener = /receiving end does not exist|message port closed before a response/i;
+		if (!noListener.test(String(e?.message ?? e))) {
 			error(e);
 		}
 	});
