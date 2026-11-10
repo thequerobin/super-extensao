@@ -23,11 +23,13 @@ button { border:1px solid var(--line); background:var(--accent-bg); color:var(--
 button:hover { filter:brightness(1.12); } button:disabled { opacity:.5; cursor:default; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .quiet,.secondary { background:var(--surface); color:var(--text); } .quiet { font-size:11px; padding:6px 9px; }
-.popup-navigation { flex-shrink:0; padding:4px; background:var(--surface); border:1px solid var(--line); border-radius:10px; }
+.popup-navigation { flex-shrink:0; isolation:isolate; }
 .popup-navigation nav { display:flex; gap:3px; }
+.main-nav, .sub-nav { border:1px solid var(--line); border-radius:10px; }
+.main-nav { position:relative; z-index:1; padding:4px; background:var(--surface); }
 .tab { flex:1; border:0; color:var(--muted); background:transparent; padding:8px 4px; font-size:12px; }
 .tab.active { background:var(--raised); color:var(--text); }
-.sub-nav { margin-top:3px; }
+.sub-nav { margin:-6px 6px 0; padding:9px 4px 4px; background:var(--bg); }
 #syncPanel { display:block; width:100%; height:clamp(240px,calc(100dvh - 190px),660px); border:0; border-radius:10px; background:var(--bg); }
 body[data-active-tab="sync"] { min-height:580px; }
 body[data-active-tab="sync"] .automation,
