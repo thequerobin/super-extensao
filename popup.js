@@ -38,10 +38,8 @@ function activateTab(tab, persist = true) {
     $("tab-" + name).classList.toggle("active", name === tab);
     $("tab-" + name).setAttribute("aria-pressed", String(name === tab));
   }
-  const saved = persist
-    ? chrome.storage.local.set({popupView:{tab, lastCleanupTab}}).catch(showError)
-    : Promise.resolve();
-  if (tab === "vpn") saved.then(() => $("vpnPanel").dispatchEvent(new Event("super-vpn:show")));
+  if (persist) chrome.storage.local.set({popupView:{tab, lastCleanupTab}}).catch(showError);
+  document.dispatchEvent(new CustomEvent("super-extension:panel-selected", {detail:tab}));
 }
 function refreshPresets() {
   document.querySelectorAll("[data-preset]").forEach(button => {

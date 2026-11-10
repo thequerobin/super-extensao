@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Super Extensão</title>
-  <link rel="stylesheet" href="popup-panels.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -85,9 +84,11 @@
       <p class="note">A aba de reserva é criada apenas quando necessária e removida quando há outras abas suficientes. Abas fixadas por você são preservadas. Janelas anônimas exigem a autorização separada do navegador.</p>
     </section>
     <section id="panel-vpn" aria-labelledby="tab-vpn" hidden>
+      <p id="vpnPanelStatus" class="scope" role="status">Carregando VPN…</p>
       <div id="vpnPanel" class="main-modal"></div>
     </section>
     <section id="panel-sync" aria-labelledby="tab-sync" hidden>
+      <p id="syncPanelStatus" class="scope" role="status">Carregando sincronização…</p>
       <div id="syncPanel" data-embedded="true"><div id="syncApp"></div></div>
     </section>
     <footer>
@@ -100,11 +101,7 @@
   <div id="popupResize" role="separator" tabindex="0" aria-label="Ajustar altura do popup" aria-orientation="horizontal" aria-valuemin="360" aria-valuemax="600" aria-valuenow="580" title="Arraste para ajustar a altura. Use ↑ e ↓ ou dê dois cliques para restaurar."></div>
   <script src="preferences.js"></script>
   <script src="popup-resize.js"></script>
+  <script src="popup-panels.js"></script>
   <script src="rules.js"></script><script src="navigation-rules.js"></script><script src="popup.js"></script><script src="tools-popup.js"></script>
-  <script defer src="sync/embedded.js"></script>
-  <script defer src="sync/js/options.js"></script>
-  <script defer src="vpn/js/browser-polyfill.min.js"></script>
-  <script defer src="vpn/panel.js"></script>
-  <script defer src="vpn/js/popup.js"></script>
 </body>
 </html>
