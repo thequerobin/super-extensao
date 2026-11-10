@@ -114,3 +114,45 @@ test('Free server selection keeps paid tiers restricted in the worker', () => {
   assert.throws(() => check({VPN: {MaxTier: 0}}, {Tier: NaN}), /not available/);
   assert.doesNotThrow(() => check({VPN: {MaxTier: 2}}, {Tier: 2}));
 });
+
+test('VPN permission requests match the host manifest', () => {
+  const {proxyPermission} = load('vpn/proxyPermission');
+  const manifest = JSON.parse(fs.readFileSync(path.resolve(source, '../../../../manifest.json'), 'utf8'));
+  for (const name of proxyPermission.permissions) assert.ok(manifest.permissions.includes(name));
+  for (const origin of proxyPermission.origins) assert.ok(manifest.host_permissions.includes(origin));
+});
+
+test('sign-in handles denied permissions, retries and failures without silently closing', async () => {
+  let allowed = false, fail = false, opened = 0, closed = 0;
+  const button = {disabled: false, classList: {remove() {}, contains() {return false;}, add() {}}};
+  const paragraph = {};
+  const view = {style: {}, querySelector: q => q === 'p' ? paragraph : button};
+  const {showSigningViewAndWaitForItToBeLoaded: show} = load('components/signIn/showSigningView', {
+    '../../vpn/getServersCount': {},
+    '../../tools/translate': {c: () => ({t: ([text]) => text})},
+    '../../account/openForkTab': {openForkTab: async () => {if (fail) throw Error('offline'); opened++;}},
+    '../../tools/triggerPromise': {},
+    '../../tools/sendMessageToBackground': {sendMessageToBackground: async () => {}},
+    '../../messaging/MessageType': {PermissionGrant: {PROXY: 'proxy'}},
+    '../../intervals': {},
+    '../../tools/update': {getUpdateError: async () => undefined},
+    '../../tools/openTab': {}, '../../tools/getBrowser': {},
+    '../../tools/getErrorMessage': {getErrorAsString: e => e.message},
+    '../../tools/sentry': {handleError() {}},
+    './initializeInlineParagraph': {}
+  }, {
+    chrome: {proxy: {}}, browser: {permissions: {request: async () => allowed}},
+    window: {close() {closed++;}}
+  });
+  await show(view, {style: {}}, {style: {}}, false);
+  await button.onclick();
+  assert.equal(opened, 0); assert.equal(closed, 0); assert.equal(button.disabled, false);
+  assert.match(paragraph.textContent, /not granted/);
+  allowed = true; fail = true;
+  await button.onclick();
+  assert.equal(closed, 0); assert.match(paragraph.textContent, /offline/);
+  fail = false;
+  await show(view, {style: {}}, {style: {}}, true);
+  await button.onclick();
+  assert.equal(opened, 1); assert.equal(closed, 1);
+});

@@ -1,22 +1,6 @@
-import {baseDomainURL} from '../config';
-type Permissions = chrome.permissions.Permissions &
-	browser.permissions.Permissions;
-
-const origins = [
-	'http://*/*',
-	'https://*/*',
-	'ftp://*/*',
-	'ws://*/*',
-	'wss://*/*',
-	'https://account.protonvpn.com/*',
-	'https://account.proton.me/*',
-];
-
-if (baseDomainURL !== 'https://account.proton.me') {
-	origins.push(baseDomainURL + '/*');
-}
-
-export const proxyPermission: Permissions = {
+// Match the host permissions declared by the Super Extensão manifest.
+// Requesting undeclared FTP/WebSocket origins prevents the login flow in Chromium.
+export const proxyPermission: chrome.permissions.Permissions & browser.permissions.Permissions = {
 	permissions: ['proxy'],
-	origins,
+	origins: ['http://*/*', 'https://*/*'],
 };
