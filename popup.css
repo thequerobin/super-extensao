@@ -13,7 +13,7 @@ h1 { font-size:17px; line-height:1.25; margin:0; letter-spacing:-.4px; } h2 { fo
 .theme-label { display:grid; flex-shrink:0; gap:3px; color:var(--muted); font-size:10px; }
 .theme-label select { padding:4px 7px; font-size:11px; }
 main { padding:0 20px; }
-.report { padding:14px 16px; border:1px solid var(--line); border-radius:var(--card-radius); background:var(--surface); box-shadow:var(--shadow); }
+.report { margin-bottom:12px; padding:14px 16px; border:1px solid var(--line); border-radius:var(--card-radius); background:var(--surface); box-shadow:var(--shadow); }
 .eyebrow { font-size:9px; letter-spacing:1.6px; color:var(--accent); font-weight:700; margin-bottom:4px; }
 .report h2 { font-size:13px; } .report p { font-size:11px; color:var(--muted); margin-top:4px; }
 .automation { display:flex; align-items:center; gap:10px; padding:17px 0; }
@@ -31,7 +31,6 @@ nav { display:flex; gap:3px; padding:4px; background:var(--surface); border:1px 
 .sub-nav .tab.active { background:var(--accent-bg); color:var(--accent); }
 #syncPanel { display:block; width:100%; height:clamp(240px,calc(100dvh - 190px),660px); border:0; border-radius:10px; background:var(--bg); }
 body[data-active-tab="sync"] { min-height:580px; }
-body[data-active-tab="sync"] .report,
 body[data-active-tab="sync"] .automation,
 body[data-active-tab="sync"] #pauseMenu,
 body[data-active-tab="sync"] #pauseRow,
@@ -86,7 +85,6 @@ footer { padding:14px 0 8px; border-top:1px solid var(--line); margin-top:16px; 
 
 #vpnPanel { display:block; width:100%; height:clamp(380px,calc(100dvh - 150px),560px); border:1px solid var(--line); border-radius:12px; background:var(--bg); }
 .vpn-note { margin:0 0 8px; color:var(--muted); font-size:11px; }
-body[data-active-tab="vpn"] .report,
 body[data-active-tab="vpn"] .automation,
 body[data-active-tab="vpn"] #pauseMenu,
 body[data-active-tab="vpn"] #pauseRow,
