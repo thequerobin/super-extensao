@@ -5,6 +5,7 @@ Commit upstream: 71d7d86f164a2ee8e50ce5a389c9e5cbe0fd6883 (1.3.6).
 Licença original: GPL-3.0, preservada em LICENSE.
 
 Alterações locais:
+- Ponte de login Chromium para o ID próprio da Super Extensão: estado local obrigatório, resposta ao solicitante e preservação do fluxo de outras extensões.
 - Tela de entrada com identidade da Super Extensão, orientação para usar a conta Proton e botão de login direto. Solicitação de proxy limitada às origens HTTP/HTTPS declaradas no manifesto, com erros e recusa de permissão visíveis.
 - Interface completa (`simplifiedUi=false`) para selecionar os servidores autorizados pelo plano; a verificação de tier continua na UI e também ocorre no worker antes de conectar.
 - Tunelamento dividido local para contas Free e pagas, incluindo os modos incluir e excluir, persistência e atualização da conexão ativa.

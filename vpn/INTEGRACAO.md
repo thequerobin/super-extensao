@@ -1,4 +1,4 @@
-# Proton VPN na Super Extensão 1.5.1
+# Proton VPN na Super Extensão 1.5.2
 
 ## Usar
 
@@ -16,13 +16,14 @@ O proxy vale para o tráfego deste navegador. Não altera a rede dos demais apli
 - Sessão, servidores e regras em `chrome.storage.local`, sob `superVpn:`. Tokens não são enviados ao Floccus nem incluídos na sincronização de favoritos.
 - Mensagens internas no canal `super-vpn`, separado de `super-sync` e da limpeza.
 - Permissões adicionadas: proxy, privacy, idle, scripting, webRequest e webRequestAuthProvider. Elas suportam o proxy, autenticação, recuperação e proteção WebRTC do módulo original.
+- Ponte Chromium na página oficial: encaminha a resposta de login à Super Extensão somente quando o estado foi gerado por ela; logins da extensão oficial mantêm o caminho original. Não encaminha senhas, chaves privadas ou tokens de sessão à página.
 - Relay de autorização apenas em `https://account.proton.me/` e `https://account.protonvpn.com/`, para mensagens de sessão `fork`, mantendo a validação do estado de autorização.
 - Telemetria e relatórios Sentry desativados. Ícone e badge do painel principal preservados.
 - Fonte GPL-3.0 do Proton mantida em `vendor/proton-source`, baseada no commit `71d7d86f164a2ee8e50ce5a389c9e5cbe0fd6883`.
 
 ## Validação
 
-Compilação de produção com verificação TypeScript e 26 testes automatizados, cobrindo também seleção por plano, tunelamento em contas Free, isolamento de dados e rejeição de mensagens indevidas.
+Compilação de produção com verificação TypeScript e 28 testes automatizados, cobrindo também seleção por plano, tunelamento em contas Free, isolamento de dados e rejeição de mensagens indevidas.
 
 O ambiente de desenvolvimento bloqueou a inicialização do Chromium com extensões (`socket() failed: Operation not permitted`). Não foram validados visualmente login, conexão real, mudança de IP, aplicação das regras no tráfego ou recuperação da VPN após reiniciar. Esses fluxos precisam de teste no navegador do usuário com uma conta Proton antes de considerar a integração validada para uso diário.
 

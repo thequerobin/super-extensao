@@ -156,3 +156,53 @@ test('sign-in handles denied permissions, retries and failures without silently 
   await button.onclick();
   assert.equal(opened, 1); assert.equal(closed, 1);
 });
+
+test('account forks are consumed only when their state belongs to this extension', async () => {
+  const calls = [];
+  const {handleAccountFork} = load('vpn/handleAccountFork', {
+    '../tools/storage': {Storage: {LOCAL: 'local'}, storage: {getItem: async key => key === 'fowned' ? {} : undefined}},
+    '../messaging/forkSession': {forkSession: async message => {calls.push(message); return {type: 'success'};}}
+  });
+  assert.equal((await handleAccountFork({payload: {state: 'other', selector: 'selector'}})).handled, false);
+  assert.equal((await handleAccountFork({payload: {state: 'owned'}})).handled, false);
+  assert.equal(calls.length, 0);
+  const result = await handleAccountFork({payload: {state: 'owned', selector: 'selector'}});
+  assert.equal(result.handled, true); assert.equal(result.response.type, 'success'); assert.equal(calls.length, 1);
+});
+
+test('Chromium auth adapter supports callback and Promise replies and preserves other extension logins', async () => {
+  let listener, serial = 0;
+  const requests = [], originalCalls = [];
+  const origin = 'https://account.proton.me';
+  const runtime = {sendMessage(...args) {
+    originalCalls.push(args);
+    const callback = args.at(-1);
+    if (typeof callback === 'function') callback({type: 'official'});
+    else return Promise.resolve({type: 'official'});
+  }};
+  const window = {addEventListener(_, fn) {listener = fn;}, postMessage(data) {requests.push(data);}};
+  vm.runInNewContext(fs.readFileSync(path.resolve(source, '../../../../vpn-auth-bridge.js'), 'utf8'), {
+    window, location: {origin}, chrome: {runtime}, crypto: {randomUUID: () => 'id-' + ++serial}, setTimeout, clearTimeout
+  });
+  const message = {type: 'fork', payload: {state: 'owned', selector: 'selector', persistent: true, keyPassword: 'must-not-relay'}};
+  const id = 'jplgfhpmjnbigmhklmmbgecoobifkmpa';
+  let reply;
+  runtime.sendMessage(id, message, value => {reply = value;});
+  assert.equal(requests.length, 1); assert.equal(requests[0].message.payload.keyPassword, undefined);
+  const respond = (request, result, eventOrigin = origin) => listener({source: window, origin: eventOrigin, data: {
+    channel: 'super-vpn-auth', direction: 'response', id: request.id, result
+  }});
+  respond(requests[0], {handled: true, response: {type: 'success'}}, 'https://evil.example');
+  await Promise.resolve(); assert.equal(reply, undefined);
+  respond(requests[0], {handled: true, response: {type: 'success'}});
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(reply.type, 'success'); assert.equal(originalCalls.length, 0);
+  const promise = runtime.sendMessage(id, message);
+  respond(requests[1], {handled: true, response: {type: 'success'}});
+  assert.equal((await promise).type, 'success');
+  const foreignLogin = runtime.sendMessage(id, message);
+  respond(requests[2], {handled: false});
+  assert.equal((await foreignLogin).type, 'official');
+  await runtime.sendMessage('another-extension', {type: 'state'});
+  assert.equal(originalCalls.length, 2);
+});

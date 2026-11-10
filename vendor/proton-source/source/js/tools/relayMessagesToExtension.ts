@@ -6,7 +6,21 @@ export const relayMessagesToExtension = (
 	source.addEventListener('message', event => {
 		if (event.source !== source || !origins.includes(event.origin)) return;
 		const data = event.data;
-		if (!data || data.type !== 'fork' || typeof data.payload?.state !== 'string' || typeof data.payload?.selector !== 'string') return;
-		void runtime.sendMessage({...data, channel: 'super-vpn'});
+		const bridge = data?.channel === 'super-vpn-auth' && data.direction === 'request' && typeof data.id === 'string';
+		const message = bridge ? data.message : data;
+		if (!message || message.type !== 'fork' || typeof message.payload?.state !== 'string' || typeof message.payload?.selector !== 'string') return;
+		const {state, selector, persistent} = message.payload;
+		void runtime.sendMessage({
+			channel: 'super-vpn', type: 'fork', token: typeof message.token === 'string' ? message.token : undefined,
+			payload: {state, selector, persistent: persistent === true},
+		}).then(result => {
+			if (bridge) {
+				source.postMessage({channel: 'super-vpn-auth', direction: 'response', id: data.id, result}, event.origin);
+			} else if (result?.handled) {
+				source.postMessage(result.response, event.origin);
+			}
+		}).catch(() => {
+			if (bridge) source.postMessage({channel: 'super-vpn-auth', direction: 'response', id: data.id, result: {handled: false}}, event.origin);
+		});
 	});
 };

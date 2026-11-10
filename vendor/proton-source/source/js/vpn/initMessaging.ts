@@ -10,6 +10,7 @@ import {executeOnTab} from '../tools/executeOnTab';
 import {getPartnerById} from '../account/partner/partners';
 import {delay} from '../tools/delay';
 import {getRuntime} from '../tools/getRuntime';
+import {handleAccountFork} from './handleAccountFork';
 import Tab = browser.tabs.Tab;
 
 type WorkerExternalMessage = MessageBase &
@@ -45,6 +46,7 @@ export const initMessaging = () => {
 		const fromAccount = accountOrigins.some(origin => senderUrl.startsWith(origin + '/'));
 		const internal = senderUrl.startsWith(runtime.getURL(''));
 		if (message.type === BackgroundAction.FORK ? !fromAccount : !internal) return undefined;
+		if (message.type === BackgroundAction.FORK) return handleAccountFork(message);
 		// eslint-disable-next-line no-async-promise-executor
 		const promise = new Promise(async (resolve) => {
 			const result = await getMessageResponse(message);
