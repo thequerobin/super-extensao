@@ -1,9 +1,11 @@
 "use strict";
 // Keep internal router navigation inside the embedded panel. Standalone views
 // retain their existing behavior; external help and provider sign-in stay external.
-if (window.self !== window.top) {
-  document.documentElement.dataset.embedded = "true";
-  document.addEventListener("click", event => {
+const embeddedSyncPanel = document.getElementById("syncPanel");
+if (embeddedSyncPanel || window.self !== window.top) {
+  const root = embeddedSyncPanel || document.documentElement;
+  root.dataset.embedded = "true";
+  root.addEventListener("click", event => {
     const link = event.target.closest("a[href]");
     if (!link) return;
     const url = new URL(link.href, location.href);

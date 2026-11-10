@@ -16,7 +16,7 @@ function showError(error) {
   $("error").textContent = error?.message || String(error);
   $("error").hidden = false;
 }
-function notify(message) { $("status").textContent = message; $("error").hidden = true; }
+function notify(message) { $("popupStatus").textContent = message; $("error").hidden = true; }
 function handle(action) { return (...args) => Promise.resolve().then(() => action(...args)).catch(showError); }
 function serializeMutation(action) {
   const result = mutationQueue.catch(() => {}).then(action);
@@ -28,8 +28,6 @@ let lastCleanupTab = "cleanup";
 function activateTab(tab, persist = true) {
   if (!NAV_TABS.includes(tab)) tab = "cleanup";
   document.body.dataset.activeTab = tab;
-  if (tab === "sync" && !$("syncPanel").getAttribute("src")) $("syncPanel").src = $("syncPanel").dataset.src;
-  if (tab === "vpn" && !$("vpnPanel").getAttribute("src")) $("vpnPanel").src = $("vpnPanel").dataset.src;
   const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
@@ -40,7 +38,10 @@ function activateTab(tab, persist = true) {
     $("tab-" + name).classList.toggle("active", name === tab);
     $("tab-" + name).setAttribute("aria-pressed", String(name === tab));
   }
-  if (persist) chrome.storage.local.set({popupView:{tab, lastCleanupTab}}).catch(showError);
+  const saved = persist
+    ? chrome.storage.local.set({popupView:{tab, lastCleanupTab}}).catch(showError)
+    : Promise.resolve();
+  if (tab === "vpn") saved.then(() => $("vpnPanel").dispatchEvent(new Event("super-vpn:show")));
 }
 function refreshPresets() {
   document.querySelectorAll("[data-preset]").forEach(button => {

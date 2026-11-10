@@ -47,7 +47,7 @@ export const freeServerList = (
 			<summary class="free-servers-summary list-item-box">
 				<span class="flex-1">${title}</span>
 				<svg class="free-servers-chevron" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-					<use xlink:href="img/icons.svg#expand-button"></use>
+					<use xlink:href="/vpn/img/icons.svg#expand-button"></use>
 				</svg>
 			</summary>
 			<div class="server-items servers-list">

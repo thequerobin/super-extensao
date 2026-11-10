@@ -37,7 +37,7 @@ const configureLock = (
 				viewBox="0 0 1309.443 1658.036"
 				xmlns="http://www.w3.org/2000/svg"
 			>
-				<use xlink:href="img/icons.svg#lock"></use>
+				<use xlink:href="/vpn/img/icons.svg#lock"></use>
 			</svg>
 		</a>
 	`;

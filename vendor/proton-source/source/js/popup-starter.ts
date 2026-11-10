@@ -133,7 +133,12 @@ type Theme = 'dark' | 'light' | 'auto';
 
 export const start = async (area: HTMLElement) => {
 	const rememberedPages = ['world', 'features', 'split-tunneling', 'help', 'settings', 'about-free-connections'];
-	const savedView = await storage.getItem<{page: string; scrollTop: number}>('view-state');
+	const preferences = window.SuperPreferences;
+	const [savedView, savedSession, locale] = await Promise.all([
+		storage.getItem<{page: string; scrollTop: number}>('view-state'),
+		readSession(),
+		preferences.locale.get(),
+	]);
 	let currentPage = 'world';
 	let viewMemoryReady = false;
 	const saveViewPosition = () => {
@@ -145,7 +150,7 @@ export const start = async (area: HTMLElement) => {
 	};
 
 	let pmUserCache: {user: PmUser | undefined} | null = null;
-	const session = await readSession();
+	const session = savedSession ?? {};
 
 	const getPmUser = async () => {
 		if (pmUserCache) {
@@ -159,15 +164,20 @@ export const start = async (area: HTMLElement) => {
 		return user;
 	};
 
-	const preferences = window.SuperPreferences;
-	const locale = await preferences.locale.get();
 	registerLocale(locale === 'en' ? 'en_US' : 'pt_BR');
-	document.documentElement.lang = locale;
+	const root = area === document.body ? document.documentElement : area;
+	root.lang = locale;
+	let languageChanged = false;
+	const reloadVisiblePanel = () => {
+		if (languageChanged && !area.closest('[hidden]')) window.location.reload();
+	};
 	preferences.locale.watch((updated) => {
-		if (updated !== locale) window.location.reload();
+		languageChanged = updated !== locale;
+		reloadVisiblePanel();
 	});
+	area.addEventListener('super-vpn:show', reloadVisiblePanel);
 	preferences.watchTheme((theme, resolved) => {
-		document.documentElement.dataset['theme'] = resolved;
+		root.dataset['theme'] = resolved;
 		setTheme(area, theme === 'system' ? 'auto' : theme);
 	});
 
@@ -881,7 +891,7 @@ export const start = async (area: HTMLElement) => {
 			? `
 				<div class="status-title">
 					<svg role="img" focusable="false" aria-hidden="true" class="protection-icon medium-icon" viewBox="0 0 24 24">
-						<use xlink:href="img/icons.svg#protected"></use>
+						<use xlink:href="/vpn/img/icons.svg#protected"></use>
 					</svg>
 					<div id="protected-label" class="protection-status">${c('Label').t`Protected`}</div>
 				</div>
@@ -902,7 +912,7 @@ export const start = async (area: HTMLElement) => {
 			: `
 				<div class="status-title">
 					<svg role="img" focusable="false" aria-hidden="true" class="protection-icon medium-icon" viewBox="0 0 24 24">
-						<use xlink:href="img/icons.svg#unprotected"></use>
+						<use xlink:href="/vpn/img/icons.svg#unprotected"></use>
 					</svg>
 					<div id="unprotected-label" class="protection-status">${c('Label').t`Unprotected`}</div>
 				</div>
@@ -1251,7 +1261,7 @@ export const start = async (area: HTMLElement) => {
 		});
 	});
 
-	translateArea(document);
+	translateArea(area);
 
 	const backStates: {name: string; content: string}[] = [];
 
@@ -1347,7 +1357,7 @@ export const start = async (area: HTMLElement) => {
 	const search = area.querySelector('#search-input') as HTMLInputElement;
 
 	if (search) {
-		search.focus();
+		if (area === document.body) search.focus();
 		search.onkeyup = (e) => {
 			if (e.key === 'Enter' || e.keyCode === 13) {
 				servers.querySelector<HTMLElement>('.server, .connect-option')?.click();

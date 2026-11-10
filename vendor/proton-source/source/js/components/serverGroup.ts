@@ -58,7 +58,7 @@ const getMinTier = (group: CountryItem): number =>
 	);
 
 export const torIcon = `<svg class="small-icon" viewBox="-3 -1 24 24" role="img" focusable="false">
-	<use xlink:href="img/icons.svg#tor"></use>
+	<use xlink:href="/vpn/img/icons.svg#tor"></use>
 </svg>`;
 
 const getGroupIcon = (
@@ -71,7 +71,7 @@ const getGroupIcon = (
 
 	if (type === 'city') {
 		return `<svg class="small-icon" viewBox="0 0 24 24" role="img" focusable="false">
-			<use xlink:href="img/icons.svg#city"></use>
+			<use xlink:href="/vpn/img/icons.svg#city"></use>
 		</svg>`;
 	}
 
@@ -80,7 +80,7 @@ const getGroupIcon = (
 	}
 
 	return `<svg class="small-icon" viewBox="0 0 24 24" role="img" focusable="false">
-		<use xlink:href="img/icons.svg#server"></use>
+		<use xlink:href="/vpn/img/icons.svg#server"></use>
 	</svg>`;
 };
 

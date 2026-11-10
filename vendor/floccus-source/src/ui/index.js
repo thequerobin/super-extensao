@@ -12,11 +12,13 @@ Vue.mixin(i18nPlugin)
 Vue.mixin(capacitor)
 
 const app = async () => {
+  const mount = document.getElementById('syncApp') || document.getElementById('app')
+  if (!mount) return
   i18n.setLocales([await globalThis.SuperPreferences.locale.get()])
   i18n.load().then(() => {
     setupDirection(vuetify)
     window['floccus'] = global['Floccus'] = new Vue({
-      el: '#app',
+      el: mount,
       router,
       store,
       vuetify,

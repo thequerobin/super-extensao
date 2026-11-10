@@ -32,7 +32,7 @@ export const connectionButton = <T extends Record<string, string | number>>(
 	<button class="connection-button"${connectionAttributes(data)}>
 		<span class="text">${c('Action').t`Connect`}</span>
 		<svg viewBox="0 0 64 64" class="icon">
-			<use xlink:href="img/icons.svg#connect"></use>
+			<use xlink:href="/vpn/img/icons.svg#connect"></use>
 		</svg>
 	</button>
 `;

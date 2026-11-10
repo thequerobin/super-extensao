@@ -108,7 +108,7 @@ export const configureSplitTunneling = (
 					}</div>
 					<button data-st-delete-index="${index}" ${describeButton(title)} class="small-button delete-button">
 						<svg fill="currentColor" viewBox="0 0 24 24">
-							<use xlink:href="img/icons.svg#delete"></use>
+							<use xlink:href="/vpn/img/icons.svg#delete"></use>
 						</svg>
 					</button>
 				</div>`;

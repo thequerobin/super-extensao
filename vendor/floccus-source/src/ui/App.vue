@@ -96,7 +96,8 @@ export default {
     const preferences = globalThis.SuperPreferences
     const stopTheme = preferences.watchTheme((_theme, resolved) => {
       this.$vuetify.theme.dark = resolved === 'dark'
-      document.documentElement.dataset.superTheme = resolved
+      const root = document.getElementById('syncPanel') || document.documentElement
+      root.dataset.superTheme = resolved
     })
     const stopLocale = preferences.locale.watch(async locale => {
       this.locale = locale

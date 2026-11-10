@@ -7,5 +7,5 @@ export const via = (
 	/* translator: Tooltip/vocalization for the >> symbol between the entry country flag and the exit country flag when using Secure Core, for instance to connect to Sweden via Switzerland */
 	c('Label').t`Via`,
 )}><svg viewBox="0 0 24 24" fill="currentColor">
-	<use xlink:href="img/icons.svg#via"></use>
+	<use xlink:href="/vpn/img/icons.svg#via"></use>
 </svg></span>`;

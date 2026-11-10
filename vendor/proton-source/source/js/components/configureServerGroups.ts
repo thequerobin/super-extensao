@@ -39,19 +39,19 @@ export const configureServerGroups = (area: HTMLElement) => {
 			const newTooltip = document.createElement('div');
 			newTooltip.innerHTML = `
 				<svg class="open-button" height="16" viewBox="0 0 16 16" width="16">
-					<use xlink:href="img/icons.svg#open-button"></use>
+					<use xlink:href="/vpn/img/icons.svg#open-button"></use>
 				</svg>
 				<div class="expanded-tooltip">
 					<div class="close-button">
 						<svg width="24" height="24" viewBox="0 0 24 24">
-							<use xlink:href="img/icons.svg#close-button"></use>
+							<use xlink:href="/vpn/img/icons.svg#close-button"></use>
 						</svg>
 					</div>
 					<div class="tooltip-title streaming-info">${c('Title').t`Features`}</div>
 					<div class="tooltip-row streaming-info">
 						<div class="tooltip-row-icon">
 							<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" class="streaming-icon">
-								<use xlink:href="img/icons.svg#streaming"></use>
+								<use xlink:href="/vpn/img/icons.svg#streaming"></use>
 							</svg>
 						</div>
 						<div class="tooltip-text">

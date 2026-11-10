@@ -21,7 +21,7 @@ export const fastestCountry = (
 					${secureCoreValue ? `<div class="via-box">${via()}</div>` : ''}
 					<div class="lightning">
 						<svg class="lightning-symbol" viewBox="0 0 10 14">
-							<use xlink:href="img/icons.svg#lightning"></use>
+							<use xlink:href="/vpn/img/icons.svg#lightning"></use>
 						</svg>
 					</div>
 					<div class="flex-1 group-name recent-name">

@@ -7,8 +7,9 @@ export function setupDirection(vuetify) {
   const framework = vuetify.framework || vuetify
   framework.rtl = rtl
   if (typeof document !== 'undefined') {
-    document.documentElement.dir = rtl ? 'rtl' : 'ltr'
-    document.documentElement.lang = i18n.getLocale()
+    const root = document.getElementById('syncPanel') || document.documentElement
+    root.dir = rtl ? 'rtl' : 'ltr'
+    root.lang = i18n.getLocale()
   }
 }
 

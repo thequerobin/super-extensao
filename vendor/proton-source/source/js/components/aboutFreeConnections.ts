@@ -16,7 +16,7 @@ export const aboutFreeConnections = (freeCountriesList: string[]) => `
 	<div class="current-server-description">
 		<div class="lightning">
 			<svg class="lightning-symbol" viewBox="0 0 10 14">
-				<use xlink:href="img/icons.svg#lightning"></use>
+				<use xlink:href="/vpn/img/icons.svg#lightning"></use>
 			</svg>
 		</div>
 		<div class="fastest-server" data-go-to="about-free-connections">

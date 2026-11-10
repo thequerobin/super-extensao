@@ -11,3 +11,5 @@ Para recompilar: em vendor/floccus-source, execute npm ci --ignore-scripts e npx
 Versão 1.4.1: largura e bordas compartilhadas entre cabeçalho, conexão, cartões, assistente e opções; controles superiores agrupados; campos contidos e layout responsivo.
 
 Versão 1.4.3: incorporação do aplicativo na seção Sincronização. sync/embedded.js identifica o contexto incorporado e mantém as rotas internas no mesmo quadro; o tema adapta cabeçalho, navegação, formulários e espaçamento para a largura do popup. A página independente continua disponível e as chaves de armazenamento existentes foram mantidas.
+
+Na versão 1.5.6, o aplicativo monta suas rotas no elemento da seção Sincronização do popup. A compilação gera `options.css` ao lado do JavaScript. Depois de copiar os arquivos para `sync/js`, execute `npm run build:panels` na raiz para atualizar os estilos da interface integrada.

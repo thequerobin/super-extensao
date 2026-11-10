@@ -49,7 +49,7 @@ const getCountryBlock = (choice: Choice) => {
 			${(choice.requiredFeatures ?? 0) & Feature.SECURE_CORE ? `<div class="via-box">${via()}</div>` : ''}
 			<div class="lightning">
 				<svg class="lightning-symbol" viewBox="0 0 10 14">
-					<use xlink:href="img/icons.svg#lightning"></use>
+					<use xlink:href="/vpn/img/icons.svg#lightning"></use>
 				</svg>
 			</div>
 		`;
@@ -76,7 +76,7 @@ const getButtonBox = (choice: Choice) => `<div class="button-box">
 		data-forget-recent="${escapeHtml(JSON.stringify(choice))}"
 	>
 		<svg width="24" height="24" viewBox="0 0 24 24">
-			<use xlink:href="img/icons.svg#close-button"></use>
+			<use xlink:href="/vpn/img/icons.svg#close-button"></use>
 		</svg>
 	</button>
 </div>`;

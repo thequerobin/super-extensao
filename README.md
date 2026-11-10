@@ -42,6 +42,8 @@ O gradiente inicial funciona offline. Widgets e provedores online continuam disp
 
 O tema é compartilhado entre o popup, a nova guia, a sincronização e a VPN. O idioma escolhido na nova guia ou na sincronização também se aplica à VPN, que recarrega seu painel ao mudar de idioma. O arquivo `preferences.js` centraliza a leitura, a validação e as atualizações dessas preferências com as chaves já usadas pelas instalações existentes.
 
+A VPN e a sincronização montam todas as suas telas na página do popup. A interface usa os dados locais e as consultas dos próprios módulos para carregar perfis, sessões e servidores. Os estilos são limitados ao painel de cada módulo. Ao recompilar a sincronização, copie também `options.css` para `sync/js` e execute `npm run build:panels` com as dependências de compilação da VPN instaladas. A compilação da VPN já executa essa etapa.
+
 O componente GPL-3.0 mantém licença, avisos e código-fonte. Veja [as adaptações e instruções de reconstrução](newtab/MODIFICATIONS.md) e [o código-fonte correspondente](vendor/tabliss-source/).
 
 ### Limpeza e exceções
