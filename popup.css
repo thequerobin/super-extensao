@@ -87,7 +87,7 @@ footer { padding:14px 20px 16px; border-top:1px solid var(--line); margin-top:16
 @media (min-width:700px) { #syncPanel { height:clamp(280px,calc(100dvh - 240px),660px); } }
 @media (prefers-reduced-motion:no-preference) { button,input[role="switch"] { transition:background .15s,color .15s; } }
 
-#vpnPanel { display:block; width:100%; height:530px; border:0; border-radius:10px; }
+#vpnPanel { display:block; width:100%; height:clamp(380px,calc(100dvh - 150px),560px); border:1px solid var(--line); border-radius:12px; background:var(--bg); }
 .vpn-note { margin:0 0 8px; color:var(--muted); font-size:11px; }
 body[data-active-tab="vpn"] .report,
 body[data-active-tab="vpn"] .automation,

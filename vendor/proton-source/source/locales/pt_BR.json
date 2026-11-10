@@ -236,6 +236,7 @@
 			]
 		},
 		"Info": {
+			"About free connections": ["Sobre as conexões gratuitas"],
 			"VPN permission was not granted. Try again to continue.": ["A permissão da VPN não foi concedida. Tente novamente para continuar."],
 			"Unable to open Proton sign-in. Please try again.": ["Não foi possível abrir o login da Proton. Tente novamente."],
 			"Sign in with your Proton Account to use the VPN.": ["Entre com sua conta Proton para usar a VPN."],

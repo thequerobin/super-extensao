@@ -27,8 +27,10 @@ function serializeMutation(action) {
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
 }
+const NAV_TABS = ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync", "vpn"];
 let lastCleanupTab = "cleanup";
-function activateTab(tab) {
+function activateTab(tab, persist = true) {
+  if (!NAV_TABS.includes(tab)) tab = "cleanup";
   document.body.dataset.activeTab = tab;
   if (tab === "sync" && !$("syncPanel").getAttribute("src")) $("syncPanel").src = $("syncPanel").dataset.src;
   if (tab === "vpn" && !$("vpnPanel").getAttribute("src")) $("vpnPanel").src = $("vpnPanel").dataset.src;
@@ -37,11 +39,12 @@ function activateTab(tab) {
   $("cleanupSubmenu").hidden = !isCleanup;
   $("section-cleanup").classList.toggle("active", isCleanup);
   $("section-cleanup").setAttribute("aria-pressed", String(isCleanup));
-  for (const name of ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync", "vpn"]) {
+  for (const name of NAV_TABS) {
     $("panel-" + name).hidden = name !== tab;
     $("tab-" + name).classList.toggle("active", name === tab);
     $("tab-" + name).setAttribute("aria-pressed", String(name === tab));
   }
+  if (persist) chrome.storage.local.set({popupView:{tab, lastCleanupTab}}).catch(showError);
 }
 function refreshPresets() {
   document.querySelectorAll("[data-preset]").forEach(button => {
@@ -150,10 +153,13 @@ async function loadBookmarks() {
   await refreshPreview();
 }
 async function init() {
-  const settings = await chrome.storage.local.get(DEFAULTS);
+  const settings = await chrome.storage.local.get({...DEFAULTS, popupView:null});
   for (const key of TOGGLES) $(key).checked = settings[key] === true;
   $("theme").value = ["dark", "light", "system"].includes(settings.theme) ? settings.theme : "dark";
   applyTheme($("theme").value);
+  const savedView = settings.popupView;
+  if (["cleanup", "exceptions", "bookmarks"].includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
+  activateTab(savedView?.tab, false);
   refreshPresets();
   $("theme").addEventListener("change", handle(async () => {
     applyTheme($("theme").value);

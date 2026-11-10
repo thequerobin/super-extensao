@@ -138,6 +138,18 @@ const state = {
 type Theme = 'dark' | 'light' | 'auto';
 
 export const start = async (area: HTMLElement) => {
+	const rememberedPages = ['world', 'features', 'split-tunneling', 'help', 'settings', 'about-free-connections'];
+	const savedView = await storage.getItem<{page: string; scrollTop: number}>('view-state');
+	let currentPage = 'world';
+	let viewMemoryReady = false;
+	const saveViewPosition = () => {
+		if (!viewMemoryReady) return;
+		triggerPromise(storage.setItem('view-state', {
+			page: rememberedPages.includes(currentPage) ? currentPage : 'world',
+			scrollTop: area.querySelector<HTMLElement>('.page-view')?.scrollTop || 0,
+		}));
+	};
+
 	let pmUserCache: {user: PmUser | undefined} | null = null;
 	const session = await readSession();
 
@@ -1291,6 +1303,7 @@ export const start = async (area: HTMLElement) => {
 		});
 
 	function goTo(page: string): void {
+		currentPage = page;
 		if (page !== 'region') {
 			currentRegionState = undefined;
 
@@ -1337,6 +1350,7 @@ export const start = async (area: HTMLElement) => {
 		if (loggedView) {
 			loggedView.scrollTop = 0;
 		}
+		saveViewPosition();
 	}
 
 	configureGoToButtons(area, goTo);
@@ -1539,6 +1553,17 @@ export const start = async (area: HTMLElement) => {
 		root.logicalMaxTier = newValue;
 		await start(area);
 	});
+
+	const rememberedPage = savedView?.page;
+	if (rememberedPage && rememberedPages.includes(rememberedPage)) {
+		goTo(rememberedPage);
+		const pageView = area.querySelector<HTMLElement>('.page-view');
+		if (pageView && typeof savedView.scrollTop === 'number' && Number.isFinite(savedView.scrollTop)) {
+			pageView.scrollTop = Math.max(0, savedView.scrollTop);
+		}
+	}
+	viewMemoryReady = true;
+	area.querySelector('.page-view')?.addEventListener('scroll', saveViewPosition, {passive: true});
 
 	maybeShowRatingModal(rateUsModal, user);
 

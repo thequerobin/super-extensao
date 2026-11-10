@@ -1,4 +1,4 @@
-# Proton VPN na Super Extensão 1.5.2
+# Proton VPN na Super Extensão 1.5.3
 
 ## Usar
 
@@ -11,6 +11,9 @@
 O proxy vale para o tráfego deste navegador. Não altera a rede dos demais aplicativos. A disponibilidade de servidores e a autorização de conexão continuam sob controle do Proton.
 
 ## Configurações e integração
+
+- Painel da VPN com a paleta, tipografia, bordas e botões da Super Extensão. Layout fluido no painel incorporado.
+- A extensão reabre na seção anterior. A VPN também lembra a página estável aberta e sua rolagem; telas transitórias de servidor voltam à lista de países.
 
 - Tema escuro, claro ou sistema compartilhado com a preferência global da Super Extensão.
 - Sessão, servidores e regras em `chrome.storage.local`, sob `superVpn:`. Tokens não são enviados ao Floccus nem incluídos na sincronização de favoritos.
