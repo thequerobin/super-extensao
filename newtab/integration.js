@@ -2,17 +2,9 @@
    upstream configuration controls and import/export remain intact. */
 (function () {
   "use strict";
-  const preference = window.matchMedia("(prefers-color-scheme: dark)");
-  let theme = "dark";
-  function applyTheme() {
-    document.documentElement.dataset.superTheme = theme === "system" ? (preference.matches ? "dark" : "light") : theme;
-  }
-  chrome.storage.local.get({theme:"dark"}).then(data => {theme=data.theme;applyTheme();}).catch(applyTheme);
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.theme) {theme=changes.theme.newValue || "dark";applyTheme();}
+  SuperPreferences.watchTheme((_theme, resolved) => {
+    document.documentElement.dataset.superTheme = resolved;
   });
-  preference.addEventListener("change",applyTheme);
-  applyTheme();
   const button = document.getElementById("super-settings");
   function applyLanguage() {
     button.title = /^en(?:-|$)/i.test(document.documentElement.lang)

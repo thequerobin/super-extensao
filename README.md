@@ -40,6 +40,8 @@ A engrenagem do dashboard abre o editor de fundos e widgets com o visual da Supe
 
 O gradiente inicial funciona offline. Widgets e provedores online continuam disponíveis e dependem dos respectivos serviços, suas APIs e cotas. As preferências do dashboard usam `tabliss/config` em `storage.sync` e podem sincronizar se o navegador oferecer o recurso. Imagens e cache usam IndexedDB e não sincronizam. Esses dados ficam separados das preferências locais de limpeza/abas/autoplay e não são apagados pela limpeza configurada nesta extensão.
 
+O tema é compartilhado entre o popup, a nova guia, a sincronização e a VPN. O idioma escolhido na nova guia ou na sincronização também se aplica à VPN, que recarrega seu painel ao mudar de idioma. O arquivo `preferences.js` centraliza a leitura, a validação e as atualizações dessas preferências com as chaves já usadas pelas instalações existentes.
+
 O componente GPL-3.0 mantém licença, avisos e código-fonte. Veja [as adaptações e instruções de reconstrução](newtab/MODIFICATIONS.md) e [o código-fonte correspondente](vendor/tabliss-source/).
 
 ### Limpeza e exceções

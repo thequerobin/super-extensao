@@ -5,7 +5,8 @@ import iconNames from "./icons-pt-BR.json";
 
 let currentLocale = "pt-BR";
 export const normalizeLocale = (locale: string): "pt-BR" | "en" =>
-  /^en(?:-|$)/i.test(locale || "") ? "en" : "pt-BR";
+  window.SuperPreferences?.locale.normalize(locale) ??
+  (/^en(?:-|$)/i.test(locale || "") ? "en" : "pt-BR");
 export function setUiLocale(locale: string) {
   currentLocale = normalizeLocale(locale);
 }

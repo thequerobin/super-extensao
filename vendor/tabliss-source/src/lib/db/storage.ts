@@ -1,6 +1,18 @@
 import * as DB from "./db";
 import * as Stream from "./stream";
 
+declare global {
+  interface Window {
+    SuperPreferences?: {
+      locale: {
+        normalize(value: unknown): "en" | "pt-BR";
+        set(value: unknown): Promise<void>;
+        watch(callback: (locale: "en" | "pt-BR") => void): () => void;
+      };
+    };
+  }
+}
+
 /** IndexedDB storage provider */
 // TODO: clean up indexeddb usage, convert to promises and double check error handling
 export const indexeddb = (
@@ -90,17 +102,27 @@ export const extension = async (
     });
 
   const storageArea = browser.storage[area];
+  const localePreference = name === "tabliss/config" && area === "sync"
+    ? window.SuperPreferences?.locale
+    : undefined;
+  let applyingSharedLocale = false;
+  let savedLocale: unknown;
 
   // Pull
   await storageArea
     .get()
-    .then((stored) =>
+    .then((stored) => {
       Object.keys(stored)
         .filter((key) => key.startsWith(name))
-        .forEach((key) =>
-          DB.put(db, key.substring(name.length + 1), stored[key]),
-        ),
-    )
+        .forEach((key) => {
+          const localKey = key.substring(name.length + 1);
+          const value = stored[key];
+          DB.put(db, localKey, localKey === "locale" && localePreference
+            ? localePreference.normalize(value)
+            : value);
+        });
+      savedLocale = stored[`${name}/locale`];
+    })
     .catch((error) => {
       throw mapError("Cannot read from storage", error);
     });
@@ -110,31 +132,49 @@ export const extension = async (
   const handleError = (message: string) => (err: unknown) => {
     Stream.publish(errors, mapError(message, err));
   };
-  DB.listen(
-    db,
-    batch((changes) => {
-      if (DEV) console.log("Storage: saving changes:", changes);
+  if (localePreference && savedLocale !== undefined && savedLocale !== localePreference.normalize(savedLocale)) {
+    localePreference.set(savedLocale).catch(handleError("Cannot normalize saved language"));
+  }
+  const persistChanges = batch((changes) => {
+    if (DEV) console.log("Storage: saving changes:", changes);
 
-      // TODO: test for both updates and deletes for the same key
-      // TODO: iterator helpers
-      const changesArray = Array.from(changes);
-      const updates = Object.fromEntries(
-        changesArray
-          .filter(([, val]) => val !== undefined)
-          .map(([key, val]) => [`${name}/${key}`, val]),
-      );
-      const deletes = changesArray
-        .filter(([, val]) => val === undefined)
-        .map(([key]) => `${name}/${key}`);
+    // TODO: test for both updates and deletes for the same key
+    // TODO: iterator helpers
+    const changesArray = Array.from(changes);
+    const updates = Object.fromEntries(
+      changesArray
+        .filter(([, val]) => val !== undefined)
+        .map(([key, val]) => [`${name}/${key}`, val]),
+    );
+    const deletes = changesArray
+      .filter(([, val]) => val === undefined)
+      .map(([key]) => `${name}/${key}`);
 
-      storageArea
-        .set(updates)
-        .catch(handleError("Cannot write updates to storage"));
-      storageArea
-        .remove(deletes)
-        .catch(handleError("Cannot write deletes to storage"));
-    }),
-  );
+    storageArea
+      .set(updates)
+      .catch(handleError("Cannot write updates to storage"));
+    storageArea
+      .remove(deletes)
+      .catch(handleError("Cannot write deletes to storage"));
+  });
+  DB.listen(db, (change) => {
+    if (localePreference && change[0] === "locale") {
+      if (!applyingSharedLocale) {
+        localePreference.set(change[1]).catch(handleError("Cannot write language preference"));
+      }
+      return;
+    }
+    persistChanges(change);
+  });
+  localePreference?.watch((locale) => {
+    if (DB.get(db, "locale") === locale) return;
+    applyingSharedLocale = true;
+    try {
+      DB.put(db, "locale", locale);
+    } finally {
+      applyingSharedLocale = false;
+    }
+  });
 
   return errors;
 };

@@ -1,7 +1,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const TOGGLES = ["enabled", "clearHistory", "clearCache", "clearCookies", "clearDownloads", "clearFormData", "clearLocalStorage"];
-const DEFAULTS = {enabled:true, clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false, excludedSites:[], theme:"dark", paused:false, pauseUntil:null};
+const DEFAULTS = {enabled:true, clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false, excludedSites:[], paused:false, pauseUntil:null};
 const PRESETS = {
   safe: {clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false},
   standard: {clearHistory:true, clearCache:true, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false},
@@ -11,7 +11,6 @@ const LABELS = {history:"histórico", cache:"cache", cookies:"cookies", download
 let folders = new Map();
 let preview = {domains:[], skipped:0};
 let mutationQueue = Promise.resolve();
-const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
 
 function showError(error) {
   $("error").textContent = error?.message || String(error);
@@ -23,9 +22,6 @@ function serializeMutation(action) {
   const result = mutationQueue.catch(() => {}).then(action);
   mutationQueue = result.catch(() => {});
   return result;
-}
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
 }
 const NAV_TABS = ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync", "vpn"];
 let lastCleanupTab = "cleanup";
@@ -155,17 +151,15 @@ async function loadBookmarks() {
 async function init() {
   const settings = await chrome.storage.local.get({...DEFAULTS, popupView:null});
   for (const key of TOGGLES) $(key).checked = settings[key] === true;
-  $("theme").value = ["dark", "light", "system"].includes(settings.theme) ? settings.theme : "dark";
-  applyTheme($("theme").value);
+  SuperPreferences.watchTheme((theme, resolved) => {
+    $("theme").value = theme;
+    document.documentElement.dataset.theme = resolved;
+  });
   const savedView = settings.popupView;
   if (["cleanup", "exceptions", "bookmarks"].includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
   activateTab(savedView?.tab, false);
   refreshPresets();
-  $("theme").addEventListener("change", handle(async () => {
-    applyTheme($("theme").value);
-    await chrome.storage.local.set({theme:$("theme").value});
-  }));
-  systemTheme.addEventListener("change", () => applyTheme($("theme").value));
+  $("theme").addEventListener("change", handle(() => SuperPreferences.theme.set($("theme").value)));
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
   $("section-cleanup").addEventListener("click", () => activateTab(lastCleanupTab));
   for (const key of TOGGLES) $(key).addEventListener("change", handle(async () => {

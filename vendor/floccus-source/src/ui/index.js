@@ -12,8 +12,7 @@ Vue.mixin(i18nPlugin)
 Vue.mixin(capacitor)
 
 const app = async () => {
-  const data=await chrome.storage.sync.get({'tabliss/config/locale':'pt-BR'})
-  i18n.setLocales([data['tabliss/config/locale']])
+  i18n.setLocales([await globalThis.SuperPreferences.locale.get()])
   i18n.load().then(() => {
     setupDirection(vuetify)
     window['floccus'] = global['Floccus'] = new Vue({

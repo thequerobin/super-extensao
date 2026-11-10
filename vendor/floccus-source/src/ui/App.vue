@@ -93,12 +93,25 @@ export default {
     },
   },
   async created() {
+    const preferences = globalThis.SuperPreferences
+    const stopTheme = preferences.watchTheme((_theme, resolved) => {
+      this.$vuetify.theme.dark = resolved === 'dark'
+      document.documentElement.dataset.superTheme = resolved
+    })
+    const stopLocale = preferences.locale.watch(async locale => {
+      this.locale = locale
+      if (locale === i18n.getLocale()) return
+      i18n.setLocales([locale])
+      await i18n.load()
+      translationState.version++
+      setupDirection(this.$vuetify)
+    })
+    this.$once('hook:beforeDestroy', () => {
+      stopTheme()
+      stopLocale()
+    })
     const current = await browser.storage.local.get({oauthClients:{}})
     this.oauth = {...this.oauth,...current.oauthClients}
-    const media=window.matchMedia('(prefers-color-scheme: dark)')
-    const apply=async()=>{ const {theme}=await chrome.storage.local.get({theme:'dark'});this.$vuetify.theme.dark=theme==='system'?media.matches:theme!=='light';document.documentElement.dataset.superTheme=this.$vuetify.theme.dark?'dark':'light' }
-    apply();media.addEventListener('change',apply)
-    chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.theme)apply()})
 
     if (window.KAGI) {
       browser.storage.local.set({ isOrion: true })
@@ -119,8 +132,7 @@ export default {
   },
   methods: {
     async changeLocale() {
-      i18n.setLocales([this.locale]);await i18n.load();translationState.version++;setupDirection(this.$vuetify)
-      await chrome.storage.sync.set({'tabliss/config/locale':this.locale})
+      await globalThis.SuperPreferences.locale.set(this.locale)
     },
     async saveOAuth() {
       await browser.storage.local.set({oauthClients:{...this.oauth}})

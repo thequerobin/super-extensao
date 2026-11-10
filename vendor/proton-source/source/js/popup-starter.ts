@@ -106,7 +106,6 @@ import {warn} from './log/log';
 import {getUserContext} from './account/user/getUserContext';
 import {loadUserForView} from './account/user/loadUserForView';
 import {canAccessPaidServers} from './account/user/canAccessPaidServers';
-import {getRegisteredLocaleFromUser} from './account/user/getRegisteredLocaleFromUser';
 import {getPmUserFromBackground} from './account/user/getPmUserFromBackground';
 import {pickServerInLogical} from './vpn/pickServerInLogical';
 import {milliSeconds} from './tools/milliSeconds';
@@ -160,13 +159,14 @@ export const start = async (area: HTMLElement) => {
 		return user;
 	};
 
-	if (session.uid) {
-		try {
-			registerLocale(getRegisteredLocaleFromUser(await getPmUser()));
-		} catch {
-			// Fallback to browser locale
-		}
-	}
+	const preferences = window.SuperPreferences;
+	const locale = await preferences.locale.get();
+	registerLocale(locale === 'en' ? 'en_US' : 'pt_BR');
+	document.documentElement.lang = locale;
+	preferences.locale.watch((updated) => {
+		if (updated !== locale) window.location.reload();
+	});
+	preferences.watchTheme((theme) => setTheme(area, theme === 'system' ? 'auto' : theme));
 
 	await fetchTranslations();
 
@@ -206,28 +206,6 @@ export const start = async (area: HTMLElement) => {
 		),
 		'.split-tunneling-action-block': !splitTunnelingEnabled,
 		'.auto-connect-action-block': !autoConnectEnabled,
-	});
-
-	let theme: Theme = 'dark';
-
-	const storedTheme = {
-		async get() {
-			const {theme} = await chrome.storage.local.get({theme: 'dark'});
-			return {value: (theme === 'system' ? 'auto' : theme) as Theme};
-		},
-		async set({value}: {value: Theme}) {
-			await chrome.storage.local.set({theme: value === 'auto' ? 'system' : value});
-		},
-	};
-	chrome.storage.onChanged.addListener((changes, areaName) => {
-		if (areaName === 'local' && changes['theme']) {
-			const value = changes['theme'].newValue;
-			setTheme(area, value === 'system' ? 'auto' : value === 'light' ? 'light' : 'dark');
-		}
-	});
-	storedTheme.get().then((themeCache) => {
-		theme = themeCache?.value || theme;
-		setTheme(area, theme);
 	});
 
 	if (!session.uid || !session.refreshToken) {
@@ -1050,8 +1028,7 @@ export const start = async (area: HTMLElement) => {
 			input.addEventListener('change', async () => {
 				if (input.checked) {
 					const value = input.value as Theme;
-					setTheme(area, value);
-					await storedTheme.set({value});
+					await preferences.theme.set(value === 'auto' ? 'system' : value);
 				}
 			});
 		});

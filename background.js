@@ -1,4 +1,4 @@
-importScripts("rules.js");
+importScripts("preferences.js", "rules.js");
 importScripts("navigation-rules.js", "tab-guard.js");
 // ====== デフォルト設定 ======
 const DEFAULT_SETTINGS = {
@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   clearFormData: false,
   clearLocalStorage: false,
   excludedSites: [],
-  theme: "dark",
+  theme: SuperPreferences.theme.defaultValue,
   pendingSession: null,
   pendingClearNotification: null,
   lastClearTime: null,
