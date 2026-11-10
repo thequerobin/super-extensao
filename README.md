@@ -6,6 +6,8 @@ Uma extensão para Helium e navegadores Chromium que reúne a Nova guia personal
 
 ## Recursos
 
+Próxima etapa planejada: integração do Proton VPN com opção de tunelamento dividido e configurações gerais para toda a extensão. Detalhes em [Próximos passos](PROXIMOS-PASSOS.md).
+
 - **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
 - **Painel unificado:** marca da Super Extensão, largura de 460 px e temas Escuro/Claro/Sistema sincronizados com o popup. Os blocos finais de persistência, apoio e links sociais foram removidos da interface.
 - **Tradução completa dos controles:** fundos, widgets, dicas, mensagens, ícones e seletores em PT-BR, com inglês preservado. Idiomas excedentes foram removidos e preferências antigas são migradas sem apagar personalizações.
