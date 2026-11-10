@@ -206,3 +206,17 @@ test('Chromium auth adapter supports callback and Promise replies and preserves 
   await runtime.sendMessage('another-extension', {type: 'state'});
   assert.equal(originalCalls.length, 2);
 });
+
+test('local recent connections are displayed for Free accounts and respect the history toggle', async () => {
+  const {locationList} = load('components/locationList', {
+    '../tools/translate': {c: () => ({t: parts => parts.join('')})},
+    './countryList': {countryList: () => '<countries>'},
+    './recentLocations': {recentLocationsSlot: choices => '<recents>' + choices.length},
+    './countryListHeader': {countryListHeader() {}},
+    '../vpn/lastChoice': {getLastChoices: async () => [{exitCountry:'NL'}]}
+  });
+  for (const tier of [0, 2]) {
+    assert.equal(await locationList({}, {tier}, {value:false}, {config:{value:true}}), '<recents>1<countries>');
+    assert.equal(await locationList({}, {tier}, {value:false}, {config:{value:false}}), '<countries>');
+  }
+});

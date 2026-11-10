@@ -5,6 +5,7 @@ Commit upstream: 71d7d86f164a2ee8e50ce5a389c9e5cbe0fd6883 (1.3.6).
 Licença original: GPL-3.0, preservada em LICENSE.
 
 Alterações locais:
+- Histórico local de conexões recentes disponível para contas Free e pagas, com controle para desativar e apagar o histórico.
 - Tema visual da Super Extensão em `vpn-theme.css`, painel fluido e memória da página e rolagem da VPN.
 - Ponte de login Chromium para o ID próprio da Super Extensão: estado local obrigatório, resposta ao solicitante e preservação do fluxo de outras extensões.
 - Tela de entrada com identidade da Super Extensão, orientação para usar a conta Proton e botão de login direto. Solicitação de proxy limitada às origens HTTP/HTTPS declaradas no manifesto, com erros e recusa de permissão visíveis.

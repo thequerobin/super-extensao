@@ -15,7 +15,7 @@ export const locationList = async (
 	recents: LoadedFeature<Recents>,
 ) => {
 	return (
-		(userContext.tier > 0 && recents.config.value
+		(recents.config.value
 			? recentLocationsSlot(await getLastChoices(), countries)
 			: '') +
 		(countryList(countries, userContext, secureCore, countryListHeader, true) ||

@@ -95,3 +95,21 @@ body[data-active-tab="vpn"] #pauseMenu,
 body[data-active-tab="vpn"] #pauseRow,
 body[data-active-tab="vpn"] footer { display:none!important; }
 body[data-active-tab="vpn"] header { padding:12px 22px; }
+
+/* Keep the resize grip and header reachable while the selected panel scrolls. */
+html { height:var(--popup-height,580px); overflow:hidden; }
+body { height:100%; min-height:0; padding:0; display:flex; flex-direction:column; overflow:hidden; }
+body[data-active-tab="sync"] { min-height:0; }
+header, footer { flex-shrink:0; }
+main { flex:1; min-height:0; overflow-y:auto; padding-bottom:8px; }
+body[data-active-tab="vpn"] main,
+body[data-active-tab="sync"] main { display:flex; flex-direction:column; overflow:hidden; }
+main > nav { flex-shrink:0; }
+#panel-vpn, #panel-sync { flex:1; min-height:0; display:flex; flex-direction:column; }
+#panel-sync .section-heading { flex-shrink:0; }
+#vpnPanel, #syncPanel { flex:1; min-height:0; height:100%; }
+#popupResize { flex:0 0 16px; display:flex; align-items:center; justify-content:center; cursor:ns-resize; touch-action:none; background:var(--bg); border-top:1px solid var(--line); }
+#popupResize::after { content:""; width:44px; height:4px; border-radius:4px; background:var(--muted); opacity:.65; }
+#popupResize:hover::after, #popupResize:focus-visible::after { background:var(--accent); opacity:1; }
+body.resizing { user-select:none; cursor:ns-resize; }
+body.resizing iframe { pointer-events:none; }

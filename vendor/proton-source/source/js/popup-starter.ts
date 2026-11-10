@@ -1434,7 +1434,6 @@ export const start = async (area: HTMLElement) => {
 		setUpToggleButtonForFeature(features.autoConnect);
 		setUpToggleButtonForFeature(features.telemetry);
 		setUpToggleButtonForFeature(features.recents, {
-			upgradeNeeded: isFreeTier,
 			refresh: (newValue) => {
 				if (!newValue) {
 					forgetLastChoices();
