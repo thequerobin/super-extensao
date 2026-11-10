@@ -31,12 +31,13 @@ let lastCleanupTab = "cleanup";
 function activateTab(tab) {
   document.body.dataset.activeTab = tab;
   if (tab === "sync" && !$("syncPanel").getAttribute("src")) $("syncPanel").src = $("syncPanel").dataset.src;
+  if (tab === "vpn" && !$("vpnPanel").getAttribute("src")) $("vpnPanel").src = $("vpnPanel").dataset.src;
   const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
   $("section-cleanup").classList.toggle("active", isCleanup);
   $("section-cleanup").setAttribute("aria-pressed", String(isCleanup));
-  for (const name of ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync"]) {
+  for (const name of ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync", "vpn"]) {
     $("panel-" + name).hidden = name !== tab;
     $("tab-" + name).classList.toggle("active", name === tab);
     $("tab-" + name).setAttribute("aria-pressed", String(name === tab));

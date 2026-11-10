@@ -1,0 +1,1 @@
+!function(){"use strict";importScripts("/vpn/js/browser-polyfill.min.js","/vpn/js/background.js")}();

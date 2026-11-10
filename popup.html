@@ -17,7 +17,7 @@
     <div class="automation"><label class="toggle-line" for="enabled"><span>Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch"></label><button id="pauseToggle" class="quiet" aria-expanded="false" aria-controls="pauseMenu">Pausar</button></div>
     <div id="pauseMenu" class="pause-menu" hidden><button data-duration="30">30 minutos</button><button data-duration="60">1 hora</button><button data-duration="today">Até amanhã</button><button data-duration="0">Até retomar</button></div>
     <div id="pauseRow" class="message pause" hidden><span id="pauseStatus"></span><button id="resume">Retomar</button></div>
-    <nav class="main-nav" aria-label="Seções"><button class="tab active" id="section-cleanup" aria-pressed="true" aria-controls="cleanupSubmenu">Limpeza</button><button class="tab" id="tab-autoplay" data-tab="autoplay" aria-pressed="false">Autoplay</button><button class="tab" id="tab-tabs" data-tab="tabs" aria-pressed="false">Abas</button><button class="tab" id="tab-sync" data-tab="sync" aria-pressed="false">Sincronização</button></nav>
+    <nav class="main-nav" aria-label="Seções"><button class="tab active" id="section-cleanup" aria-pressed="true" aria-controls="cleanupSubmenu">Limpeza</button><button class="tab" id="tab-autoplay" data-tab="autoplay" aria-pressed="false">Autoplay</button><button class="tab" id="tab-tabs" data-tab="tabs" aria-pressed="false">Abas</button><button class="tab" id="tab-sync" data-tab="sync" aria-pressed="false">Sincronização</button><button class="tab" id="tab-vpn" data-tab="vpn" aria-pressed="false">VPN</button></nav>
     <nav id="cleanupSubmenu" class="sub-nav" aria-label="Opções de limpeza"><button class="tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true">O que apagar</button><button class="tab" id="tab-exceptions" data-tab="exceptions" aria-pressed="false">Cookies</button><button class="tab" id="tab-bookmarks" data-tab="bookmarks" aria-pressed="false">Favoritos</button></nav>
     <section id="panel-cleanup" aria-labelledby="tab-cleanup">
       <div class="section-heading"><h2>O que apagar</h2><span>Salvo automaticamente</span></div>
@@ -71,6 +71,10 @@
       <div class="options"><label class="toggle-line"><span>Uma única Nova guia por janela<small>Ignora abas fixadas e páginas em uso</small></span><input id="singleNewTab" type="checkbox" role="switch"></label><label class="toggle-line"><span>Manter Nova guia na última posição<small>Disponível com a opção acima ativada</small></span><input id="newTabLast" type="checkbox" role="switch"></label></div>
       <p class="scope">Para encerrar de verdade, feche a janela pelo X ou saia do navegador. A limpeza ao sair só começa quando a última janela for fechada.</p>
       <p class="note">A aba de reserva é criada apenas quando necessária e removida quando há outras abas suficientes. Abas fixadas por você são preservadas. Janelas anônimas exigem a autorização separada do navegador.</p>
+    </section>
+    <section id="panel-vpn" aria-labelledby="tab-vpn" hidden>
+      <p class="vpn-note">Proton VPN · Protege o tráfego deste navegador. Entre na sua conta para conectar.</p>
+      <iframe id="vpnPanel" title="Proton VPN: conexão, servidores e tunelamento dividido" data-src="vpn/popup.html"></iframe>
     </section>
     <section id="panel-sync" aria-labelledby="tab-sync" hidden>
       <div class="section-heading"><h2>Sincronização de favoritos</h2></div>

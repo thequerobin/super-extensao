@@ -6,7 +6,7 @@ Uma extensão para Helium e navegadores Chromium que reúne a Nova guia personal
 
 ## Recursos
 
-Próxima etapa planejada: integração do Proton VPN com opção de tunelamento dividido e configurações gerais para toda a extensão. Detalhes em [Próximos passos](PROXIMOS-PASSOS.md).
+**Proton VPN integrado (1.5.0):** abra a aba **VPN**, entre na sua conta Proton e selecione um servidor permitido pelo seu plano. Contas Free usam o seletor completo para os servidores gratuitos disponíveis. Tunelamento dividido permite excluir sites da VPN ou usar a VPN apenas nos sites escolhidos, incluindo subdomínios. O tema é compartilhado com o painel principal. O proxy cobre o navegador e depende da autorização da API Proton. Login e conexão real ainda precisam de validação. [Detalhes da integração](vpn/INTEGRACAO.md).
 
 - **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
 - **Painel unificado:** marca da Super Extensão, largura de 460 px e temas Escuro/Claro/Sistema sincronizados com o popup. Os blocos finais de persistência, apoio e links sociais foram removidos da interface.
@@ -133,3 +133,17 @@ Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Lice
 Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.
 
 Versão 1.4.3: painel de sincronização incorporado ao popup, com navegação interna, tema compartilhado e altura ajustada ao espaço disponível. Conferido no popup nativo do Edge e com perfis fictícios: criação, opções e importação/exportação permaneceram dentro da seção, sem abrir novas guias. O login nos provedores continua usando a janela de autorização do serviço. As configurações existentes permanecem no armazenamento da extensão.
+
+
+### Compilar o módulo VPN
+
+O pacote carregável já inclui `vpn/`. Para reconstruí-lo após alterar o código:
+
+```sh
+npm ci
+npm run setup:vpn
+npm run build:vpn
+npm test
+```
+
+A instalação do módulo usa `--legacy-peer-deps` devido ao conflito entre Babel 8 e a dependência de testes `ts-jest` herdado do upstream. Scripts de instalação das dependências ficam desativados. O código-fonte e a licença GPL-3.0 do Proton são preservados em `vendor/proton-source`.

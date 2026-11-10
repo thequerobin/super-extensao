@@ -536,3 +536,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 // Motor de sincronizacao isolado em superSync: e super-sync.
 importScripts("sync/js/background-script.js");
+
+// Proton VPN has its own message channel and storage namespace.
+importScripts("vpn/js/service.js");
