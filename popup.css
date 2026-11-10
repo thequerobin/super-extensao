@@ -1,11 +1,10 @@
-:root { color-scheme: dark; --bg:#11151d; --surface:#1a202b; --raised:#222b39; --text:#eef2f8; --muted:#a8b5c9; --line:#303b4d; --accent:#9ab8ff; --accent-bg:#263b60; --success:#8cdbb6; --warning:#ffd59c; --danger:#ffb7b7; --shadow:0 6px 24px #0002; }
-:root[data-theme="light"] { color-scheme:light; --bg:#f5f7fb; --surface:#fff; --raised:#edf1f8; --text:#182338; --muted:#566780; --line:#d6deeb; --accent:#245bd0; --accent-bg:#e6eeff; --success:#19724e; --warning:#805100; --danger:#a52c36; --shadow:0 6px 24px #17355d0a; }
+@import url("ui-theme.css");
 * { box-sizing:border-box; }
 [hidden] { display:none !important; }
 /* An extension popup starts with a narrow viewport. Give the root an intrinsic
    minimum instead of shrinking the body to that initial viewport with 100vw. */
 html { min-width:520px; }
-body { width:520px; min-width:520px; margin:0 auto; font:13px/1.5 system-ui, "Segoe UI", sans-serif; color:var(--text); background:var(--bg); }
+body { width:520px; min-width:520px; margin:0 auto; font:13px/1.5 var(--ui-font); color:var(--text); background:var(--bg); }
 header { padding:22px 22px 17px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .brand { display:flex; gap:11px; align-items:center; }
 .brand-icon { width:36px; height:36px; flex-shrink:0; object-fit:contain; }
@@ -14,13 +13,13 @@ h1 { font-size:17px; line-height:1.25; margin:0; letter-spacing:-.4px; } h2 { fo
 .theme-label { display:grid; flex-shrink:0; gap:3px; color:var(--muted); font-size:10px; }
 .theme-label select { padding:4px 7px; font-size:11px; }
 main { padding:0 20px; }
-.report { padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:var(--shadow); }
+.report { padding:14px 16px; border:1px solid var(--line); border-radius:var(--card-radius); background:var(--surface); box-shadow:var(--shadow); }
 .eyebrow { font-size:9px; letter-spacing:1.6px; color:var(--accent); font-weight:700; margin-bottom:4px; }
 .report h2 { font-size:13px; } .report p { font-size:11px; color:var(--muted); margin-top:4px; }
 .automation { display:flex; align-items:center; gap:10px; padding:17px 0; }
 .automation .toggle-line { flex:1; padding:0; border:0; font-size:12px; }
 button,input,select { font:inherit; }
-button { border:1px solid var(--line); background:var(--accent-bg); color:var(--accent); padding:8px 12px; border-radius:8px; font-weight:600; cursor:pointer; }
+button { border:1px solid var(--line); background:var(--accent-bg); color:var(--accent); padding:8px 12px; border-radius:var(--control-radius); font-weight:600; cursor:pointer; }
 button:hover { filter:brightness(1.12); } button:disabled { opacity:.5; cursor:default; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .quiet,.secondary { background:var(--surface); color:var(--text); } .quiet { font-size:11px; padding:6px 9px; }
@@ -38,7 +37,6 @@ body[data-active-tab="sync"] #pauseMenu,
 body[data-active-tab="sync"] #pauseRow,
 body[data-active-tab="sync"] footer { display:none!important; }
 body[data-active-tab="sync"] header { padding-bottom:12px; }
-body[data-active-tab="sync"] #panel-sync .section-heading { margin-bottom:4px; }
 .current-site { margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .current-site strong { display:block; margin-top:5px; overflow-wrap:anywhere; }
 .search-input { width:100%; margin-bottom:8px; }
@@ -105,8 +103,7 @@ body[data-active-tab="vpn"] main,
 body[data-active-tab="sync"] main { display:flex; flex-direction:column; overflow:hidden; }
 main > nav { flex-shrink:0; }
 #panel-vpn, #panel-sync { flex:1; min-height:0; display:flex; flex-direction:column; }
-#panel-vpn { margin-top:12px; }
-#panel-sync .section-heading { flex-shrink:0; }
+#panel-vpn, #panel-sync { margin-top:12px; }
 #vpnPanel, #syncPanel { flex:1; min-height:0; height:100%; }
 #popupResize { flex:0 0 16px; display:flex; align-items:center; justify-content:center; cursor:ns-resize; touch-action:none; background:var(--bg); border-top:1px solid var(--line); }
 #popupResize::after { content:""; width:44px; height:4px; border-radius:4px; background:var(--muted); opacity:.65; }

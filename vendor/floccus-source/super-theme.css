@@ -1,5 +1,9 @@
-:root {color-scheme:dark;--super-bg:#11151d;--super-surface:#1a202b;--super-raised:#222b39;--super-text:#eef2f8;--super-muted:#a8b5c9;--super-line:#303b4d;--super-accent:#9ab8ff}
-:root[data-super-theme="light"] {color-scheme:light;--super-bg:#f5f7fb;--super-surface:#fff;--super-raised:#edf1f8;--super-text:#182338;--super-muted:#566780;--super-line:#d6deeb;--super-accent:#245bd0}
+@import url("../ui-theme.css");
+
+:root {
+  --super-bg:var(--bg); --super-surface:var(--surface); --super-raised:var(--raised);
+  --super-text:var(--text); --super-muted:var(--muted); --super-line:var(--line); --super-accent:var(--accent);
+}
 html,body{margin:0;background:var(--super-bg);color:var(--super-text);font-family:system-ui,"Segoe UI",sans-serif;min-width:320px}
 .v-application,.v-application .headline,.v-application .title,.v-application .subtitle-1{font-family:system-ui,"Segoe UI",sans-serif!important}
 .super-sync-header{display:flex;align-items:center;gap:16px;width:min(960px,100%);margin:32px auto 20px;padding:0 24px}
@@ -55,16 +59,17 @@ html,body{margin:0;background:var(--super-bg);color:var(--super-text);font-famil
 /* The same app can run inside the Super Extensão popup. */
 html[data-embedded="true"] { scrollbar-width:none; }
 html[data-embedded="true"]::-webkit-scrollbar { display:none; }
-html[data-embedded="true"] .super-sync-header{grid-template-columns:1fr auto;gap:12px;width:100%;margin:4px auto 12px}
+html[data-embedded="true"] .super-sync-header{grid-template-columns:minmax(0,1fr) auto auto;gap:8px;width:100%;margin:0 auto 12px}
 html[data-embedded="true"] .super-sync-header>img,
-html[data-embedded="true"] .super-sync-header>div{display:none}
-html[data-embedded="true"] .super-sync-header>.super-back{grid-column:1;grid-row:1;justify-self:start}
-html[data-embedded="true"] .super-sync-header>label{grid-column:2;grid-row:1;width:auto;max-width:180px}
+html[data-embedded="true"] .super-sync-header strong{display:none}
+html[data-embedded="true"] .super-sync-header h1{font-size:14px;margin:0}
+html[data-embedded="true"] .super-sync-header>.super-back{grid-column:2;grid-row:1}
+html[data-embedded="true"] .super-sync-header>label{grid-column:3;grid-row:1;width:auto}
 html[data-embedded="true"] .super-oauth{width:100%;margin-bottom:12px;padding:12px;font-size:12px}
 html[data-embedded="true"] .v-content__wrap>.container,
 html[data-embedded="true"] .v-main__wrap>.container,
 html[data-embedded="true"] .v-content__wrap>div>.width,
-html[data-embedded="true"] .v-main__wrap>div>.width{width:100%!important;margin-top:12px!important}
+html[data-embedded="true"] .v-main__wrap>div>.width{width:100%!important;margin-top:8px!important}
 html[data-embedded="true"] .v-application .v-content,
 html[data-embedded="true"] .v-application .v-main{padding-bottom:12px!important}
 html[data-embedded="true"] .v-navigation-drawer{display:none!important}
@@ -73,3 +78,62 @@ html[data-embedded="true"] .v-stepper__content .v-form,
 html[data-embedded="true"] .v-stepper__content .headline,
 html[data-embedded="true"] .v-stepper__content .form-buttons{padding-left:0!important;padding-right:0!important}
 html[data-embedded="true"] .v-container.mt-12{margin-top:12px!important;padding-top:12px!important}
+
+.v-application {
+  background:var(--bg)!important;
+  color:var(--text)!important;
+  font:13px/1.5 var(--ui-font)!important;
+}
+.v-application .v-card,
+.v-application .v-stepper {
+  border-radius:var(--card-radius)!important;
+  color:var(--text);
+}
+.v-application .v-btn {
+  border:1px solid var(--line);
+  border-radius:var(--control-radius);
+  box-shadow:none!important;
+  font-size:12px;
+}
+.v-application .v-btn.v-btn--has-bg:not(.primary,.error,.warning,.success,.info) {
+  background:var(--raised)!important;
+  color:var(--text);
+}
+.v-application .v-btn.primary {
+  background:var(--accent)!important;
+  border-color:transparent;
+  color:var(--bg)!important;
+}
+.v-application .v-alert.info--text {
+  background:var(--raised)!important;
+  border-color:var(--line)!important;
+  border-radius:var(--control-radius);
+  color:var(--muted)!important;
+}
+.v-application .account-card__header .overline {
+  color:var(--accent);
+  font:700 10px/1.5 var(--ui-font)!important;
+  letter-spacing:1.2px!important;
+}
+.v-application .account-card__header .text-h6 {
+  margin:6px 0 2px;
+  font:650 16px/1.4 var(--ui-font)!important;
+}
+.v-application .account-card__header .caption { color:var(--muted); }
+.v-application .account-card__footer .v-btn { min-height:32px; }
+.v-application .v-stepper .headline { font-size:16px!important; font-weight:650; }
+.v-application .v-label { font-size:13px; }
+.v-application .account-card__statusColumn :is(.v-icon,span) {
+  color:var(--sync-state,var(--muted))!important;
+}
+.v-application .account-card__statusColumn:has(.mdi-check) { --sync-state:var(--success); }
+.v-application .account-card__statusColumn:has(.mdi-sync-alert) { --sync-state:var(--danger); }
+html[data-embedded="true"] .super-sync-header label {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:none;
+}
+html[data-embedded="true"] .super-sync-header select,
+.super-oauth input { background:var(--surface); }
+html[data-embedded="true"] .v-content__wrap > .container > .v-card:first-child { margin-top:0; }

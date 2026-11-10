@@ -7,6 +7,6 @@ interface Window {
 		theme: {
 			set(value: 'dark' | 'light' | 'system'): Promise<void>;
 		};
-		watchTheme(callback: (theme: 'dark' | 'light' | 'system') => void): () => void;
+		watchTheme(callback: (theme: 'dark' | 'light' | 'system', resolved: 'dark' | 'light') => void): () => void;
 	};
 }

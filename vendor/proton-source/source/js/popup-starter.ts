@@ -166,7 +166,10 @@ export const start = async (area: HTMLElement) => {
 	preferences.locale.watch((updated) => {
 		if (updated !== locale) window.location.reload();
 	});
-	preferences.watchTheme((theme) => setTheme(area, theme === 'system' ? 'auto' : theme));
+	preferences.watchTheme((theme, resolved) => {
+		document.documentElement.dataset['theme'] = resolved;
+		setTheme(area, theme === 'system' ? 'auto' : theme);
+	});
 
 	await fetchTranslations();
 
