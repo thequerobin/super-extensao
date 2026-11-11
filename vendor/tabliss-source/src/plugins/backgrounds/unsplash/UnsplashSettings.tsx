@@ -2,7 +2,6 @@ import { UiCheck, UiField, UiInput, UiSelect } from "../../../ui";
 import { ProviderAccess } from "../shared/ProviderAccess";
 import { t } from "../../../locales/ui";
 import React from "react";
-import { Icon } from "../../../views/shared";
 import { DebounceInput } from "../../shared";
 import topics from "./topics.json";
 import { defaultData, Props } from "./types";
@@ -11,12 +10,6 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="UnsplashSettings">
     <ProviderAccess provider="unsplash" />
     <UiField>
-      <span style={{ float: "right" }}>
-        {data.paused ? <span className="text--grey">{t("(Paused) ")}</span> : null}
-        <a onClick={() => setData({ ...data, paused: !data.paused })}>
-          <Icon name={data.paused ? "play" : "pause"} />
-        </a>
-      </span>
       {t("Show a new photo")}<UiSelect
         value={data.timeout}
         onChange={(event) =>

@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.8**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.9**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Ajustes visuais 1.6.9
+
+Os 17 testes de imagens da nova guia e componentes visuais passaram. A nova guia foi recompilada e conferida no Helium com perfil temporário. Em larguras de 520 e 320 px, os campos de idioma e fuso horário ficaram separados por 12 px sem estouro horizontal. O botão nativo de arquivos reservou 12 px até o texto do arquivo. O editor do Unsplash não exibe mais o controle de pausa; o componente de créditos da página inicial permanece inalterado. Não foram usadas contas ou credenciais pessoais.
 
 ## Evidência disponível
 

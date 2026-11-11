@@ -1,4 +1,4 @@
-import { UiField, UiSelect } from "../../ui";
+import { UiField, UiSelect, UiStack } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
@@ -20,38 +20,22 @@ const System: React.FC = () => {
         />
       </h2>
 
-      <UiField
-        style={{
-          alignItems: "center",
-          display: "grid",
-          gridGap: "0 0.5rem",
-          gridTemplateColumns: "1fr 2fr",
-          width: "100%",
-          margin: 0,
-        }}
-      >
-        <span>{t("Language")}</span>
-        <UiSelect
-          value={locale}
-          onChange={(event) => setLocale(event.target.value)}
-        >
-          <option value="pt-BR">Português do Brasil</option>
-          <option value="en">English</option>
-        </UiSelect>
-      </UiField>
+      <UiStack className="system-fields">
+        <UiField className="system-field">
+          <span>{t("Language")}</span>
+          <UiSelect
+            value={locale}
+            onChange={(event) => setLocale(event.target.value)}
+          >
+            <option value="pt-BR">Português do Brasil</option>
+            <option value="en">English</option>
+          </UiSelect>
+        </UiField>
 
-      <UiField
-        style={{
-          alignItems: "center",
-          display: "grid",
-          gridGap: "0 0.5rem",
-          gridTemplateColumns: "1fr 2fr",
-          width: "100%",
-          margin: 0,
-        }}
-      >
-        {t("Time Zone")}<TimeZoneInput timeZone={timeZone} onChange={setTimeZone} />
-      </UiField>
+        <UiField className="system-field">
+          {t("Time Zone")}<TimeZoneInput timeZone={timeZone} onChange={setTimeZone} />
+        </UiField>
+      </UiStack>
     </div>
   );
 };

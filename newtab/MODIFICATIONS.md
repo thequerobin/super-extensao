@@ -1,5 +1,9 @@
 # Tabliss 2.6.0 na Super Extensão
 
+## Ajustes visuais — Super Extensão 1.6.9
+
+Separados os campos de idioma e fuso horário por 12 px, usando o agrupamento compartilhado `UiStack`. Adicionada margem entre o botão de seleção de arquivos e seu texto. Removido o atalho de pausa/reprodução das configurações Unsplash, mantendo o controle na página inicial e preservando a configuração de pausa existente.
+
 ## Componentização — Super Extensão 1.6.8
 
 O editor, as configurações dos fundos/widgets e seus controles auxiliares usam `vendor/tabliss-source/src/ui/index.tsx`, adaptador React do catálogo em `ui/catalog.json`. O painel de chaves Unsplash/GIPHY usa os componentes compartilhados de campo, descrição, ações e aviso. Valores controlados, eventos, cache e armazenamento permanecem nos componentes funcionais existentes. A página `index.html` passa a ser gerada de `ui/templates/newtab.html` por `npm run build:ui`.

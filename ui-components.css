@@ -91,7 +91,7 @@
 .ui-range { width: 100%; min-width: 0; }
 .ui-color { width: 48px; height: 32px; padding: 3px; border: 1px solid var(--line); border-radius: var(--control-radius); background: var(--surface); cursor: pointer; }
 .ui-file { min-width: 0; max-width: 100%; font: var(--font-description)/1.5 var(--ui-font); }
-.ui-file::file-selector-button { padding: var(--button-padding); border: 1px solid var(--line); border-radius: var(--control-radius); background: var(--accent-bg); color: var(--accent); cursor: pointer; }
+.ui-file::file-selector-button { margin-inline-end: var(--space-3); padding: var(--button-padding); border: 1px solid var(--line); border-radius: var(--control-radius); background: var(--accent-bg); color: var(--accent); cursor: pointer; }
 .ui-toggle {
   display: flex;
   align-items: center;

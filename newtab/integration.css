@@ -56,3 +56,4 @@ html,body {background:#172039;}
 .Settings .ui-card {padding:var(--card-padding);}
 .Settings .ui-stack > :is(label,p) {margin:0;}
 .Settings .ui-button-icon {min-height:28px;width:28px;padding:6px;}
+.Settings .system-field {align-items:center;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:var(--space-3);}
