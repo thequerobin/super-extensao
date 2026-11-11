@@ -1,61 +1,62 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 export const uiMessages = {
+  SyncInvalidUrl: {
+    "pt-BR":
+      "Um favorito contém um endereço inválido. Confira os endereços antes de sincronizar.",
+    en: "A bookmark contains an invalid URL. Check the addresses before syncing.",
+  },
+  SyncStorageFailed: {
+    "pt-BR":
+      "Não foi possível salvar o estado local. A sincronização foi interrompida para preservar a recuperação.",
+    en: "The local state could not be saved. Synchronization was stopped to preserve recovery.",
+  },
+  SyncLocalWriteFailed: {
+    "pt-BR":
+      "Não foi possível alterar os favoritos locais. O plano foi preservado para uma nova tentativa.",
+    en: "Local bookmarks could not be changed. The plan was preserved for another attempt.",
+  },
+  SyncManagedBookmarks: {
+    "pt-BR":
+      "A pasta contém favoritos gerenciados por política. Escolha uma pasta modificável para este perfil.",
+    en: "The folder contains policy-managed bookmarks. Choose an editable folder for this profile.",
+  },
+  SyncProtectedRoot: {
+    "pt-BR":
+      "Escolha uma pasta de favoritos em vez da raiz geral do navegador.",
+    en: "Choose a bookmarks folder instead of the browser’s top-level root.",
+  },
+  SyncProfilesLocked: {
+    "pt-BR":
+      "Os perfis foram bloqueados. Desbloqueie a sincronização para continuar.",
+    en: "Profiles were locked. Unlock synchronization to continue.",
+  },
   SyncLocalTreeChanged: {
     "pt-BR":
-      "Os favoritos locais mudaram durante a leitura. Tente comparar novamente.",
-    en: "Local bookmarks changed while being read. Compare again.",
-  },
-  UiCompareTitle: { "pt-BR": "Conferir favoritos", en: "Compare bookmarks" },
-  UiCompareHelp: {
-    "pt-BR":
-      "Compara a pasta deste perfil com o arquivo salvo no Google Drive, usando a configuração salva. Não altera os favoritos.",
-    en: "Compares this profile’s folder with its Google Drive file using the saved settings. Bookmarks are not changed.",
-  },
-  UiCompareDrive: {
-    "pt-BR": "Comparar com Google Drive",
-    en: "Compare with Google Drive",
-  },
-  UiCompareNoFile: {
-    "pt-BR":
-      "O arquivo deste perfil ainda não existe no Drive. Nenhum arquivo foi criado.",
-    en: "This profile’s file does not exist in Drive yet. No file was created.",
-  },
-  UiCompareCommon: { "pt-BR": "Itens em comum", en: "Matching items" },
-  UiCompareLocal: {
-    "pt-BR": "Somente neste navegador",
-    en: "Only in this browser",
-  },
-  UiCompareRemote: {
-    "pt-BR": "Somente no Google Drive",
-    en: "Only in Google Drive",
-  },
-  UiCompareInventory: {
-    "pt-BR":
-      "A contagem inclui favoritos e pastas, considerando nome, endereço e caminho. Não identifica mudanças de ordem nem decide o que será excluído.",
-    en: "Counts include bookmarks and folders, considering title, URL and path. This comparison does not detect reordered items or decide deletions.",
+      "Os favoritos locais mudaram durante a sincronização. As alterações foram preservadas. Tente novamente.",
+    en: "Local bookmarks changed during synchronization. Your changes were preserved. Try again.",
   },
   SyncFileTooLarge: {
-    "pt-BR": "O arquivo excede o limite de 20 MB para esta comparação.",
-    en: "The file exceeds the 20 MB comparison limit.",
+    "pt-BR": "O arquivo ultrapassa o limite de 20 MB.",
+    en: "The file exceeds the 20 MB limit.",
   },
   SyncUnsupportedXml: {
     "pt-BR":
-      "Este arquivo contém recursos XBEL ainda não suportados pela comparação.",
-    en: "This file contains XBEL features not yet supported by the comparison.",
+      "O arquivo contém recursos XML não suportados. A sincronização foi interrompida.",
+    en: "The file contains unsupported XML features. Synchronization was stopped.",
   },
   SyncInvalidFile: {
     "pt-BR":
-      "O arquivo não é um XBEL válido. Se estiver criptografado, esta comparação ainda não pode lê-lo.",
-    en: "The file is not valid XBEL. Encrypted files are not supported by this comparison yet.",
+      "O arquivo do Drive não contém favoritos XBEL válidos. Nenhum dado foi substituído.",
+    en: "The Drive file does not contain valid XBEL bookmarks. No data was replaced.",
   },
   SyncTreeTooLarge: {
-    "pt-BR": "A pasta ou o arquivo ultrapassa os limites desta comparação.",
-    en: "The folder or file exceeds the comparison limits.",
+    "pt-BR": "A pasta ou o arquivo ultrapassa os limites deste motor.",
+    en: "The folder or file exceeds this engine’s limits.",
   },
   SyncDuplicateIds: {
     "pt-BR":
-      "O arquivo contém identificadores repetidos. A comparação foi interrompida.",
-    en: "The file contains duplicate identifiers. The comparison was stopped.",
+      "O arquivo contém identificadores repetidos. Nenhum dado foi substituído.",
+    en: "The file contains duplicate identifiers. No data was replaced.",
   },
   SyncInvalidLocalTree: {
     "pt-BR": "Não foi possível interpretar a pasta local deste perfil.",
@@ -67,8 +68,8 @@ export const uiMessages = {
     en: "Check the Google configuration in Connections and this profile’s authorization.",
   },
   SyncCancelled: {
-    "pt-BR": "Comparação cancelada.",
-    en: "Comparison cancelled.",
+    "pt-BR": "Sincronização cancelada.",
+    en: "Synchronization cancelled.",
   },
   SyncGoogleRateLimited: {
     "pt-BR": "O Google limitou as requisições. Aguarde e tente novamente.",
@@ -92,36 +93,30 @@ export const uiMessages = {
   },
   SyncAmbiguousDriveFile: {
     "pt-BR":
-      "Há mais de um arquivo com esse nome no Drive. A comparação não escolheu nem removeu arquivos.",
-    en: "More than one file has this name in Drive. No files were selected or removed.",
+      "Há mais de um arquivo com esse nome no Drive. Resolva os nomes duplicados antes de sincronizar.",
+    en: "More than one Drive file has this name. Resolve the duplicate names before syncing.",
   },
   SyncRemoteFileChanged: {
-    "pt-BR": "O arquivo mudou durante a leitura. Tente comparar novamente.",
-    en: "The file changed while being read. Compare again.",
+    "pt-BR":
+      "O arquivo no Drive mudou durante a sincronização. Tente novamente.",
+    en: "The Drive file changed during synchronization. Try again.",
   },
   SyncUnsupportedProvider: {
-    "pt-BR": "Esta comparação está disponível apenas para Google Drive.",
-    en: "This comparison is available only for Google Drive.",
+    "pt-BR": "Este motor atende perfis de favoritos no Google Drive.",
+    en: "This engine handles Google Drive bookmark profiles.",
   },
   SyncBookmarksOnly: {
-    "pt-BR":
-      "Esta comparação precisa de uma pasta de favoritos. Perfis de abas ainda não são suportados.",
-    en: "This comparison requires a bookmarks folder. Tab profiles are not supported yet.",
-  },
-  SyncEncryptedFileUnsupported: {
-    "pt-BR":
-      "A comparação ainda não suporta arquivos criptografados. Não desative sua criptografia para usá-la.",
-    en: "This comparison does not support encrypted files yet. Keep your encryption enabled.",
+    "pt-BR": "Escolha uma pasta de favoritos para sincronizar.",
+    en: "Choose a bookmarks folder to synchronize.",
   },
   SyncProfileBusy: {
-    "pt-BR": "Aguarde a sincronização deste perfil terminar antes de comparar.",
-    en: "Wait for this profile’s synchronization to finish before comparing.",
+    "pt-BR": "Aguarde a sincronização deste perfil terminar.",
+    en: "Wait for this profile’s synchronization to finish.",
   },
   SyncLocalFolderMissing: {
     "pt-BR": "A pasta de favoritos deste perfil não foi encontrada.",
     en: "This profile’s bookmarks folder was not found.",
   },
-
   UiIntro: {
     "pt-BR": "Seus favoritos, em todos os navegadores.",
     en: "Your bookmarks, across browsers.",
@@ -258,5 +253,89 @@ export const uiMessages = {
   UiServicedropbox: {
     "pt-BR": "Um arquivo na sua conta Dropbox.",
     en: "A file in your Dropbox account.",
+  },
+  SyncInvalidIds: {
+    "pt-BR":
+      "Não foi possível identificar os favoritos com segurança. Nenhum dado foi substituído.",
+    en: "Bookmarks could not be identified safely. No data was replaced.",
+  },
+  SyncFolderCycle: {
+    "pt-BR":
+      "As alterações criariam uma pasta dentro de si mesma. Confira a organização das pastas.",
+    en: "The changes would create a folder cycle. Check your folder structure.",
+  },
+  SyncUnsupportedStrategy: {
+    "pt-BR":
+      "O modo de sincronização deste perfil não é suportado pelo novo motor.",
+    en: "This profile’s synchronization mode is not supported by the new engine.",
+  },
+  SyncConflict: {
+    "pt-BR":
+      "O mesmo item foi alterado nos dois lados. Ajuste o conflito ou escolha Enviar/Receber uma vez nas ações avançadas.",
+    en: "The same item changed on both sides. Resolve the conflict or choose Upload/Download once in the advanced actions.",
+  },
+  SyncOrderConflict: {
+    "pt-BR":
+      "A ordem dos favoritos mudou nos dois lados. Escolha a ordem desejada antes de sincronizar novamente.",
+    en: "Bookmark order changed on both sides. Choose the desired order before syncing again.",
+  },
+  SyncDeletionGuard: {
+    "pt-BR":
+      "A proteção impediu uma exclusão grande ou de todos os itens. Confira os favoritos e o sentido da sincronização.",
+    en: "Protection prevented a large deletion or deletion of all items. Check your bookmarks and synchronization direction.",
+  },
+  SyncWritePrecondition: {
+    "pt-BR":
+      "O Drive não forneceu uma revisão segura para gravar. A gravação sem proteção foi impedida.",
+    en: "Drive did not provide a safe write revision. An unprotected upload was prevented.",
+  },
+  SyncCreateConflict: {
+    "pt-BR":
+      "O arquivo já foi criado por outra operação. Tente sincronizar novamente para verificar o resultado.",
+    en: "The file was already created by another operation. Sync again to verify the result.",
+  },
+  SyncDecryptionFailed: {
+    "pt-BR":
+      "Não foi possível abrir o arquivo criptografado. Confira a senha do perfil.",
+    en: "The encrypted file could not be opened. Check the profile password.",
+  },
+  SyncMigrationMappings: {
+    "pt-BR":
+      "Não foi possível aproveitar os mapeamentos anteriores. Confira seus favoritos antes de redefinir o cache para mesclar novamente.",
+    en: "Previous mappings could not be reused. Check your bookmarks before resetting the cache to merge again.",
+  },
+  SyncRemoteLocked: {
+    "pt-BR":
+      "Outro dispositivo está sincronizando esse arquivo. Aguarde e tente novamente.",
+    en: "Another device is syncing this file. Wait and try again.",
+  },
+  SyncUnsupportedState: {
+    "pt-BR": "O estado salvo deste motor tem uma versão não suportada.",
+    en: "The saved engine state has an unsupported version.",
+  },
+  SyncRemoteReplaced: {
+    "pt-BR":
+      "O arquivo original do perfil não foi encontrado ou foi substituído. Restaure o arquivo ou confira o perfil antes de redefinir o cache.",
+    en: "The original profile file is missing or was replaced. Restore it or check the profile before resetting the cache.",
+  },
+  SyncProfileChanged: {
+    "pt-BR":
+      "O perfil mudou com uma operação pendente. Confira os dados antes de redefinir o cache.",
+    en: "The profile changed while an operation was pending. Check your data before resetting the cache.",
+  },
+  SyncRecoveryConflict: {
+    "pt-BR":
+      "Houve alterações simultâneas durante uma recuperação. Os backups foram preservados. Confira os dados antes de redefinir o cache.",
+    en: "Concurrent changes interrupted recovery. Backups were preserved. Check your data before resetting the cache.",
+  },
+  SyncRecoveryDirection: {
+    "pt-BR":
+      "Há uma sincronização pendente em outro sentido. Retome o sentido original ou confira os dados antes de redefinir o cache.",
+    en: "A synchronization is pending in another direction. Resume the original direction or check your data before resetting the cache.",
+  },
+  SyncOverlappingProfiles: {
+    "pt-BR":
+      "Há perfis com pastas sobrepostas. Separe as pastas antes de usar o motor próprio nessa configuração.",
+    en: "Profiles have overlapping folders. Separate their folders before using the own engine for this configuration.",
   },
 };

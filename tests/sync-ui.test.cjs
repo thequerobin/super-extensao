@@ -333,34 +333,17 @@ test("locked engine keeps profile and credential views hidden", async () => {
   }
 });
 
-test("Google Drive comparison uses saved settings, presents own-engine counts and leaves profiles untouched", async () => {
+test("Google Drive options keep normal synchronization controls without the comparison panel", async () => {
   const google = { ...profile, type: "google-drive", password: "", refreshToken: "private-refresh" };
-  const ui = await boot({ local: { "superSync:accounts": JSON.stringify({ saved: google }), "superSync:oauthClients": { googleClientId: "test-client" } } });
+  const ui = await boot({ local: { "superSync:accounts": JSON.stringify({ saved: google }) } });
   try {
     await ui.route("/options/saved");
-    const compare = ui.component("GoogleDriveComparison");
-    assert.ok(compare);
-    const requests = [];
-    const text = '<xbel/>';
-    const metadata = { id: "drive-file", version: "1", size: String(Buffer.byteLength(text)) };
-    ui.w.chrome.bookmarks.getSubTree = async () => [{ id: "1", title: "Favoritos", children: [] }];
-    ui.w.fetch = async (url, init) => {
-      requests.push({ url, init });
-      if (url.includes("oauth2.googleapis.com")) return new Response(JSON.stringify({ access_token: "private-access" }));
-      if (url.includes("alt=media")) return new Response(text);
-      if (url.includes("/drive-file?")) return new Response(JSON.stringify(metadata));
-      return new Response(JSON.stringify({ files: [metadata] }));
-    };
-    ui.component("AccountOptions").data.bookmark_file = "unsaved.xbel";
-    const before = JSON.stringify(ui.local["superSync:accounts"]);
-    await compare.compare();
-    await tick();
-    assert.equal(compare.error, "");
-    assert.equal(compare.result.common, 0);
-    assert.ok(ui.w.document.querySelector(".sync-comparison-result"));
-    assert.match(new URL(requests[1].url).searchParams.get("q"), /bookmarks\.xbel/);
-    assert.equal(JSON.stringify(ui.local["superSync:accounts"]), before);
-    assert.ok(!ui.calls.some((call) => call.type === "syncAccount"));
-    assert.ok(!JSON.stringify(compare.result).includes("private"));
+    assert.equal(ui.component("GoogleDriveComparison"), undefined);
+    assert.equal(ui.w.document.querySelector(".sync-comparison"), null);
+    assert.ok(!ui.w.document.body.textContent.includes("Comparar com Google Drive"));
+    assert.ok(ui.component("OptionsGoogleDrive"));
+    await ui.route("/");
+    await ui.component("AccountCard").onTriggerSync();
+    assert.ok(ui.calls.some(call => call.type === "syncAccount" && call.params[0] === "saved"));
   } finally { ui.close(); }
 });

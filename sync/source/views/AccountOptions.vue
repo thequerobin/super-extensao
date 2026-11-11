@@ -77,10 +77,6 @@
         @delete="onDelete"
       />
     </v-form>
-    <GoogleDriveComparison
-      v-if="!loading && data.type === 'google-drive'"
-      :profile="$store.state.accounts[id].data"
-    />
     <div class="sync-save-row">
       <span role="status" class="ui-inline-status">{{
         saved ? t("UiSaved") : ""
@@ -96,7 +92,6 @@
   </section>
 </template>
 <script>
-import GoogleDriveComparison from "../components/GoogleDriveComparison.vue";
 import PathHelper from "@sync-engine/PathHelper";
 import BrowserTree from "@sync-engine/browser/BrowserTree";
 import { actions } from "../store/definitions";
@@ -113,7 +108,6 @@ import OptionsGit from "../components/OptionsGit.vue";
 export default {
   name: "AccountOptions",
   components: {
-    GoogleDriveComparison,
     OptionsGit,
     OptionsGoogleDrive,
     OptionsDropbox,

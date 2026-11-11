@@ -1,6 +1,8 @@
-# Estado atual — Super Extensão 1.5.19
+# Estado atual — Super Extensão 1.6.0
 
-A interface ativa continua em `sync/source` e a sincronização normal continua usando o motor Floccus adaptado. O núcleo independente de `sync/engine` é usado apenas na comparação sem escrita dos perfis Google Drive. Nenhum perfil foi migrado para um novo motor de gravação.
+A interface ativa continua em `sync/source`. Perfis Google Drive de favoritos passam a executar o núcleo próprio em `sync/engine`; os demais provedores e perfis de abas mantêm o motor legado. O painel de comparação foi removido. Cadastro, OAuth interativo, formato dos perfis e agendamento permanecem na camada de compatibilidade.
+
+O núcleo e seu worker são compilados por `npm run build:sync-engine`; a interface por `npm run build:sync`. Os componentes derivados do Floccus e seus avisos MPL-2.0 permanecem preservados.
 
 Documentação: [interface](../docs/sync-interface.md), [novo núcleo](../docs/sync-engine.md), [roteiro](../PROXIMOS-PASSOS.md) e [validação](../docs/validacao.md). Licença MPL-2.0, fontes e avisos dos componentes derivados permanecem preservados. As instruções antigas abaixo são históricas; a interface atual é reconstruída por `npm run build:sync`, na raiz, após os comandos de preparo documentados.
 

@@ -1,3 +1,4 @@
+// Read-only diagnostic helpers for automated tests; no comparison panel is mounted.
 const { GoogleDriveReader } = require("./google-drive.cjs");
 const {
   fail,

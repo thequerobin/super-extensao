@@ -4,15 +4,15 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.5.19.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.6.0.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
 | Área | Implementado | O que ainda depende de trabalho |
 | --- | --- | --- |
 | Interface | Abas e submenus fixos, componentes compartilhados, idioma/tema globais e altura do popup ajustável | Conferência visual no navegador, inclusive foco, rolagem e setas dos países |
-| Sincronização | Interface própria; sincronização operacional pelo motor Floccus adaptado | Migração para o motor próprio, mantendo perfis e compatibilidade |
-| Novo núcleo Google Drive | Leitura OAuth/XBEL e comparação sem escrita nas opções do perfil | Identidade persistente, reconciliação, conflitos, escrita, recuperação e migração |
+| Sincronização | Google Drive/favoritos pelo núcleo próprio; demais provedores e abas pelo motor legado | Validação real, restauração de backups por interface e migração dos demais conectores |
+| Núcleo Google Drive | Reconciliação, escrita condicional, criptografia, backup e retomada pelo diário | Validar o fluxo em conta real, medir grandes importações e suportar pastas sobrepostas |
 | VPN | Interface própria, motor Proton, servidores por país, regras por site e indicador no ícone | Validação real de login, tráfego, IP, regras e recuperação; reescrita do motor ainda não iniciada |
 | Limpeza, Autoplay e Abas | Controles locais e testes automatizados | Validar fechamento nativo e recuperação no Helium |
 | Nova guia | Tabliss adaptado, editor, widgets e importação/exportação | Regressão visual e teste dos provedores online utilizados |
@@ -47,7 +47,9 @@ Em **Sincronização → Novo perfil**, escolha o serviço e a pasta. O motor at
 
 Para Google Drive e Dropbox, configure credenciais OAuth próprias em **Conexões**, usando o endereço de redirecionamento exibido. O Google usa ID e segredo do cliente; o Dropbox usa a chave do aplicativo. Os outros conectores usam as configurações do perfil.
 
-**Reescrita em andamento:** nas opções de um perfil Google Drive, **Conferir favoritos → Comparar com Google Drive** executa o novo código de `sync/engine`. Ele usa a configuração salva e apresenta itens em comum e presentes apenas de um lado, incluindo pastas. A comparação não escreve no Drive nem nos favoritos; não migra o perfil e não substitui a sincronização atual. Arquivos criptografados, perfis de abas, alterações de ordem e resolução de conflitos ainda não são suportados por essa comparação.
+**Motor próprio Google Drive (1.6.0):** os perfis de favoritos usam `sync/engine` no botão **Sincronizar** e no agendamento existente. O núcleo faz leitura, reconciliação de três versões, escrita condicional, criptografia compatível, backup e aplicação local com checkpoints. Conflitos incompatíveis e exclusões grandes são interrompidos; as ações avançadas permitem escolher o sentido. O painel de comparação foi removido.
+
+Os perfis existentes são aproveitados, incluindo cache e mapeamentos quando consistentes. Outros serviços e perfis de abas continuam no legado; cadastro, OAuth interativo e a estrutura de agendamento ainda usam a camada de compatibilidade. Pastas sobrepostas entre perfis são recusadas por enquanto. Os backups ficam no armazenamento local; ainda não há tela de restauração.
 
 Veja [a interface e a compatibilidade](docs/sync-interface.md) e [o escopo do novo motor](docs/sync-engine.md). Perfis exportados podem conter credenciais; guarde esses arquivos como configurações privadas. Backup de perfis não equivale a backup dos favoritos.
 
@@ -93,7 +95,7 @@ A proteção da última aba mantém uma reserva criada pela extensão e preserva
 | `scripting`, `webRequest`, `webRequestAuthProvider` e acesso HTTP/HTTPS | Integração da VPN, autenticação do proxy e scripts de controle de mídia |
 | `history` — opcional | Contagem de visitas quando habilitada em conectores compatíveis |
 
-Limpeza, autoplay e proteção de abas são locais. Sincronização, VPN e widgets online usam os serviços configurados. Os módulos preservam os espaços de armazenamento `superSync:`, `superVpn:` e `tabliss/config`, separados das preferências locais de limpeza/abas/autoplay. O novo leitor Google Drive renova o token em memória e não o inclui nos resultados da comparação.
+Limpeza, autoplay e proteção de abas são locais. Sincronização, VPN e widgets online usam os serviços configurados. Os módulos preservam os espaços de armazenamento `superSync:`, `superVpn:` e `tabliss/config`, separados das preferências locais de limpeza/abas/autoplay. O núcleo Google Drive mantém tokens em memória e não os inclui nos backups, checkpoints ou logs de erro.
 
 ## Desenvolvimento e testes
 
@@ -109,7 +111,8 @@ npm test
 
 | Alteração | Comando |
 | --- | --- |
-| Interface da Sincronização e núcleo Google Drive incorporado à comparação | `npm run build:sync` |
+| Interface da Sincronização | `npm run build:sync` |
+| Worker com núcleo Google Drive próprio | `npm run build:sync-engine` |
 | Somente interface da VPN | `npm run build:vpn-ui` |
 | Motor Proton e interface VPN | `npm run build:vpn` |
 | Estilos incorporados dos painéis | `npm run build:panels` |
@@ -117,7 +120,7 @@ npm test
 
 `build:sync` não recompila o worker Floccus. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A última execução registrada na implementação **1.5.19 passou 71 testes**, com APIs simuladas e testes DOM. Não comprova login real, tráfego de VPN, geometria do popup ou sincronização com contas reais. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
+A última execução registrada na implementação **1.6.0 passou 106 testes**, com APIs simuladas e testes DOM. Não comprova login real, tráfego de VPN, geometria do popup ou sincronização com contas reais. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
 
 ## Documentação
 

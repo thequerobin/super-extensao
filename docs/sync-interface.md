@@ -1,6 +1,6 @@
-# Interface de sincronização — referência 1.5.19
+# Interface de sincronização — referência 1.6.0
 
-A aplicação de sincronização da Super Extensão fica em `sync/source`. O motor Floccus 5.13.0 continua em `vendor/floccus-source`; a sincronização normal continua usando esse algoritmo, seus conectores e o bundle de segundo plano. O novo núcleo Google Drive é usado somente pela comparação sem escrita.
+A aplicação fica em `sync/source`. Os perfis Google Drive de favoritos executam o núcleo próprio de `sync/engine` pelo worker; demais provedores e perfis de abas continuam no Floccus adaptado de `vendor/floccus-source`. O bloco de comparação foi removido em 1.6.0. Cadastro, autenticação interativa e comandos da interface mantêm a camada de compatibilidade.
 
 ## Telas
 
@@ -33,7 +33,7 @@ npm test
 
 `setup:vpn` instala as dependências já utilizadas pelo compilador compartilhado de estilos dos painéis. Não é necessário recompilar a VPN.
 
-`build:sync` gera `sync/js/options.js`, `sync/js/options.css` e os recursos de fonte, copia `sync/source/interface.css` para `sync/theme.css` e recompila `popup-panels.css`. Não substitui `sync/js/background-script.js`. Os arquivos compilados ficam no repositório; instalar a extensão descompactada não exige Node.js.
+`build:sync` gera `sync/js/options.js`, `sync/js/options.css` e os recursos de fonte, copia `sync/source/interface.css` para `sync/theme.css` e recompila `popup-panels.css`. O worker é recompilado separadamente por `npm run build:sync-engine`, a partir de `sync/engine/background-entry.js`. Os arquivos compilados ficam no repositório; instalar a extensão descompactada não exige Node.js.
 
 Para alterar as telas, edite `sync/source`, e não as telas antigas em `vendor/floccus-source/src/ui`. A configuração antiga `webpack.super.cjs` continua disponível para a origem histórica, mas não deve ser usada para substituir o bundle da interface própria.
 
@@ -43,6 +43,6 @@ A suíte Node inclui testes DOM do bundle de produção com JSDOM e APIs Chromiu
 
 O Chromium não iniciou neste ambiente (`socket() failed: Operation not permitted`). Os testes DOM não verificam geometria, contraste, foco nativo ou tráfego real. Antes de liberar, conferir no Helium/Chromium: temas claro/escuro/sistema, rolagem e altura do popup, seleção de pastas e diálogos, criação/edição/importação/exportação e login/sincronização nos provedores usados. Nenhuma conta real foi conectada durante estes testes.
 
-## Início do motor próprio (1.5.19)
+## Núcleo próprio Google Drive (1.6.0)
 
-As opções de um perfil Google Drive incluem uma comparação somente de leitura, implementada em `sync/engine` sem importar o motor legado. Ela usa a configuração salva para comparar o inventário local e o XBEL remoto; não migra perfis nem altera a execução da sincronização. Escopo, limitações e próximos passos estão em [sync-engine.md](sync-engine.md).
+O botão **Sincronizar**, as ações direcionais e o agendamento usam o núcleo próprio nos perfis atendidos, sem um painel de diagnóstico adicional. O worker é gerado por `npm run build:sync-engine`; a interface continua em `npm run build:sync`. Após alterar o núcleo, execute os dois comandos e os testes. Reconciliação, backup, recuperação, criptografia e limitações estão em [sync-engine.md](sync-engine.md).

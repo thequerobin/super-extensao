@@ -1,16 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.5.19**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.0**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
 ## Evidência disponível
 
-A última execução registrada durante a implementação da versão 1.5.19 passou **71 testes** da suíte `npm test`. As alterações documentais posteriores não representam nova execução dessa suíte.
+A última execução registrada durante a implementação da versão 1.6.0 passou **106 testes** da suíte `npm test`. Essa execução inclui o novo worker e a interface sem o painel de comparação. Nenhuma conta real foi acessada durante o teste.
 
 | Área | Cobertura automatizada | Limite da evidência |
 | --- | --- | --- |
 | Limpeza e abas | Exceções, importação de domínios, falhas, pausa, recuperação e transições de abas com APIs simuladas | Não comprova encerramento nativo nem tempo de conclusão antes de o navegador fechar |
 | Sincronização atual | Bundle da interface em JSDOM, perfis, rascunhos, backup de perfis, assistente e bloqueio | Não comprova autenticação e sincronização com contas reais |
-| Novo núcleo Drive | XBEL, comparação, OAuth/transporte simulados, ausência de escrita, revisões e cancelamento | Não implementa aplicação, conflitos, ordem, migração ou criptografia |
+| Núcleo próprio Drive | Reconciliação, escrita condicional, bloqueios, aplicação local, criptografia, migração de IDs, dois dispositivos e injeção de falhas nos checkpoints | Transporte, armazenamento e favoritos são simulados; ainda não comprova o serviço real |
 | VPN | Interface/adaptador, isolamento, limites de plano, regras, estados e indicador por aba | Não comprova túnel, IP, WebRTC ou recuperação no serviço real |
 | Interface compartilhada | Comparação de estilos e temas com o CSS compilado e testes DOM de idioma/navegação | JSDOM não mede a geometria real nem comprova que nada está cortado |
 
@@ -28,7 +28,7 @@ npm run setup:vpn
 npm test
 ```
 
-A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. Para reconstruir a interface Sync e o núcleo incorporado a ela, execute também `npm run setup:sync`, seguido de `npm run build:sync`.
+A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. Para reconstruir a sincronização, execute também `npm run setup:sync`, seguido de `npm run build:sync-engine` (worker) e `npm run build:sync` (interface).
 
 Ao alterar o motor Proton, execute `npm run build:vpn`. Para alterar somente sua interface, use `npm run build:vpn-ui`. Esses comandos exigem `setup:vpn`. Recompilações da Sincronização usam `setup:sync` e `setup:vpn`, pois também geram os estilos dos painéis.
 
@@ -48,11 +48,15 @@ Use perfis de teste e favoritos fictícios. Registre a versão instalada e o res
 ### Google Drive
 
 - [ ] Configurar OAuth para o endereço mostrado em Conexões e autorizar um perfil de teste.
-- [ ] Comparar uma pasta de teste com o XBEL correspondente, verificando as contagens.
-- [ ] Conferir que a comparação usa a configuração salva, sem aplicar rascunhos.
-- [ ] Conferir arquivo ausente, dois arquivos de mesmo nome e autorização revogada.
-- [ ] Confirmar que os favoritos e o conteúdo/revisão do arquivo não foram alterados pela comparação.
-- [ ] Confirmar que a sincronização normal continua no motor anterior.
+- [ ] Sincronizar pelo botão normal e conferir migração de IDs sem duplicações.
+- [ ] Criar, editar, mover, reordenar e remover alguns itens nos dois lados, usando duas instalações de teste.
+- [ ] Conferir conflito no mesmo campo e uso deliberado de Enviar/Receber uma vez.
+- [ ] Conferir a proteção para exclusão total/grande antes de qualquer alteração.
+- [ ] Validar arquivo ausente, nomes duplicados, autorização revogada, bloqueio de outro dispositivo e revisão rejeitada.
+- [ ] Conferir o conteúdo criptografado após sincronizar um perfil com senha.
+- [ ] Fechar o popup durante a execução e depois interromper o worker; conferir retomada sem criar cópias repetidas.
+- [ ] Inspecionar backup, diário e logs sem publicar favoritos pessoais ou credenciais.
+- [ ] Confirmar que outros provedores e perfis de abas continuam no legado.
 
 ### VPN
 

@@ -109,3 +109,9 @@ test('a concurrent local edit invalidates the inventory without any local or rem
   } };
   await assert.rejects(() => inspectGoogleDriveProfile({ profile, oauth, bookmarks, fetchImpl: f.fetchImpl }), /SyncLocalTreeChanged/);
 });
+test('HTTP URL normalization matches browser bookmark canonicalization without changing query semantics', () => {
+  const remote = parseXbel('<xbel><bookmark id="1" href="HTTPS://Example.COM:443"><title>One</title></bookmark></xbel>');
+  const local = fromBrowserTree({ id: 'root', title: '', children: [{ id: 'native', title: 'One', url: 'https://example.com/' }] });
+  assert.equal(compareTrees(local, remote).common, 1);
+  assert.throws(() => parseXbel('<xbel><bookmark id="1" href="relative/path"><title>Bad</title></bookmark></xbel>'), /SyncInvalidUrl/);
+});

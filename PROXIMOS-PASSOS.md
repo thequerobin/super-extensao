@@ -1,69 +1,60 @@
 # Próximos passos da Super Extensão
 
-Revisado em **11 de novembro de 2026**, com base na implementação **1.5.19**. Este arquivo é o roteiro principal; itens marcados como implementados não significam validação com contas reais. Consulte [a evidência e o checklist manual](docs/validacao.md).
+Revisado em **11 de novembro de 2026**, referência **1.6.0**. Itens implementados foram testados com APIs simuladas; a validação em conta real permanece separada em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
 | Prioridade | Frente | Estado atual | Próxima entrega |
 | --- | --- | --- | --- |
-| 1 | Motor próprio de sincronização | Leitor/comparador Google Drive sem escrita | Identidade persistente e reconciliador de três versões, ainda sem aplicar alterações |
-| 2 | Validação em navegador | 71 testes simulados registrados; Chromium bloqueado no ambiente atual | Conferir layout, Google Drive e VPN com perfis de teste |
-| 3 | Migração da sincronização | Nenhum perfil migrado | Escrita segura, recuperação e ativação explícita por perfil |
-| 4 | Motor próprio da VPN | Não iniciado; interface própria sobre o motor Proton | Mapear contratos de sessão, proxy, regras e recuperação antes de substituir partes |
-| Contínua | Interface e manutenção | Base visual e preferências compartilhadas | Regressões visuais, consistência dos novos componentes e documentação atualizada |
+| 1 | Google Drive/favoritos | Núcleo próprio integrado a Sincronizar, ações direcionais e agendamento | Validação real, grandes volumes e restauração de backups por interface |
+| 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; Chromium bloqueado no ambiente atual | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
+| 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
+| 4 | Motor próprio da VPN | Não iniciado; interface própria sobre Proton | Mapear sessão, proxy, regras e recuperação antes de substituir partes |
+| Contínua | Interface e manutenção | Componentes e preferências compartilhados | Regressões visuais e consistência da documentação |
 
-## 1. Motor próprio de sincronização — Google Drive primeiro
+## 1. Motor próprio de sincronização
 
-### Entregue na etapa 1
+### Google Drive de favoritos — entregue em 1.6.0
 
-- [x] Núcleo independente em `sync/engine`, sem importar o motor Floccus.
-- [x] Leitor Google Drive com renovação OAuth em memória, pesquisa do arquivo e paginação.
-- [x] Leitura XBEL, conferência de tamanho/revisão remota e detecção de alterações locais durante a consulta.
-- [x] Comparação por tipo, título, URL e caminho, preservando contagens de itens duplicados.
-- [x] Botão **Comparar com Google Drive** nas opções do perfil, usando a configuração salva.
-- [x] Interrupção para arquivos duplicados, dados inválidos, cancelamento, timeout e recursos não suportados.
-- [x] Testes do núcleo e da tela, sem operações de escrita no Drive ou nos favoritos.
+- [x] Remover o painel de comparação; manter diagnóstico apenas nos testes internos.
+- [x] Executar o núcleo próprio no fluxo normal de sincronização dos perfis atendidos.
+- [x] Preservar IDs e aproveitar cache/mapeamentos legados quando consistentes.
+- [x] Persistir base comum e mapeamentos próprios por perfil.
+- [x] Reconciliar criação, edição, movimento, ordenação e remoção.
+- [x] Mesclar alterações de campos distintos e interromper conflitos incompatíveis sem escolher uma versão silenciosamente.
+- [x] Usar o mesmo núcleo para enviar/receber uma vez, mantendo a proteção de exclusões.
+- [x] Escrever no Drive com condição de revisão, bloqueio remoto temporário e conferência posterior do conteúdo.
+- [x] Pré-gerar o ID de arquivos novos e persistir o payload antes do envio.
+- [x] Preservar a criptografia compatível e aceitar o cabeçalho XBEL legado sem carregar DTDs.
+- [x] Guardar backup e diário por operação; recuperar criações e gravações já concluídas após interrupção.
+- [x] Serializar execuções, atender cancelamento e reutilizar o agendamento existente.
+- [x] Impedir sobreposição de pastas, alteração de escopo com operação pendente e uso de raízes protegidas/favoritos gerenciados.
+- [x] Testar dois dispositivos simulados e falhas antes/depois dos checkpoints.
 
-### Etapa 2 — modelo e planejamento
+A primeira execução no novo worker aproveita o perfil salvo; não exige recriação nem um botão separado de migração. Cadastro, OAuth interativo e a estrutura de agendamento ainda usam a camada de compatibilidade. A execução de favoritos Google Drive é própria; a troca de todos os componentes do Floccus ainda não terminou.
 
-- [ ] Definir IDs estáveis, relação entre IDs locais/remotos e versão do formato persistido.
-- [ ] Guardar uma base comum confirmada por perfil, separada do cache legado.
-- [ ] Reconhecer criação, edição, movimento, ordenação e remoção sem tratar URLs repetidas como o mesmo favorito.
-- [ ] Reconciliar base comum, estado local e estado remoto.
-- [ ] Definir resolução de conflitos: edição nos dois lados, exclusão contra edição, movimentos incompatíveis e pastas removidas com filhos alterados.
-- [ ] Produzir um plano determinístico e revisável, sem aplicar alterações nesta etapa.
-- [ ] Testar convergência de dois dispositivos, repetição sem duplicações e ausência de operações após sincronização já concluída.
+### Validação e melhorias pendentes
 
-**Concluir quando:** os casos de conflito, identidade, movimentos, ordem e duplicações estiverem cobertos por testes, com um plano reproduzível e nenhuma escrita implícita.
+- [ ] Validar OAuth, bloqueios, `If-Match`, gravação e leitura com uma conta Google real.
+- [ ] Conferir convergência entre dois navegadores reais, inclusive edição concorrente e mudança de ordem.
+- [ ] Interromper o worker/processo durante uma execução de teste e conferir a retomada real.
+- [ ] Medir tempo e armazenamento com grandes importações; otimizar sem perder recuperação por operação.
+- [ ] Criar uma tela para consultar e restaurar os backups internos; hoje eles ficam no armazenamento da extensão.
+- [ ] Definir recuperação assistida de conflitos que atualmente exigem ajuste dos itens ou escolha do sentido nas ações avançadas.
+- [ ] Definir retorno controlado ao motor anterior, reconstruindo caches/mapeamentos quando necessário; não alternar silenciosamente entre motores no mesmo perfil.
 
-### Etapa 3 — execução e recuperação
+**Critério de validação real:** dados fictícios convergem entre dois navegadores após falhas e reinícios, sem duplicação ou perda; cópias e diário permitem explicar cada operação executada.
 
-- [ ] Implementar serialização e escrita compatíveis com o arquivo usado pelo perfil.
-- [ ] Validar a estratégia de concorrência suportada pela API Drive e impedir sobrescritas sobre revisões remotas alteradas.
-- [ ] Fazer backup antes da primeira aplicação e das operações destrutivas.
-- [ ] Definir proteção contra exclusões em massa, incluindo perda da pasta local, arquivo vazio e primeira sincronização.
-- [ ] Aplicar alterações locais com diário persistente e retomada após interrupção do service worker.
-- [ ] Garantir que repetir uma operação interrompida não duplique favoritos nem perca alterações confirmadas.
-- [ ] Implementar fila, exclusão mútua por perfil/pasta, cancelamento e progresso.
-- [ ] Tratar erros transitórios, limites do Google e recuperação da autorização sem expor credenciais.
-- [ ] Implementar compatibilidade com arquivos criptografados antes de permitir migração desses perfis.
+### Independência restante e próximos conectores
 
-**Concluir quando:** falhas injetadas durante gravação, aplicação local e persistência permitirem recuperação previsível, com backup e proteção contra perda de dados.
+- [ ] Substituir APIs de cadastro, armazenamento de perfis e autenticação interativa ainda importadas do Floccus.
+- [ ] Substituir a estrutura legada de alarmes/agendamento por uma própria, preservando as preferências existentes.
+- [ ] Migrar os demais provedores, começando pelos efetivamente utilizados depois do Google Drive.
+- [ ] Implementar perfis de abas no núcleo próprio.
+- [ ] Definir sincronização de subpastas sobrepostas entre perfis com propriedade explícita dos itens.
+- [ ] Manter fontes, licenças e avisos dos componentes ainda utilizados.
 
-### Etapa 4 — migrar um perfil e validar
-
-- [ ] Separar a API da interface das classes e ações legadas ainda importadas do Floccus.
-- [ ] Migrar um perfil Google Drive explicitamente, mantendo credenciais, pasta, arquivo e preferências.
-- [ ] Impedir que os dois motores escrevam simultaneamente no mesmo perfil ou pasta.
-- [ ] Definir retorno ao motor anterior, incluindo tratamento dos caches e mapeamentos após alterações pelo novo motor.
-- [ ] Implementar agendamento, execução ao iniciar, logs e recuperação após reinício.
-- [ ] Validar autorização e sincronização entre dois perfis de navegador com uma conta de teste.
-- [ ] Comparar os resultados com os cenários suportados pelo motor anterior.
-- [ ] Migrar os demais conectores e perfis de abas depois de estabilizar o Google Drive.
-
-**Concluir quando:** um perfil de teste sincronizar de ponta a ponta, sobreviver a falhas e reinícios e demonstrar convergência entre dois navegadores. O motor próprio ainda não é o padrão.
-
-Detalhes da etapa entregue: [docs/sync-engine.md](docs/sync-engine.md).
+Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine.md).
 
 ## 2. VPN
 

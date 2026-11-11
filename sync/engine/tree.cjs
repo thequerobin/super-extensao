@@ -1,10 +1,28 @@
 // Super Extensão: provider-independent bookmark snapshots and comparisons.
-const { XMLParser, XMLValidator } = require("fast-xml-parser");
+const { XMLParser, XMLValidator, XMLBuilder } = require("fast-xml-parser");
 const LIMITS = { bytes: 20 * 1024 * 1024, nodes: 100000, depth: 100 };
 function fail(code) {
   const error = new Error(code);
   error.code = code;
   throw error;
+}
+function normalizeUrl(value) {
+  try {
+    const parsed = new URL(value);
+    if (["http:", "https:", "ftp:"].includes(parsed.protocol))
+      return parsed.href;
+    if (
+      ["chrome:", "edge:", "chrome-extension:"].includes(parsed.protocol) &&
+      parsed.hostname &&
+      !parsed.pathname
+    ) {
+      parsed.pathname = "/";
+      return parsed.href;
+    }
+    return value;
+  } catch {
+    fail("SyncInvalidUrl");
+  }
 }
 function parseXbel(text) {
   if (
@@ -13,6 +31,13 @@ function parseXbel(text) {
   )
     fail("SyncFileTooLarge");
   // External/custom entities and DTDs are unnecessary for the supported format.
+  // The legacy writer emits this standard external declaration. Strip it as
+  // inert syntax; never resolve a DTD or accept an internal entity declaration.
+  const highest = text.match(/<!---?\s*highestId\s*:\s*(\d+)\s*:/)?.[1];
+  text = text.replace(
+    /<!DOCTYPE\s+xbel\s+PUBLIC\s+"\+\/\/IDN python\.org\/\/DTD XML Bookmark Exchange Language 1\.0\/\/EN\/\/XML"\s+"http:\/\/pyxml\.sourceforge\.net\/topics\/dtds\/xbel\.dtd"\s*>/i,
+    ""
+  );
   if (/<!DOCTYPE|<!ENTITY/i.test(text)) fail("SyncUnsupportedXml");
   if (XMLValidator.validate(text) !== true) fail("SyncInvalidFile");
   let xml;
@@ -54,6 +79,8 @@ function parseXbel(text) {
       const kind =
         "folder" in node ? "folder" : "bookmark" in node ? "bookmark" : null;
       if (!kind) {
+        if (typeof node["#text"] === "string" && node["#text"].trim())
+          fail("SyncUnsupportedXml");
         if (
           Object.keys(node).some(
             (key) => !["title", "desc", "info", "#text", ":@"].includes(key)
@@ -80,28 +107,45 @@ function parseXbel(text) {
       const item = {
         kind,
         title: titles.length ? textOf(titles[0].title) : "",
+        attributes: attrs,
+        meta: content.filter((entry) => "desc" in entry || "info" in entry),
       };
       if (id !== undefined) item.id = String(id);
       if (kind === "folder") item.children = children(content, depth + 1);
       else {
         if (typeof attrs["@_href"] !== "string") fail("SyncInvalidFile");
-        item.url = attrs["@_href"];
+        item.url = normalizeUrl(attrs["@_href"]);
       }
       result.push(item);
     }
     return result;
   }
-  return { kind: "folder", title: "", children: children(roots[0].xbel, 0) };
+  return {
+    kind: "folder",
+    title: "",
+    children: children(roots[0].xbel, 0),
+    attributes: roots[0][":@"] || {},
+    meta: roots[0].xbel.filter(
+      (node) => "title" in node || "desc" in node || "info" in node
+    ),
+    highestId: Number(highest || 0),
+  };
 }
 function fromBrowserTree(root) {
   let count = 0;
   function convert(node, depth) {
+    if (node?.unmodifiable) fail("SyncManagedBookmarks");
     if (depth > LIMITS.depth || ++count > LIMITS.nodes)
       fail("SyncTreeTooLarge");
     if (!node || typeof node.id !== "string" || typeof node.title !== "string")
       fail("SyncInvalidLocalTree");
     return typeof node.url === "string"
-      ? { kind: "bookmark", id: node.id, title: node.title, url: node.url }
+      ? {
+          kind: "bookmark",
+          id: node.id,
+          title: node.title,
+          url: normalizeUrl(node.url),
+        }
       : {
           kind: "folder",
           id: node.id,
@@ -157,3 +201,39 @@ function compareTrees(local, remote) {
   };
 }
 module.exports = { LIMITS, fail, parseXbel, fromBrowserTree, compareTrees };
+
+function serializeXbel(tree, highestId) {
+  function nodes(folder) {
+    return folder.children.map((item) => {
+      const attributes = { ...item.attributes, "@_id": String(item.id) };
+      if (item.kind === "bookmark") attributes["@_href"] = item.url;
+      return {
+        [item.kind]: [
+          { title: [{ "#text": item.title }] },
+          ...(item.meta || []),
+          ...(item.kind === "folder" ? nodes(item) : []),
+        ],
+        ":@": attributes,
+      };
+    });
+  }
+  const body = new XMLBuilder({
+    preserveOrder: true,
+    ignoreAttributes: false,
+    format: true,
+  }).build([
+    {
+      xbel: [...(tree.meta || []), ...nodes(tree)],
+      ":@": { "@_version": "1.0", ...tree.attributes },
+    },
+  ]);
+  return (
+    '<?xml version="1.0" encoding="UTF-8"?>\n<!--- highestId :' +
+    highestId +
+    ": for Super Extensão -->\n" +
+    body
+  );
+}
+module.exports.serializeXbel = serializeXbel;
+
+module.exports.normalizeUrl = normalizeUrl;

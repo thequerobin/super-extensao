@@ -1,4 +1,4 @@
-# Super Extensão — guia rápido (1.5.19)
+# Super Extensão — guia rápido (1.6.0)
 
 Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
 
@@ -27,9 +27,11 @@ Arraste a alça inferior para ajustar a altura do popup. O menu fica fixo enquan
 
 ## Google Drive e motor próprio
 
-Configure o cliente OAuth em **Sincronização → Conexões** e autorize o perfil. Nas opções desse perfil, **Conferir favoritos → Comparar com Google Drive** usa o novo núcleo para comparar os favoritos com o arquivo remoto, sem modificar dados.
+Configure o cliente OAuth em **Sincronização → Conexões** e autorize o perfil. Use o botão normal **Sincronizar**: os perfis Google Drive de favoritos passam a usar o núcleo próprio. O painel de comparação foi removido.
 
-Essa é a primeira etapa da reescrita: a sincronização normal ainda usa o motor atual. A comparação não resolve conflitos nem detecta mudanças de ordem; arquivos criptografados e perfis de abas ainda não são suportados por ela. Mantenha a criptografia existente habilitada. [Escopo e próximos passos](docs/sync-engine.md).
+O motor preserva a criptografia e mantém backup/checkpoints locais para retomar interrupções. Se o mesmo item mudar de forma incompatível nos dois lados, o perfil mostra um conflito em vez de sobrescrever uma versão. Confira os itens ou use **Enviar/Receber uma vez** nas ações avançadas; a proteção de exclusão continua válida.
+
+Demais provedores e perfis de abas ainda usam o motor anterior. Pastas sobrepostas entre perfis não são suportadas pelo núcleo próprio. Ainda falta validação real da conta Google e uma tela de restauração dos backups. [Escopo e limites](docs/sync-engine.md).
 
 Backup de perfis pode conter credenciais e não equivale a backup dos favoritos.
 
@@ -50,4 +52,4 @@ O sinal não mede tráfego nem verifica o IP externamente. O proxy cobre este na
 - A importação de domínios de favoritos é manual e não altera os favoritos.
 - A importação da Nova guia substitui sua configuração; imagens próprias precisam ser selecionadas novamente.
 
-A suíte da implementação 1.5.19 passou 71 testes simulados. Login real, tráfego, recuperação e ajustes visuais ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
+A suíte da implementação 1.6.0 passou 106 testes simulados. Login real, tráfego, recuperação e ajustes visuais ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
