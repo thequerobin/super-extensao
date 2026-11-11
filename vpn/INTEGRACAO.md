@@ -1,6 +1,6 @@
-# Proton VPN na Super Extensão — referência 1.5.19
+# Proton VPN na Super Extensão — referência 1.6.5
 
-A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O motor e o serviço permanecem Proton. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
+A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço, a sessão e o controlador de conexão permanecem Proton; regras e PAC já usam o núcleo próprio de `vpn/engine`. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 
 ## Usar
 
@@ -45,4 +45,4 @@ Os arquivos compilados são incluídos no repositório; instalar a extensão des
 
 ## Trabalho restante
 
-O motor continua sendo o Proton adaptado. Sua reescrita ainda precisa começar pelos contratos de autenticação, proxy, roteamento e recuperação, com testes antes de substituir cada parte. A integração já implementada e os itens pendentes estão separados em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+A reescrita parcial começou em 1.6.5: os contratos estão mapeados e o núcleo de regras/PAC é próprio. Sessão, credenciais, controlador de proxy e recuperação continuam no Proton adaptado. O próximo passo é o controlador de proxy, conforme [vpn-engine.md](../docs/vpn-engine.md). A integração já implementada e os itens pendentes estão separados em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).

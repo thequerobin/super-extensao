@@ -27,6 +27,7 @@ function boot() {
     },
   };
   const context = vm.createContext({ chrome, URL, console, OffscreenCanvas: Canvas, createImageBitmap: async () => ({ close() {} }), fetch: async () => ({ blob: async () => ({}) }), SuperPreferences: { locale: { get: async () => locale } } });
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "../vpn/engine/routing.js"), "utf8"), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../vpn-indicator.js"), "utf8"), context);
   const api = context.SuperVpnIndicator;
   api.attach(() => state);

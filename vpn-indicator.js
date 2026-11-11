@@ -7,35 +7,7 @@
   const rendered = new Map(), applied = new Map();
   let reader = () => ({ connected: false }), revision = 0, queue = Promise.resolve();
 
-  function matches(host, rule, port) {
-    rule = String(rule).toLowerCase();
-    if (rule === "<local>") return !host.includes(".") && !host.includes(":");
-    const cidr = rule.match(/^(\d+\.\d+\.\d+\.\d+)\/(\d+)$/);
-    if (cidr) {
-      const ip = (value) => value.split(".").reduce((sum, part) => (sum * 256 + Number(part)) >>> 0, 0);
-      if (!/^\d+(\.\d+){3}$/.test(host)) return false;
-      const bits = Number(cidr[2]);
-      if (bits < 0 || bits > 32) return false;
-      const mask = bits ? (0xffffffff << (32 - bits)) >>> 0 : 0;
-      return (ip(host) & mask) === (ip(cidr[1]) & mask);
-    }
-    if (rule.startsWith(".")) return host.endsWith(rule);
-    return host === rule || `${host}:${port}` === rule;
-  }
-  function usesVpn(url, snapshot) {
-    let target;
-    try { target = new URL(url); } catch { return false; }
-    if (!["http:", "https:", "ws:", "wss:"].includes(target.protocol)) return false;
-    const host = target.hostname.toLowerCase();
-    const port = target.port || (["https:", "wss:"].includes(target.protocol) ? "443" : "80");
-    // Chromium implicitly bypasses loopback and link-local hosts. The generated
-    // include-only PAC also sends plain hostnames and reserved IPv4 ranges direct.
-    if (host === "localhost" || host.endsWith(".localhost") || host === "[::1]" ||
-        /^127\./.test(host) || /^169\.254\./.test(host) || /^\[fe[89ab]/i.test(host)) return false;
-    if (snapshot.includeOnly !== undefined && (!host.includes(".") || /^(0|10|127|192\.168|172\.1[6789]|172\.2\d|172\.3[01]|169\.254|192\.88\.99)\./.test(host) || matches(host, "192.0.2.0/24", port))) return false;
-    if ((snapshot.bypassList || []).some((rule) => matches(host, rule, port))) return false;
-    return snapshot.includeOnly === undefined || snapshot.includeOnly.some((rule) => matches(host, rule, port));
-  }
+  const usesVpn = globalThis.SuperVpnRouting.usesVpn;
   async function icon(mode) {
     if (!rendered.has(mode)) rendered.set(mode, (async () => {
       const result = {};

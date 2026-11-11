@@ -13,4 +13,4 @@ fs.cpSync(path.join(source, 'distribution'), target, {recursive: true});
 // The host owns the manifest and service worker. Never ship a second manifest.
 fs.rmSync(path.join(target, 'manifest.json'), {force: true});
 fs.copyFileSync(path.join(source, 'LICENSE'), path.join(target, 'LICENSE'));
-fs.writeFileSync(path.join(target, 'INTEGRACAO.md'), fs.readFileSync(path.join(root, 'docs/proton-vpn.md'), 'utf8').replace('(vpn-interface.md)', '(../docs/vpn-interface.md)'));
+fs.writeFileSync(path.join(target, 'INTEGRACAO.md'), fs.readFileSync(path.join(root, 'docs/proton-vpn.md'), 'utf8').replace('(vpn-interface.md)', '(../docs/vpn-interface.md)').replace('(vpn-engine.md)', '(../docs/vpn-engine.md)'));

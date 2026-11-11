@@ -36,8 +36,8 @@ function worker(initial = {}) {
   };
   const context = vm.createContext({chrome, URL, console, setTimeout:() => 0, crypto:require('node:crypto').webcrypto});
   // This suite isolates the existing cleanup worker; tab protection is covered
-  // by the real-browser integration suite.
-  context.importScripts = (...files) => { for (const file of files) if (file !== 'tab-guard.js' && !file.startsWith('sync/') && !file.startsWith('vpn/')) vm.runInContext(fs.readFileSync(path.join(base, file), 'utf8'), context); };
+  // by its dedicated integration suite.
+  context.importScripts = (...files) => { for (const file of files) if (file !== 'tab-guard.js' && !file.startsWith('sync/') && (!file.startsWith('vpn/') || file === 'vpn/engine/routing.js')) vm.runInContext(fs.readFileSync(path.join(base, file), 'utf8'), context); };
   vm.runInContext(fs.readFileSync(path.join(base, 'background.js'), 'utf8'), context);
   return {state, calls, listeners, context};
 }

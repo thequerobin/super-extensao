@@ -53,7 +53,7 @@ const proxySettingsWatcher = async (event: OnChangeDetails) => {
 	);
 };
 
-let proxySettingsWatcherInitialized = true;
+let proxySettingsWatcherInitialized = false;
 
 export const removeProxySettingsWatcher = () => {
 	if (!proxySettingsWatcherInitialized || !browser.proxy) {

@@ -1,4 +1,5 @@
 'use background';
+import {createFixedConfig, createPacScript} from '../../../../../vpn/engine/routing';
 import {triggerPromise} from './triggerPromise';
 import {setWebRTCState} from '../webrtc/setWebRTCState';
 import {WebRTCState} from '../webrtc/state';
@@ -20,8 +21,6 @@ import {
 	scheme,
 } from '../config';
 import type {ProxyServer, SplitTunnelingConfig} from '../vpn/ConnectionState';
-import {getIncludeOnlyList} from '../vpn/getIncludeOnlyList';
-import {getBypassList} from '../vpn/getBypassList';
 
 interface PacScript {
 	mode: 'pac_script';
@@ -75,81 +74,9 @@ export const hasProxy = async (): Promise<boolean> =>
 		'Unable to check proxy settings',
 	);
 
-const buildDomainMatchingCondition = (domain: string) => {
-	if (domain.startsWith('.')) {
-		return `host.endsWith(${JSON.stringify(domain)})`;
-	}
-
-	const mask = domain.match(/^(\d+\.\d+\.\d+\.\d+)\/(\d+)$/);
-
-	if (mask) {
-		let val = Number(mask[2]);
-
-		return `isInNet(host, "${mask[1]}", "${[255, 255, 255, 255]
-			.map(() =>
-				[...Array.from(Array(8).keys())].reduce(
-					(rst) => rst * 2 + Number(val-- > 0),
-					0,
-				),
-			)
-			.join('.')}")`;
-	}
-
-	return `(host === ${JSON.stringify(domain)})`;
-};
-
-const buildDomainListCondition = (domains: string[]) =>
-	domains.map((domain) => buildDomainMatchingCondition(domain)).join(' || ');
-
-const getExcludeCondition = (proxy: FixedServersProxy): string => {
-	return buildDomainListCondition(
-		proxy.rules.bypassList.filter(
-			(exclusion) => !proxyLocalNetworkExclusion.includes(exclusion), // Those will be handled by dnsResolve()
-		),
-	);
-};
-
-const getIncludeCondition = (proxy: FixedServersProxy): string => {
-	const includeOnly = proxy.rules.includeOnly;
-	const exclusion = getExcludeCondition(proxy);
-
-	if (typeof includeOnly === 'undefined') {
-		return exclusion ? `!(${exclusion})` : 'true';
-	}
-
-	const inclusion = buildDomainListCondition(includeOnly);
-
-	if (!inclusion) {
-		return 'false';
-	}
-
-	return exclusion ? `!(${exclusion}) && (${inclusion})` : inclusion;
-};
-
-/**
- * PAC Script is for Chrome, in Firefox, logic is overridden by handleProxyRequest()
- */
-export const getPacScript = (proxy: FixedServersProxy): PacScript => ({
-	mode: 'pac_script',
-	pacScript: {
-		data: `function FindProxyForURL(url, host) {
-			var isLocal = /^\\d+(\\.\\d+){3}$/.test(host) && (
-				isInNet(host, "192.0.2.0", "255.255.255.0")
-				|| /^(0|10|127|192\\.168|172\\.1[6789]|172\\.2[0-9]|172\\.3[01]|169\\.254|192\\.88\\.99)\\.[0-9.]+$/.test(host)
-			);
-
-			if (isLocal || isPlainHostName(host)) {
-				return "DIRECT";
-			}
-
-			if (${getIncludeCondition(proxy)}) {
-				return "${proxy.rules.singleProxy.scheme.toUpperCase()} ${proxy.rules.singleProxy.host}:${proxy.rules.singleProxy.port}";
-			}
-
-			return "DIRECT";
-		}`,
-	},
-});
+// Super Extensão owns rule compilation; session and browser writes remain here.
+export const getPacScript = (proxy: FixedServersProxy): PacScript =>
+  createPacScript(proxy, proxyLocalNetworkExclusion);
 
 const setProxy = (
 	value: FixedServersProxy | SystemProxy | PacScript,
@@ -206,34 +133,13 @@ const setProxy = (
 	});
 
 export const getFixedServerConfig = (
-	host: string,
-	port: number,
-	splitTunneling: SplitTunnelingConfig = {},
-): FixedServersProxy => {
-	const config: FixedServersProxy = {
-		mode: 'fixed_servers',
-		rules: {
-			singleProxy: {
-				scheme,
-				host,
-				port,
-			},
-			bypassList: [
-				...getBypassList(splitTunneling),
-				...(excludeApiFromProxy ? apiDomainsExclusion : []),
-				...proxyLocalNetworkExclusion,
-			],
-		},
-	};
-
-	const includeOnly = getIncludeOnlyList(splitTunneling);
-
-	if (typeof includeOnly !== 'undefined') {
-		config.rules.includeOnly = includeOnly;
-	}
-
-	return config;
-};
+  host: string,
+  port: number,
+  splitTunneling: SplitTunnelingConfig = {},
+): FixedServersProxy => createFixedConfig(host, port, splitTunneling, {
+  scheme, excludeApi: excludeApiFromProxy, apiExclusions: apiDomainsExclusion,
+  localExclusions: proxyLocalNetworkExclusion,
+});
 
 export const proxyToServer = async (
 	server: ProxyServer,

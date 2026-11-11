@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.6.4.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.6.5.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -13,7 +13,7 @@ Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincroniza�
 | Interface | Abas e submenus fixos, componentes/preferências compartilhados, foco unificado e tema também na aba de reserva/Nova guia | Conferência visual no navegador, inclusive foco, rolagem e setas dos países |
 | Sincronização | Google Drive/favoritos pelo núcleo próprio; demais provedores e abas pelo motor legado | Dois navegadores reais, restauração de backups por interface e migração dos demais conectores |
 | Núcleo Google Drive | Reconciliação, escrita condicional, criptografia, backup e retomada pelo diário | Ampliar a validação real relatada pelo usuário, medir grandes importações e suportar pastas sobrepostas |
-| VPN | Interface própria, motor Proton, servidores por país, regras por site e indicador no ícone | Validação real de login, tráfego, IP, regras e recuperação; reescrita do motor ainda não iniciada |
+| VPN | Interface e núcleo de regras próprios, controlador/sessão Proton, servidores por país e indicador no ícone | Validação real de login, tráfego, IP, regras e recuperação; núcleo próprio de regras entregue; controlador e sessão pendentes |
 | Limpeza, Autoplay e Abas | Controles locais e testes automatizados | Validar fechamento nativo e recuperação no Helium |
 | Nova guia | Tabliss adaptado, editor, widgets e importação/exportação | Regressão visual e teste dos provedores online utilizados |
 
@@ -120,12 +120,13 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A última execução registrada na implementação **1.6.3 passou 126 testes**, com APIs simuladas e testes DOM. Os testes simulados não comprovam tráfego de VPN nem geometria nativa. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
+A última execução registrada na implementação **1.6.5 passou 135 testes**, com APIs simuladas e testes DOM. Os testes simulados não comprovam tráfego de VPN nem geometria nativa. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
 
 ## Documentação
 
 - [Guia rápido](LEIA-ME.md)
 - [Próximos passos e critérios de conclusão](PROXIMOS-PASSOS.md)
+- [Motor da VPN: contratos, primeira etapa e próximas substituições](docs/vpn-engine.md)
 - [Novo motor de sincronização](docs/sync-engine.md)
 - [Interface da Sincronização](docs/sync-interface.md)
 - [Integração VPN](docs/proton-vpn.md) e [interface VPN](docs/vpn-interface.md)
