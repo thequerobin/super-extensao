@@ -24,6 +24,8 @@ export const messages = {
     "pt-BR": "Conta",
     en: "Account",
   },
+  loadingServers: { "pt-BR": "Carregando servidores…", en: "Loading servers…" },
+  loadingAccount: { "pt-BR": "Consultando conta…", en: "Loading account…" },
   loading: {
     "pt-BR": "Carregando VPN…",
     en: "Loading VPN…",

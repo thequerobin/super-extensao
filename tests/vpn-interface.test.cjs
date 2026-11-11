@@ -566,7 +566,15 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
   const engine = createEngine();
   let events = 0;
   const unsubscribe = engine.subscribe(() => events++);
-  const state = await engine.load();
+  const progress = [];
+  const state = await engine.load((partial) => progress.push(plain(partial)));
+  assert.equal(progress.length, 2);
+  assert.equal(progress[0].signedIn, true);
+  assert.ok(progress[0].features);
+  assert.equal(progress[0].account, undefined);
+  assert.equal(progress[0].servers, undefined);
+  assert.ok(progress[1].account);
+  assert.equal(progress[1].servers, undefined);
   assert.ok(!JSON.stringify(state).includes("never-expose"));
   assert.ok(!JSON.stringify(state).includes("never-render-this"));
   await engine.signIn();
@@ -790,4 +798,37 @@ test("embedded VPN uses the fixed shared submenu and keeps navigation and locale
   } finally {
     await ui.close();
   }
+});
+
+
+test("server loading keeps navigation, settings and disconnect available and scopes failures", async () => {
+  const ui = await boot(snapshot());
+  let rejectLoad;
+  try {
+    ui.engine.load = (progress) => {
+      const local = snapshot();
+      delete local.servers;
+      progress(local);
+      return new Promise((_resolve, reject) => { rejectLoad = reject; });
+    };
+    const pending = ui.app.refresh();
+    await tick();
+    assert.equal(ui.w.document.querySelector(".vpn-heading"), null);
+    assert.ok(ui.w.document.querySelector(".vpn-status-card"));
+    assert.match(ui.w.document.body.textContent, /Carregando servidores/);
+    assert.equal(ui.w.document.querySelector('[data-action="fastest"]').disabled, true);
+    ui.broadcast("changeState", { state: "connected", server: { name: "JP#1" } });
+    assert.equal(ui.w.document.querySelector('[data-action="disconnect"]').disabled, false);
+    ui.w.document.querySelector('[data-page="features"]').click();
+    await tick();
+    assert.ok(ui.w.document.querySelector('[data-feature="notification"]'));
+    assert.equal(ui.w.document.querySelector('[data-feature="notification"]').disabled, false);
+    rejectLoad(new Error("Server network failed"));
+    await pending;
+    assert.ok(ui.w.document.querySelector('[data-feature="notification"]'));
+    ui.w.document.querySelector('[data-page="servers"]').click();
+    await tick();
+    assert.match(ui.w.document.body.textContent, /Server network failed/);
+    assert.ok(ui.w.document.querySelector('[data-action="refresh"]'));
+  } finally { await ui.close(); }
 });

@@ -1,11 +1,7 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
   <v-app id="app" class="sync-workspace">
-    <header class="sync-heading">
-      <div>
-        <p class="sync-eyebrow">{{ t("SuperSyncTitle") }}</p>
-        <h1>{{ t("UiIntro") }}</h1>
-      </div>
+    <header v-if="!embedded" class="sync-heading">
       <label v-if="!embedded" class="sync-language"
         ><span class="sr-only">{{ t("SuperLanguage") }}</span
         ><select

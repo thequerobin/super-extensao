@@ -18,6 +18,8 @@ export async function mountVpn(root, engine, preferences) {
     locale: await preferences.locale.get(),
     snapshot: { signedIn: false },
     loading: true,
+    serversLoading: false,
+    serversError: "",
     busy: false,
     error: "",
     state: { state: "disconnected" },
@@ -42,7 +44,7 @@ export async function mountVpn(root, engine, preferences) {
   const openCountries = new Set();
   const t = (key) => messages[key]?.[model.locale] || messages[key]?.en || key;
   const button = (label, action, extra = "", kind = "") =>
-    `<button type="button" class="vpn-button ui-button ${kind}" data-action="${action}" ${model.busy ? "disabled" : ""} ${extra}>${e(label)}</button>`;
+    `<button type="button" class="vpn-button ui-button ${kind}" data-action="${action}" ${model.busy || (model.serversLoading || model.serversError) && ["fastest", "random", "connect", "recent"].includes(action) ? "disabled" : ""} ${extra}>${e(label)}</button>`;
   const errorText = (error) =>
     messages[error?.message]
       ? t(error.message)
@@ -106,6 +108,9 @@ export async function mountVpn(root, engine, preferences) {
       })
       .join("")}</div>`;
   }
+  const serversStatus = () => model.serversLoading
+    ? `<p class="vpn-empty" role="status">${e(t("loadingServers"))}</p>`
+    : model.serversError ? `<div class="vpn-empty" role="alert"><p>${e(model.serversError)}</p>${button(t("retry"), "refresh")}</div>` : "";
   function connectionMarkup() {
     const server = model.state.server;
     const free = filterServers(
@@ -121,7 +126,8 @@ export async function mountVpn(root, engine, preferences) {
     ).slice(0, 5);
     return `<section class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<div class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${button(t("choose"), "servers")}</div></section>
   ${!active() ? `<div class="vpn-quick">${button(t("random"), "random")}</div>` : ""}
-  ${free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
+  ${serversStatus()}
+  ${!model.serversLoading && !model.serversError && free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
   ${
     recent.length
       ? `<section class="vpn-card ui-card"><h2>${e(t("recent"))}</h2><div class="vpn-recents">${recent
@@ -146,7 +152,7 @@ export async function mountVpn(root, engine, preferences) {
       model.filter,
       model.locale,
     );
-    return `<section><div class="vpn-section-heading"><h2>${e(t("servers"))} <span class="vpn-count">${servers.length}</span></h2>${button(t("refresh"), "refresh")}</div><label class="vpn-field"><span class="vpn-sr-only">${e(t("search"))}</span><input type="search" data-field="search" placeholder="${e(t("search"))}" value="${e(model.query)}"></label><label class="vpn-field"><span class="vpn-sr-only">${e(t("servers"))}</span><select data-field="server-filter">${["available", "free", "all", "secureCore"].map((filter) => `<option value="${filter}" ${model.filter === filter ? "selected" : ""}>${e(t(filter))}</option>`).join("")}</select></label>${listMarkup(servers, "servers")}</section>`;
+    return `<section><div class="vpn-section-heading"><h2>${e(t("servers"))} <span class="vpn-count">${servers.length}</span></h2>${button(t("refresh"), "refresh")}</div><label class="vpn-field"><span class="vpn-sr-only">${e(t("search"))}</span><input type="search" data-field="search" placeholder="${e(t("search"))}" value="${e(model.query)}"></label><label class="vpn-field"><span class="vpn-sr-only">${e(t("servers"))}</span><select data-field="server-filter">${["available", "free", "all", "secureCore"].map((filter) => `<option value="${filter}" ${model.filter === filter ? "selected" : ""}>${e(t(filter))}</option>`).join("")}</select></label>${serversStatus() || listMarkup(servers, "servers")}</section>`;
   }
   function featuresMarkup() {
     const features = model.snapshot.features || {};
@@ -170,7 +176,7 @@ export async function mountVpn(root, engine, preferences) {
   }
   function accountMarkup() {
     const account = model.snapshot.account || {};
-    return `<section class="vpn-card ui-card"><p class="vpn-eyebrow">PROTON</p><h2>${e(account.name)}</h2><p class="vpn-note">${e(t("plan"))}: ${e(account.plan || "Free")}</p>${document.getElementById("language") ? "" : `<label class="vpn-field">${e(t("language"))}<select data-field="locale"><option value="pt-BR" ${model.locale === "pt-BR" ? "selected" : ""}>Português do Brasil</option><option value="en" ${model.locale === "en" ? "selected" : ""}>English</option></select></label>`}<div class="vpn-account-links"><a href="https://account.proton.me/vpn/dashboard" target="_blank" rel="noopener noreferrer">${e(t("manage"))} ↗</a><a href="https://protonvpn.com/support/browser-extensions" target="_blank" rel="noopener noreferrer">${e(t("help"))} ↗</a></div></section><section class="vpn-card ui-card"><h2>${e(t("signOut"))}</h2><p class="vpn-note">${e(t("signOutHelp"))}</p>${model.confirmSignOut ? `<div class="vpn-signout-confirm" role="alertdialog" aria-labelledby="vpnSignoutTitle"><p id="vpnSignoutTitle">${e(t("confirmSignOut"))}</p><div class="vpn-action-row">${button(t("keepAccount"), "cancel-signout")}${button(t("signOut"), "signout", "", "vpn-danger")}</div></div>` : button(t("signOut"), "confirm-signout", "", "vpn-danger")}</section>`;
+    return `<section class="vpn-card ui-card"><p class="vpn-eyebrow">PROTON</p><h2>${e(account.name || t("account"))}</h2><p class="vpn-note">${e(t("plan"))}: ${e(account.plan || t("loadingAccount"))}</p>${document.getElementById("language") ? "" : `<label class="vpn-field">${e(t("language"))}<select data-field="locale"><option value="pt-BR" ${model.locale === "pt-BR" ? "selected" : ""}>Português do Brasil</option><option value="en" ${model.locale === "en" ? "selected" : ""}>English</option></select></label>`}<div class="vpn-account-links"><a href="https://account.proton.me/vpn/dashboard" target="_blank" rel="noopener noreferrer">${e(t("manage"))} ↗</a><a href="https://protonvpn.com/support/browser-extensions" target="_blank" rel="noopener noreferrer">${e(t("help"))} ↗</a></div></section><section class="vpn-card ui-card"><h2>${e(t("signOut"))}</h2><p class="vpn-note">${e(t("signOutHelp"))}</p>${model.confirmSignOut ? `<div class="vpn-signout-confirm" role="alertdialog" aria-labelledby="vpnSignoutTitle"><p id="vpnSignoutTitle">${e(t("confirmSignOut"))}</p><div class="vpn-action-row">${button(t("keepAccount"), "cancel-signout")}${button(t("signOut"), "signout", "", "vpn-danger")}</div></div>` : button(t("signOut"), "confirm-signout", "", "vpn-danger")}</section>`;
   }
   function navigationMarkup() {
     if (!model.snapshot.signedIn) return "";
@@ -196,7 +202,7 @@ export async function mountVpn(root, engine, preferences) {
         : null;
     const freeOpen = Boolean(root.querySelector("[data-free]")?.open);
     root.lang = model.locale;
-    root.innerHTML = `<div class="vpn-app"><header class="vpn-heading"><div><p class="vpn-eyebrow">VPN</p><h1>${e(t("heading"))}</h1></div><span class="vpn-provider-badge">Proton</span></header>${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<section class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</section>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note">${e(t("provider"))}</footer></div>`;
+    root.innerHTML = `<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<section class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</section>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note">${e(t("provider"))}</footer></div>`;
     if (hostNavigation) {
       hostNavigation.innerHTML = navigationMarkup();
       if (focusedNavigation)
@@ -240,12 +246,21 @@ export async function mountVpn(root, engine, preferences) {
   async function refresh() {
     if (loadingPromise) return loadingPromise;
     const revision = stateRevision;
-    model.loading = true;
+    model.loading = !model.snapshot.signedIn;
+    model.serversLoading = true;
+    model.serversError = "";
     model.error = "";
     render();
     loadingPromise = (async () => {
       try {
-        const snapshot = await engine.load();
+        const snapshot = await engine.load((partial) => {
+          if (disposed || stateRevision !== revision && model.state.state === "logged-out") return;
+          model.snapshot = { ...model.snapshot, ...partial };
+          model.loading = false;
+          if (stateRevision === revision) model.state = partial.state || model.state;
+          if (!model.dirty) restoreRules();
+          render();
+        });
         if (disposed) return;
         if (stateRevision !== revision && model.state.state === "logged-out") {
           model.snapshot = { signedIn: false };
@@ -261,8 +276,10 @@ export async function mountVpn(root, engine, preferences) {
         if (!model.dirty) restoreRules();
         if (model.state.state === "connecting") startChecking();
       } catch (error) {
-        model.error = errorText(error);
+        if (model.snapshot.signedIn) model.serversError = errorText(error);
+        else model.error = errorText(error);
       } finally {
+        model.serversLoading = false;
         model.loading = false;
         loadingPromise = undefined;
         render();
@@ -375,11 +392,11 @@ export async function mountVpn(root, engine, preferences) {
       render();
       return;
     }
+    if (action === "refresh") { void refresh(); return; }
     void run(async () => {
       if (action === "login") {
         await engine.signIn();
       }
-      if (action === "refresh") await refresh();
       if (["fastest", "random", "connect", "recent"].includes(action)) {
         // Pending text is a local action state; connection status comes from worker broadcasts.
         const revision = stateRevision;

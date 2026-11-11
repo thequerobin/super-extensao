@@ -82,7 +82,7 @@ export function createEngine() {
             enabled: item.config.value,
             available: item.feature.isAvailable(),
             controllable:
-              item.feature.isControllable() &&
+              Boolean(user) && item.feature.isControllable() &&
               (key !== "secureCore" || getUserMaxTier(user) > 0),
             message: item.feature.getControlMessage(),
           },
@@ -90,7 +90,7 @@ export function createEngine() {
       }),
     );
   return {
-    async load() {
+    async load(onProgress?: (snapshot: any) => void) {
       const session = await readSession();
       if (!session?.uid || !session.refreshToken) {
         user = undefined;
@@ -98,40 +98,40 @@ export function createEngine() {
         connected = false;
         return { signedIn: false };
       }
-      user = await request<User>("user");
-      if (!user?.VPN) throw new Error("Unable to load Proton account");
-      const tier = getUserMaxTier(user);
-      const [state, loadedFeatures, loadedContext, loadedLogicals] =
-        await Promise.all([
-          request<any>("state"),
-          loadAllFeatures(),
-          getUserContext(tier),
-          getSortedLogicals(),
-        ]);
+      const [state, loadedFeatures, recents] = await Promise.all([
+        request<any>("state"), loadAllFeatures(), getLastChoices(),
+      ]);
       features = loadedFeatures;
-      context = loadedContext;
-      logicals = loadedLogicals;
-      // Confirm the connection through worker events, never infer success from a click.
-      return {
+      const local = {
         signedIn: true,
-        account: {
-          name: user.VPN.Name,
-          plan: user.VPN.PlanTitle || user.VPN.PlanName,
-          tier,
-        },
-        servers: logicals.map(summary),
         features: featureSummary(),
         split: features.splitTunneling.config,
-        splitControllable:
-          features.splitTunneling.feature.isControllable() &&
-          features.splitTunneling.feature.isAvailable(),
+        splitControllable: false,
         state: {
           state: state?.server ? "connecting" : "disconnected",
           server: state?.server,
           error: state?.error,
         },
-        recents: await getLastChoices(),
+        recents,
       };
+      onProgress?.(local);
+      user = await request<User>("user");
+      if (!user?.VPN) throw new Error("Unable to load Proton account");
+      const tier = getUserMaxTier(user);
+      const ready = {
+        ...local,
+        account: { name: user.VPN.Name, plan: user.VPN.PlanTitle || user.VPN.PlanName, tier },
+        features: featureSummary(),
+        splitControllable: features.splitTunneling.feature.isControllable() &&
+          features.splitTunneling.feature.isAvailable(),
+      };
+      onProgress?.(ready);
+      const [loadedContext, loadedLogicals] = await Promise.all([
+        getUserContext(tier), getSortedLogicals(),
+      ]);
+      context = loadedContext;
+      logicals = loadedLogicals;
+      return { ...ready, servers: logicals.map(summary), features: featureSummary(), split: features.splitTunneling.config };
     },
     async signIn() {
       if (!(await browser.permissions.request({ permissions: ["proxy"] })))

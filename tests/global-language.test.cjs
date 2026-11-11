@@ -222,7 +222,7 @@ test("global header locale updates all local tabs, dynamic messages and both emb
     doc.querySelector("#tab-autoplay").click();
     assert.equal(doc.querySelector("#syncSubmenu").hidden, true);
 
-    assert.match(doc.querySelector("#syncPanel").textContent, /Your bookmarks/);
+    assert.match(doc.querySelector("#syncPanel").textContent, /Profiles/);
     doc.querySelector("#language").value = "pt-BR";
     doc
       .querySelector("#language")
@@ -236,17 +236,17 @@ test("global header locale updates all local tabs, dynamic messages and both emb
       doc.querySelector("#currentAutoplayEffective").textContent,
       /Permitindo autoplay/,
     );
-    assert.match(doc.querySelector("#syncPanel").textContent, /Seus favoritos/);
+    assert.match(doc.querySelector("#syncPanel").textContent, /Perfis/);
     assert.match(
       doc.querySelector("#vpnPanel").textContent,
-      /VPN no navegador/,
+      /Conexão fornecida pelo Proton/,
     );
     assert.equal(doc.querySelector("#domainInput").value, "unsaved.example");
     assert.deepEqual(ui.local.excludedSites, ["saved.example"]);
     assert.equal(doc.querySelector("#enabled").checked, true);
     await ui.w.SuperPreferences.locale.set("en");
     await tick();
-    assert.match(doc.querySelector("#vpnPanel").textContent, /Browser VPN/);
+    assert.match(doc.querySelector("#vpnPanel").textContent, /Connection provided by Proton/);
     assert.deepEqual(ui.errors, []);
   } finally {
     ui.close();

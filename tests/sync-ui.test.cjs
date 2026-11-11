@@ -222,7 +222,7 @@ test("sync interface navigates internally, switches language and isolates OAuth 
     await tick();
     assert.match(
       ui.w.document.body.textContent,
-      /Your bookmarks, across browsers/
+      /Save connection settings/
     );
     await ui.route("/new");
     assert.equal(ui.w.document.querySelectorAll(".sync-service").length, 8);
