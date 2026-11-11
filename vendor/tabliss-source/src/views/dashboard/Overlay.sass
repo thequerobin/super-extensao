@@ -1,33 +1,45 @@
 .Overlay
     position: absolute
-    top: 0
-    left: 0
-    margin: 0.5rem
-    padding: 0.5rem
-    border-radius: 1.25rem
-    transition: all 0.25s ease-out
-    font-size: 1.1rem
+    top: var(--space-3)
+    left: var(--space-3)
+    gap: var(--space-1)
+    margin: 0
+    padding: var(--space-1)
+    border: 1px solid var(--line)
+    border-radius: var(--card-radius)
+    background: var(--surface)
+    color: var(--text)
+    box-shadow: var(--shadow)
 
-    .on-hover
-        opacity: 0
-        transition: all 0.25s ease-out
+    .ui-button, .overlay-loading
+        width: var(--button-height)
+        min-height: var(--button-height)
+        padding: var(--space-2)
+        display: inline-flex
+        align-items: center
+        justify-content: center
 
-    &:hover
-        opacity: 1
-        background-color: rgba(0, 0, 0, 0.65)
+    .ui-button
+        background: transparent
+        border-color: transparent
+        color: var(--muted)
 
-        .on-hover
-            opacity: 1
+        &:hover, &[aria-pressed="true"]
+            background: var(--accent-bg)
+            color: var(--accent)
 
-        svg
-            color: #3498db
-            filter: none
+        &.ui-button-danger
+            color: var(--danger)
 
-    a, span
-        margin: 0 0.25em
+    .overlay-loading
+        color: var(--accent)
 
-    svg, i
-        transition: stroke 0.25s ease-out
+    span, i, svg
+        display: inline-flex
+        align-items: center
+        justify-content: center
 
-.light .Overlay:hover
-    background-color: rgba(255, 255, 255, 0.65)
+    svg
+        width: var(--icon-size)
+        height: var(--icon-size)
+        filter: none

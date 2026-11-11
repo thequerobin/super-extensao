@@ -7,6 +7,7 @@ import { db } from "../../db/state";
 import { useFormatMessages, useFullscreen, useKeyPress } from "../../hooks";
 import { useValue } from "../../lib/db/react";
 import { Icon } from "../shared";
+import { UiActions, UiButton } from "../../ui";
 import "./Overlay.sass";
 
 const messages = defineMessages({
@@ -52,41 +53,43 @@ const Overlay: React.FC = () => {
   if (handleToggleFullscreen) useKeyPress(handleToggleFullscreen, ["f"]);
 
   return (
-    <div className="Overlay">
-      <a onClick={toggleSettings} title={`${translated.settingsHint} (S)`}>
-        <Icon name="settings" />
-      </a>
+    <UiActions className="Overlay" role="group" aria-label={translated.settingsHint}>
+      <UiButton onClick={toggleSettings} title={`${translated.settingsHint} (S)`} aria-label={translated.settingsHint}>
+        <span aria-hidden="true"><Icon name="settings" /></span>
+      </UiButton>
 
       {errors.length > 0 ? (
-        <a onClick={toggleErrors} title={translated.errorHint}>
-          <Icon name="alert-triangle" />
-        </a>
+        <UiButton className="ui-button-danger" onClick={toggleErrors} title={translated.errorHint} aria-label={translated.errorHint}>
+          <span aria-hidden="true"><Icon name="alert-triangle" /></span>
+        </UiButton>
       ) : null}
 
       {pending > 0 ? (
-        <span title={translated.loadingHint}>
-          <Icon name="zap" />
+        <span className="overlay-loading" role="status" title={translated.loadingHint} aria-label={translated.loadingHint}>
+          <span aria-hidden="true"><Icon name="zap" /></span>
         </span>
       ) : null}
 
-      <a
-        className={focus ? "" : "on-hover"}
+      <UiButton
         onClick={toggleFocus}
         title={`${translated.focusHint} (W)`}
+        aria-label={translated.focusHint}
+        aria-pressed={!focus}
       >
-        <Icon name={focus ? "eye-off" : "eye"} />
-      </a>
+        <span aria-hidden="true"><Icon name={focus ? "eye-off" : "eye"} /></span>
+      </UiButton>
 
       {handleToggleFullscreen ? (
-        <a
-          className="on-hover"
+        <UiButton
           onClick={handleToggleFullscreen}
           title={`${translated.fullscreenHint} (F)`}
+          aria-label={translated.fullscreenHint}
+          aria-pressed={isFullscreen}
         >
-          <Icon name={isFullscreen ? "minimize-2" : "maximize-2"} />
-        </a>
+          <span aria-hidden="true"><Icon name={isFullscreen ? "minimize-2" : "maximize-2"} /></span>
+        </UiButton>
       ) : null}
-    </div>
+    </UiActions>
   );
 };
 

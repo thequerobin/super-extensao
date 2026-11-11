@@ -1,5 +1,9 @@
 # Tabliss 2.6.0 na Super Extensão
 
+## Barra de controles — Super Extensão 1.6.10
+
+A barra de configurações, widgets e tela cheia passa a usar `UiActions` e `UiButton`. Removidos o azul fixo e o fundo de hover herdados, adotando paleta, borda, raio e foco do projeto. As ações agora são botões nativos de 36 px, com nomes acessíveis, estados pressionados e ícones decorativos de 16 px. Os controles ficam visíveis; atalhos S/W/F, carregamento, erros e ações existentes foram preservados. Conferido nos temas claro e escuro no Helium com perfil temporário.
+
 ## Ajustes visuais — Super Extensão 1.6.9
 
 Separados os campos de idioma e fuso horário por 12 px, usando o agrupamento compartilhado `UiStack`. Adicionada margem entre o botão de seleção de arquivos e seu texto. Removido o atalho de pausa/reprodução das configurações Unsplash, mantendo o controle na página inicial e preservando a configuração de pausa existente.

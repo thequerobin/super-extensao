@@ -1,5 +1,7 @@
 # Componentes da interface — 1.6.8
 
+Ajuste visual 1.6.10: a barra de controles da página inicial usa `UiActions` e `UiButton`, com cores do tema global, borda e raio comuns, ícones de 16 px e botões de 36 px. Configurações, widgets e tela cheia ficam visíveis e acessíveis por teclado, com nomes e estados ARIA. O indicador de carregamento e o botão de erros continuam condicionais.
+
 Ajuste visual 1.6.9: os campos de idioma e fuso horário do editor ficam em `UiStack`, com 12 px de separação entre linhas. O botão nativo de seleção de arquivos reserva 12 px até o nome do arquivo. O controle de pausa do Unsplash fica somente na página inicial, junto dos créditos da imagem; foi removido das configurações de intervalo.
 
 Revisado em 11 de novembro de 2026. As telas usam um catálogo comum de componentes com adaptadores para HTML, DOM, Vue e React. Tema, cores, medidas e foco ficam em `ui-theme.css` e `ui-components.css`. Os componentes não acessam armazenamento, rede, credenciais ou motores.

@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.9**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.10**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Barra de controles 1.6.10
+
+Conferida no Helium com perfil temporário nos temas claro e escuro. A barra acompanha a superfície do tema, tem raio de 12 px e botões de 36 × 36 px com nomes acessíveis. Foram exercitados a abertura de configurações por Enter, fechamento por Escape, alternância dos widgets e entrada/saída de tela cheia. Não houve exceções de página nos cenários verificados. Os 17 testes existentes de imagens da nova guia e componentes visuais passaram.
 
 ## Ajustes visuais 1.6.9
 
