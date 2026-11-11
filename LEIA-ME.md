@@ -1,4 +1,4 @@
-# Super Extensão — guia rápido (1.6.10)
+# Super Extensão — guia rápido (1.6.11)
 
 Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
 

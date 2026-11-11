@@ -1,7 +1,9 @@
 .Overlay
     position: absolute
-    top: var(--space-3)
-    left: var(--space-3)
+    top: var(--newtab-controls-inset, var(--space-3))
+    left: var(--newtab-controls-inset, var(--space-3))
+    box-sizing: border-box
+    min-height: var(--newtab-controls-height)
     gap: var(--space-1)
     margin: 0
     padding: var(--space-1)
@@ -10,6 +12,10 @@
     background: var(--surface)
     color: var(--text)
     box-shadow: var(--shadow)
+    opacity: 0.5
+
+    &:hover, &:focus-within
+        opacity: 1
 
     .ui-button, .overlay-loading
         width: var(--button-height)
@@ -43,3 +49,7 @@
         width: var(--icon-size)
         height: var(--icon-size)
         filter: none
+
+@media (prefers-reduced-motion: no-preference)
+    .Overlay
+        transition: opacity 0.15s ease-out

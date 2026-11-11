@@ -1,5 +1,9 @@
 # Tabliss 2.6.0 na Super Extensão
 
+## Alinhamento dos controles — Super Extensão 1.6.11
+
+A barra esquerda e o botão direito usam o mesmo recuo superior/lateral de 12 px e altura de 46 px, inclusive em telas estreitas. A barra esquerda tem opacidade de 50% em repouso, com 100% ao passar o mouse ou focar um controle pelo teclado. O movimento reduzido desativa a transição. Os comportamentos dos botões foram preservados.
+
 ## Barra de controles — Super Extensão 1.6.10
 
 A barra de configurações, widgets e tela cheia passa a usar `UiActions` e `UiButton`. Removidos o azul fixo e o fundo de hover herdados, adotando paleta, borda, raio e foco do projeto. As ações agora são botões nativos de 36 px, com nomes acessíveis, estados pressionados e ícones decorativos de 16 px. Os controles ficam visíveis; atalhos S/W/F, carregamento, erros e ações existentes foram preservados. Conferido nos temas claro e escuro no Helium com perfil temporário.

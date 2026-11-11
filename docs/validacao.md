@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.10**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.11**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Alinhamento e opacidade 1.6.11
+
+Após recompilar a nova guia, os controles foram medidos no Helium com perfil temporário, em viewports de 1280, 520 e 320 px. Ambos ficaram a 12 px do topo, com 46 px de altura e borda inferior em 58 px. A barra esquerda ficou em 50% de opacidade em repouso e em 100% com hover e foco de teclado. Não houve exceção de página nos estados verificados. `check:ui` e a conferência de consistência das quatro versões passaram. Esta rodada de CSS usou a verificação direcionada no navegador, sem repetir a suíte completa.
 
 ## Barra de controles 1.6.10
 
