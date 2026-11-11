@@ -1,4 +1,4 @@
-# Base visual e idioma compartilhados — referência 1.6.3
+# Base visual e idioma compartilhados — referência 1.6.4
 
 `ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define cores, família tipográfica e raios; `ui-components.css` define a escala de tamanhos e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
 
@@ -67,3 +67,7 @@ Em componentes com ciclo de vida próprio, execute `stop()` ao destruí-los. Par
 Use as classes existentes e ajuste apenas o layout no módulo: `ui-button` com sua variante, `ui-control` para campos, `ui-search ui-focus-within` para busca composta, `ui-card` para cartões e `ui-notice` para mensagens. Não copie valores de cor ou regras de foco de outro módulo. Não é necessária uma página de Configurações gerais nesta rodada: tema/idioma já estão no cabeçalho; opções funcionais permanecem no respectivo módulo.
 
 A matriz automatizada cobre PT-BR/inglês nos módulos, troca dos três temas e mudança do sistema, preservação de rascunho ao trocar tema e encerramento das assinaturas. A conferência manual de assistentes/diálogos, contraste, foco nativo, alturas mínima/máxima e nomes longos continua no [checklist de validação](validacao.md).
+
+## Seletores — 1.6.4
+
+Os seletores nativos simples usam uma seta comum, de 12 px, posicionada a 12 px da borda direita. O espaço de texto reserva 36 px à direita para evitar sobreposição. A cor acompanha os tokens claro/escuro. Seletores com `multiple` ou `size` mantêm a apresentação de lista; o menu de opções continua nativo. Isso elimina a diferença de posicionamento da seta entre plataformas.

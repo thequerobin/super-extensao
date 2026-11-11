@@ -265,3 +265,13 @@
 .ui-focus-within :focus-visible {
   outline: none !important;
 }
+
+/* Position the select arrow ourselves so its edge spacing is consistent across platforms. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  padding-right: 36px !important;
+  background-image: var(--select-arrow) !important;
+  background-position: right 12px center !important;
+  background-size: 12px 12px !important;
+  background-repeat: no-repeat !important;
+}
