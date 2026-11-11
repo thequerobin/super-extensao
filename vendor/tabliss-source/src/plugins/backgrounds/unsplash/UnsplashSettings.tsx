@@ -1,3 +1,4 @@
+import { ProviderAccess } from "../shared/ProviderAccess";
 import { t } from "../../../locales/ui";
 import React from "react";
 import { Icon } from "../../../views/shared";
@@ -7,6 +8,7 @@ import { defaultData, Props } from "./types";
 
 const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="UnsplashSettings">
+    <ProviderAccess provider="unsplash" />
     <label>
       <span style={{ float: "right" }}>
         {data.paused ? <span className="text--grey">{t("(Paused) ")}</span> : null}

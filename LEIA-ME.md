@@ -1,4 +1,4 @@
-# Super Extensão — guia rápido (1.6.5)
+# Super Extensão — guia rápido (1.6.6)
 
 Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
 
@@ -52,4 +52,6 @@ O sinal não mede tráfego nem verifica o IP externamente. O proxy cobre este na
 - A importação de domínios de favoritos é manual e não altera os favoritos.
 - A importação da Nova guia substitui sua configuração; imagens próprias precisam ser selecionadas novamente.
 
-A suíte da implementação 1.6.5 passou 135 testes simulados. O usuário confirmou a sincronização Google Drive na 1.6.2; tráfego VPN, recuperação após falhas e conferência visual ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
+A suíte da implementação 1.6.6 passou 148 testes simulados. O usuário confirmou a sincronização Google Drive na 1.6.2; tráfego VPN, recuperação após falhas e conferência visual ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
+
+Para imagens Unsplash/GIPHY, abra as opções do fundo na Nova guia e salve sua chave de API. Ela fica apenas neste dispositivo. Veja [as instruções de imagens](docs/newtab-images.md).

@@ -1,3 +1,4 @@
+import { ProviderStatus, useProviderRevision } from "../shared/ProviderAccess";
 import React from "react";
 import { useObjectUrl } from "../../../hooks";
 import Backdrop from "../../../views/shared/Backdrop";
@@ -13,17 +14,22 @@ const Giphy: React.FC<Props> = ({
   loader,
 }) => {
   const [gif, setGif] = React.useState(cache);
-  const mounted = React.useRef(false);
+  const [error, setError] = React.useState<unknown>(null);
+  const [retry, setRetry] = React.useState(0);
+  const revision = useProviderRevision();
   React.useEffect(() => {
     const config = { tag: data.tag, nsfw: data.nsfw };
-    getGif(config, loader).then(setCache);
-    if (mounted.current || !gif) getGif(config, loader).then(setGif);
-    mounted.current = true;
-  }, [data.tag, data.nsfw]);
+    let active = true;
+    setError(null);
+    getGif(config, loader).then(next => {
+      if (active) { setCache(next); setGif(next); }
+    }).catch(error => { if (active) setError(error); });
+    return () => { active = false; };
+  }, [data.tag, data.nsfw, revision, retry]);
 
   const url = useObjectUrl(gif && gif.data);
 
-  if (!gif || !url) return null;
+  if (!gif || !url) return <ProviderStatus error={error} retry={() => setRetry(value => value + 1)} />;
 
   return (
     <div className="Giphy fullscreen">
@@ -35,6 +41,7 @@ const Giphy: React.FC<Props> = ({
         }}
       />
       <Credit link={gif.link} />
+      <ProviderStatus error={error} retry={() => setRetry(value => value + 1)} />
     </div>
   );
 };

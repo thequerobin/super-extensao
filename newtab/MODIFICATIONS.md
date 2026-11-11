@@ -28,3 +28,13 @@ O snapshot em `vendor/tabliss-source/` contém os arquivos de configuração, lo
 Para reconstruir o dashboard, use Node.js 20 ou superior. Dentro de `vendor/tabliss-source/`, instale com `npm ci` e execute `npm run build:chromium`. O comando Chromium funciona no Windows e em shells POSIX; o pacote usa Dart Sass e dispensa a compilação nativa do antigo `node-sass`. As integrações de Unsplash e GIPHY usam as variáveis indicadas em `.env.example`; uma reconstrução para distribuição deve configurar suas próprias credenciais de cliente desses serviços.
 
 O resultado fica em `dist/chromium/`. Para instalar na Super Extensão, copie os recursos gerados para `newtab/`, mantenha a entrada HTML e os arquivos `integration.js`/`integration.css` desta integração e preserve a licença e os avisos. Não substitua o manifesto principal pelo manifesto standalone gerado para o Tabliss.
+
+## Super Extensão 1.6.6 — Imagens e diagnóstico
+
+- Unsplash/GIPHY validam chaves, status HTTP, JSON e imagem antes de acessar os campos. O pacote anterior enviava chaves `undefined`; agora a ausência de chave é mostrada na interface, sem enviar a requisição.
+- Campos de chaves próprios nas opções dos fundos, guardados apenas em `chrome.storage.local` sob `superNewtab:imageProviders`, sem exportação nem sincronização.
+- Erros com opção de tentar novamente, manutenção da última imagem/créditos válidos, descarte de respostas atrasadas e correção do cursor para lotes pequenos.
+- Removidas as requisições GIPHY duplicadas; todos os carregamentos terminam o indicador em sucesso/falha. URLs temporárias têm descarte corrigido.
+- `npm run setup:newtab` e `npm run build:newtab` preparam/reconstroem o módulo sem substituir a integração HTML nem o manifesto principal.
+
+As instruções e os limites estão em [docs/newtab-images.md](../docs/newtab-images.md). Nenhuma chave de terceiros foi adicionada ao repositório; Unsplash/GIPHY precisam de credenciais válidas do serviço.

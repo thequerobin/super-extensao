@@ -41,6 +41,7 @@ export function useRotatingCache<T>(
   { cache, setCache }: Cache<RotatingCache<T>>,
   timeout: number,
   deps: unknown[],
+  onError?: (error: unknown) => void,
 ): T | undefined {
   // Find cursor
   const time = useTime("absolute").getTime();
@@ -64,28 +65,30 @@ export function useRotatingCache<T>(
 
   // Fetch more when cursor reaches end
   useEffect(() => {
-    if (cache && cursor >= cache.items.length - 1) {
-      // fetch more
-      fetch().then((items) =>
-        setCache({
-          ...cache,
-          items: [...cache.items.slice(-10), ...items],
-          cursor: 9,
-        }),
-      );
+    let active = true;
+    if (cache && areDepsEqual(deps, cache.deps) && cursor >= cache.items.length - 1) {
+      fetch().then((items) => {
+        if (!active) return;
+        const retained = cache.items.slice(-10);
+        setCache({ ...cache, items: [...retained, ...items], cursor: Math.max(0, retained.length - 1) });
+      }).catch(error => { if (active) onError?.(error); });
     }
-  }, [cursor]);
+    return () => { active = false; };
+  }, [cursor, ...deps]);
 
   // Refresh of deps change
   useEffect(() => {
+    let active = true;
     if (!cache || !areDepsEqual(deps, cache.deps)) {
-      fetch().then((items) =>
-        setCache({ items, cursor: 0, rotated: Date.now(), deps }),
-      );
+      fetch().then((items) => {
+        if (active) setCache({ items, cursor: 0, rotated: Date.now(), deps });
+      }).catch(error => { if (active) onError?.(error); });
     }
+    return () => { active = false; };
   }, [...deps, cache]);
 
-  return cache ? cache.items[cursor] : undefined;
+  // Keep the last valid image visible when a refresh fails or the queue runs out.
+  return cache ? cache.items[Math.min(cursor, cache.items.length - 1)] : undefined;
 }
 
 /**
@@ -93,6 +96,7 @@ export function useRotatingCache<T>(
  * Too bad they do not export it.
  */
 function areDepsEqual(prevDeps: unknown[], nextDeps: unknown[]) {
+  if (prevDeps.length !== nextDeps.length) return false;
   for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
     if (Object.is(nextDeps[i], prevDeps[i])) {
       continue;

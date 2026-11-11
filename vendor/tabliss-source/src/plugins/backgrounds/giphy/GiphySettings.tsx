@@ -1,3 +1,4 @@
+import { ProviderAccess } from "../shared/ProviderAccess";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -6,6 +7,7 @@ import { DebounceInput } from "../../shared";
 
 const GiphySettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="GiphySettings">
+    <ProviderAccess provider="giphy" />
     <label>
       {t("Tag")}<DebounceInput
         type="text"

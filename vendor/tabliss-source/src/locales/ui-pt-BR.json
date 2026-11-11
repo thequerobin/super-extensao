@@ -252,5 +252,21 @@
   "End of": "Fim do",
   "English": "English",
   "Q": "º quarto",
-  "OT": "PR"
+  "OT": "PR",
+  "Configure an API key in this background's settings.": "Configure uma chave de API nas opções deste fundo.",
+  "Unable to read or save the image provider settings.": "Não foi possível ler ou salvar as configurações do provedor de imagens.",
+  "The image provider rejected the API key. Check this background's settings.": "O provedor de imagens recusou a chave de API. Confira as opções deste fundo.",
+  "The image provider reached its request limit. Try again later.": "O provedor de imagens atingiu o limite de requisições. Tente novamente mais tarde.",
+  "The image provider is temporarily unavailable.": "O provedor de imagens está temporariamente indisponível.",
+  "No images found. Try another search.": "Nenhuma imagem encontrada. Tente outra busca.",
+  "The image provider returned an invalid response.": "O provedor de imagens retornou uma resposta inválida.",
+  "Unable to load this background. Check your connection and try again.": "Não foi possível carregar este fundo. Confira sua conexão e tente novamente.",
+  "Unable to load this background. Try again.": "Não foi possível carregar este fundo. Tente novamente.",
+  "Saved only on this device; not included in exported settings.": "Salva apenas neste dispositivo; não é incluída nas configurações exportadas.",
+  "Saved. The background will retry automatically.": "Salvo. O fundo tentará carregar novamente automaticamente.",
+  "Save API key": "Salvar chave de API",
+  "How to get an API key": "Como obter uma chave de API",
+  "Try again": "Tentar novamente",
+  "Unsplash Access Key": "Chave de acesso do Unsplash",
+  "GIPHY API key": "Chave de API do GIPHY"
 }

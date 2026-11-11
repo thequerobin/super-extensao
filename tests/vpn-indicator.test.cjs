@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 const path = require("node:path");
 function boot() {
-  let state = { connected: false }, locale = "pt-BR", controlled = true;
+  let state = { connected: false }, locale = "pt-BR", controlled = true, closedTab, errorsRead = 0;
   const calls = [], listeners = {}, tabs = [{ id: 1, url: "https://example.com" }, { id: 2, url: "https://skip.example.com" }];
   const event = (name) => ({ addListener(fn) { listeners[name] = fn; } });
   class Canvas {
@@ -21,8 +21,13 @@ function boot() {
     storage: { onChanged: event("storage") },
     proxy: { settings: { get: (_options, done) => done({ levelOfControl: controlled ? "controlled_by_this_extension" : "controlled_by_other_extensions" }), onChange: event("proxy") } },
     action: {
-      async setIcon(data) { calls.push(["icon", data]); },
-      async setTitle(data) { calls.push(["title", data]); },
+      setIcon(data, done) {
+        if (data.tabId === closedTab) {
+          Object.defineProperty(chrome.runtime, "lastError", { configurable: true, get() { errorsRead++; return { message: "No tab with id: " + closedTab }; } });
+          done(); delete chrome.runtime.lastError;
+        } else { calls.push(["icon", data]); done(); }
+      },
+      setTitle(data, done) { calls.push(["title", data]); done(); },
       setBadgeText() { throw Error("Pause badge must remain untouched"); },
     },
   };
@@ -31,7 +36,7 @@ function boot() {
   vm.runInContext(fs.readFileSync(path.join(__dirname, "../vpn-indicator.js"), "utf8"), context);
   const api = context.SuperVpnIndicator;
   api.attach(() => state);
-  return { api, tabs, calls, listeners, setState(value) { state = value; }, setLocale(value) { locale = value; }, loseProxy() { controlled = false; }, async latest() { await api.refresh(); return new Map(calls.filter(([kind]) => kind === "icon").map(([, value]) => [value.tabId, value])); } };
+  return { api, tabs, calls, listeners, closeTab(id) { closedTab = id; }, get errorsRead() { return errorsRead; }, setState(value) { state = value; }, setLocale(value) { locale = value; }, loseProxy() { controlled = false; }, async latest() { await api.refresh(); return new Map(calls.filter(([kind]) => kind === "icon").map(([, value]) => [value.tabId, value])); } };
 }
 test("route colors follow effective exclusions, subdomains, include-only and local bypasses", () => {
   const { api } = boot();
@@ -75,4 +80,14 @@ test("confirmed VPN state sets per-tab overlays, updates navigation/rules and pr
   icons = await ui.latest();
   assert.ok(icons.get(1).path);
   assert.equal(ui.calls.filter(([type]) => type === "title").at(-1)[1].title, "Super Extensão");
+});
+
+test("closing a tab during an icon update consumes lastError and does not block other tabs", async () => {
+  const ui = boot(); await ui.latest();
+  ui.closeTab(1); ui.setState({ connected: true, bypassList: [] });
+  const before = ui.calls.length;
+  await ui.latest();
+  assert.ok(ui.errorsRead > 0);
+  assert.equal(ui.calls.slice(before).some(([, data]) => data.tabId === 1), false);
+  assert.ok(ui.calls.slice(before).some(([, data]) => data.tabId === 2));
 });

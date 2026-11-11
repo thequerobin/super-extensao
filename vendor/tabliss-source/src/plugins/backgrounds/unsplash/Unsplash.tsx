@@ -1,8 +1,10 @@
+import { useProviderImage } from "../shared/useProviderImage";
+import { ProviderStatus, useProviderRevision } from "../shared/ProviderAccess";
 import React from "react";
 import { useRotatingCache } from "../../../hooks";
 import Backdrop from "../../../views/shared/Backdrop";
 import { buildLink, fetchImages } from "./api";
-import { defaultData, Props } from "./types";
+import { defaultData, Props, Image as UnsplashImage } from "./types";
 import "./Unsplash.sass";
 import UnsplashCredit from "./UnsplashCredit";
 
@@ -13,6 +15,9 @@ const Unsplash: React.FC<Props> = ({
   setCache,
   setData,
 }) => {
+  const [error, setError] = React.useState<unknown>(null);
+  const [retry, setRetry] = React.useState(0);
+  const revision = useProviderRevision();
   // If legacy cache design, clear and let the new cache take over
   // Unfortunately, without the image src being stored, I cannot migrate the old cache
   if (cache && "now" in cache) {
@@ -33,26 +38,20 @@ const Unsplash: React.FC<Props> = ({
   // Get current item from rotating cache
   const item = useRotatingCache(
     () => {
+      setError(null);
       loader.push();
-      return fetchImages(data).finally(loader.pop);
+      return fetchImages(data).finally(() => loader.pop());
     },
     { cache, setCache },
     data.paused ? Number.MAX_SAFE_INTEGER : data.timeout * 1000,
-    [data.by, data.collections, data.featured, data.search, data.topics],
+    [data.by, data.collections, data.featured, data.search, data.topics, revision, retry],
+    setError,
   );
 
-  // Populate browser cache with the next image
-  React.useEffect(() => {
-    if (cache && cache.items[cache.cursor + 1]) {
-      const next = new Image();
-      next.src = buildLink(cache.items[cache.cursor + 1].src);
-      next.onload = loader.pop;
-      next.onerror = loader.pop;
-      loader.push();
-    }
-  }, [cache]);
-
-  const url = item ? buildLink(item.src) : null;
+  const source = item ? buildLink(item.src) : null;
+  const url = useProviderImage(source, loader, setError, `${revision}:${retry}`);
+  const [displayed, setDisplayed] = React.useState<UnsplashImage>();
+  React.useEffect(() => { if (url && item && url === source) setDisplayed(item); }, [url, item]);
 
   const go = (amount: number) =>
     cache && cache.items[cache.cursor + amount]
@@ -79,9 +78,10 @@ const Unsplash: React.FC<Props> = ({
         style={{ backgroundImage: url ? `url(${url})` : undefined }}
       />
 
-      {item ? (
+      <ProviderStatus error={error} retry={() => setRetry(value => value + 1)} />
+      {displayed && url ? (
         <UnsplashCredit
-          credit={item.credit}
+          credit={displayed.credit}
           paused={data.paused ?? false}
           onPause={handlePause}
           onPrev={go(-1)}

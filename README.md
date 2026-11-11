@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.6.5.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.6.6.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -71,7 +71,7 @@ O sinal fica no canto superior direito, preservando o badge de limpeza pausada. 
 
 Tabliss 2.6.0 adaptado, com editor de fundos e widgets, PT-BR/inglês, importação/exportação e fundo inicial local. A engrenagem abre o editor; o botão **Super Extensão** abre os controles da extensão. A importação substitui a configuração do dashboard; imagens próprias precisam ser selecionadas novamente.
 
-Preferências usam `tabliss/config` em `storage.sync`; imagens e cache usam IndexedDB e não sincronizam pelo JSON. Provedores online dependem dos serviços e de suas cotas. O envio de erros do Tabliss ao Sentry foi desativado. Veja [as modificações](newtab/MODIFICATIONS.md).
+Preferências usam `tabliss/config` em `storage.sync`; imagens e cache usam IndexedDB e não sincronizam pelo JSON. Unsplash/GIPHY permitem configurar a chave nas opções do fundo, salva apenas neste dispositivo; sem chave, exibem a orientação correspondente. [Carregamento de imagens e configuração](docs/newtab-images.md). Provedores online dependem dos serviços e de suas cotas. O envio de erros do Tabliss ao Sentry foi desativado. Veja [as modificações](newtab/MODIFICATIONS.md).
 
 ### Limpeza, Autoplay e Abas
 
@@ -117,10 +117,11 @@ npm test
 | Motor Proton e interface VPN | `npm run build:vpn` |
 | Estilos incorporados dos painéis | `npm run build:panels` |
 | Catálogos globais | `npm run build:i18n` |
+| Nova guia | `npm run setup:newtab` e `npm run build:newtab` |
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A última execução registrada na implementação **1.6.5 passou 135 testes**, com APIs simuladas e testes DOM. Os testes simulados não comprovam tráfego de VPN nem geometria nativa. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
+A última execução registrada na implementação **1.6.6 passou 148 testes**, com APIs simuladas e testes DOM. Os testes simulados não comprovam tráfego de VPN nem geometria nativa. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
 
 ## Documentação
 

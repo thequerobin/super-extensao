@@ -6,7 +6,7 @@ export function useObjectUrl(data?: Blob) {
 
   useEffect(() => {
     const prev = url;
-    () => {
+    return () => {
       if (prev) URL.revokeObjectURL(prev);
     };
   }, [url]);

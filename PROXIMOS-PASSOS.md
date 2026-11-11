@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **11 de novembro de 2026**, referência **1.6.5**. Itens implementados foram testados com APIs simuladas; a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **11 de novembro de 2026**, referência **1.6.6**. Itens implementados foram testados com APIs simuladas; a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -111,7 +111,8 @@ A reescrita foi iniciada parcialmente: regras/PAC são próprios; sessão, crede
 - [ ] Validar fechamento pelo X no Helium e recuperação após encerrar o processo com limpeza pendente.
 - [ ] Conferir pausa/retomada, relatório e notificação após falha parcial.
 - [ ] Conferir proteção da última aba com várias janelas e modo anônimo.
-- [ ] Testar importação/exportação da Nova guia e os provedores online realmente utilizados.
+- [x] Corrigir erros de resposta/chave ausente em Unsplash/GIPHY, preservar cache e adicionar configuração local das chaves (1.6.6).
+- [ ] Testar importação/exportação da Nova guia e o carregamento real com chaves válidas dos provedores utilizados.
 - [ ] Revalidar personalizações, favoritos e sessões após cada migração dos motores.
 
 ## 5. Manutenção

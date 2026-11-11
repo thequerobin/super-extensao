@@ -47,6 +47,17 @@
       });
     });
   }
+  function setTabAction(method, details) {
+    return new Promise((resolve, reject) => {
+      chrome.action[method](details, () => {
+        // Reading lastError in the callback consumes the error if the tab closed
+        // between tabs.query() and this per-tab action (also in callback-only hosts).
+        const message = chrome.runtime.lastError?.message;
+        if (message) reject(new Error(message));
+        else resolve();
+      });
+    });
+  }
   async function update(ticket) {
     try {
       const snapshot = reader() || {};
@@ -66,8 +77,8 @@
         const payload = mode === "off" ? { path: BASE } : { imageData: await icon(mode) };
         if (ticket !== revision) return;
         try {
-          await chrome.action.setIcon({ tabId: tab.id, ...payload });
-          await chrome.action.setTitle({ tabId: tab.id, title });
+          await setTabAction("setIcon", { tabId: tab.id, ...payload });
+          await setTabAction("setTitle", { tabId: tab.id, title });
           if (ticket === revision) applied.set(tab.id, key);
         } catch { /* The tab may have closed while its icon was being prepared. */ }
       }

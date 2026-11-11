@@ -1,4 +1,5 @@
 import { Data, Image } from "./types";
+import { readProviderKey, request, json, httpsUrl, ProviderError } from "../shared/provider";
 
 export const officialCollection = 1053828;
 
@@ -16,9 +17,7 @@ export const fetchImages = async ({
 }: Config): Promise<Image[]> => {
   const url = "https://api.unsplash.com/photos/random";
   const params = new URLSearchParams();
-  const headers = new Headers({
-    Authorization: `Client-ID ${UNSPLASH_API_KEY}`,
-  });
+  const headers = new Headers({ Authorization: `Client-ID ${await readProviderKey("unsplash")}` });
 
   params.set("count", "10");
 
@@ -42,20 +41,21 @@ export const fetchImages = async ({
       params.set("collections", String(officialCollection));
   }
 
-  const res = await fetch(`${url}?${params}`, { headers, cache: "no-cache" });
-  const body = await res.json();
-
-  // TODO: validate types
-
-  return body.map((item: any) => ({
-    src: item.urls.raw,
-    credit: {
-      imageLink: item.links.html,
-      location: item.location ? item.location.title : null,
-      userName: item.user.name,
-      userLink: item.user.links.html,
-    },
-  }));
+  const body = await request(`${url}?${params}`, json, { headers, cache: "no-cache", redirect: "error" });
+  if (!Array.isArray(body)) throw new ProviderError("response");
+  if (!body.length) throw new ProviderError("empty");
+  return body.map((item: any) => {
+    if (!item || typeof item.user?.name !== "string") throw new ProviderError("response");
+    return {
+      src: httpsUrl(item.urls?.raw),
+      credit: {
+        imageLink: httpsUrl(item.links?.html),
+        location: typeof item.location?.title === "string" ? item.location.title : undefined,
+        userName: item.user.name,
+        userLink: httpsUrl(item.user.links?.html),
+      },
+    };
+  });
 };
 
 /**

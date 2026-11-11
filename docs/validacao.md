@@ -1,10 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.5**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.6**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
 ## Evidência disponível
 
-A última execução registrada durante a implementação da versão 1.6.5 passou **135 testes** da suíte `npm test`. Essa execução inclui o núcleo próprio, a sincronização da raiz, diagnóstico de transporte e exportação de logs, além da manutenção visual: matriz de temas, preferência do sistema, descarte de observadores, preservação de campos e foco de controles compostos. Os novos contratos VPN incluem o núcleo próprio de regras/PAC, execução após Babel/minificação e perda de controle do proxy. Nenhuma conta real foi acessada durante o teste.
+A última execução registrada durante a implementação da versão 1.6.6 passou **148 testes** da suíte `npm test`. Essa execução inclui o núcleo próprio, a sincronização da raiz, diagnóstico de transporte e exportação de logs, além da manutenção visual: matriz de temas, preferência do sistema, descarte de observadores, preservação de campos e foco de controles compostos. Os novos contratos VPN incluem o núcleo próprio de regras/PAC, execução após Babel/minificação e perda de controle do proxy. A Nova guia também tem testes de respostas de imagem, chaves locais, cache, loader, falhas de imagem, respostas atrasadas e fechamento de aba durante atualização do ícone. Nenhuma conta real foi acessada durante o teste.
 
 | Área | Cobertura automatizada | Limite da evidência |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ A última execução registrada durante a implementação da versão 1.6.5 passo
 | VPN | Interface/adaptador, isolamento, limites de plano, regras, estados e indicador por aba | Não comprova túnel, IP, WebRTC ou recuperação no serviço real |
 | Interface compartilhada | Comparação de estilos e temas com o CSS compilado e testes DOM de idioma/navegação | JSDOM não mede a geometria real nem comprova que nada está cortado |
 
-A ponte VPN também passou pela checagem TypeScript nesta rodada. Para repeti-la, use o compilador das dependências Proton com `--noEmit -p vpn/tsconfig.interface.json`.
+A ponte VPN também passou pela checagem TypeScript na rodada 1.6.5. Para repeti-la, use o compilador das dependências Proton com `--noEmit -p vpn/tsconfig.interface.json`.
 
 O Chromium não iniciou neste ambiente, retornando `socket() failed: Operation not permitted`. A execução automatizada não acessou uma conta Google ou Proton real. Os registros históricos de Edge nas versões 1.3/1.4, com perfis temporários, dados fictícios e WebDAV local, não certificam as alterações atuais.
 
@@ -29,10 +29,11 @@ Node.js 20 ou superior, na raiz:
 ```sh
 npm ci
 npm run setup:vpn
+npm run setup:newtab
 npm test
 ```
 
-A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. Para reconstruir a sincronização, execute também `npm run setup:sync`, seguido de `npm run build:sync-engine` (worker) e `npm run build:sync` (interface).
+A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. As dependências Tabliss são necessárias aos testes React das imagens da Nova guia. Para reconstruir a sincronização, execute também `npm run setup:sync`, seguido de `npm run build:sync-engine` (worker) e `npm run build:sync` (interface).
 
 Ao alterar o motor Proton, execute `npm run build:vpn`. Para alterar somente sua interface, use `npm run build:vpn-ui`. Esses comandos exigem `setup:vpn`. Recompilações da Sincronização usam `setup:sync` e `setup:vpn`, pois também geram os estilos dos painéis.
 
@@ -80,6 +81,7 @@ Use perfis de teste e favoritos fictícios. Registre a versão instalada e o res
 - [ ] Conferir cookies protegidos e escopo da limpeza com dados fictícios.
 - [ ] Conferir várias janelas e as reservas criadas pela extensão.
 - [ ] Exportar/importar configurações da Nova guia e selecionar novamente imagens próprias.
+- [ ] Salvar chaves válidas de Unsplash/GIPHY nas opções do fundo e conferir imagens, créditos, limites e repetição após falhas reais.
 
 ## Registro de novas evidências
 
