@@ -67,5 +67,14 @@
     };
   }
 
-  globalThis.SuperPreferences = Object.freeze({theme, locale, watchTheme});
+  // Use the same theme attribute on standalone pages and embedded modules.
+  // Returning the subscription lets each view dispose its listeners on teardown.
+  function bindTheme(element, onChange = () => {}) {
+    return watchTheme((selected, resolved) => {
+      element.dataset.superTheme = resolved;
+      onChange(selected, resolved);
+    });
+  }
+
+  globalThis.SuperPreferences = Object.freeze({theme, locale, watchTheme, bindTheme});
 })();

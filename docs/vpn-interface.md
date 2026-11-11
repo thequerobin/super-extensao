@@ -1,4 +1,4 @@
-# Interface própria da VPN — referência 1.5.19
+# Interface própria da VPN — referência 1.6.3
 
 A aba VPN usa `vpn/source`, sem montar o HTML, JavaScript ou CSS do popup original. O motor, a autenticação, os servidores e a autorização de plano continuam sendo do Proton. O worker Proton permanece ativo, com uma ponte para o indicador próprio do host. A reescrita do motor ainda não foi iniciada.
 
@@ -45,3 +45,5 @@ A indicação acompanha navegação, troca de aba, alterações das regras e idi
 ## Trabalho restante
 
 Login real, roteamento por domínio, cores do indicador, modo anônimo, recuperação e geometria do popup continuam no [checklist de validação](validacao.md). A substituição do motor exige mapear autenticação, estado, proxy, regras e persistência; o roteiro está em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+
+Tema e foco usam a [base compartilhada](ui-components.md), revisada em 1.6.3. Confira o [registro de validação](validacao.md) para distinguir testes DOM, relatos do usuário e cenários ainda pendentes.

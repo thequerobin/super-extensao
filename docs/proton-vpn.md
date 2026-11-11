@@ -1,4 +1,4 @@
-# Proton VPN na Super Extensão — referência 1.5.19
+# Proton VPN na Super Extensão — referência 1.6.3
 
 A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O motor e o serviço permanecem Proton. Veja [arquitetura, reconstrução e validação](vpn-interface.md).
 

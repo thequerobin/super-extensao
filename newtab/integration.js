@@ -2,9 +2,8 @@
    upstream configuration controls and import/export remain intact. */
 (function () {
   "use strict";
-  SuperPreferences.watchTheme((_theme, resolved) => {
-    document.documentElement.dataset.superTheme = resolved;
-  });
+  const stopTheme = SuperPreferences.bindTheme(document.documentElement);
+  window.addEventListener("unload", stopTheme, { once: true });
   const button = document.getElementById("super-settings");
   function applyLanguage() {
     button.title = /^en(?:-|$)/i.test(document.documentElement.lang)

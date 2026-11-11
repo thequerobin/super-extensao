@@ -1,4 +1,4 @@
-# Estado atual — Super Extensão 1.6.2
+# Estado atual — Super Extensão 1.6.3
 
 A interface ativa continua em `sync/source`. Perfis Google Drive de favoritos passam a executar o núcleo próprio em `sync/engine`; os demais provedores e perfis de abas mantêm o motor legado. O painel de comparação foi removido. Cadastro, OAuth interativo, formato dos perfis e agendamento permanecem na camada de compatibilidade.
 
@@ -39,3 +39,7 @@ Removida a restrição que impedia perfis do Google Drive com a raiz geral do na
 ## 1.6.2 — Requisições Google e arquivo de diagnóstico
 
 A implementação padrão de fetch permanece vinculada ao contexto global do worker. Falhas de transporte agora têm código próprio e identificam a etapa (autenticação, listagem, leitura, metadados, bloqueio ou escrita), com status HTTP quando disponível. Os logs incluem somente categorias fixas da exceção, sem URL, corpo, mensagem bruta ou credenciais. A exportação usa `super-extensao-sincronizacao-<versão>-<data>-completo.log` ou `-anonimizado.log`, cabeçalho próprio e a versão instalada da extensão; a anonimização existente foi preservada.
+
+## 1.6.3 — Manutenção da interface compartilhada
+
+O adaptador de tema usa `SuperPreferences.bindTheme` e mantém a integração com o Vuetify. A base compartilhada centraliza o foco interno, evita o contorno duplicado em buscas compostas e permite quebra de textos longos nos controles comuns. A matriz DOM de tema/idioma mantém rascunhos e configurações. A documentação distingue o relato de sincronização bem-sucedida na 1.6.2 dos cenários reais ainda não verificados.

@@ -1,10 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.2**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.3**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
 ## Evidência disponível
 
-A última execução registrada durante a implementação da versão 1.6.2 passou **120 testes** da suíte `npm test`. Essa execução inclui o novo worker, a interface sem o painel de comparação e a sincronização da raiz com pastas permanentes protegidas, migração do cache anterior e retomada após interrupção. Nenhuma conta real foi acessada durante o teste.
+A última execução registrada durante a implementação da versão 1.6.3 passou **126 testes** da suíte `npm test`. Essa execução inclui o núcleo próprio, a sincronização da raiz, diagnóstico de transporte e exportação de logs, além da manutenção visual: matriz de temas, preferência do sistema, descarte de observadores, preservação de campos e foco de controles compostos. Nenhuma conta real foi acessada durante o teste.
 
 | Área | Cobertura automatizada | Limite da evidência |
 | --- | --- | --- |
@@ -16,7 +16,11 @@ A última execução registrada durante a implementação da versão 1.6.2 passo
 
 A ponte VPN também passou pela checagem TypeScript durante as implementações anteriores. Para repeti-la, use o compilador das dependências Proton com `--noEmit -p vpn/tsconfig.interface.json`.
 
-O Chromium não iniciou neste ambiente, retornando `socket() failed: Operation not permitted`. Não houve acesso a uma conta Google ou Proton real para validar as últimas versões. Os registros históricos de Edge nas versões 1.3/1.4, com perfis temporários, dados fictícios e WebDAV local, não certificam as alterações atuais.
+O Chromium não iniciou neste ambiente, retornando `socket() failed: Operation not permitted`. A execução automatizada não acessou uma conta Google ou Proton real. Os registros históricos de Edge nas versões 1.3/1.4, com perfis temporários, dados fictícios e WebDAV local, não certificam as alterações atuais.
+
+## Evidência relatada pelo usuário
+
+Em **11 de novembro de 2026**, após a publicação da **1.6.2**, o usuário confirmou “Deu certo agora” no fluxo de sincronização Google Drive que havia retornado erro. O cenário em discussão era um perfil com a raiz geral do navegador. Essa é uma confirmação de uso real relatada pelo usuário, separada dos testes automatizados. Navegador/versão, sistema operacional e quantidade de favoritos não foram informados nesse teste. Não comprova os cenários de dois dispositivos, falhas, criptografia, retomada ou ausência de duplicações por inspeção detalhada; eles permanecem no checklist.
 
 ## Reproduzir a suíte
 
@@ -38,7 +42,8 @@ Use perfis de teste e favoritos fictícios. Registre a versão instalada e o res
 
 ### Layout e preferências
 
-- [ ] Abrir todas as abas nos temas claro, escuro e sistema e em PT-BR/inglês.
+- [ ] Abrir todas as abas, assistentes e diálogos nos temas claro, escuro e sistema e em PT-BR/inglês.
+- [ ] Conferir aba de reserva e configurações da Nova guia com tema explícito diferente do sistema e após mudança do sistema.
 - [ ] Rolar com mouse/teclado e ajustar a altura do popup ao mínimo e máximo.
 - [ ] Confirmar cabeçalho/submenus fixos, ausência de rolagem horizontal e acesso aos últimos controles.
 - [ ] Focar buscas, campos e países pela tecla Tab; conferir o contorno inteiro.

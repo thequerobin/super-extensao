@@ -1,16 +1,16 @@
 # Próximos passos da Super Extensão
 
-Revisado em **11 de novembro de 2026**, referência **1.6.2**. Itens implementados foram testados com APIs simuladas; a validação em conta real permanece separada em [docs/validacao.md](docs/validacao.md).
+Revisado em **11 de novembro de 2026**, referência **1.6.3**. Itens implementados foram testados com APIs simuladas; a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
 | Prioridade | Frente | Estado atual | Próxima entrega |
 | --- | --- | --- | --- |
-| 1 | Google Drive/favoritos | Núcleo próprio integrado a Sincronizar, ações direcionais e agendamento | Validação real, grandes volumes e restauração de backups por interface |
+| 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
 | 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; Chromium bloqueado no ambiente atual | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
 | 4 | Motor próprio da VPN | Não iniciado; interface própria sobre Proton | Mapear sessão, proxy, regras e recuperação antes de substituir partes |
-| Contínua | Interface e manutenção | Componentes e preferências compartilhados | Regressões visuais e consistência da documentação |
+| Contínua | Interface e manutenção | Rodada 1.6.3 entregue: tema, paleta e foco compartilhados; regressões automatizadas e documentação revisada | Conferência visual real de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização
 
@@ -28,14 +28,15 @@ Revisado em **11 de novembro de 2026**, referência **1.6.2**. Itens implementad
 - [x] Preservar a criptografia compatível e aceitar o cabeçalho XBEL legado sem carregar DTDs.
 - [x] Guardar backup e diário por operação; recuperar criações e gravações já concluídas após interrupção.
 - [x] Serializar execuções, atender cancelamento e reutilizar o agendamento existente.
-- [x] Impedir sobreposição de pastas, alteração de escopo com operação pendente e uso de raízes protegidas/favoritos gerenciados.
+- [x] Impedir sobreposição de pastas, alteração de escopo com operação pendente e alterações indevidas das pastas permanentes/favoritos gerenciados.
 - [x] Testar dois dispositivos simulados e falhas antes/depois dos checkpoints.
 
 A primeira execução no novo worker aproveita o perfil salvo; não exige recriação nem um botão separado de migração. Cadastro, OAuth interativo e a estrutura de agendamento ainda usam a camada de compatibilidade. A execução de favoritos Google Drive é própria; a troca de todos os componentes do Floccus ainda não terminou.
 
 ### Validação e melhorias pendentes
 
-- [ ] Validar OAuth, bloqueios, `If-Match`, gravação e leitura com uma conta Google real.
+- [x] Registrar a confirmação do usuário de que a sincronização Google Drive funcionou após a atualização 1.6.2.
+- [ ] Validar detalhadamente OAuth, bloqueios, `If-Match`, gravação e leitura com dados fictícios; o relato de sucesso não certifica cada cenário.
 - [ ] Conferir convergência entre dois navegadores reais, inclusive edição concorrente e mudança de ordem.
 - [ ] Interromper o worker/processo durante uma execução de teste e conferir a retomada real.
 - [ ] Medir tempo e armazenamento com grandes importações; otimizar sem perder recuperação por operação.
@@ -93,9 +94,12 @@ A reescrita do motor VPN não foi iniciada. O indicador descreve o roteamento do
 - [x] Menus fixos e componentes comuns para botões, campos, cartões, avisos e switches.
 - [x] Contorno de foco interno e controles de largura nos painéis.
 - [x] Altura ajustável do popup e preservação da seção selecionada.
-- [ ] Revisar todas as telas, assistentes e diálogos em PT-BR/inglês e nos três temas.
+- [x] Centralizar a aplicação do tema em `SuperPreferences.bindTheme`, incluindo a aba de reserva.
+- [x] Unificar os tokens de cor das configurações da Nova guia e o contorno de teclado.
+- [x] Cobrir troca de tema/idioma, preservação de rascunhos, campos compostos e descarte de observadores com testes automatizados.
+- [ ] Revisar visualmente todas as telas, assistentes e diálogos em PT-BR/inglês e nos três temas.
 - [ ] Conferir teclado, foco, contraste, textos longos e alturas mínima/máxima no navegador.
-- [ ] Verificar se uma tela dedicada de **Configurações gerais** ainda é necessária para preferências além de tema/idioma; não duplicar seletores já globais.
+- [x] Avaliar Configurações gerais: nenhuma tela adicional é necessária nesta etapa; manter tema/idioma no cabeçalho e preferências funcionais no módulo correspondente.
 - [ ] Fazer os próximos controles adotarem `ui-components.css` e seus tokens.
 
 ## 4. Limpeza, abas e Nova guia
@@ -108,9 +112,10 @@ A reescrita do motor VPN não foi iniciada. O indicador descreve o roteamento do
 
 ## 5. Manutenção
 
-- [ ] Normalizar textos com codificação incorreta, incluindo a descrição do `package.json`.
+- [x] Corrigir a codificação da descrição do `package.json` e revisar textos das fontes próprias/documentação desta rodada.
 - [ ] Avaliar testes DOM que dependem de dependências de compilação do Proton; manter o preparo documentado enquanto essa dependência existir.
-- [ ] Registrar novas evidências de testes reais com versão, navegador, cenário e resultado.
+- [x] Registrar a confirmação de sincronização 1.6.2, identificando os detalhes não informados.
+- [ ] Ampliar as evidências reais com navegador/versão, cenário e resultado para cada teste.
 - [ ] Atualizar este roteiro ao fechar cada etapa, mantendo licenças, fontes e documentação de reconstrução.
 
 Alterações apenas documentais mantêm a versão instalada. Alterações que afetem a extensão devem seguir [AGENTS.md](AGENTS.md), incluindo versão igual no manifest, package e lockfile.

@@ -48,6 +48,10 @@
   font: inherit;
 }
 .ui-button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-align: center;
   max-width: 100%;
   box-sizing: border-box;
   display: inline-flex;
@@ -115,6 +119,8 @@
   cursor: default;
 }
 .ui-search {
+  min-width: 0;
+  max-width: 100%;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -127,6 +133,9 @@
   color: var(--muted);
 }
 .ui-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   box-sizing: border-box;
   padding: var(--card-padding);
   border-radius: var(--card-radius);
@@ -237,6 +246,7 @@
 }
 /* Inset focus rings stay complete even in nested/clipped scroll areas. */
 :focus-visible {
+  outline: var(--focus-width) solid var(--accent) !important;
   outline-offset: calc(-1 * var(--focus-width)) !important;
 }
 @media (max-width: 420px) {
@@ -249,4 +259,9 @@
 .ui-focus-within:focus-within {
   outline: var(--focus-width) solid var(--accent);
   outline-offset: calc(-1 * var(--focus-width)) !important;
+}
+
+/* Compound fields own the ring; avoid drawing a second ring on their input. */
+.ui-focus-within :focus-visible {
+  outline: none !important;
 }

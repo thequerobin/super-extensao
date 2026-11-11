@@ -166,10 +166,10 @@ async function init() {
   $("language").value=SuperI18n.locale;
   const settings = await chrome.storage.local.get({...DEFAULTS, popupView:null});
   for (const key of TOGGLES) $(key).checked = settings[key] === true;
-  SuperPreferences.watchTheme((theme, resolved) => {
+  const stopTheme = SuperPreferences.bindTheme(document.documentElement, theme => {
     $("theme").value = theme;
-    document.documentElement.dataset.theme = resolved;
   });
+  window.addEventListener("unload", stopTheme, { once: true });
   const savedView = settings.popupView;
   if (["cleanup", "exceptions", "bookmarks"].includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
   activateTab(savedView?.tab, false);

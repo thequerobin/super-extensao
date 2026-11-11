@@ -69,3 +69,29 @@ for (const theme of ["dark", "light"]) {
     } finally { dom.window.close(); }
   });
 }
+test('keyboard focus belongs to the compound field and remains inset on regular controls', () => {
+  const dom = new JSDOM('<button class="ui-button">Long action</button><label class="ui-focus-within ui-search"><input class="ui-control"></label>', { pretendToBeVisual: true });
+  try {
+    const doc = dom.window.document, style = doc.createElement('style');
+    style.textContent = stylesheet('light'); doc.head.append(style);
+    const button = doc.querySelector('button'); button.focus();
+    const buttonStyle = dom.window.getComputedStyle(button);
+    assert.match(buttonStyle.outline, /2px solid/);
+    assert.equal(buttonStyle.outlineOffset, 'calc(-1 * 2px)');
+    doc.querySelector('input').focus();
+    assert.equal(dom.window.getComputedStyle(doc.querySelector('input')).outline, 'none');
+    assert.match(dom.window.getComputedStyle(doc.querySelector('label')).outline, /2px solid/);
+    assert.equal(buttonStyle.overflowWrap, 'anywhere');
+    assert.equal(buttonStyle.whiteSpace, 'normal');
+  } finally { dom.window.close(); }
+});
+test('new-tab settings and spare page consume the shared palette rather than a second theme', () => {
+  const css = postcss.parse(read('newtab/integration.css'));
+  const settings = css.nodes.find(rule => rule.selector === '.Settings');
+  const declarations = Object.fromEntries(settings.nodes.filter(node => node.type === 'decl').map(node => [node.prop, node.value]));
+  for (const token of ['bg', 'surface', 'raised', 'text', 'muted', 'line', 'accent', 'accent-bg'])
+    assert.equal(declarations['--se-' + token], `var(--${token})`);
+  assert.match(read('newtab/integration.css'), /@import url\("\.\.\/ui-theme\.css"\)/);
+  assert.match(read('spare-tab.css'), /@import url\("ui-theme\.css"\)/);
+  assert.doesNotMatch(read('spare-tab.css'), /prefers-color-scheme|#[0-9a-f]{3,8}\b/i);
+});

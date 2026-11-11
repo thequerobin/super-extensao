@@ -1,4 +1,4 @@
-# Base visual e idioma compartilhados — referência 1.5.19
+# Base visual e idioma compartilhados — referência 1.6.3
 
 `ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define cores, família tipográfica e raios; `ui-components.css` define a escala de tamanhos e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
 
@@ -44,3 +44,26 @@ A configuração da Nova guia segue as mesmas dimensões, preservando a personal
 ## Largura, setas e validação
 
 Os painéis e filhos flex/grid têm limites de largura e permissão para encolher; o eixo horizontal dos painéis roláveis fica contido. Os países da VPN reservam uma caixa fixa de 16 px para o SVG `icons/chevron-right.svg`, com folga à direita; a rotação ocorre dentro da caixa. O foco continua interno. Esses ajustes foram implementados em 1.5.17/1.5.18 e precisam de conferência visual real nos estados aberto/fechado. Os testes DOM/CSS não substituem essa verificação. Veja [validacao.md](validacao.md).
+
+## Rodada de manutenção 1.6.3
+
+- `SuperPreferences.bindTheme(element, onChange?)` aplica o atributo único `data-super-theme` e retorna a função de desligamento. O callback recebe o tema escolhido e o resolvido. Popup, Sincronização, VPN, Nova guia e aba de reserva usam essa integração; as chaves existentes de armazenamento foram mantidas.
+- A aba de reserva passa a respeitar a seleção explícita claro/escuro, além de acompanhar mudanças do sistema quando selecionado **Sistema**. Antes, ela usava apenas a preferência do sistema operacional.
+- As configurações da Nova guia importam `ui-theme.css` e mantêm os nomes `--se-*` apenas como aliases dos tokens comuns. O fundo e os widgets do painel continuam sob a personalização da Nova guia.
+- `ui-components.css` é a fonte do contorno de teclado, sempre interno. Nos campos compostos, somente `ui-focus-within` desenha o anel; o input interno não recebe um segundo contorno.
+- Botões comuns permitem quebra de textos longos; buscas e cartões podem encolher dentro dos painéis. Esses contratos recebem cobertura CSS/DOM, que não substitui a medição de largura no navegador.
+
+### Uso e descarte das preferências
+
+```js
+const stop = SuperPreferences.bindTheme(document.documentElement);
+window.addEventListener("unload", stop, { once: true });
+```
+
+Em componentes com ciclo de vida próprio, execute `stop()` ao destruí-los. Para integração com um framework, forneça o callback opcional; o adaptador Vue atualiza também o tema do Vuetify. O modo **Sistema** acompanha `prefers-color-scheme`; uma seleção explícita não é alterada pelo sistema. Observadores ignoram mudanças de outras áreas/chaves, normalizam valores antigos e não aplicam uma leitura inicial depois do descarte da tela.
+
+### Critério para novos controles
+
+Use as classes existentes e ajuste apenas o layout no módulo: `ui-button` com sua variante, `ui-control` para campos, `ui-search ui-focus-within` para busca composta, `ui-card` para cartões e `ui-notice` para mensagens. Não copie valores de cor ou regras de foco de outro módulo. Não é necessária uma página de Configurações gerais nesta rodada: tema/idioma já estão no cabeçalho; opções funcionais permanecem no respectivo módulo.
+
+A matriz automatizada cobre PT-BR/inglês nos módulos, troca dos três temas e mudança do sistema, preservação de rascunho ao trocar tema e encerramento das assinaturas. A conferência manual de assistentes/diálogos, contraste, foco nativo, alturas mínima/máxima e nomes longos continua no [checklist de validação](validacao.md).

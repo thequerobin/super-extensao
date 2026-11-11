@@ -1,4 +1,4 @@
-# Interface de sincronização — referência 1.6.0
+# Interface de sincronização — referência 1.6.3
 
 A aplicação fica em `sync/source`. Os perfis Google Drive de favoritos executam o núcleo próprio de `sync/engine` pelo worker; demais provedores e perfis de abas continuam no Floccus adaptado de `vendor/floccus-source`. O bloco de comparação foi removido em 1.6.0. Cadastro, autenticação interativa e comandos da interface mantêm a camada de compatibilidade.
 
@@ -46,3 +46,5 @@ O Chromium não iniciou neste ambiente (`socket() failed: Operation not permitte
 ## Núcleo próprio Google Drive (1.6.0)
 
 O botão **Sincronizar**, as ações direcionais e o agendamento usam o núcleo próprio nos perfis atendidos, sem um painel de diagnóstico adicional. O worker é gerado por `npm run build:sync-engine`; a interface continua em `npm run build:sync`. Após alterar o núcleo, execute os dois comandos e os testes. Reconciliação, backup, recuperação, criptografia e limitações estão em [sync-engine.md](sync-engine.md).
+
+Tema e foco usam a [base compartilhada](ui-components.md), revisada em 1.6.3. Confira o [registro de validação](validacao.md) para distinguir testes DOM, relatos do usuário e cenários ainda pendentes.

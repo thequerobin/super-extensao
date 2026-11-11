@@ -135,6 +135,12 @@ async function boot(initial = snapshot(), options = {}) {
       fn(options.theme || "dark", options.theme || "dark");
       return () => {};
     },
+    bindTheme(element, callback = () => {}) {
+      return this.watchTheme((selected, resolved) => {
+        element.dataset.superTheme = resolved;
+        callback(selected, resolved);
+      });
+    },
   };
   const engine = {
     load: async () => initial,

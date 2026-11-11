@@ -534,8 +534,7 @@ export async function mountVpn(root, engine, preferences) {
     model.locale = locale;
     render();
   });
-  const stopTheme = preferences.watchTheme((_theme, resolved) => {
-    root.dataset.superTheme = resolved;
+  const stopTheme = preferences.bindTheme(root, (_theme, resolved) => {
     if (root.parentElement === document.body)
       document.documentElement.dataset.superTheme = resolved;
   });

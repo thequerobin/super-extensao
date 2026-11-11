@@ -117,11 +117,13 @@ function setup(html, initialLocale = "en") {
     bookmarks: { getTree: async () => [] },
     i18n: { getUILanguage: () => "pt-BR" },
   };
-  w.matchMedia = () => ({
+  const mediaListeners = new Set();
+  const media = {
     matches: false,
-    addEventListener() {},
-    removeEventListener() {},
-  });
+    addEventListener(_type, fn) { mediaListeners.add(fn); },
+    removeEventListener(_type, fn) { mediaListeners.delete(fn); },
+  };
+  w.matchMedia = () => media;
   w.confirm = () => true;
   w.TextEncoder = TextEncoder;
   w.TextDecoder = TextDecoder;
@@ -131,6 +133,10 @@ function setup(html, initialLocale = "en") {
     local,
     sync,
     errors,
+    setSystemTheme(dark) {
+      media.matches = dark;
+      for (const listener of mediaListeners) listener({ matches: dark });
+    },
     close() {
       w.superSyncApp?.$destroy();
       w.dispatchEvent(new w.Event("unload"));
@@ -199,6 +205,19 @@ test("global header locale updates all local tabs, dynamic messages and both emb
     doc.querySelector("#domainInput").value = "unsaved.example";
     scripts(ui.w, ["sync/js/options.js", "vpn/interface.js"]);
     await tick();
+    for (const [theme, systemDark, resolved] of [
+      ["light", true, "light"], ["dark", false, "dark"],
+      ["system", false, "light"], ["system", true, "dark"],
+    ]) {
+      ui.setSystemTheme(systemDark);
+      await ui.w.SuperPreferences.theme.set(theme);
+      await tick();
+      for (const target of [doc.documentElement, doc.querySelector("#syncPanel"), doc.querySelector("#vpnPanel")])
+        assert.equal(target.dataset.superTheme, resolved);
+      assert.equal(ui.w.superSyncApp.$vuetify.theme.dark, resolved === "dark");
+      assert.equal(doc.querySelector("#theme").value, theme);
+      assert.equal(doc.querySelector("#domainInput").value, "unsaved.example");
+    }
     assert.equal(doc.querySelector("#syncPanel .sync-language"), null);
     const syncMenu = doc.querySelector("#syncSubmenu .sub-nav");
     assert.ok(syncMenu);
@@ -255,7 +274,7 @@ test("global header locale updates all local tabs, dynamic messages and both emb
 test("shared catalogs preserve notification placeholders, and the spare tab follows the chosen language", async () => {
   const ui = setup(fs.readFileSync(path.join(root, "spare-tab.html"), "utf8"));
   try {
-    scripts(ui.w, ["preferences.js", "i18n.js"]);
+    scripts(ui.w, ["preferences.js", "spare-tab.js", "i18n.js"]);
     await tick();
     assert.match(ui.w.document.body.textContent, /Your window stays open/);
     const message = ui.w.SuperI18n.t("desktopNotifContext", ["history, cache"]);
@@ -291,5 +310,27 @@ test("both runtime catalogs have matching keys and all static translation marker
         if (attr.name === "data-i18n" || attr.name.startsWith("data-i18n-"))
           assert.ok(en[attr.value], file + ": " + attr.value);
     dom.window.close();
+  }
+});
+
+test("spare tab and new-tab settings follow shared theme changes and dispose their bindings", async () => {
+  for (const page of ["spare-tab", "newtab"]) {
+    const html = page === "spare-tab" ? fs.readFileSync(path.join(root, "spare-tab.html"), "utf8") : '<button id="super-settings"></button><section class="Settings"></section>';
+    const ui = setup(html);
+    try {
+      scripts(ui.w, ["preferences.js", page === "spare-tab" ? "spare-tab.js" : "newtab/integration.js"]);
+      await ui.w.SuperPreferences.theme.set("light"); await tick();
+      assert.equal(ui.w.document.documentElement.dataset.superTheme, "light");
+      ui.setSystemTheme(true); await tick();
+      assert.equal(ui.w.document.documentElement.dataset.superTheme, "light");
+      await ui.w.SuperPreferences.theme.set("system"); await tick();
+      assert.equal(ui.w.document.documentElement.dataset.superTheme, "dark");
+      ui.setSystemTheme(false); await tick();
+      assert.equal(ui.w.document.documentElement.dataset.superTheme, "light");
+      ui.w.dispatchEvent(new ui.w.Event("unload"));
+      await ui.w.SuperPreferences.theme.set("dark"); await tick();
+      assert.equal(ui.w.document.documentElement.dataset.superTheme, "light");
+      assert.deepEqual(ui.errors, []);
+    } finally { ui.close(); }
   }
 });

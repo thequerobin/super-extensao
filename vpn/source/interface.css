@@ -82,10 +82,6 @@
   opacity: 0.5;
   cursor: default;
 }
-.vpn-app :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
 .vpn-status-card {
   text-align: center;
   padding: 22px 16px;

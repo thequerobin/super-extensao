@@ -1,4 +1,4 @@
-# Motor próprio Google Drive — 1.6.2
+# Motor próprio Google Drive — 1.6.3
 
 Os perfis **Google Drive com pasta de favoritos** passam a executar o núcleo de `sync/engine` ao usar **Sincronizar**, as ações direcionais ou o agendamento já configurado. O painel de comparação introduzido em 1.5.19 foi removido. As funções de comparação sem escrita permanecem apenas como diagnóstico interno/testes.
 
