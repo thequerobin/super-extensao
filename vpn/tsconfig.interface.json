@@ -1,0 +1,14 @@
+{
+  "extends": "../vendor/proton-source/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false,
+    "paths": {
+      "@vpn-engine/*": ["../vendor/proton-source/source/js/*"]
+    },
+    "typeRoots": ["../vendor/proton-source/node_modules/@types"],
+    "types": ["node", "chrome", "firefox-webext-browser"]
+  },
+  "include": ["source/**/*"]
+}

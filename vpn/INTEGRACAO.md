@@ -1,11 +1,13 @@
-# Proton VPN na Super Extensão 1.5.3
+# Proton VPN na Super Extensão 1.5.10
+
+A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O motor e o serviço permanecem Proton. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 
 ## Usar
 
 1. Atualize os arquivos da extensão e clique em **Recarregar** em `chrome://extensions` (ou no gerenciador do Helium).
 2. Abra a Super Extensão, selecione **VPN** e clique em **Entrar com a conta Proton**. A permissão de proxy já declarada pelo app não exige um novo aviso quando já concedida.
 3. Entre na sua conta na página oficial do Proton. A senha é digitada no Proton; a Super Extensão recebe a sessão de autorização.
-4. Abaixo de **País mais rápido**, abra **Servidores gratuitos (N)** para ver todos os servidores Free retornados pela API, com bandeira, ocupação e indicação de manutenção. Clique em um servidor disponível para conectar. Você também pode escolher um país e um servidor disponível para o seu plano. Em contas Free, o seletor completo permite escolher os servidores gratuitos retornados pela API. Servidores pagos continuam restritos.
+4. Na tela **Conexão**, abaixo de **País mais rápido**, abra **Servidores gratuitos** para ver todos os servidores Free retornados pela API, com bandeira, ocupação e indicação de manutenção. Clique em um servidor disponível para conectar. Você também pode escolher um país e um servidor disponível para o seu plano. Em contas Free, o seletor completo permite escolher os servidores gratuitos retornados pela API. Servidores pagos continuam restritos.
 5. Em **Recursos → Tunelamento dividido**, escolha excluir sites da VPN ou usar a VPN apenas nos sites listados. As regras podem incluir subdomínios. Salvar uma alteração também atualiza a conexão ativa.
 
 O proxy vale para o tráfego deste navegador. Não altera a rede dos demais aplicativos. A disponibilidade de servidores e a autorização de conexão continuam sob controle do Proton.

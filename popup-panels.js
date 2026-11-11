@@ -2,7 +2,7 @@
 (() => {
   const assets = {
     sync: ["sync/embedded.js", "sync/js/options.js"],
-    vpn: ["vpn/js/browser-polyfill.min.js", "vpn/panel.js", "vpn/js/popup.js"]
+    vpn: ["vpn/js/browser-polyfill.min.js", "vpn/interface.js"]
   };
   const panels = new Map();
   const firstPaint = new Promise(resolve => {

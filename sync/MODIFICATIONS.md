@@ -1,3 +1,11 @@
+# Interface própria — Super Extensão 1.5.9
+
+A interface ativa agora é compilada de `sync/source`, com navegação Perfis/Novo perfil/Backup/Conexões, cartões de perfil, busca, assistente com seleção visual de serviços e formulários adaptados ao tema compartilhado. Mantém componentes e fluxos derivados do Floccus sob MPL-2.0, com fonte original e avisos preservados. Motor, conectores, armazenamento e worker permanecem nesta etapa.
+
+Reconstrução atual: `npm ci`, `npm run setup:sync`, `npm run setup:vpn`, `npm run build:sync` e `npm test`, na raiz. Os bundles da interface não devem mais ser substituídos pela compilação das telas antigas. Veja `docs/sync-interface.md` para arquitetura, compatibilidade e limites da validação.
+
+## Histórico da integração
+
 # Integração de sincronização — Super Extensão 1.4.0
 
 Base: Floccus 5.13.0, commit 05decdc731415cab2614bf8cf240833b815e7e30.

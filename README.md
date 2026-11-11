@@ -6,6 +6,8 @@ Uma extensão para Helium e navegadores Chromium que reúne a Nova guia personal
 
 ## Recursos
 
+**Interface da VPN (1.5.10):** telas próprias de Conexão, Servidores, Recursos e Conta, com tema e idioma compartilhados. O motor Proton é mantido, assim como sessões, regras e restrições de plano. O controle de limpeza ao fechar fica acima do relatório de última limpeza, e todas as abas usam o mesmo espaçamento do cabeçalho. [Detalhes e validação pendente](docs/vpn-interface.md).
+
 **Proton VPN integrado (1.5.0):** abra a aba **VPN**, entre na sua conta Proton e selecione um servidor permitido pelo seu plano. Contas Free usam o seletor completo para os servidores gratuitos disponíveis. Tunelamento dividido permite excluir sites da VPN ou usar a VPN apenas nos sites escolhidos, incluindo subdomínios. O tema é compartilhado com o painel principal. O proxy cobre o navegador e depende da autorização da API Proton. Login e conexão real ainda precisam de validação. [Detalhes da integração](vpn/INTEGRACAO.md).
 
 - **Nova guia completa:** Tabliss 2.6.0 com editor de fundos, widgets, traduções, importação/exportação, imagens próprias, cores, gradientes, Unsplash e GIPHY. Fundo inicial local e envio de erros ao Sentry desativado.
@@ -42,7 +44,7 @@ O gradiente inicial funciona offline. Widgets e provedores online continuam disp
 
 O tema é compartilhado entre o popup, a nova guia, a sincronização e a VPN. O idioma escolhido na nova guia ou na sincronização também se aplica à VPN, que recarrega seu painel ao mudar de idioma. O arquivo `preferences.js` centraliza a leitura, a validação e as atualizações dessas preferências com as chaves já usadas pelas instalações existentes.
 
-A VPN e a sincronização montam todas as suas telas na página do popup. A interface usa os dados locais e as consultas dos próprios módulos para carregar perfis, sessões e servidores. Os estilos são limitados ao painel de cada módulo. Ao recompilar a sincronização, copie também `options.css` para `sync/js` e execute `npm run build:panels` com as dependências de compilação da VPN instaladas. A compilação da VPN já executa essa etapa.
+A VPN e a sincronização montam todas as suas telas na página do popup. A interface usa os dados locais e as consultas dos próprios módulos para carregar perfis, sessões e servidores. Os estilos são limitados ao painel de cada módulo. Para recompilar a interface da sincronização, use `npm run build:sync`; o comando também atualiza os estilos compartilhados dos painéis. A compilação da VPN já executa essa etapa.
 
 O componente GPL-3.0 mantém licença, avisos e código-fonte. Veja [as adaptações e instruções de reconstrução](newtab/MODIFICATIONS.md) e [o código-fonte correspondente](vendor/tabliss-source/).
 
@@ -122,17 +124,17 @@ A página Nova guia incorpora [Tabliss 2.6.0](https://github.com/joelshepherd/ta
 
 ## Sincronização de favoritos
 
-Abra **Sincronização** no menu principal. O painel completo fica incorporado à própria seção, com perfis, assistente, opções e importação/exportação. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+Abra **Sincronização** no menu principal. A interface própria reúne **Perfis**, **Novo perfil**, **Backup** e **Conexões**, com busca, status e ações de sincronização. O assistente oferece os oito serviços existentes e as opções continuam disponíveis no próprio perfil. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
 
 Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
 
-**Google Drive e Dropbox:** abra o bloco de conexão no topo e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
+**Google Drive e Dropbox:** abra a tela **Conexões** e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
 
 O idioma acompanha a preferência PT-BR/inglês da nova guia e o tema acompanha o painel principal. O módulo usa chaves `superSync:` e alarmes/mensagens `super-sync`, sem substituir regras de autoplay, exceções de cookies, preferências da nova guia ou o ícone principal.
 
 As permissões adicionais são `bookmarks` (ler e modificar as pastas escolhidas), `unlimitedStorage` (cache de sincronização), `tabGroups` (sincronização opcional de abas) e `identity` (login OAuth). `history` é opcional e usado somente se o usuário ativar contagem de visitas em um conector compatível. O acesso aos favoritos passa a ser obrigatório para o módulo; importar domínios para exceções continua sendo uma ação manual independente.
 
-Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
+Interface ativa: `sync/source`, compilada com `npm run build:sync`. O motor e sua fonte adaptada continuam em `vendor/floccus-source`. [Reconstrução e validação da interface](docs/sync-interface.md). Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
 
 Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.
 

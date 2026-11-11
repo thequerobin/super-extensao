@@ -1,4 +1,6 @@
-# Super Extensão 1.4.3
+# Super Extensão 1.5.10
+
+A VPN agora tem interface própria em Conexão, Servidores, Recursos e Conta; sessões, regras e motor Proton são preservados. A automação de limpeza fica acima da última limpeza, com o mesmo espaçamento entre abas. [Detalhes](docs/vpn-interface.md).
 
 Versão separada, preparada para uso pessoal no Helium e em navegadores Chromium. A limpeza usa o worker adaptado da Auto Clear History on Exit 2.0.9 instalada no caminho informado. O ícone próprio é um S geométrico em roxo e turquesa, com fonte editável em `icons/super-icon.svg` e PNGs de 16, 32, 48 e 128 pixels. O controle de autoplay e a proteção da última aba foram reimplementados após a análise das extensões AutoplayStopper (MV3), ID `gcendpekmacfohmhhkbhejjfbepkkkib`, e Don't Close Window With Last Tab, ID `dlnpfhfhmkiebpnlllpehlmklgdggbhn`. Esta é uma extensão pessoal independente, sem vínculo com os desenvolvedores originais.
 
@@ -102,17 +104,17 @@ Referências das APIs: https://developer.chrome.com/docs/extensions/reference/ap
 
 ## Sincronização de favoritos
 
-Abra **Sincronização** no menu principal. O painel completo fica incorporado à própria seção, com perfis, assistente, opções e importação/exportação. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
+Abra **Sincronização** no menu principal. A interface própria reúne **Perfis**, **Novo perfil**, **Backup** e **Conexões**, com busca, status e ações de sincronização. O assistente oferece os oito serviços existentes e as opções continuam disponíveis no próprio perfil. A navegação interna permanece no painel, sem abrir outra guia. Adicione um perfil, escolha um serviço, a pasta local e a estratégia. O motor é baseado no [Floccus 5.13.0](https://github.com/floccusaddon/floccus/tree/v5.13.0), com interface própria, PT-BR e inglês. Perfis e credenciais da extensão original não são importados automaticamente.
 
 Estão disponíveis os conectores do Floccus para WebDAV, Nextcloud Bookmarks, Google Drive, Dropbox, S3, Git, Linkwarden e Karakeep, além das opções de sincronização de abas, agendamento, criptografia compatível com o conector e importação/exportação de perfis. A estratégia padrão mescla alterações; estratégias de substituição devem ser escolhidas conscientemente.
 
-**Google Drive e Dropbox:** abra o bloco de conexão no topo e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
+**Google Drive e Dropbox:** abra a tela **Conexões** e informe credenciais OAuth próprias, cadastradas para o endereço de redirecionamento mostrado pela extensão. O cliente OAuth e o identificador do Floccus original não são reutilizados. O Google usa ID e chave secreta do cliente; o Dropbox usa a chave do aplicativo. WebDAV, Nextcloud, S3 e os demais conectores usam as configurações de seus próprios perfis.
 
 O idioma acompanha a preferência PT-BR/inglês da nova guia e o tema acompanha o painel principal. O módulo usa chaves `superSync:` e alarmes/mensagens `super-sync`, sem substituir regras de autoplay, exceções de cookies, preferências da nova guia ou o ícone principal.
 
 As permissões adicionais são `bookmarks` (ler e modificar as pastas escolhidas), `unlimitedStorage` (cache de sincronização), `tabGroups` (sincronização opcional de abas) e `identity` (login OAuth). `history` é opcional e usado somente se o usuário ativar contagem de visitas em um conector compatível. O acesso aos favoritos passa a ser obrigatório para o módulo; importar domínios para exceções continua sendo uma ação manual independente.
 
-Código-fonte adaptado e arquivos de compilação: `vendor/floccus-source`. Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
+Interface ativa: `sync/source`, compilada com `npm run build:sync`. O motor e sua fonte adaptada continuam em `vendor/floccus-source`. [Reconstrução e validação da interface](docs/sync-interface.md). Licença MPL-2.0 e alterações: `sync/LICENSE.txt` e `sync/MODIFICATIONS.md`. Este projeto não é uma publicação oficial do Floccus. As credenciais ficam no armazenamento local da extensão; a exportação de perfis pode conter segredos e deve ser guardada como uma configuração privada.
 
 
 Na versão 1.4.0, o painel de sincronização foi testado em um perfil temporário novo do Edge: PT-BR/inglês, temas claro/escuro, assistente de perfis, erro de OAuth não configurado, envio e recebimento reais de favoritos fictícios usando um servidor WebDAV local, além de limpeza com cookies preservados e configuração de sincronização intacta. Nenhum perfil, conta ou favorito real foi usado. Login e sincronização com serviços externos reais ainda dependem da configuração do usuário e não foram validados com contas de nuvem.
