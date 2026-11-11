@@ -3,6 +3,8 @@
   <v-container>
     <div>
       <v-text-field
+        outlined
+        dense
         append-icon="mdi-label"
         class="mt-2 mb-4"
         :value="label"
@@ -35,6 +37,8 @@
           </p>
         </div>
         <v-text-field
+          outlined
+          dense
           append-icon="mdi-file-document"
           class="mt-2"
           :value="bookmark_file"

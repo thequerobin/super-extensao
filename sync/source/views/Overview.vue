@@ -5,13 +5,13 @@
       <div>
         <h2>
           {{ t("UiProfiles") }}
-          <span class="sync-count">{{ accounts.length }}</span>
+          <span class="sync-count ui-count">{{ accounts.length }}</span>
         </h2>
         <p>{{ t("UiProfilesHelp") }}</p>
       </div>
       <button
         v-if="accounts.length"
-        class="sync-button"
+        class="sync-button ui-button"
         :disabled="busy || loading"
         @click="syncAll"
       >
@@ -19,14 +19,20 @@
         >{{ t("LabelSyncall") }}
       </button>
     </div>
-    <p v-if="error" role="alert" class="sync-notice sync-error">{{ error }}</p>
+    <p
+      v-if="error"
+      role="alert"
+      class="ui-notice sync-notice sync-error ui-notice-error"
+    >
+      {{ error }}
+    </p>
     <div v-if="loading && !accounts.length" class="sync-empty" role="status">
       <v-progress-circular indeterminate size="24" />
       <p>{{ t("UiWorking") }}</p>
     </div>
     <template v-else-if="accounts.length">
-      <label class="sync-search ui-focus-within"
-        ><v-icon small aria-hidden="true">mdi-magnify</v-icon
+      <label class="sync-search ui-focus-within ui-search"
+        ><span class="ui-icon ui-icon-search" aria-hidden="true"></span
         ><span class="sr-only">{{ t("UiSearch") }}</span
         ><input v-model="query" type="search" :placeholder="t('UiSearch')"
       /></label>
@@ -43,13 +49,15 @@
         >{{ t("UiNew") }}</router-link
       >
     </template>
-    <div v-else class="sync-empty sync-welcome">
+    <div v-else class="sync-empty sync-welcome ui-card">
       <div class="sync-empty-icon">
         <v-icon large aria-hidden="true">mdi-bookmark-multiple-outline</v-icon>
       </div>
       <h2>{{ t("UiEmptyTitle") }}</h2>
       <p>{{ t("UiEmptyHelp") }}</p>
-      <router-link class="sync-button sync-primary" to="/new"
+      <router-link
+        class="sync-button sync-primary ui-button ui-button-primary"
+        to="/new"
         >{{ t("UiCreate")
         }}<v-icon small aria-hidden="true">mdi-arrow-right</v-icon></router-link
       >

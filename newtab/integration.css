@@ -18,16 +18,16 @@ html,body {background:#172039;}
 .Settings .super-brand img {display:block;flex-shrink:0;}
 .Settings .super-brand strong {display:block;color:var(--se-text);font-size:19px;font-weight:700;letter-spacing:-.4px;}
 .Settings .super-brand span {display:block;margin-top:4px;color:var(--se-muted);font-size:12px;font-weight:400;}
-.Settings h2 {font-size:15px;margin:24px 0 12px;letter-spacing:-.2px;color:var(--se-text);}
+.Settings h2 {font-size:var(--font-title);margin:24px 0 12px;letter-spacing:-.2px;color:var(--se-text);}
 .Settings h3,.Settings h4 {font-size:13px;color:var(--se-text);}
 .Settings h4 {font-weight:650;line-height:1.5;}
 .Settings p {font-size:12px;color:var(--se-muted);line-height:1.6;}
 .Settings label {font-size:12px;color:var(--se-muted);margin:12px 0;}
-.Settings .Widget {box-sizing:border-box;margin:10px 0;padding:14px;border:1px solid var(--se-line);border-radius:11px;background:var(--se-surface);}
+.Settings .Widget {box-sizing:border-box;margin:10px 0;padding:var(--card-padding);border:1px solid var(--se-line);border-radius:var(--card-radius,12px);background:var(--se-surface);}
 .Settings .Widget .settings {margin:14px 0 0;}
 .Settings .Widget .title--buttons {min-height:28px;}
 .Settings .Widget .title--buttons button {margin:0 0 0 6px;}
-.Settings .plane input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.Settings .plane select,.Settings .plane textarea {box-sizing:border-box;background:var(--se-surface);border:1px solid var(--se-line);border-radius:8px;color:var(--se-text);padding:9px 10px;font:13px/1.45 system-ui,sans-serif;min-width:0;}
+.Settings .plane input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.Settings .plane select,.Settings .plane textarea {box-sizing:border-box;background:var(--se-surface);border:1px solid var(--se-line);border-radius:var(--control-radius,8px);color:var(--se-text);padding:var(--control-padding);font:var(--font-control)/1.5 system-ui,sans-serif;min-width:0;min-height:var(--control-height);}
 .Settings .plane select.primary {border:1px solid var(--se-line);background:var(--se-raised);padding:10px 11px;}
 .Settings input[type=color] {width:48px;height:32px;padding:3px;background:var(--se-raised);border:1px solid var(--se-line);border-radius:7px;cursor:pointer;}
 .Settings input[type=range],.Settings input[type=checkbox],.Settings input[type=radio] {accent-color:var(--se-accent);}
@@ -44,3 +44,7 @@ html,body {background:#172039;}
 /* Hide scrollbar chrome while preserving wheel, touch and keyboard scrolling. */
 * {scrollbar-width:none!important;}
 *::-webkit-scrollbar {display:none!important;width:0!important;height:0!important;}
+
+/* The settings panel shares the popup's component scale; dashboard widgets retain their own layouts. */
+.Settings .plane .button--primary { min-height: var(--button-height); padding: var(--button-padding); font: 600 var(--font-control)/1.5 system-ui,sans-serif; }
+.Settings .plane select.primary { padding: var(--control-padding); background: var(--se-surface); }

@@ -3,6 +3,8 @@
   <v-container>
     <div>
       <v-text-field
+        outlined
+        dense
         append-icon="mdi-label"
         class="mt-2 mb-4"
         :value="label"
@@ -19,6 +21,8 @@
       </v-card-title>
       <v-card-text>
         <v-text-field
+          outlined
+          dense
           :value="url"
           :rules="[validateUrl]"
           :label="t('LabelNextcloudurl')"
@@ -47,6 +51,8 @@
           {{ t("DescriptionServerfolder") }}
         </div>
         <v-text-field
+          outlined
+          dense
           :value="serverRoot"
           :placeholder="'/'"
           :rules="[validateServerRoot]"

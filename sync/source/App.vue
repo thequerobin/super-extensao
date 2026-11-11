@@ -32,9 +32,15 @@
         >{{ t(item.label) }}</router-link
       >
     </nav>
-    <p v-if="loadError" role="alert" class="sync-notice sync-error">
+    <p
+      v-if="loadError"
+      role="alert"
+      class="ui-notice sync-notice sync-error ui-notice-error"
+    >
       {{ loadError }}
-      <button class="sync-button" @click="load">{{ t("UiRetry") }}</button>
+      <button class="sync-button ui-button" @click="load">
+        {{ t("UiRetry") }}
+      </button>
     </p>
     <v-main v-if="initialized && !locked && !loadError"
       ><router-view :key="$route.path"
@@ -50,11 +56,19 @@
             type="password"
             autocomplete="current-password"
             required
+            class="ui-control"
         /></label>
-        <p v-if="unlockError" role="alert" class="sync-error">
+        <p
+          v-if="unlockError"
+          role="alert"
+          class="sync-error ui-notice-error ui-notice"
+        >
           {{ unlockError }}
         </p>
-        <button class="sync-button sync-primary" :disabled="unlocking">
+        <button
+          class="sync-button sync-primary ui-button ui-button-primary"
+          :disabled="unlocking"
+        >
           {{ unlocking ? t("UiWorking") : t("LabelUnlock") }}
         </button>
       </form>

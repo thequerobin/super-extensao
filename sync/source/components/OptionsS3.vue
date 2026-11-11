@@ -3,6 +3,8 @@
   <v-container>
     <div>
       <v-text-field
+        outlined
+        dense
         append-icon="mdi-label"
         class="mt-2 mb-4"
         :value="label"
@@ -19,6 +21,8 @@
       </v-card-text>
       <v-card-text>
         <v-text-field
+          outlined
+          dense
           :value="url"
           :rules="[validateUrl]"
           :label="t('LabelS3endpoint')"
@@ -27,6 +31,8 @@
           @input="$emit('update:url', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :value="region"
           class="mt-2"
           :label="t('LabelS3region')"
@@ -35,6 +41,8 @@
           @input="$emit('update:region', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :value="bucket"
           class="mt-2"
           :rules="[validateBucket]"
@@ -51,11 +59,15 @@
           @change="$emit('update:pathStyle', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :value="username"
           :label="t('LabelS3accesskey')"
           @input="$emit('update:username', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :label="t('LabelS3secretkey')"
           :type="showPassword ? 'text' : 'password'"
           @input="$emit('update:password', $event)"
@@ -76,6 +88,8 @@
           </template>
         </v-text-field>
         <v-text-field
+          outlined
+          dense
           append-icon="mdi-file-document"
           :value="bookmark_file"
           :rules="[validateBookmarksFile]"

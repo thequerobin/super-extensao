@@ -8,17 +8,23 @@
         }}</v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-text-field
+            outlined
+            dense
             :value="url"
             :rules="[validateUrl]"
             :label="t('LabelNextcloudurl')"
             @input="$emit('update:url', $event)"
           />
           <v-text-field
+            outlined
+            dense
             :value="username"
             :label="t('LabelUsername')"
             @input="$emit('update:username', $event)"
           />
           <v-text-field
+            outlined
+            dense
             :value="password"
             type="password"
             :label="t('LabelPassword')"
@@ -40,6 +46,8 @@
               {{ t("DescriptionServerfolder") }}
             </div>
             <v-text-field
+              outlined
+              dense
               :value="serverRoot"
               :placeholder="'/'"
               :rules="[validateServerRoot]"

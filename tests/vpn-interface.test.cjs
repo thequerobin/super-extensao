@@ -211,10 +211,7 @@ test("cleanup controls follow all panels and sit directly above the last cleanup
   const document = dom.window.document;
   assert.ok(document.querySelector("main > footer > .automation"));
   assert.equal(document.querySelectorAll("#enabled").length, 1);
-  assert.equal(
-    document.querySelector("#pauseRow").nextElementSibling.className,
-    "report",
-  );
+  assert.ok(document.querySelector("#pauseRow").nextElementSibling.classList.contains("report"));
   assert.ok(!document.querySelector("main > .automation"));
   const style = document.createElement("style");
   style.textContent = css;

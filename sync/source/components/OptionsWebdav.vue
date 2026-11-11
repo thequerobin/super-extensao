@@ -3,6 +3,8 @@
   <v-container>
     <div>
       <v-text-field
+        outlined
+        dense
         append-icon="mdi-label"
         class="mt-2 mb-4"
         :value="label"
@@ -19,17 +21,23 @@
       </v-card-text>
       <v-card-text>
         <v-text-field
+          outlined
+          dense
           :value="url"
           :rules="[validateUrl]"
           :label="t('LabelWebdavurl')"
           @input="$emit('update:url', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :value="username"
           :label="t('LabelUsername')"
           @input="$emit('update:username', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :label="t('LabelPassword')"
           :type="showPassword ? 'text' : 'password'"
           @input="$emit('update:password', $event)"
@@ -50,6 +58,8 @@
           </template>
         </v-text-field>
         <v-text-field
+          outlined
+          dense
           append-icon="mdi-file-document"
           :value="bookmark_file"
           :rules="[validateBookmarksFile]"

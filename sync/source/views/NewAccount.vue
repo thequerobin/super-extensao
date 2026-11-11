@@ -23,7 +23,11 @@
         </li>
       </ol>
       <v-stepper-items>
-        <p v-if="createError" class="sync-notice sync-error" role="alert">
+        <p
+          v-if="createError"
+          class="ui-notice sync-notice sync-error ui-notice-error"
+          role="alert"
+        >
           {{ createError }}
         </p>
         <v-stepper-content step="0">
@@ -79,6 +83,8 @@
           </div>
           <v-form>
             <v-text-field
+              outlined
+              dense
               v-model="label"
               append-icon="mdi-label"
               class="mt-2 mb-4"
@@ -105,6 +111,8 @@
             </div>
             <v-form>
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelNextcloudurl')"
@@ -158,14 +166,23 @@
             </div>
             <v-form>
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelLinkwardenurl')"
                 :loading="isServerTestRunning"
                 :error-messages="serverTestError || serverisNotHttps"
               />
-              <v-text-field v-model="username" :label="t('LabelUsername')" />
               <v-text-field
+                outlined
+                dense
+                v-model="username"
+                :label="t('LabelUsername')"
+              />
+              <v-text-field
+                outlined
+                dense
                 v-model="password"
                 :label="t('LabelAccesstoken')"
                 :type="showPassword ? 'text' : 'password'"
@@ -204,6 +221,8 @@
             </div>
             <v-form>
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelKarakeepurl')"
@@ -211,6 +230,8 @@
                 :error-messages="serverTestError || serverisNotHttps"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="password"
                 :label="t('LabelApiKey')"
                 :type="showPassword ? 'text' : 'password'"
@@ -249,6 +270,8 @@
             </div>
             <v-form>
               <v-select
+                outlined
+                dense
                 :items="Object.keys(predefinedWebdavUrls)"
                 :label="t('LabelPredefinedwebdavurls')"
                 :placeholder="t('DescriptionPredefinedwebdavurls')"
@@ -256,14 +279,23 @@
                 @change="server = predefinedWebdavUrls[$event]"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelWebdavurl')"
                 :loading="isServerTestRunning"
                 :error-messages="serverTestError || serverisNotHttps"
               />
-              <v-text-field v-model="username" :label="t('LabelUsername')" />
               <v-text-field
+                outlined
+                dense
+                v-model="username"
+                :label="t('LabelUsername')"
+              />
+              <v-text-field
+                outlined
+                dense
                 v-model="password"
                 :label="t('LabelPassword')"
                 :type="showPassword ? 'text' : 'password'"
@@ -286,6 +318,8 @@
                 </template>
               </v-text-field>
               <v-text-field
+                outlined
+                dense
                 v-model="passphrase"
                 class="mt-2"
                 :label="t('LabelPassphrase')"
@@ -328,6 +362,8 @@
             </div>
             <v-form>
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelS3endpoint')"
@@ -337,6 +373,8 @@
                 :error-messages="serverTestError || serverisNotHttps"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="region"
                 class="mt-2"
                 :label="t('LabelS3region')"
@@ -344,6 +382,8 @@
                 :persistent-hint="true"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="bucket"
                 class="mt-2"
                 :rules="[validateBucket]"
@@ -357,8 +397,15 @@
                 dense
                 class="mt-0 pt-0 mb-4"
               />
-              <v-text-field v-model="username" :label="t('LabelS3accesskey')" />
               <v-text-field
+                outlined
+                dense
+                v-model="username"
+                :label="t('LabelS3accesskey')"
+              />
+              <v-text-field
+                outlined
+                dense
                 v-model="password"
                 :label="t('LabelS3secretkey')"
                 :type="showPassword ? 'text' : 'password'"
@@ -381,6 +428,8 @@
                 </template>
               </v-text-field>
               <v-text-field
+                outlined
+                dense
                 v-model="passphrase"
                 class="mt-2"
                 :label="t('LabelPassphrase')"
@@ -422,12 +471,21 @@
             </div>
             <v-form>
               <v-text-field
+                outlined
+                dense
                 v-model="server"
                 :rules="[validateUrl]"
                 :label="t('LabelGiturl')"
               />
-              <v-text-field v-model="username" :label="t('LabelUsername')" />
               <v-text-field
+                outlined
+                dense
+                v-model="username"
+                :label="t('LabelUsername')"
+              />
+              <v-text-field
+                outlined
+                dense
                 v-model="password"
                 :label="t('LabelPassword')"
                 :type="showPassword ? 'text' : 'password'"
@@ -518,6 +576,8 @@
                 {{ t("DescriptionServerfolder") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="serverRoot"
                 :placeholder="'/'"
                 :rules="[validateServerRoot]"
@@ -533,6 +593,8 @@
                 {{ t("DescriptionServerfolderlinkwarden") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="serverFolder"
                 :label="t('LabelServerfolder')"
               />
@@ -546,6 +608,8 @@
                 {{ t("DescriptionServerfolderkarakeep") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="serverFolder"
                 :label="t('LabelServerfolder')"
               />
@@ -556,6 +620,8 @@
                 {{ t("LabelBookmarksfile") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="bookmark_file"
                 class="mb-2"
                 append-icon="mdi-file-document"
@@ -572,6 +638,8 @@
                 {{ t("LabelBookmarksfile") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="bookmark_file"
                 class="mb-2"
                 append-icon="mdi-file-document"
@@ -588,6 +656,8 @@
                 {{ t("LabelBookmarksfile") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="bookmark_file"
                 class="mb-2"
                 append-icon="mdi-file-document"
@@ -598,6 +668,8 @@
               />
               <OptionFileType v-model="bookmark_file_type" />
               <v-text-field
+                outlined
+                dense
                 v-model="branch"
                 class="mb-2"
                 :label="t('LabelGitbranch')"
@@ -609,6 +681,8 @@
                 {{ t("LabelBookmarksfile") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="bookmark_file"
                 append-icon="mdi-file-document"
                 :rules="[validateBookmarksFileGoogle]"
@@ -617,6 +691,8 @@
                 :persistent-hint="true"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="passphrase"
                 :type="showPassphrase ? 'text' : 'password'"
                 class="mt-2"
@@ -648,6 +724,8 @@
                 {{ t("LabelBookmarksfile") }}
               </div>
               <v-text-field
+                outlined
+                dense
                 v-model="bookmark_file"
                 append-icon="mdi-file-document"
                 :rules="[validateBookmarksFileDropbox]"
@@ -656,6 +734,8 @@
                 :persistent-hint="true"
               />
               <v-text-field
+                outlined
+                dense
                 v-model="passphrase"
                 :type="showPassphrase ? 'text' : 'password'"
                 class="mt-2"
@@ -752,9 +832,11 @@
           <v-form>
             <div v-if="isBrowser">
               {{ t("DescriptionAccountcreated") }}
-              <router-link class="sync-button sync-primary" to="/">{{
-                t("UiProfiles")
-              }}</router-link>
+              <router-link
+                class="sync-button sync-primary ui-button ui-button-primary"
+                to="/"
+                >{{ t("UiProfiles") }}</router-link
+              >
             </div>
           </v-form>
         </v-stepper-content>

@@ -6,9 +6,17 @@
         <p class="sync-eyebrow">{{ data.type }}</p>
         <h2>{{ data.label || folderName || t("LabelOptions") }}</h2>
       </div>
-      <router-link class="sync-button" to="/">{{ t("LabelBack") }}</router-link>
+      <router-link class="sync-button ui-button" to="/">{{
+        t("LabelBack")
+      }}</router-link>
     </div>
-    <p v-if="error" role="alert" class="sync-notice sync-error">{{ error }}</p>
+    <p
+      v-if="error"
+      role="alert"
+      class="ui-notice sync-notice sync-error ui-notice-error"
+    >
+      {{ error }}
+    </p>
     <p v-if="loading" role="status">{{ t("UiWorking") }}</p>
     <v-form v-if="!loading" class="mt-3 mb-3">
       <OptionsNextcloudFolders
@@ -70,9 +78,11 @@
       />
     </v-form>
     <div class="sync-save-row">
-      <span role="status">{{ saved ? t("UiSaved") : "" }}</span
+      <span role="status" class="ui-inline-status">{{
+        saved ? t("UiSaved") : ""
+      }}</span
       ><button
-        class="sync-button sync-primary"
+        class="sync-button sync-primary ui-button ui-button-primary"
         :disabled="loading || saving"
         @click="onSave"
       >

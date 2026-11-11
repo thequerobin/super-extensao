@@ -8,16 +8,23 @@
       </div>
     </div>
     <form class="sync-form" @submit.prevent="save">
-      <p class="sync-notice">{{ t("SuperOAuthHelp") }}</p>
+      <p class="ui-notice sync-notice">{{ t("SuperOAuthHelp") }}</p>
       <label
         >{{ t("SuperRedirect")
-        }}<input :value="redirectUrl" readonly @focus="$event.target.select()"
+        }}<input
+          :value="redirectUrl"
+          readonly
+          @focus="$event.target.select()"
+          class="ui-control"
       /></label>
       <fieldset>
         <legend>Google Drive</legend>
         <label
           >{{ t("SuperGoogleId")
-          }}<input v-model.trim="oauth.googleClientId" autocomplete="off"
+          }}<input
+            v-model.trim="oauth.googleClientId"
+            autocomplete="off"
+            class="ui-control"
         /></label>
         <label
           >{{ t("SuperGoogleSecret")
@@ -25,19 +32,30 @@
             v-model.trim="oauth.googleClientSecret"
             type="password"
             autocomplete="new-password"
+            class="ui-control"
         /></label>
       </fieldset>
       <fieldset>
         <legend>Dropbox</legend>
         <label
           >{{ t("SuperDropboxKey")
-          }}<input v-model.trim="oauth.dropboxClientId" autocomplete="off"
+          }}<input
+            v-model.trim="oauth.dropboxClientId"
+            autocomplete="off"
+            class="ui-control"
         /></label>
       </fieldset>
-      <p v-if="error" role="alert" class="sync-error">{{ error }}</p>
+      <p v-if="error" role="alert" class="sync-error ui-notice-error ui-notice">
+        {{ error }}
+      </p>
       <div class="sync-save-row">
-        <span role="status">{{ saved ? t("UiSaved") : "" }}</span
-        ><button class="sync-button sync-primary" :disabled="saving || loading">
+        <span role="status" class="ui-inline-status">{{
+          saved ? t("UiSaved") : ""
+        }}</span
+        ><button
+          class="sync-button sync-primary ui-button ui-button-primary"
+          :disabled="saving || loading"
+        >
           {{ saving ? t("UiWorking") : t("SuperSave") }}
         </button>
       </div>

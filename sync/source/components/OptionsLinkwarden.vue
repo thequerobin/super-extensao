@@ -3,6 +3,8 @@
   <v-container>
     <div>
       <v-text-field
+        outlined
+        dense
         append-icon="mdi-label"
         class="mt-2 mb-4"
         :value="label"
@@ -19,17 +21,23 @@
       </v-card-text>
       <v-card-text>
         <v-text-field
+          outlined
+          dense
           :value="url"
           :rules="[validateUrl]"
           :label="t('LabelLinkwardenurl')"
           @input="$emit('update:url', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :value="username"
           :label="t('LabelUsername')"
           @input="$emit('update:username', $event)"
         />
         <v-text-field
+          outlined
+          dense
           :label="t('LabelAccesstoken')"
           :type="showPassword ? 'text' : 'password'"
           @input="$emit('update:password', $event)"
@@ -65,6 +73,8 @@
           {{ t("DescriptionServerfolderlinkwarden") }}
         </div>
         <v-text-field
+          outlined
+          dense
           v-model="serverFolder"
           :label="t('LabelServerfolder')"
           @input="$emit('update:serverFolder', $event)"

@@ -7,7 +7,7 @@
         <p>{{ t("UiBackupHelp") }}</p>
       </div>
     </div>
-    <p class="sync-notice">{{ t("UiBackupPrivacy") }}</p>
+    <p class="ui-notice sync-notice">{{ t("UiBackupPrivacy") }}</p>
     <v-card class="options">
       <v-container class="pa-5">
         <v-card-title role="heading" aria-level="1">

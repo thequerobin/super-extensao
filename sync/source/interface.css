@@ -109,52 +109,8 @@ body {
   font-size: 12px;
   margin: 5px 0 0;
 }
-.sync-count {
-  display: inline-block;
-  color: var(--accent);
-  background: var(--accent-bg);
-  padding: 1px 7px;
-  border-radius: 12px;
-  font-size: 11px;
-  margin-left: 4px;
-}
-.sync-workspace .sync-button {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 7px 11px;
-  border: 1px solid var(--line);
-  background: var(--raised);
-  color: var(--text);
-  border-radius: var(--control-radius);
-  font: 600 12px/1.4 var(--ui-font);
-  text-decoration: none;
-  cursor: pointer;
-}
-.sync-workspace .sync-primary {
-  color: var(--bg) !important;
-  background: var(--accent) !important;
-  border-color: transparent;
-}
-.sync-workspace .sync-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
 .sync-button .v-icon {
-  font-size: 17px !important;
-}
-.sync-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--control-radius);
-  margin-bottom: 12px;
-  color: var(--muted);
+  font-size: var(--icon-size) !important;
 }
 .sync-search input {
   width: 100%;
@@ -171,13 +127,6 @@ body {
 .sync-profiles {
   display: grid;
   gap: 12px;
-}
-.sync-profile {
-  border: 1px solid var(--line);
-  border-radius: var(--card-radius);
-  background: var(--surface);
-  overflow: hidden;
-  padding: 16px;
 }
 .sync-profile-top {
   display: flex;
@@ -281,12 +230,6 @@ body {
   text-align: center;
   color: var(--muted);
 }
-.sync-welcome {
-  border: 1px solid var(--line);
-  border-radius: var(--card-radius);
-  background: var(--surface);
-  padding: 28px 24px;
-}
 .sync-empty-icon {
   width: 60px;
   height: 60px;
@@ -312,16 +255,6 @@ body {
   margin: 12px auto 0;
   font-size: 12px;
 }
-.sync-notice {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--raised);
-  color: var(--muted);
-  padding: 12px;
-  margin-bottom: 14px !important;
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
 .sync-workspace .sync-error {
   color: var(--danger) !important;
   overflow-wrap: anywhere;
@@ -333,17 +266,6 @@ body {
   font-size: 12px;
   color: var(--muted);
   margin: 14px 0;
-}
-.sync-form input,
-.sync-unlock input {
-  color: var(--text);
-  background: var(--bg);
-  font: 13px var(--ui-font);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px;
-  min-width: 0;
-  width: 100%;
 }
 .sync-form fieldset {
   margin: 16px 0;
@@ -407,8 +329,8 @@ body {
 }
 .sync-workspace .v-btn {
   border: 1px solid var(--line);
-  background: var(--raised) !important;
-  color: var(--text) !important;
+  background: var(--accent-bg) !important;
+  color: var(--accent) !important;
   box-shadow: none !important;
   text-transform: none;
   letter-spacing: 0;
@@ -586,4 +508,128 @@ body {
 }
 .sync-workspace .v-stepper__content .headline {
   margin-bottom: 16px;
+}
+
+/* Module layout; control appearance is owned by ui-components.css. */
+.sync-search {
+  margin-bottom: var(--section-gap);
+}
+.sync-search input {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  min-height: 0;
+}
+.sync-notice {
+  margin-bottom: var(--section-gap) !important;
+}
+.sync-workspace .ui-button-primary {
+  color: var(--bg);
+}
+.sync-workspace .sync-section-title h2,
+.sync-workspace .sync-profile h3,
+.sync-workspace .v-card__title,
+.sync-workspace .text-h5,
+.sync-workspace .headline,
+.sync-workspace .text-h6 {
+  font: var(--weight-title) var(--font-title) / 1.5 var(--ui-font) !important;
+}
+.sync-section-title p,
+.sync-folder,
+.sync-wizard-help {
+  font-size: var(--font-description);
+}
+.sync-section-title {
+  margin-bottom: var(--section-gap);
+}
+.sync-form label,
+.sync-unlock label {
+  margin: var(--section-gap) 0;
+  font-size: var(--font-control);
+}
+.sync-workspace .v-btn {
+  min-height: var(--button-height);
+  height: auto;
+  padding: var(--button-padding) !important;
+  background: var(--accent-bg) !important;
+  color: var(--accent) !important;
+  font: 600 var(--font-control) / 1.5 var(--ui-font);
+}
+.sync-workspace .v-btn.primary {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+}
+.sync-workspace .v-text-field--outlined {
+  border-radius: var(--control-radius);
+}
+.sync-workspace .v-text-field--outlined fieldset {
+  border-color: var(--line);
+}
+.sync-workspace .v-text-field--outlined .v-input__slot {
+  min-height: var(--control-height);
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+.sync-workspace .v-input input,
+.sync-workspace .v-select__selection,
+.sync-workspace .v-label {
+  font-size: var(--font-control);
+  color: var(--text);
+}
+.sync-workspace .v-input input::placeholder {
+  color: var(--muted);
+}
+.sync-workspace .sync-service {
+  border-radius: var(--control-radius);
+}
+.sync-save-row [role="status"] {
+  font-size: var(--font-description);
+}
+
+/* Match native switches without replacing Vuetify's accessible input and label. */
+.sync-workspace .v-input--switch .v-input--selection-controls__input {
+  width: 32px;
+  height: 24px;
+}
+.sync-workspace .v-input--switch .v-input--switch__track {
+  width: 32px;
+  height: 19px;
+  left: 0;
+  right: auto;
+  top: 2.5px;
+  border-radius: 20px;
+  opacity: 1;
+  color: var(--line) !important;
+}
+.sync-workspace .v-input--switch .v-input--switch__thumb {
+  width: 13px;
+  height: 13px;
+  position: absolute;
+  left: 3px;
+  top: 5.5px;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  transform: none !important;
+}
+.sync-workspace .v-input--switch.v-input--is-dirty .v-input--switch__track {
+  color: var(--accent) !important;
+}
+.sync-workspace .v-input--switch.v-input--is-dirty .v-input--switch__thumb {
+  color: var(--bg) !important;
+  transform: translateX(13px) !important;
+}
+.sync-workspace .v-input--switch .v-input--selection-controls__ripple {
+  display: none;
+}
+.sync-workspace
+  .v-input--switch.v-input--is-disabled
+  .v-input--selection-controls__input {
+  opacity: 0.5;
+}
+.sync-workspace
+  .v-input--switch
+  .v-input--selection-controls__input:focus-within
+  .v-input--switch__track {
+  outline: var(--focus-width) solid var(--accent);
+  outline-offset: 2px;
 }

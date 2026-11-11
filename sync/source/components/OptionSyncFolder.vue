@@ -13,6 +13,8 @@
           <template #label>
             {{ t("LabelLocalfolder") }}
             <v-text-field
+              outlined
+              dense
               v-model="path"
               class="ms-2"
               readonly

@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
   <article
-    class="sync-profile"
+    class="sync-profile ui-card"
     :data-state="status"
     :aria-busy="Boolean(account.data.syncing)"
   >
@@ -31,18 +31,26 @@
     />
     <p
       class="sync-profile-detail"
-      :class="{ 'sync-error': account.data.error }"
+      :class="{ 'sync-error ui-notice ui-notice-error': account.data.error }"
     >
       {{ statusDetail }}
     </p>
-    <p v-if="legacyWarning" class="sync-notice">{{ legacyWarning }}</p>
-    <p v-if="!account.data.failsafe" class="sync-notice">
+    <p v-if="legacyWarning" class="ui-notice sync-notice">
+      {{ legacyWarning }}
+    </p>
+    <p v-if="!account.data.failsafe" class="ui-notice sync-notice">
       {{ t("StatusFailsafeoff") }}
     </p>
-    <p v-if="actionError" class="sync-error" role="alert">{{ actionError }}</p>
+    <p
+      v-if="actionError"
+      class="sync-error ui-notice-error ui-notice"
+      role="alert"
+    >
+      {{ actionError }}
+    </p>
     <div class="sync-profile-actions">
       <router-link
-        class="sync-button"
+        class="sync-button ui-button"
         :to="{
           name: routes.ACCOUNT_OPTIONS,
           params: { accountId: account.id },
@@ -52,7 +60,7 @@
       >
       <button
         v-if="account.data.syncing"
-        class="sync-button"
+        class="sync-button ui-button"
         :disabled="busy"
         @click="onCancelSync"
       >
@@ -60,7 +68,7 @@
       </button>
       <router-link
         v-else-if="needsAuthorization"
-        class="sync-button sync-primary"
+        class="sync-button sync-primary ui-button ui-button-primary"
         :to="{
           name: routes.ACCOUNT_OPTIONS,
           params: { accountId: account.id },
@@ -69,7 +77,7 @@
       >
       <button
         v-else
-        class="sync-button sync-primary"
+        class="sync-button sync-primary ui-button ui-button-primary"
         :disabled="busy || Boolean(account.data.scheduled)"
         @click="onTriggerSync"
       >
@@ -81,7 +89,7 @@
       <summary>{{ t("UiAdvanced") }}</summary>
       <div>
         <button
-          class="sync-button"
+          class="sync-button ui-button"
           :disabled="
             busy || Boolean(account.data.syncing || account.data.scheduled)
           "
@@ -90,7 +98,7 @@
           {{ t("LabelSyncDownOnce") }}
         </button>
         <button
-          class="sync-button"
+          class="sync-button ui-button"
           :disabled="
             busy || Boolean(account.data.syncing || account.data.scheduled)
           "
@@ -100,13 +108,17 @@
         </button>
         <button
           v-if="status === 'scheduled'"
-          class="sync-button"
+          class="sync-button ui-button"
           :disabled="busy"
           @click="onForceSync"
         >
           {{ t("LabelScheduledforcesync") }}
         </button>
-        <button class="sync-button" :disabled="busy" @click="onGetLogs">
+        <button
+          class="sync-button ui-button"
+          :disabled="busy"
+          @click="onGetLogs"
+        >
           {{ t("LabelDebuglogs") }}
         </button>
       </div>

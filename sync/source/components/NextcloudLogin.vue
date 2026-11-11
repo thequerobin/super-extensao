@@ -2,6 +2,8 @@
 <template>
   <div>
     <v-text-field
+      outlined
+      dense
       :value="username"
       :label="t('LabelUsername')"
       :loading="isRunning"
@@ -38,6 +40,8 @@
       </template>
     </v-text-field>
     <v-text-field
+      outlined
+      dense
       :type="showPassword ? 'text' : 'password'"
       :label="t('LabelPassword')"
       @input="$emit('update:password', $event)"

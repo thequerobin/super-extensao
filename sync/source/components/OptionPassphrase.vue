@@ -24,6 +24,8 @@
     </template>
     <template v-else>
       <v-text-field
+        outlined
+        dense
         class="mt-2"
         :label="t('LabelPassphrase')"
         :type="showPassphrase ? 'text' : 'password'"

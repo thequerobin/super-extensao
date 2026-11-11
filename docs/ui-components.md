@@ -1,4 +1,4 @@
-# Base visual e idioma compartilhados — 1.5.14
+# Base visual e idioma compartilhados — 1.5.16
 
 `ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define os tokens de cor, tipografia, bordas e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
 
@@ -8,7 +8,7 @@
 - `ui-button` e `ui-card`: bases visuais para botões e cartões.
 - `ui-scroll-panel`: área rolável sem barra visível.
 
-Tema e Idioma usam essa base no cabeçalho global. Os botões e cartões da VPN também adotam as classes comuns. Os painéis existentes continuam com seus fluxos e validações. Não houve uma reescrita de todos os componentes nesta etapa.
+Tema e Idioma usam essa base no cabeçalho global. Os botões e cartões da VPN também adotam as classes comuns. Os painéis existentes continuam com seus fluxos e validações. Botões, campos nativos, buscas, switches, cartões, contadores e avisos das abas usam essas primitivas. Os formulários Vuetify recebem um adaptador para a mesma escala visual, preservando validações e comportamento.
 
 O contorno de foco continua ativo e usa deslocamento interno para permanecer inteiro mesmo em áreas que recortam o conteúdo. A mesma geometria é aplicada ao editor da Nova guia.
 
@@ -29,3 +29,14 @@ Os testes DOM verificam troca de idioma no cabeçalho e nos dois módulos incorp
 Limpeza, Sincronização e VPN usam a mesma apresentação `sub-nav ui-submenu`, na área `.popup-navigation` fora da rolagem do conteúdo. Sincronização e VPN montam seus controles nos espaços `syncSubmenu` e `vpnSubmenu`, mantendo rotas, estado selecionado e idioma. Nas páginas independentes, a navegação permanece no próprio módulo.
 
 Campos compostos, como a busca de perfis, usam `ui-focus-within`: o contorno é desenhado dentro do limite do contêiner, inclusive quando o foco está no input interno. Isso substitui a antiga regra externa `sync-search:focus-within` que podia ser recortada pelo painel.
+
+## Escala e variantes
+
+A Limpeza orienta a apresentação comum: controles de 40 px, botões de no mínimo 36 px, fonte de controle de 12 px, títulos de seção de 14 px, descrições de 11 px e cartões com 16 px de preenchimento. A escala de espaçamento usa 4, 8, 12, 16 e 24 px. As ações principais, controles compactos e cartões de boas-vindas têm variantes explícitas.
+
+- `ui-button`, `ui-button-primary`, `ui-button-secondary`, `ui-button-danger`, `ui-button-compact`.
+- `ui-control` para campos nativos; `ui-search` e `ui-focus-within` para buscas compostas.
+- `ui-card`, `ui-count`, `ui-switch`, `ui-footer-note`.
+- `ui-notice`, com `ui-notice-error`, `ui-notice-warning` ou `ui-notice-success`.
+
+A configuração da Nova guia segue as mesmas dimensões, preservando a personalização do painel. Na compilação do popup, a base compartilhada é reaplicada dentro da Sincronização, depois do CSS do motor: isso impede que o reset do Vuetify apague o preenchimento, as bordas e as cores dos componentes nativos.

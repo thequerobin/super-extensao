@@ -40,7 +40,8 @@ function scopedCss(file, panel) {
 }
 
 const sheets = [
-  ['sync/js/options.css', 'syncPanel'], ['sync/theme.css', 'syncPanel'],
+  ['sync/js/options.css', 'syncPanel'], ['ui-components.css', 'syncPanel'],
+  ['sync/theme.css', 'syncPanel'],
   ['vpn/source/interface.css', 'vpnPanel']
 ];
 const css = sheets.map(([file, panel]) => scopedCss(file, panel)).join('\n');
