@@ -13,9 +13,6 @@
   </header>
   <main>
     <div id="error" class="message error" role="alert" hidden></div>
-    <div class="automation"><label class="toggle-line" for="enabled"><span>Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch"></label><button id="pauseToggle" class="quiet" aria-expanded="false" aria-controls="pauseMenu">Pausar</button></div>
-    <div id="pauseMenu" class="pause-menu" hidden><button data-duration="30">30 minutos</button><button data-duration="60">1 hora</button><button data-duration="today">Até amanhã</button><button data-duration="0">Até retomar</button></div>
-    <div id="pauseRow" class="message pause" hidden><span id="pauseStatus"></span><button id="resume">Retomar</button></div>
     <div class="popup-navigation">
       <nav class="main-nav" aria-label="Seções">
         <button class="tab active" id="section-cleanup" aria-pressed="true" aria-controls="cleanupSubmenu">Limpeza</button>
@@ -85,13 +82,16 @@
     </section>
     <section id="panel-vpn" aria-labelledby="tab-vpn" hidden>
       <p id="vpnPanelStatus" class="scope" role="status">Carregando VPN…</p>
-      <div id="vpnPanel" class="main-modal"></div>
+      <div id="vpnPanel" class="vpn-workspace"></div>
     </section>
     <section id="panel-sync" aria-labelledby="tab-sync" hidden>
       <p id="syncPanelStatus" class="scope" role="status">Carregando sincronização…</p>
       <div id="syncPanel" data-embedded="true"><div id="syncApp"></div></div>
     </section>
     <footer>
+      <div class="automation"><label class="toggle-line" for="enabled"><span>Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch"></label><button id="pauseToggle" class="quiet" aria-expanded="false" aria-controls="pauseMenu">Pausar</button></div>
+      <div id="pauseMenu" class="pause-menu" hidden><button data-duration="30">30 minutos</button><button data-duration="60">1 hora</button><button data-duration="today">Até amanhã</button><button data-duration="0">Até retomar</button></div>
+      <div id="pauseRow" class="message pause" hidden><span id="pauseStatus"></span><button id="resume">Retomar</button></div>
       <section class="report" aria-labelledby="reportTitle"><div class="eyebrow">ÚLTIMA LIMPEZA</div><h2 id="reportTitle">Carregando…</h2><p id="reportDetail"></p></section>
       <button id="clearNow" class="full danger">Limpar agora</button>
       <p id="popupStatus" role="status" aria-live="polite"></p>
