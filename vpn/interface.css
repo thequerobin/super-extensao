@@ -487,3 +487,47 @@
     opacity: 0.4;
   }
 }
+
+/* Compact country groups; local SVG flags also render on Windows. */
+.vpn-country-group {
+  border-bottom: 1px solid var(--line);
+}
+.vpn-country-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.vpn-country-group > summary::-webkit-details-marker {
+  display: none;
+}
+.vpn-country-group > summary::after {
+  content: "›";
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+}
+.vpn-country-group[open] > summary::after {
+  transform: rotate(90deg);
+}
+.vpn-country-group > summary .vpn-count {
+  margin-left: auto;
+}
+.vpn-country-servers {
+  padding: 0 0 12px 34px;
+}
+.vpn-flag {
+  display: block;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 3px;
+}
+.vpn-app select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}

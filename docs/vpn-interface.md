@@ -1,11 +1,11 @@
-# Interface própria da VPN — 1.5.10
+# Interface própria da VPN — 1.5.12
 
 A aba VPN usa `vpn/source`, sem montar o HTML, JavaScript ou CSS do popup original. O motor, a autenticação, os servidores e a autorização de plano continuam sendo do Proton. O worker não foi alterado nesta etapa.
 
 ## Telas
 
 - **Conexão:** estado confirmado pelo worker, conexão automática ao país mais rápido, servidor aleatório, desconexão/cancelamento, lista de servidores gratuitos e conexões recentes quando ativadas.
-- **Servidores:** pesquisa por país, cidade ou nome; filtros Meu plano, Gratuitos, Todos e Secure Core; ocupação e manutenção. Contas Free continuam limitadas aos servidores gratuitos. A interface pagina a renderização para não inserir milhares de botões de uma vez.
+- **Servidores:** pesquisa por país, cidade ou nome; filtros Meu plano, Gratuitos, Todos e Secure Core; ocupação e manutenção. Contas Free continuam limitadas aos servidores gratuitos. Os servidores ficam agrupados por país, inicialmente recolhidos, com bandeiras SVG locais e contagem por grupo. Cada grupo carrega mais 50 servidores por vez. As barras de rolagem ficam ocultas, preservando a rolagem.
 - **Recursos:** conexão ao iniciar, proteção WebRTC, notificações, Secure Core e memória de conexões recentes. Disponibilidade e controle por dispositivo são respeitados. Regras de tunelamento dividido têm listas separadas de inclusão/exclusão e suporte a subdomínios. Alterações ficam em rascunho até salvar; regras são aplicadas à conexão ativa.
 - **Conta:** identificação do plano, idioma compartilhado, links oficiais e saída da conta com confirmação.
 

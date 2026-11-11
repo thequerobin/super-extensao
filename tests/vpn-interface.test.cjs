@@ -192,6 +192,14 @@ async function boot(initial = snapshot(), options = {}) {
     },
   };
 }
+async function openCountry(ui, key) {
+  const details = [
+    ...ui.w.document.querySelectorAll("[data-country-group]"),
+  ].find((node) => node.dataset.countryGroup === key);
+  assert.ok(details, key);
+  details.open = true;
+  await tick();
+}
 test("cleanup controls follow all panels and sit directly above the last cleanup report; VPN shares header gutters", () => {
   const html = fs.readFileSync(path.join(root, "popup.html"), "utf8");
   const css = fs.readFileSync(path.join(root, "popup.css"), "utf8");
@@ -246,6 +254,8 @@ test("server picker keeps Free, paid and maintenance states, search and connecti
     const select = ui.w.document.querySelector('[data-field="server-filter"]');
     select.value = "all";
     select.dispatchEvent(new ui.w.Event("change", { bubbles: true }));
+    await openCountry(ui, "servers:BR");
+    await openCountry(ui, "servers:JP");
     assert.equal(
       ui.w.document.querySelector('[data-server="paid"]').disabled,
       true,
@@ -359,7 +369,12 @@ test("server text and errors are rendered as text and invalid domains are reject
   const ui = await boot(data);
   try {
     await ui.app.navigate("servers");
-    assert.equal(ui.w.document.querySelector("img"), null);
+    await openCountry(ui, "servers:JP");
+    assert.equal(ui.w.document.querySelector("img:not(.vpn-flag)"), null);
+    assert.equal(
+      ui.w.document.querySelector(".vpn-flag").getAttribute("src"),
+      "/vpn/img/flags/jp.svg",
+    );
     const model = load("model.js");
     for (const value of [
       "javascript:alert(1)",
@@ -696,6 +711,52 @@ test("standalone theme follows preferences and late loads cannot undo a sign-out
     await loading;
     assert.ok(ui.w.document.querySelector('[data-action="login"]'));
     assert.equal(ui.w.document.querySelector(".vpn-navigation"), null);
+  } finally {
+    await ui.close();
+  }
+});
+
+test("country groups start collapsed, use local SVG flags and paginate independently", async () => {
+  const data = snapshot();
+  data.servers = Array.from({ length: 121 }, (_, index) => ({
+    ...servers[0],
+    id: "jp" + index,
+    name: "JP#" + index,
+  })).concat({ ...servers[0], id: "br", country: "BR", name: "BR#0" });
+  const ui = await boot(data);
+  try {
+    await ui.app.navigate("servers");
+    assert.equal(load("model.js").flag("UK"), "/vpn/img/flags/gb.svg");
+    const groups = [...ui.w.document.querySelectorAll("[data-country-group]")];
+    assert.equal(groups.length, 2);
+    assert.ok(groups.every((group) => !group.open));
+    assert.equal(ui.w.document.querySelectorAll("[data-server]").length, 0);
+    for (const image of ui.w.document.querySelectorAll(".vpn-flag"))
+      assert.ok(
+        fs.existsSync(path.join(root, image.getAttribute("src").slice(1))),
+      );
+    assert.equal(
+      ui.w.document.querySelector(
+        '[data-country-group="servers:JP"] .vpn-count',
+      ).textContent,
+      "121",
+    );
+    await openCountry(ui, "servers:JP");
+    assert.equal(ui.w.document.querySelectorAll("[data-server]").length, 50);
+    await ui.click("more");
+    assert.equal(ui.w.document.querySelectorAll("[data-server]").length, 100);
+    assert.equal(
+      ui.w.document.querySelector('[data-country-group="servers:JP"]').open,
+      true,
+    );
+    assert.equal(
+      ui.w.document.querySelector('[data-country-group="servers:BR"]').open,
+      false,
+    );
+    ui.w.document.querySelector('[data-country-group="servers:JP"]').open =
+      false;
+    await tick();
+    assert.equal(ui.w.document.querySelectorAll("[data-server]").length, 0);
   } finally {
     await ui.close();
   }

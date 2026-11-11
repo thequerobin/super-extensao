@@ -22,7 +22,7 @@ export async function mountVpn(root, engine, preferences) {
     state: { state: "disconnected" },
     query: "",
     filter: "available",
-    limits: { free: 50, servers: 50 },
+    limits: {},
     draft: { enabled: false, mode: "exclude", value: [] },
     dirty: false,
     domain: "",
@@ -38,6 +38,7 @@ export async function mountVpn(root, engine, preferences) {
     scrollTimer,
     attemptTime = 0,
     initialScroll;
+  const openCountries = new Set();
   const t = (key) => messages[key]?.[model.locale] || messages[key]?.en || key;
   const button = (label, action, extra = "", kind = "") =>
     `<button type="button" class="vpn-button ${kind}" data-action="${action}" ${model.busy ? "disabled" : ""} ${extra}>${e(label)}</button>`;
@@ -66,28 +67,43 @@ export async function mountVpn(root, engine, preferences) {
     model.dirty = false;
     model.saved = false;
   };
+  function countryFlag(code) {
+    const src = flag(code);
+    return src
+      ? `<img class="vpn-flag" src="${e(src)}" alt="" width="24" height="18" loading="lazy">`
+      : "";
+  }
+  function serverRows(servers, key) {
+    const limit = model.limits[key] || 50;
+    return (
+      servers
+        .slice(0, limit)
+        .map((server) => {
+          const label = server.name + (server.city ? " · " + server.city : "");
+          const unavailable = !server.available || !server.allowed;
+          return `<button type="button" class="vpn-server" data-action="connect" data-server="${e(server.id)}" ${model.busy || unavailable ? "disabled" : ""} aria-label="${e(t("connect") + " " + label)}"><span><strong>${e(server.name)}</strong><small>${e(server.city || country(server.country))}${server.secureCore ? " · Secure Core" : ""}</small></span><span class="vpn-server-meta">${e(!server.allowed ? t("paid") : !server.available ? t("maintenance") : Number.isFinite(server.load) ? `${Math.round(server.load)}% ${t("load")}` : t("connect"))}</span></button>`;
+        })
+        .join("") +
+      (servers.length > limit
+        ? button(t("more"), "more", `data-list="${e(key)}"`)
+        : "")
+    );
+  }
   function listMarkup(servers, list) {
-    const shown = servers.slice(0, model.limits[list]);
-    let lastCountry = "";
-    return `${
-      shown.length
-        ? '<div class="vpn-servers">' +
-          shown
-            .map((server) => {
-              const label =
-                server.name + (server.city ? " · " + server.city : "");
-              const heading =
-                lastCountry === server.country
-                  ? ""
-                  : `<h3 class="vpn-country">${e(flag(server.country))} ${e(country(server.country))}</h3>`;
-              lastCountry = server.country;
-              const unavailable = !server.available || !server.allowed;
-              return `${heading}<button type="button" class="vpn-server" data-action="connect" data-server="${e(server.id)}" ${model.busy || unavailable ? "disabled" : ""} aria-label="${e(t("connect") + " " + label)}"><span><strong>${e(server.name)}</strong><small>${e(server.city || country(server.country))}${server.secureCore ? " · Secure Core" : ""}</small></span><span class="vpn-server-meta">${e(!server.allowed ? t("paid") : !server.available ? t("maintenance") : Number.isFinite(server.load) ? `${Math.round(server.load)}% ${t("load")}` : t("connect"))}</span></button>`;
-            })
-            .join("") +
-          "</div>"
-        : `<p class="vpn-empty">${e(t("empty"))}</p>`
-    }${servers.length > shown.length ? button(t("more"), "more", `data-list="${list}"`) : ""}`;
+    const groups = new Map();
+    for (const server of servers) {
+      const code = server.country || "";
+      if (!groups.has(code)) groups.set(code, []);
+      groups.get(code).push(server);
+    }
+    if (!groups.size) return `<p class="vpn-empty">${e(t("empty"))}</p>`;
+    return `<div class="vpn-countries">${[...groups]
+      .map(([code, items]) => {
+        const key = list + ":" + code;
+        const open = openCountries.has(key);
+        return `<details class="vpn-country-group" data-country-group="${e(key)}" ${open ? "open" : ""}><summary>${countryFlag(code)}<span>${e(country(code))}</span><span class="vpn-count">${items.length}</span></summary>${open ? `<div class="vpn-country-servers">${serverRows(items, key)}</div>` : ""}</details>`;
+      })
+      .join("")}</div>`;
   }
   function connectionMarkup() {
     const server = model.state.server;
@@ -166,12 +182,22 @@ export async function mountVpn(root, engine, preferences) {
       focused && "selectionStart" in focused
         ? [focused.selectionStart, focused.selectionEnd]
         : null;
+    const focusGroup =
+      focused?.tagName === "SUMMARY"
+        ? focused.parentElement.dataset.countryGroup
+        : null;
     const freeOpen = Boolean(root.querySelector("[data-free]")?.open);
     root.lang = model.locale;
     root.innerHTML = `<div class="vpn-app"><header class="vpn-heading"><div><p class="vpn-eyebrow">VPN</p><h1>${e(t("heading"))}</h1></div><span class="vpn-provider-badge">Proton</span></header>${model.snapshot.signedIn ? `<nav class="vpn-navigation" aria-label="VPN">${pages.map((page) => `<button type="button" data-action="navigate" data-page="${page}" class="${model.page === page ? "active" : ""}" ${model.page === page ? 'aria-current="page"' : ""}>${e(t(page))}</button>`).join("")}</nav>` : ""}<p class="vpn-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<section class="vpn-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</section>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note">${e(t("provider"))}</footer></div>`;
     const freeDetails = root.querySelector("[data-free]");
     if (freeDetails) freeDetails.open = freeOpen;
     root.scrollTop = oldScroll;
+    if (focusGroup) {
+      [...root.querySelectorAll("[data-country-group]")]
+        .find((node) => node.dataset.countryGroup === focusGroup)
+        ?.querySelector("summary")
+        .focus({ preventScroll: true });
+    }
     if (focusKey) {
       const element = [...root.querySelectorAll("[data-field]")].find(
         (input) => input.dataset.field === focusKey,
@@ -302,7 +328,8 @@ export async function mountVpn(root, engine, preferences) {
       return;
     }
     if (action === "more") {
-      model.limits[button.dataset.list] += 50;
+      model.limits[button.dataset.list] =
+        (model.limits[button.dataset.list] || 50) + 50;
       render();
       return;
     }
@@ -475,6 +502,20 @@ export async function mountVpn(root, engine, preferences) {
     if (root.parentElement === document.body)
       document.documentElement.dataset.superTheme = resolved;
   });
+  const toggleCountry = (event) => {
+    const details = event.target;
+    const key = details.dataset?.countryGroup;
+    if (
+      !key ||
+      !root.contains(details) ||
+      openCountries.has(key) === details.open
+    )
+      return;
+    if (details.open) openCountries.add(key);
+    else openCountries.delete(key);
+    render();
+  };
+  root.addEventListener("toggle", toggleCountry, true);
   root.addEventListener("click", click);
   root.addEventListener("input", input);
   root.addEventListener("change", change);
@@ -504,6 +545,7 @@ export async function mountVpn(root, engine, preferences) {
     unsubscribe();
     stopLocale();
     stopTheme();
+    root.removeEventListener("toggle", toggleCountry, true);
     root.removeEventListener("click", click);
     root.removeEventListener("input", input);
     root.removeEventListener("change", change);

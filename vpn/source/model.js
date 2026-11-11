@@ -18,8 +18,8 @@ export function countryName(code, locale) {
   }
 }
 export function flag(code) {
-  return /^[A-Z]{2}$/.test(code || "")
-    ? String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt(0)))
+  return /^[a-z]{2}$/i.test(code || "")
+    ? `/vpn/img/flags/${code.toUpperCase() === "UK" ? "gb" : code.toLowerCase()}.svg`
     : "";
 }
 export function filterServers(

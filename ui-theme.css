@@ -33,3 +33,7 @@
   --danger: #a52c36;
   --shadow: 0 6px 24px #17355d0a;
 }
+
+/* Keep scrolling available without visible scrollbar tracks or thumbs. */
+* { scrollbar-width:none!important; }
+*::-webkit-scrollbar {display:none!important;width:0!important;height:0!important;}
