@@ -65,6 +65,9 @@ function nextOperation(journal, current) {
         desiredParent = inverse[target.nodes[item.id].parent];
       if (!desiredParent) fail("SyncInvalidIds");
       const node = localId && find(current, localId);
+      if (current.id === "0" && desiredParent === "0" &&
+          (!node || node.kind !== "folder" || parent(current, localId)?.id !== "0" || node.title !== item.title))
+        fail("SyncRootLayoutChanged");
       if (!node)
         return {
           type: "create",
@@ -102,14 +105,17 @@ function nextOperation(journal, current) {
         const op = extras(item);
         if (op) return op;
       }
-      if (!target.nodes[journal.mapping[item.id]])
+      if (!target.nodes[journal.mapping[item.id]]) {
+        if (current.id === "0" && folder.id === "0") fail("SyncRootLayoutChanged");
         return { type: "remove", id: item.id };
+      }
     }
   }
   const removal = extras(current);
   if (removal) return removal;
   for (const [folder, ids] of Object.entries(target.order)) {
     const actual = find(current, inverse[folder]);
+    if (current.id === "0" && folder === ROOT) continue;
     for (let position = 0; position < ids.length; position++) {
       const localId = inverse[ids[position]];
       if (actual.children[position]?.id !== localId)

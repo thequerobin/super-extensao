@@ -20,10 +20,10 @@ export const uiMessages = {
       "A pasta contém favoritos gerenciados por política. Escolha uma pasta modificável para este perfil.",
     en: "The folder contains policy-managed bookmarks. Choose an editable folder for this profile.",
   },
-  SyncProtectedRoot: {
+  SyncRootLayoutChanged: {
     "pt-BR":
-      "Escolha uma pasta de favoritos em vez da raiz geral do navegador.",
-    en: "Choose a bookmarks folder instead of the browser’s top-level root.",
+      "A estrutura das pastas fixas do navegador foi alterada no arquivo remoto. Restaure essas pastas antes de sincronizar.",
+    en: "The remote file changed the browser’s permanent folder structure. Restore those folders before syncing.",
   },
   SyncProfilesLocked: {
     "pt-BR":

@@ -149,7 +149,11 @@ function fromBrowserTree(root) {
       : {
           kind: "folder",
           id: node.id,
-          title: node.title,
+          title: root.id === "0" && depth === 1
+            ? ({ "bookmarks-bar": "Bookmarks Bar", other: "Other Bookmarks", mobile: "Mobile Bookmarks" }[node.folderType]
+              || { "1": "Bookmarks Bar", "2": "Other Bookmarks", "3": "Mobile Bookmarks" }[node.id]
+              || node.title)
+            : node.title,
           children: (node.children || []).map((child) =>
             convert(child, depth + 1)
           ),

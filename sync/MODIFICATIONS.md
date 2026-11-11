@@ -1,4 +1,4 @@
-# Estado atual — Super Extensão 1.6.0
+# Estado atual — Super Extensão 1.6.1
 
 A interface ativa continua em `sync/source`. Perfis Google Drive de favoritos passam a executar o núcleo próprio em `sync/engine`; os demais provedores e perfis de abas mantêm o motor legado. O painel de comparação foi removido. Cadastro, OAuth interativo, formato dos perfis e agendamento permanecem na camada de compatibilidade.
 
@@ -31,3 +31,7 @@ Versão 1.4.1: largura e bordas compartilhadas entre cabeçalho, conexão, cart�
 Versão 1.4.3: incorporação do aplicativo na seção Sincronização. sync/embedded.js identifica o contexto incorporado e mantém as rotas internas no mesmo quadro; o tema adapta cabeçalho, navegação, formulários e espaçamento para a largura do popup. A página independente continua disponível e as chaves de armazenamento existentes foram mantidas.
 
 Na versão 1.5.6, o aplicativo monta suas rotas no elemento da seção Sincronização do popup. A compilação gera `options.css` ao lado do JavaScript. Depois de copiar os arquivos para `sync/js`, execute `npm run build:panels` na raiz para atualizar os estilos da interface integrada.
+
+## 1.6.1 — Sincronização da raiz
+
+Removida a restrição que impedia perfis do Google Drive com a raiz geral do navegador. O motor preserva as pastas permanentes e sincroniza seu conteúdo, reutilizando os mapeamentos e o cache do motor anterior. Os títulos das pastas especiais são normalizados para compatibilidade entre idiomas, sem renomeá-las no navegador. Testes cobrem migração, idempotência, download, organização do remoto e proteção das pastas nativas.

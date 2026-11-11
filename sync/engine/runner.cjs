@@ -18,6 +18,7 @@ const {
   guard,
 } = require("./model.cjs");
 const local = require("./local.cjs");
+const { normalizeRootTitles, protectRoot } = require("./root.cjs");
 const { decode, encode, fingerprint } = require("./crypto.cjs");
 function prepareRemote(input, previous) {
   const tree = copy(input),
@@ -174,6 +175,11 @@ async function synchronizeCore({
           mapping: hints,
           highestId: remote.highestId,
         };
+    const originalRemote = copy(remote);
+    if (String(profile.localRoot) === "0") {
+      normalizeRootTitles(remote, before, previous.mapping || hints);
+      normalizeRootTitles(previous.tree, before, previous.mapping || hints);
+    }
     const identified = identify(before, remote, previous, hints);
     const target = merge(
       previous.tree,
@@ -181,12 +187,13 @@ async function synchronizeCore({
       remote,
       profile.strategy || "default"
     );
+    if (String(profile.localRoot) === "0") protectRoot(target, identified.local);
     if (Object.keys(index(target).nodes).length > LIMITS.nodes)
       fail("SyncTreeTooLarge");
     guard(identified.local, target, profile.failsafe !== false);
     guard(remote, target, profile.failsafe !== false);
     const localChanges = changes(identified.local, target),
-      remoteChanges = changes(remote, target);
+      remoteChanges = changes(originalRemote, target);
     if (dryRun)
       return {
         local: localChanges.total,
@@ -350,7 +357,6 @@ async function synchronize(input) {
     input.profile.localRoot === "tabs"
   )
     fail("SyncUnsupportedProvider");
-  if (String(input.profile.localRoot) === "0") fail("SyncProtectedRoot");
   const client =
     input.client ||
     new GoogleDriveClient({

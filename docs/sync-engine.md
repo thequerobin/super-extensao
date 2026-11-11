@@ -1,4 +1,4 @@
-# Motor próprio Google Drive — 1.6.0
+# Motor próprio Google Drive — 1.6.1
 
 Os perfis **Google Drive com pasta de favoritos** passam a executar o núcleo de `sync/engine` ao usar **Sincronizar**, as ações direcionais ou o agendamento já configurado. O painel de comparação introduzido em 1.5.19 foi removido. As funções de comparação sem escrita permanecem apenas como diagnóstico interno/testes.
 
@@ -83,6 +83,6 @@ npm test
 
 A suíte cobre envio/recebimento, edições concorrentes, movimentação, ordem, exclusões, identidade na migração, arquivos novos, criptografia compatível, dois dispositivos simulados e falhas antes/depois dos checkpoints de armazenamento. O transporte de produção é exercitado contra respostas HTTP simuladas, incluindo precondição rejeitada e limpeza do bloqueio após cancelamento.
 
-Ainda faltam testes com uma conta Google real, interrupção real do worker, volume elevado, restauração por interface e migração dos demais conectores/perfis de abas. Raiz geral do navegador e favoritos gerenciados por política são recusados; selecione uma pasta modificável. Os limites de 20 MB, 100 mil nós e profundidade limitada permanecem. A aplicação local privilegia checkpoints por operação; o desempenho de importações grandes precisa ser medido.
+Ainda faltam testes com uma conta Google real, interrupção real do worker, volume elevado, restauração por interface e migração dos demais conectores/perfis de abas. A raiz geral do navegador é suportada: as pastas permanentes são identificadas pelos papéis nativos e mantidas na posição original, com títulos canônicos compatíveis com o motor anterior. Apenas seu conteúdo é modificado. Itens comuns soltos na raiz do arquivo remoto são acomodados em Outros favoritos; a mudança é persistida no XBEL. Pastas permanentes ausentes no remoto são mantidas localmente, e tentativas de aninhá-las são recusadas antes de escrever conteúdo. Favoritos gerenciados por política continuam recusados; para esses casos selecione uma pasta modificável. Os limites de 20 MB, 100 mil nós e profundidade limitada permanecem. A aplicação local privilegia checkpoints por operação; o desempenho de importações grandes precisa ser medido.
 
 [Validação pendente](validacao.md) · [Roteiro](../PROXIMOS-PASSOS.md)

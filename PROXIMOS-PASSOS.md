@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **11 de novembro de 2026**, referência **1.6.0**. Itens implementados foram testados com APIs simuladas; a validação em conta real permanece separada em [docs/validacao.md](docs/validacao.md).
+Revisado em **11 de novembro de 2026**, referência **1.6.1**. Itens implementados foram testados com APIs simuladas; a validação em conta real permanece separada em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 

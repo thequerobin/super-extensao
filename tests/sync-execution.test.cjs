@@ -338,10 +338,7 @@ test('reauthorizing a profile starts a conservative merge instead of applying ma
   assert.equal(f.d.tree.children.length, 2);
   assert.deepEqual(new Set(f.d.tree.children.map(item => item.title)), new Set(['one', 'other-account']));
 });
-test('protected browser root and managed bookmarks are rejected before content writes', async () => {
-  const f = setup(folder('0', 'All bookmarks', []), root([]));
-  await assert.rejects(f.run, /SyncProtectedRoot/);
-  assert.equal(f.remote.calls.length, 0);
+test('managed bookmarks are rejected before content writes', async () => {
   const managed = setup(root([{ ...bookmark('m', 'managed'), unmodifiable: 'managed' }]), root([]));
   await assert.rejects(managed.run, /SyncManagedBookmarks/);
   assert.equal(managed.remote.calls.length, 0);
@@ -354,4 +351,96 @@ test('an explicit resume clears the paused marker before continuing its journal'
   const save = f.args.storage.save; let cleared = false;
   f.args.storage.save = async (id, state) => { if (state.journal && !state.journal.paused) cleared = true; await save(id, state); };
   await f.run(); assert.equal(cleared, true); assert.equal(f.data.profile.journal, null);
+});
+
+function browserRoot() {
+  return folder('0', '', [
+    { ...folder('1', 'Barra de favoritos', [bookmark('a', 'local')]), folderType: 'bookmarks-bar' },
+    { ...folder('2', 'Outros favoritos'), folderType: 'other' },
+  ]);
+}
+function protectNativeRoot(f) {
+  for (const method of ['create', 'update', 'move', 'remove']) {
+    const original = f.d.api[method];
+    f.d.api[method] = async (id, data) => {
+      if (method === 'create') assert.notEqual(id.parentId, '0', 'cannot create under browser root');
+      else {
+        assert.ok(!['0', '1', '2'].includes(id), 'cannot mutate permanent folders');
+        if (method === 'move') assert.notEqual(data.parentId, '0');
+      }
+      return original(id, data);
+    };
+  }
+}
+test('browser root uploads contents without changing permanent native folders and is idempotent', async () => {
+  const f = setup(browserRoot(), null); protectNativeRoot(f);
+  await f.run(); await f.run();
+  const remote = parseXbel(f.remote.file.content);
+  assert.deepEqual(remote.children.map(n => n.title), ['Bookmarks Bar', 'Other Bookmarks']);
+  assert.equal(remote.children[0].children[0].title, 'local');
+  assert.equal(f.remote.calls.length, 1); assert.equal(f.d.calls.length, 0);
+  assert.equal(f.d.tree.children[0].title, 'Barra de favoritos');
+});
+test('legacy root profile migrates mappings and cache without duplicating system folders', async () => {
+  const before = browserRoot();
+  const remote = root([folder('10', 'Bookmarks Bar', [bookmark('11', 'local')]), folder('12', 'Other Bookmarks', [bookmark('13', 'remote')])]);
+  const f = setup(before, remote); protectNativeRoot(f);
+  await f.run({ legacy: { cache: { ...before, children: [{ ...before.children[0], title: 'Bookmarks Bar' }, { ...before.children[1], title: 'Other Bookmarks' }] }, mapping: { '1': '10', '2': '12', a: '11' } } });
+  assert.equal(f.d.tree.children[1].children[0].title, 'remote');
+  assert.equal(parseXbel(f.remote.file.content).children.length, 2);
+  assert.equal(f.remote.calls.length, 0);
+});
+test('remote root reorders and renames do not mutate browser folders; contents still synchronize', async () => {
+  const f = setup(browserRoot(), null); protectNativeRoot(f); await f.run();
+  f.remote.edit(tree => { tree.children.reverse(); tree.children[1].title = 'Renamed'; tree.children[0].children.push(bookmark('90', 'added')); });
+  await f.run();
+  assert.equal(f.d.tree.children[1].children[0].title, 'added');
+  assert.deepEqual(parseXbel(f.remote.file.content).children.map(n => n.title), ['Bookmarks Bar', 'Other Bookmarks']);
+  assert.equal(f.d.tree.children[0].title, 'Barra de favoritos');
+});
+test('remote ordinary top-level items are placed inside Other Bookmarks', async () => {
+  const f = setup(browserRoot(), root([folder('20', 'Imported', [bookmark('21', 'remote')])])); protectNativeRoot(f);
+  await f.run(); await f.run();
+  assert.equal(f.d.tree.children[1].children[0].title, 'Imported');
+  assert.equal(f.d.tree.children[1].children[0].children[0].title, 'remote');
+  assert.equal(f.remote.calls.length, 1);
+});
+test('download preserves native root folders even if absent remotely', async () => {
+  const f = setup(browserRoot(), root([folder('20', 'Other Bookmarks', [bookmark('21', 'remote')])])); protectNativeRoot(f);
+  await f.run({ profile: { ...f.args.profile, strategy: 'slave', failsafe: false } });
+  assert.equal(f.d.tree.children.length, 2);
+  assert.equal(f.d.tree.children[0].children.length, 0);
+  assert.equal(f.d.tree.children[1].children[0].title, 'remote');
+});
+test('moving a permanent root folder remotely stops before any content writes', async () => {
+  const f = setup(browserRoot(), null); protectNativeRoot(f); await f.run();
+  f.remote.edit(tree => tree.children[1].children.push(tree.children.splice(0, 1)[0]));
+  const writes = f.remote.calls.length;
+  await assert.rejects(f.run, /SyncRootLayoutChanged/);
+  assert.equal(f.remote.calls.length, writes); assert.equal(f.d.calls.length, 0);
+});
+test('root contents recover after an interrupted create without duplicating native folders or bookmarks', async () => {
+  let interrupted = false;
+  const f = setup(browserRoot(), root([folder('20', 'Other Bookmarks', [bookmark('21', 'remote')])]), {
+    onSave(state) {
+      if (!interrupted && state.journal?.pending?.result) { interrupted = true; throw Error('worker stopped'); }
+    },
+  });
+  protectNativeRoot(f);
+  await assert.rejects(f.run, /SyncLocalWriteFailed/); await f.run();
+  assert.equal(f.d.tree.children.length, 2);
+  assert.equal(f.d.tree.children[1].children.length, 1);
+  assert.equal(f.remote.calls.length, 1);
+  assert.equal(f.data.profile.journal, null);
+});
+test('older Chromium root caches with localized titles retain existing remote identities', async () => {
+  const before = browserRoot(); before.children.forEach(item => delete item.folderType);
+  const f = setup(before, root([folder('10', 'Barra de favoritos', [bookmark('11', 'local')]), folder('12', 'Outros favoritos')]));
+  protectNativeRoot(f);
+  await f.run({ legacy: { cache: before, mapping: { '1': '10', '2': '12', a: '11' } } });
+  await f.run();
+  assert.equal(f.d.calls.length, 0);
+  const remote = parseXbel(f.remote.file.content);
+  assert.deepEqual(remote.children.map(item => [item.id, item.title]), [['10', 'Bookmarks Bar'], ['12', 'Other Bookmarks']]);
+  assert.equal(f.remote.calls.length, 1);
 });

@@ -1,10 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.0**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 11 de novembro de 2026, referência **1.6.1**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
 ## Evidência disponível
 
-A última execução registrada durante a implementação da versão 1.6.0 passou **106 testes** da suíte `npm test`. Essa execução inclui o novo worker e a interface sem o painel de comparação. Nenhuma conta real foi acessada durante o teste.
+A última execução registrada durante a implementação da versão 1.6.1 passou **114 testes** da suíte `npm test`. Essa execução inclui o novo worker, a interface sem o painel de comparação e a sincronização da raiz com pastas permanentes protegidas, migração do cache anterior e retomada após interrupção. Nenhuma conta real foi acessada durante o teste.
 
 | Área | Cobertura automatizada | Limite da evidência |
 | --- | --- | --- |
