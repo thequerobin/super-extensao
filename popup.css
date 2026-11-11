@@ -24,7 +24,7 @@ button:where(:not(#syncPanel *,#vpnPanel *)):hover { filter:brightness(1.12); }
 button:where(:not(#syncPanel *,#vpnPanel *)):disabled { opacity:.5; cursor:default; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .quiet,.secondary { background:var(--surface); color:var(--text); } .quiet { font-size:11px; padding:6px 9px; }
-.popup-navigation { flex-shrink:0; isolation:isolate; }
+.popup-navigation { flex-shrink:0; isolation:isolate; padding:0 20px; }
 .popup-navigation nav { display:flex; gap:3px; }
 .main-nav, .sub-nav { border:1px solid var(--line); border-radius:10px; }
 .main-nav { position:relative; z-index:1; padding:4px; background:var(--surface); }
