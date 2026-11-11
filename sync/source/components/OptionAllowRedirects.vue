@@ -1,0 +1,30 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<template>
+  <div>
+    <div class="text-h6" role="heading" aria-level="3">
+      {{ t("LabelAllowredirects") }}
+    </div>
+    <div class="caption">
+      {{ t("DescriptionAllowredirects") }}
+    </div>
+    <v-checkbox
+      :input-value="value"
+      :true-value="true"
+      :false-value="false"
+      :label="t('LabelAllowredirects')"
+      @change="$emit('input', $event)"
+    />
+  </div>
+</template>
+
+<script>
+export default {
+  name: "OptionAllowRedirects",
+  props: {
+    value: {
+      type: Boolean,
+      default: false,
+    },
+  },
+};
+</script>
