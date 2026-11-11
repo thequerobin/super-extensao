@@ -1,3 +1,4 @@
+import { UiCheck, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -8,14 +9,14 @@ const QuoteSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="QuoteSettings">
     <h5>{t("Daily Quotes")}</h5>
     {categories.map((category) => (
-      <label key={category.key}>
-        <input
+      <UiCheck key={category.key}>
+        <UiInput
           type="radio"
           checked={data.category === category.key}
           onChange={() => setData({ category: category.key })}
         />{" "}
         {category.name}
-      </label>
+      </UiCheck>
     ))}
     <p>
       {t("Powered by")}{" "}
@@ -28,13 +29,13 @@ const QuoteSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
       </a>
     </p>
     <h5>{t("Hourly Quotes")}</h5>
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="radio"
         checked={data.category === "developerexcuses"}
         onChange={() => setData({ category: "developerexcuses" })}
       />{" "}
-      {t("Developer Excuses")}</label>
+      {t("Developer Excuses")}</UiCheck>
     <p>
       {t("Powered by")}{" "}
       <a

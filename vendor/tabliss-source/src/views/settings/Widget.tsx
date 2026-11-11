@@ -1,3 +1,4 @@
+import { UiCard, UiField, UiInput, UiSelect } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { setWidgetDisplay } from "../../db/action";
@@ -30,7 +31,7 @@ const Widget: React.FC<Props> = ({
   const setDisplay = setWidgetDisplay.bind(null, plugin.id);
 
   return (
-    <fieldset className="Widget">
+    <UiCard as="fieldset" className="Widget">
       <div className="title--buttons">
         <IconButton onClick={onRemove} title={t("Remove widget")}>
           <RemoveIcon />
@@ -73,18 +74,18 @@ const Widget: React.FC<Props> = ({
 
           <ToggleSection name={t("Font Settings")}>
             <>
-              <label>
-                {t("Font")}<input
+              <UiField>
+                {t("Font")}<UiInput
                   type="text"
                   value={plugin.display.fontFamily}
                   onChange={(event) =>
                     setDisplay({ fontFamily: event.target.value })
                   }
                 />
-              </label>
+              </UiField>
 
-              <label>
-                {t("Weight")}<select
+              <UiField>
+                {t("Weight")}<UiSelect
                   value={plugin.display.fontWeight}
                   onChange={(event) =>
                     setDisplay({
@@ -101,23 +102,23 @@ const Widget: React.FC<Props> = ({
                   <option value="500">{t("Medium")}</option>
                   <option value="700">{t("Bold")}</option>
                   <option value="900">{t("Black")}</option>
-                </select>
-              </label>
+                </UiSelect>
+              </UiField>
 
-              <label>
-                {t("Colour")}<input
+              <UiField>
+                {t("Colour")}<UiInput
                   type="color"
                   value={plugin.display.colour ?? "#ffffff"}
                   onChange={(event) =>
                     setDisplay({ colour: event.target.value })
                   }
                 />
-              </label>
+              </UiField>
             </>
           </ToggleSection>
         </div>
       )}
-    </fieldset>
+    </UiCard>
   );
 };
 

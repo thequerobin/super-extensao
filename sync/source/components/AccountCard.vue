@@ -1,158 +1,158 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <article
-    class="sync-profile ui-card"
-    :data-state="status"
-    :aria-busy="Boolean(account.data.syncing)"
+<UiCard as="article"
+  class="sync-profile ui-card"
+  :data-state="status"
+  :aria-busy="Boolean(account.data.syncing)"
+>
+  <div class="sync-profile-top">
+    <span class="sync-provider">{{ account.data.type }}</span
+    ><span class="sync-status" role="status"
+      ><SyncIcon
+        small
+        :class="{ spinning: account.data.syncing }"
+        aria-hidden="true"
+        >{{ statusIcon }}</SyncIcon
+      >{{ statusLabel }}</span
+    >
+  </div>
+  <h3>{{ account.data.label || folderName }}</h3>
+  <p class="sync-folder">
+    <SyncIcon small aria-hidden="true">{{
+      localRoot === "tabs" ? "mdi-tab" : "mdi-folder-outline"
+    }}</SyncIcon
+    >{{ rootPath || folderName }}
+  </p>
+  <p class="sync-destination">{{ uri }}</p>
+  <SyncProgress
+    v-if="account.data.syncing"
+    :value="Number(account.data.syncing) * 100"
+    :indeterminate="typeof account.data.syncing !== 'number'"
+  />
+  <p
+    class="sync-profile-detail"
+    :class="{ 'sync-error ui-notice ui-notice-error': account.data.error }"
   >
-    <div class="sync-profile-top">
-      <span class="sync-provider">{{ account.data.type }}</span
-      ><span class="sync-status" role="status"
-        ><v-icon
-          small
-          :class="{ spinning: account.data.syncing }"
-          aria-hidden="true"
-          >{{ statusIcon }}</v-icon
-        >{{ statusLabel }}</span
-      >
-    </div>
-    <h3>{{ account.data.label || folderName }}</h3>
-    <p class="sync-folder">
-      <v-icon small aria-hidden="true">{{
-        localRoot === "tabs" ? "mdi-tab" : "mdi-folder-outline"
-      }}</v-icon
-      >{{ rootPath || folderName }}
-    </p>
-    <p class="sync-destination">{{ uri }}</p>
-    <v-progress-linear
+    {{ statusDetail }}
+  </p>
+  <UiNotice v-if="legacyWarning" class="ui-notice sync-notice">
+    {{ legacyWarning }}
+  </UiNotice>
+  <UiNotice v-if="!account.data.failsafe" class="ui-notice sync-notice">
+    {{ t("StatusFailsafeoff") }}
+  </UiNotice>
+  <UiNotice
+    v-if="actionError"
+    class="sync-error ui-notice-error ui-notice"
+    role="alert"
+  >
+    {{ actionError }}
+  </UiNotice>
+  <UiActions class="sync-profile-actions">
+    <router-link
+      class="sync-button ui-button"
+      :to="{
+        name: routes.ACCOUNT_OPTIONS,
+        params: { accountId: account.id },
+      }"
+      ><SyncIcon small aria-hidden="true">mdi-cog-outline</SyncIcon
+      >{{ t("LabelOptions") }}</router-link
+    >
+    <UiButton
       v-if="account.data.syncing"
-      :value="Number(account.data.syncing) * 100"
-      :indeterminate="typeof account.data.syncing !== 'number'"
-    />
-    <p
-      class="sync-profile-detail"
-      :class="{ 'sync-error ui-notice ui-notice-error': account.data.error }"
+      class="sync-button ui-button"
+      :disabled="busy"
+      @click="onCancelSync"
+     type="submit">
+      {{ t("LabelCancelsync") }}
+    </UiButton>
+    <router-link
+      v-else-if="needsAuthorization"
+      class="sync-button sync-primary ui-button ui-button-primary"
+      :to="{
+        name: routes.ACCOUNT_OPTIONS,
+        params: { accountId: account.id },
+      }"
+      >{{ t("LabelAuthorize") }}</router-link
     >
-      {{ statusDetail }}
-    </p>
-    <p v-if="legacyWarning" class="ui-notice sync-notice">
-      {{ legacyWarning }}
-    </p>
-    <p v-if="!account.data.failsafe" class="ui-notice sync-notice">
-      {{ t("StatusFailsafeoff") }}
-    </p>
-    <p
-      v-if="actionError"
-      class="sync-error ui-notice-error ui-notice"
-      role="alert"
-    >
-      {{ actionError }}
-    </p>
-    <div class="sync-profile-actions">
-      <router-link
+    <UiButton
+      v-else
+      class="sync-button sync-primary ui-button ui-button-primary"
+      :disabled="busy || Boolean(account.data.scheduled)"
+      @click="onTriggerSync"
+     type="submit">
+      <SyncIcon small aria-hidden="true">mdi-sync</SyncIcon
+      >{{ t("LabelSyncnow") }}
+    </UiButton>
+  </UiActions>
+  <details class="sync-advanced">
+    <summary>{{ t("UiAdvanced") }}</summary>
+    <div>
+      <UiButton
         class="sync-button ui-button"
-        :to="{
-          name: routes.ACCOUNT_OPTIONS,
-          params: { accountId: account.id },
-        }"
-        ><v-icon small aria-hidden="true">mdi-cog-outline</v-icon
-        >{{ t("LabelOptions") }}</router-link
-      >
-      <button
-        v-if="account.data.syncing"
+        :disabled="
+          busy || Boolean(account.data.syncing || account.data.scheduled)
+        "
+        @click="confirmDirection = 'down'"
+       type="submit">
+        {{ t("LabelSyncDownOnce") }}
+      </UiButton>
+      <UiButton
+        class="sync-button ui-button"
+        :disabled="
+          busy || Boolean(account.data.syncing || account.data.scheduled)
+        "
+        @click="confirmDirection = 'up'"
+       type="submit">
+        {{ t("LabelSyncUpOnce") }}
+      </UiButton>
+      <UiButton
+        v-if="status === 'scheduled'"
         class="sync-button ui-button"
         :disabled="busy"
-        @click="onCancelSync"
-      >
-        {{ t("LabelCancelsync") }}
-      </button>
-      <router-link
-        v-else-if="needsAuthorization"
-        class="sync-button sync-primary ui-button ui-button-primary"
-        :to="{
-          name: routes.ACCOUNT_OPTIONS,
-          params: { accountId: account.id },
-        }"
-        >{{ t("LabelAuthorize") }}</router-link
-      >
-      <button
-        v-else
-        class="sync-button sync-primary ui-button ui-button-primary"
-        :disabled="busy || Boolean(account.data.scheduled)"
-        @click="onTriggerSync"
-      >
-        <v-icon small aria-hidden="true">mdi-sync</v-icon
-        >{{ t("LabelSyncnow") }}
-      </button>
+        @click="onForceSync"
+       type="submit">
+        {{ t("LabelScheduledforcesync") }}
+      </UiButton>
+      <UiButton
+        class="sync-button ui-button"
+        :disabled="busy"
+        @click="onGetLogs"
+       type="submit">
+        {{ t("LabelDebuglogs") }}
+      </UiButton>
     </div>
-    <details class="sync-advanced">
-      <summary>{{ t("UiAdvanced") }}</summary>
-      <div>
-        <button
-          class="sync-button ui-button"
-          :disabled="
-            busy || Boolean(account.data.syncing || account.data.scheduled)
-          "
-          @click="confirmDirection = 'down'"
-        >
-          {{ t("LabelSyncDownOnce") }}
-        </button>
-        <button
-          class="sync-button ui-button"
-          :disabled="
-            busy || Boolean(account.data.syncing || account.data.scheduled)
-          "
-          @click="confirmDirection = 'up'"
-        >
-          {{ t("LabelSyncUpOnce") }}
-        </button>
-        <button
-          v-if="status === 'scheduled'"
-          class="sync-button ui-button"
-          :disabled="busy"
-          @click="onForceSync"
-        >
-          {{ t("LabelScheduledforcesync") }}
-        </button>
-        <button
-          class="sync-button ui-button"
-          :disabled="busy"
-          @click="onGetLogs"
-        >
-          {{ t("LabelDebuglogs") }}
-        </button>
-      </div>
-    </details>
-    <v-dialog
-      :value="Boolean(confirmDirection)"
-      max-width="460"
-      @input="!$event && (confirmDirection = '')"
-      ><v-card class="sync-confirm"
-        ><v-card-title>{{
-          t(confirmDirection === "up" ? "LabelSyncUpOnce" : "LabelSyncDownOnce")
-        }}</v-card-title
-        ><v-card-text
-          ><p>{{ t("UiDirectionWarning") }}</p>
-          <p>
-            {{
-              t(
-                confirmDirection === "up"
-                  ? "DescriptionSyncUp"
-                  : "DescriptionSyncDown"
-              )
-            }}
-          </p></v-card-text
-        ><v-card-actions
-          ><v-btn text @click="confirmDirection = ''">{{
-            t("LabelCancel")
-          }}</v-btn
-          ><v-btn class="primary" @click="runDirection">{{
-            t("LabelContinue")
-          }}</v-btn></v-card-actions
-        ></v-card
-      ></v-dialog
-    >
-  </article>
+  </details>
+  <SyncDialog
+    :value="Boolean(confirmDirection)"
+    max-width="460"
+    @input="!$event && (confirmDirection = '')"
+    ><SyncCard class="sync-confirm"
+      ><SyncCardTitle>{{
+        t(confirmDirection === "up" ? "LabelSyncUpOnce" : "LabelSyncDownOnce")
+      }}</SyncCardTitle
+      ><SyncCardBody
+        ><p>{{ t("UiDirectionWarning") }}</p>
+        <p>
+          {{
+            t(
+              confirmDirection === "up"
+                ? "DescriptionSyncUp"
+                : "DescriptionSyncDown"
+            )
+          }}
+        </p></SyncCardBody
+      ><SyncCardActions
+        ><SyncButton text @click="confirmDirection = ''">{{
+          t("LabelCancel")
+        }}</SyncButton
+        ><SyncButton class="primary" @click="runDirection">{{
+          t("LabelContinue")
+        }}</SyncButton></SyncCardActions
+      ></SyncCard
+    ></SyncDialog
+  >
+</UiCard>
 </template>
 <script>
 import PathHelper from "@sync-engine/PathHelper";

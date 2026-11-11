@@ -1,8 +1,8 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <v-container>
+  <SyncContainer>
     <div>
-      <v-text-field
+      <SyncTextField
         outlined
         dense
         append-icon="mdi-label"
@@ -14,13 +14,13 @@
         @input="$emit('update:label', $event)"
       />
     </div>
-    <v-card class="mb-4">
-      <v-card-text id="server" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-account-box </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardBody id="server" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-account-box </SyncIcon>
         {{ t("LabelOptionsServerDetails") }}
-      </v-card-text>
-      <v-card-text>
-        <v-text-field
+      </SyncCardBody>
+      <SyncCardBody>
+        <SyncTextField
           outlined
           dense
           :value="url"
@@ -30,7 +30,7 @@
           :persistent-hint="true"
           @input="$emit('update:url', $event)"
         />
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           :value="region"
@@ -40,7 +40,7 @@
           :persistent-hint="true"
           @input="$emit('update:region', $event)"
         />
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           :value="bucket"
@@ -49,7 +49,7 @@
           :label="t('LabelS3bucket')"
           @input="$emit('update:bucket', $event)"
         />
-        <v-switch
+        <SyncSwitch
           :input-value="pathStyle"
           :label="t('LabelS3pathstyle')"
           :hint="t('DescriptionS3pathstyle')"
@@ -58,14 +58,14 @@
           class="mt-0 pt-0 mb-4"
           @change="$emit('update:pathStyle', $event)"
         />
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           :value="username"
           :label="t('LabelS3accesskey')"
           @input="$emit('update:username', $event)"
         />
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           :label="t('LabelS3secretkey')"
@@ -73,7 +73,7 @@
           @input="$emit('update:password', $event)"
         >
           <template #append>
-            <v-icon
+            <SyncIcon
               role="button"
               tabindex="0"
               :aria-label="
@@ -84,10 +84,10 @@
               @keydown.space.prevent="showPassword = !showPassword"
             >
               {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-            </v-icon>
+            </SyncIcon>
           </template>
-        </v-text-field>
-        <v-text-field
+        </SyncTextField>
+        <SyncTextField
           outlined
           dense
           append-icon="mdi-file-document"
@@ -106,42 +106,42 @@
           :value="bookmark_file_type"
           @input="$emit('update:bookmark_file_type', $event)"
         />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card v-if="isBrowser" class="mb-4">
-      <v-card-title id="folder" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-folder-outline </v-icon>
+    <SyncCard v-if="isBrowser" class="mb-4">
+      <SyncCardTitle id="folder" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-folder-outline </SyncIcon>
         {{ t("LabelOptionsFolderMapping") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionSyncFolder
           :value="localRoot"
           @input="$emit('update:localRoot', $event)"
         />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card v-if="!isBrowser" class="mb-4">
-      <v-card-title id="mobile" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-cellphone-settings </v-icon>
+    <SyncCard v-if="!isBrowser" class="mb-4">
+      <SyncCardTitle id="mobile" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-cellphone-settings </SyncIcon>
         {{ t("LabelMobilesettings") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionAllowNetwork
           :value="allowNetwork"
           @input="$emit('update:allowNetwork', $event)"
         />
         <OptionExportBookmarks />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card class="mb-4">
-      <v-card-title id="sync" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-sync-circle </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardTitle id="sync" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-sync-circle </SyncIcon>
         {{ t("LabelOptionsSyncBehavior") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionAutoSync
           :value="enabled"
           @input="$emit('update:enabled', $event)"
@@ -178,15 +178,15 @@
           :value="nestedSync"
           @input="$emit('update:nestedSync', $event)"
         />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card class="mb-4">
-      <v-card-title id="danger" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-alert-circle </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardTitle id="danger" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-alert-circle </SyncIcon>
         {{ t("LabelOptionsDangerous") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionDownloadLogs />
         <OptionResetCache @click="$emit('reset')" />
         <OptionFailsafe
@@ -194,9 +194,9 @@
           @input="$emit('update:failsafe', $event)"
         />
         <OptionDeleteAccount @click="$emit('delete')" />
-      </v-card-text>
-    </v-card>
-  </v-container>
+      </SyncCardBody>
+    </SyncCard>
+  </SyncContainer>
 </template>
 
 <script>

@@ -1,3 +1,4 @@
+import { UiField, UiInput, UiSelect } from "../../../ui";
 import { t, iconLabel } from "../../../locales/ui";
 import icons from "feather-icons/dist/icons.json";
 import React, { FC } from "react";
@@ -42,27 +43,27 @@ const Input: FC<Props> = (props) => (
       {props.number <= 9 ? `${t("Keyboard shortcut")} ${props.number}` : t("Shortcut")}
     </h5>
 
-    <label>
+    <UiField>
       URL
-      <input
+      <UiInput
         type="url"
         value={props.url}
         onChange={(event) => props.onChange({ url: event.target.value })}
       />
-    </label>
+    </UiField>
 
-    <label>
+    <UiField>
       {t("Name ")}<span className="text--grey">{t("(optional)")}</span>
-      <input
+      <UiInput
         type="text"
         value={props.name}
         onChange={(event) => props.onChange({ name: event.target.value })}
       />
-    </label>
+    </UiField>
 
-    <label>
+    <UiField>
       {t("Icon ")}<span className="text--grey">{t("(optional)")}</span>
-      <select
+      <UiSelect
         value={props.icon}
         onChange={(event) => props.onChange({ icon: event.target.value })}
       >
@@ -73,8 +74,8 @@ const Input: FC<Props> = (props) => (
             <option key={key} value={key}>{iconLabel(key)}</option>
           ))}
         </optgroup>
-      </select>
-    </label>
+      </UiSelect>
+    </UiField>
 
     <hr />
   </div>

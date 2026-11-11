@@ -1,5 +1,11 @@
 # Tabliss 2.6.0 na Super Extensão
 
+## Componentização — Super Extensão 1.6.8
+
+O editor, as configurações dos fundos/widgets e seus controles auxiliares usam `vendor/tabliss-source/src/ui/index.tsx`, adaptador React do catálogo em `ui/catalog.json`. O painel de chaves Unsplash/GIPHY usa os componentes compartilhados de campo, descrição, ações e aviso. Valores controlados, eventos, cache e armazenamento permanecem nos componentes funcionais existentes. A página `index.html` passa a ser gerada de `ui/templates/newtab.html` por `npm run build:ui`.
+
+Para reconstruir, use a raiz completa do projeto e `npm run build:newtab`; o catálogo compartilhado fica fora da pasta de origem Tabliss. [Arquitetura e comandos](../docs/ui-components.md). Fontes, licenças e atribuições da origem permanecem preservadas.
+
 Este diretório contém a página completa do Tabliss 2.6.0, um componente GPL-3.0. O texto da licença está em [LICENSE.txt](LICENSE.txt), os avisos das dependências em [main.js.LICENSE.txt](main.js.LICENSE.txt) e o código-fonte correspondente em [vendor/tabliss-source](../vendor/tabliss-source/).
 
 Origem: [joelshepherd/tabliss, tag 2.6.0](https://github.com/joelshepherd/tabliss/tree/2.6.0), commit `a273d6329cec1f0813e04fde907111e648821946`. O bundle de produção foi obtido da instalação 2.6.0 do Tabliss, ID `hipekcciheckooncpjeljhnekcoolahp`. A atribuição, os avisos e a licença do componente permanecem neste diretório e no código-fonte correspondente.

@@ -28,13 +28,13 @@
     for (const [domain, permission] of entries) {
       const li = document.createElement("li");
       const text = document.createElement("span"); text.className="rule-domain"; text.textContent=domain;
-      const select = document.createElement("select"); select.setAttribute("aria-label",SuperI18n.t("uiAutoplayLabel",{domain}));
+      const select = SuperUi.create("control", {as:"select"}); select.setAttribute("aria-label",SuperI18n.t("uiAutoplayLabel",{domain}));
       for (const [value,label] of [["allow",SuperI18n.text("Permitir")],["block",SuperI18n.text("Bloquear")]]) {
         const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);
       }
       select.value=permission;
       select.addEventListener("change",handle(() => changeAutoplay(next => {next.siteSettings[domain]=select.value;})));
-      const remove=document.createElement("button");remove.textContent="×";remove.setAttribute("aria-label",SuperI18n.t("uiRemoveRule",{domain}));
+      const remove=SuperUi.create("button", {className:"ui-button-compact ui-button-danger"});remove.textContent="×";remove.setAttribute("aria-label",SuperI18n.t("uiRemoveRule",{domain}));
       remove.addEventListener("click",handle(() => changeAutoplay(next => {delete next.siteSettings[domain];})));
       li.append(text,select,remove);$("autoplayRules").append(li);
     }

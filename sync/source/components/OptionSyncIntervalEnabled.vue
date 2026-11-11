@@ -7,7 +7,7 @@
     <div class="caption">
       {{ t("DescriptionSyncintervalenabled") }}
     </div>
-    <v-switch
+    <SyncSwitch
       :input-value="value"
       :aria-label="t('LabelSyncintervalenabled')"
       :label="t('LabelSyncintervalenabled')"

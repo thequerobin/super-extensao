@@ -1,4 +1,6 @@
-# Proton VPN na Super Extensão — referência 1.6.5
+# Proton VPN na Super Extensão — referência 1.6.8
+
+A interface compõe os controles pelo catálogo comum em `ui/catalog.json`, expandido para HTML nativo por `ui/render.cjs`. O adaptador de componentes não modifica autenticação, sessão, plano ou aplicação do proxy. [Componentes compartilhados](../docs/ui-components.md).
 
 A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço, a sessão e o controlador de conexão permanecem Proton; regras e PAC já usam o núcleo próprio de `vpn/engine`. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 

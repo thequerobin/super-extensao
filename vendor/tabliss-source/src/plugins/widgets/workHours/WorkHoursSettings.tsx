@@ -1,3 +1,4 @@
+import { UiCheck, UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -15,26 +16,26 @@ const daysList = [
 
 const WorkHoursSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="WorkHoursSettings">
-    <label>
-      {t("Start time")}<input
+    <UiField>
+      {t("Start time")}<UiInput
         type="time"
         value={data.startTime}
         onChange={(event) =>
           setData({ ...data, startTime: event.target.value })
         }
       />
-    </label>
-    <label>
-      {t("End time")}<input
+    </UiField>
+    <UiField>
+      {t("End time")}<UiInput
         type="time"
         value={data.endTime}
         onChange={(event) => setData({ ...data, endTime: event.target.value })}
       />
-    </label>
+    </UiField>
     {daysList.map((day, index) => (
       <div key={day}>
-        <label>
-          <input
+        <UiCheck>
+          <UiInput
             type="checkbox"
             checked={data.days.includes(index)}
             onChange={(event) =>
@@ -47,7 +48,7 @@ const WorkHoursSettings: FC<Props> = ({ data = defaultData, setData }) => (
             }
           />
           {t(day)}
-        </label>
+        </UiCheck>
       </div>
     ))}
   </div>

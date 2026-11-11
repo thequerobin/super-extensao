@@ -7,7 +7,7 @@
     <div class="caption">
       {{ t("DescriptionAllowredirects") }}
     </div>
-    <v-checkbox
+    <SyncCheckbox
       :input-value="value"
       :true-value="true"
       :false-value="false"

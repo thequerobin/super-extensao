@@ -7,7 +7,7 @@
     <div class="caption">
       {{ t("DescriptionAllownetwork") }}
     </div>
-    <v-checkbox
+    <SyncCheckbox
       :input-value="value"
       :true-value="true"
       :false-value="false"

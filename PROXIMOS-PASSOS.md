@@ -1,16 +1,16 @@
 # Próximos passos da Super Extensão
 
-Revisado em **11 de novembro de 2026**, referência **1.6.6**. Itens implementados foram testados com APIs simuladas; a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **11 de novembro de 2026**, referência **1.6.8**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
 | Prioridade | Frente | Estado atual | Próxima entrega |
 | --- | --- | --- | --- |
 | 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
-| 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; Chromium bloqueado no ambiente atual | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
+| 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; interface conferida parcialmente no Helium isolado | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
 | 4 | Motor próprio da VPN | Iniciado em 1.6.5: núcleo próprio de regras/PAC e contratos mapeados | Controlador de proxy, estado/recuperação e sessão, nessa ordem |
-| Contínua | Interface e manutenção | Rodada 1.6.3 entregue: tema, paleta e foco compartilhados; regressões automatizadas e documentação revisada | Conferência visual real de diálogos, contraste, textos longos e alturas do popup |
+| Contínua | Interface e manutenção | Catálogo e adaptadores compartilhados entregues em 1.6.8; 154 testes aprovados; fontes das páginas estáticas e estilos validados centralizados | Ampliar a conferência visual de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização
 

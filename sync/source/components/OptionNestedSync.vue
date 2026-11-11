@@ -7,10 +7,10 @@
     <div class="caption">
       {{ t("DescriptionNestedSync") }}
     </div>
-    <v-radio-group :value="value" @change="$emit('input', $event)">
-      <v-radio :label="t('LabelNestedSyncNo')" :value="false" />
-      <v-radio :label="t('LabelNestedSyncYes')" :value="true" />
-    </v-radio-group>
+    <SyncRadioGroup :value="value" @change="$emit('input', $event)">
+      <SyncRadio :label="t('LabelNestedSyncNo')" :value="false" />
+      <SyncRadio :label="t('LabelNestedSyncYes')" :value="true" />
+    </SyncRadioGroup>
   </div>
 </template>
 

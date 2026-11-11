@@ -11,7 +11,7 @@ for (const anonymous of [false, true]) {
     };
     await downloadSyncLogs({ logger, version: '1.6.2', anonymous, now: new Date('2026-11-11T12:00:00Z') });
     assert.equal(downloaded.name, `super-extensao-sincronizacao-1.6.2-2026-11-11-${anonymous ? 'anonimizado' : 'completo'}.log`);
-    assert.match(downloaded.text, /Super Extensão — Sincronização\nVersão: 1\.6\.2/);
+    assert.match(downloaded.text, /Super Extensão — Sincronização\r?\nVersão: 1\.6\.2/);
     assert.equal(redacted, anonymous);
     if (anonymous) assert.doesNotMatch(downloaded.text, /private/);
     else assert.match(downloaded.text, /private bookmark title/);

@@ -1,3 +1,4 @@
+import { UiCheck, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -8,23 +9,23 @@ const LiteratureClockSettings: FC<Props> = ({
   setData,
 }) => (
   <div className="LiteratureClockSettings">
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="checkbox"
         checked={data.showBookAndAuthor}
         onChange={() =>
           setData({ ...data, showBookAndAuthor: !data.showBookAndAuthor })
         }
       />{" "}
-      {t("Display book and author")}</label>
+      {t("Display book and author")}</UiCheck>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="checkbox"
         checked={data.centerText}
         onChange={() => setData({ ...data, centerText: !data.centerText })}
       />{" "}
-      {t("Align text at center")}</label>
+      {t("Align text at center")}</UiCheck>
   </div>
 );
 

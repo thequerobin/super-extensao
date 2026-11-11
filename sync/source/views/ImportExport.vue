@@ -1,79 +1,79 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <v-container class="sync-backup">
-    <div class="sync-section-title">
-      <div>
-        <h2>{{ t("UiBackup") }}</h2>
-        <p>{{ t("UiBackupHelp") }}</p>
-      </div>
+<SyncContainer class="sync-backup">
+  <UiHeading class="sync-section-title">
+    <div>
+      <h2>{{ t("UiBackup") }}</h2>
+      <p>{{ t("UiBackupHelp") }}</p>
     </div>
-    <p class="ui-notice sync-notice">{{ t("UiBackupPrivacy") }}</p>
-    <v-card class="options">
-      <v-container class="pa-5">
-        <v-card-title role="heading" aria-level="1">
-          {{ t("LabelExport") }}
-        </v-card-title>
-        <v-card-text>
-          <p>{{ t("DescriptionExport") }}</p>
-          <div v-for="(account, i) in accounts" :key="i">
-            <v-row>
-              <v-col class="flex-grow-0">
-                <v-checkbox
-                  v-model="selected[i]"
-                  :aria-label="getFolderName(account.fullPath)"
-                />
-              </v-col>
-              <v-col>
-                <div class="text-h6">
-                  <v-icon color="primary" aria-hidden="true">
-                    {{
-                      account.data.localRoot === "tabs"
-                        ? "mdi-tab"
-                        : "mdi-folder"
-                    }}
-                  </v-icon>
-                  {{ getFolderName(account.fullPath) }}
-                </div>
-                <div class="caption">
-                  <span class="text-uppercase">{{ account.data.type }}</span
-                  >: {{ account.label }}
-                </div>
-              </v-col>
-            </v-row>
-          </div>
-          <v-btn
-            block
-            :disabled="!Object.values(selected).some(Boolean)"
-            @click="onTriggerExport"
-          >
-            <v-icon aria-hidden="true"> mdi-export </v-icon
-            >{{ t("LabelExport") }}
-          </v-btn>
-        </v-card-text>
-      </v-container>
-    </v-card>
-    <v-card class="options mt-3 mb-9">
-      <v-container class="pa-5">
-        <v-card-title role="heading" aria-level="2">
-          {{ t("LabelImport") }}
-        </v-card-title>
-        <v-card-text>
-          <p>{{ t("DescriptionImport") }}</p>
-          <input
-            ref="filePicker"
-            type="file"
-            class="d-none"
-            accept="application/json"
-            @change="onFileSelect"
-          />
-          <v-btn block @click="onTriggerFilePicker">
-            <v-icon aria-hidden="true"> mdi-import </v-icon
-            >{{ t("LabelImport") }}
-          </v-btn>
-        </v-card-text>
-      </v-container>
-    </v-card>
-  </v-container>
+  </UiHeading>
+  <UiNotice class="ui-notice sync-notice">{{ t("UiBackupPrivacy") }}</UiNotice>
+  <SyncCard class="options">
+    <SyncContainer class="pa-5">
+      <SyncCardTitle role="heading" aria-level="1">
+        {{ t("LabelExport") }}
+      </SyncCardTitle>
+      <SyncCardBody>
+        <p>{{ t("DescriptionExport") }}</p>
+        <div v-for="(account, i) in accounts" :key="i">
+          <SyncRow>
+            <SyncCol class="flex-grow-0">
+              <SyncCheckbox
+                v-model="selected[i]"
+                :aria-label="getFolderName(account.fullPath)"
+              />
+            </SyncCol>
+            <SyncCol>
+              <div class="text-h6">
+                <SyncIcon color="primary" aria-hidden="true">
+                  {{
+                    account.data.localRoot === "tabs"
+                      ? "mdi-tab"
+                      : "mdi-folder"
+                  }}
+                </SyncIcon>
+                {{ getFolderName(account.fullPath) }}
+              </div>
+              <div class="caption">
+                <span class="text-uppercase">{{ account.data.type }}</span
+                >: {{ account.label }}
+              </div>
+            </SyncCol>
+          </SyncRow>
+        </div>
+        <SyncButton
+          block
+          :disabled="!Object.values(selected).some(Boolean)"
+          @click="onTriggerExport"
+        >
+          <SyncIcon aria-hidden="true"> mdi-export </SyncIcon
+          >{{ t("LabelExport") }}
+        </SyncButton>
+      </SyncCardBody>
+    </SyncContainer>
+  </SyncCard>
+  <SyncCard class="options mt-3 mb-9">
+    <SyncContainer class="pa-5">
+      <SyncCardTitle role="heading" aria-level="2">
+        {{ t("LabelImport") }}
+      </SyncCardTitle>
+      <SyncCardBody>
+        <p>{{ t("DescriptionImport") }}</p>
+        <input
+          ref="filePicker"
+          type="file"
+          class="d-none"
+          accept="application/json"
+          @change="onFileSelect"
+        />
+        <SyncButton block @click="onTriggerFilePicker">
+          <SyncIcon aria-hidden="true"> mdi-import </SyncIcon
+          >{{ t("LabelImport") }}
+        </SyncButton>
+      </SyncCardBody>
+    </SyncContainer>
+  </SyncCard>
+</SyncContainer>
 </template>
 
 <script>

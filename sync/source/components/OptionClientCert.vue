@@ -7,7 +7,7 @@
     <div class="caption">
       {{ t("DescriptionClientcert") }}
     </div>
-    <v-checkbox
+    <SyncCheckbox
       :input-value="value"
       :true-value="true"
       :false-value="false"

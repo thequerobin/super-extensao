@@ -1,3 +1,4 @@
+import { UiField, UiInput } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { WidgetDisplay as WidgetDisplayType } from "../../db/state";
@@ -17,9 +18,9 @@ const WidgetDisplay: React.FC<Props> = ({ display, onChange }) => {
         onChange={(position) => onChange({ position })}
       />
 
-      <label>
+      <UiField>
         {t("Size")}<br />
-        <input
+        <UiInput
           type="range"
           value={display.fontSize}
           min="2"
@@ -29,7 +30,7 @@ const WidgetDisplay: React.FC<Props> = ({ display, onChange }) => {
             onChange({ fontSize: Number(event.target.value) })
           }
         />
-      </label>
+      </UiField>
     </div>
   );
 };

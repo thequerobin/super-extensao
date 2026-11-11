@@ -1,3 +1,4 @@
+import { UiField, UiSelect } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
@@ -21,8 +22,8 @@ const Widgets: React.FC = () => {
         />
       </h2>
 
-      <label>
-        <select
+      <UiField>
+        <UiSelect
           value=""
           onChange={(event) => addWidget(event.target.value)}
           className="primary"
@@ -34,8 +35,8 @@ const Widgets: React.FC = () => {
               {plugin.name}
             </option>
           ))}
-        </select>
-      </label>
+        </UiSelect>
+      </UiField>
 
       {widgets.map((widget, index) => (
         <Widget

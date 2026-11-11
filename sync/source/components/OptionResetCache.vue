@@ -7,9 +7,9 @@
     <div class="caption">
       {{ t("DescriptionResetcache") }}
     </div>
-    <v-btn small class="mt-3 mb-5" @click="$emit('click')">
+    <SyncButton small class="mt-3 mb-5" @click="$emit('click')">
       {{ t("LabelResetCache") }}
-    </v-btn>
+    </SyncButton>
   </div>
 </template>
 

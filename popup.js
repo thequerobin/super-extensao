@@ -87,7 +87,7 @@ async function refreshList() {
     const li = document.createElement("li");
     const text = document.createElement("span");
     text.textContent = domain;
-    const remove = document.createElement("button");
+    const remove = SuperUi.create("button", {className:"ui-button-compact ui-button-danger"});
     remove.textContent = "×";
     remove.setAttribute("aria-label", SuperI18n.t("uiRemoveDomain",{domain}));
     remove.addEventListener("click", handle(async () => {

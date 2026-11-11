@@ -1,79 +1,79 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <v-app id="app" class="sync-workspace">
-    <header v-if="!embedded" class="sync-heading">
-      <label v-if="!embedded" class="sync-language"
-        ><span class="sr-only">{{ t("SuperLanguage") }}</span
-        ><select
-          v-model="locale"
-          :aria-label="t('SuperLanguage')"
-          @change="changeLocale"
-        >
-          <option value="pt-BR">PT-BR</option>
-          <option value="en">EN</option>
-        </select></label
+<v-app id="app" class="sync-workspace">
+  <header v-if="!embedded" class="sync-heading">
+    <UiField v-if="!embedded" class="sync-language"
+      ><span class="sr-only">{{ t("SuperLanguage") }}</span
+      ><select
+        v-model="locale"
+        :aria-label="t('SuperLanguage')"
+        @change="changeLocale"
       >
-    </header>
-    <nav
-      ref="navigation"
-      :class="hostNavigation ? 'sub-nav ui-submenu' : 'sync-navigation'"
-      :aria-label="t('SuperSyncTitle')"
+        <option value="pt-BR">PT-BR</option>
+        <option value="en">EN</option>
+      </select></UiField
     >
-      <router-link
-        v-for="item in navigation"
-        :key="item.path"
-        :class="{ tab: hostNavigation, active: active(item.path) }"
-        :to="item.path"
-        :exact="item.path === '/'"
-        :aria-current="active(item.path) ? 'page' : null"
-        ><v-icon v-if="!hostNavigation" small aria-hidden="true">{{
-          item.icon
-        }}</v-icon
-        >{{ t(item.label) }}</router-link
+  </header>
+  <UiNav
+    ref="navigation"
+    :class="hostNavigation ? 'sub-nav ui-submenu' : 'sync-navigation'"
+    :aria-label="t('SuperSyncTitle')"
+  >
+    <router-link
+      v-for="item in navigation"
+      :key="item.path"
+      :class="{ tab: hostNavigation, active: active(item.path) }"
+      :to="item.path"
+      :exact="item.path === '/'"
+      :aria-current="active(item.path) ? 'page' : null"
+      ><SyncIcon v-if="!hostNavigation" small aria-hidden="true">{{
+        item.icon
+      }}</SyncIcon
+      >{{ t(item.label) }}</router-link
+    >
+  </UiNav>
+  <UiNotice
+    v-if="loadError"
+    role="alert"
+    class="ui-notice sync-notice sync-error ui-notice-error"
+  >
+    {{ loadError }}
+    <UiButton class="sync-button ui-button" @click="load" type="submit">
+      {{ t("UiRetry") }}
+    </UiButton>
+  </UiNotice>
+  <v-main v-if="initialized && !locked && !loadError"
+    ><router-view :key="$route.path"
+  /></v-main>
+  <section v-if="initialized && locked" class="sync-unlock">
+    <SyncIcon large aria-hidden="true">mdi-lock-outline</SyncIcon>
+    <h2>{{ t("LabelUnlock") }}</h2>
+    <UiForm @submit.prevent="onUnlock">
+      <UiField
+        >{{ t("LabelKey")
+        }}<input
+          v-model="key"
+          type="password"
+          autocomplete="current-password"
+          required
+          class="ui-control"
+      /></UiField>
+      <UiNotice
+        v-if="unlockError"
+        role="alert"
+        class="sync-error ui-notice-error ui-notice"
       >
-    </nav>
-    <p
-      v-if="loadError"
-      role="alert"
-      class="ui-notice sync-notice sync-error ui-notice-error"
-    >
-      {{ loadError }}
-      <button class="sync-button ui-button" @click="load">
-        {{ t("UiRetry") }}
-      </button>
-    </p>
-    <v-main v-if="initialized && !locked && !loadError"
-      ><router-view :key="$route.path"
-    /></v-main>
-    <section v-if="initialized && locked" class="sync-unlock">
-      <v-icon large aria-hidden="true">mdi-lock-outline</v-icon>
-      <h2>{{ t("LabelUnlock") }}</h2>
-      <form @submit.prevent="onUnlock">
-        <label
-          >{{ t("LabelKey")
-          }}<input
-            v-model="key"
-            type="password"
-            autocomplete="current-password"
-            required
-            class="ui-control"
-        /></label>
-        <p
-          v-if="unlockError"
-          role="alert"
-          class="sync-error ui-notice-error ui-notice"
-        >
-          {{ unlockError }}
-        </p>
-        <button
-          class="sync-button sync-primary ui-button ui-button-primary"
-          :disabled="unlocking"
-        >
-          {{ unlocking ? t("UiWorking") : t("LabelUnlock") }}
-        </button>
-      </form>
-    </section>
-  </v-app>
+        {{ unlockError }}
+      </UiNotice>
+      <UiButton
+        class="sync-button sync-primary ui-button ui-button-primary"
+        :disabled="unlocking"
+       type="submit">
+        {{ unlocking ? t("UiWorking") : t("LabelUnlock") }}
+      </UiButton>
+    </UiForm>
+  </section>
+</v-app>
 </template>
 <script>
 import { actions } from "./store/definitions";

@@ -47,4 +47,12 @@ html,body {background:#172039;}
 
 .background-provider-status {position:fixed;left:20px;bottom:64px;max-width:min(440px,calc(100vw - 40px));padding:12px 16px;border:1px solid var(--line);border-radius:var(--card-radius);background:var(--surface);color:var(--text);font:12px/1.5 var(--ui-font);pointer-events:auto;z-index:5;}
 .background-provider-status p {margin:0 0 8px;}
-.Settings .provider-access {padding:12px 0;border-bottom:1px solid var(--se-line);margin-bottom:16px;}
+.Settings .provider-access {padding:var(--space-3) 0 var(--space-4);border-bottom:1px solid var(--se-line);margin-bottom:var(--space-4);}
+.Settings .provider-access .ui-actions {align-items:flex-start;flex-direction:column;gap:var(--space-3);}
+.Settings .provider-access a {max-width:100%;overflow-wrap:anywhere;}
+.Settings .ui-field {display:grid;gap:var(--field-gap);}
+.Settings .ui-field > .ui-control {margin:0;}
+.Settings .ui-check {display:flex;gap:var(--space-2);}
+.Settings .ui-card {padding:var(--card-padding);}
+.Settings .ui-stack > :is(label,p) {margin:0;}
+.Settings .ui-button-icon {min-height:28px;width:28px;padding:6px;}

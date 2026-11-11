@@ -1,3 +1,4 @@
+import { UiButton } from "../../ui";
 import React, { FC } from "react";
 
 type Props = JSX.IntrinsicElements["button"] & {
@@ -5,12 +6,12 @@ type Props = JSX.IntrinsicElements["button"] & {
 };
 
 const Button: FC<Props> = ({ className, children, primary, ...props }) => (
-  <button
+  <UiButton
     className={`button ${primary ? "button--primary" : ""} ${className}`}
     {...props}
   >
     {children}
-  </button>
+  </UiButton>
 );
 
 export default Button;

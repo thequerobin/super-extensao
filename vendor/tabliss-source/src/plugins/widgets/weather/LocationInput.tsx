@@ -1,3 +1,4 @@
+import { UiButton, UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React from "react";
 import { useToggle } from "../../../hooks";
@@ -27,11 +28,11 @@ const GeocodeInput: React.FC<Props> = ({ onChange }) => {
   return (
     <form onSubmit={handleGeocode}>
       <div className="grid" style={{ gridTemplateColumns: "1fr auto" }}>
-        <label htmlFor="LocationInput__query">{t("Search for city")}</label>
+        <UiField htmlFor="LocationInput__query">{t("Search for city")}</UiField>
 
         <div />
 
-        <input
+        <UiInput
           id="LocationInput__query"
           placeholder={t("City or location")}
           type="text"
@@ -39,9 +40,9 @@ const GeocodeInput: React.FC<Props> = ({ onChange }) => {
           onChange={(event) => setQuery(event.target.value)}
         />
 
-        <button type="submit" className="button--primary button--icon">
+        <UiButton type="submit" className="button--primary button--icon">
           <Icon name="search" />
-        </button>
+        </UiButton>
       </div>
     </form>
   );
@@ -70,13 +71,13 @@ const CoordinateInput: React.FC<Props> = ({
             : "1fr 1fr",
         }}
       >
-        <label htmlFor="LocationInput__latitude">{t("Latitude")}</label>
+        <UiField htmlFor="LocationInput__latitude">{t("Latitude")}</UiField>
 
-        <label htmlFor="LocationInput__longitude">{t("Longitude")}</label>
+        <UiField htmlFor="LocationInput__longitude">{t("Longitude")}</UiField>
 
         {geolocationAvailable && <div />}
 
-        <input
+        <UiInput
           id="LocationInput__latitude"
           type="text"
           value={latitude}
@@ -85,7 +86,7 @@ const CoordinateInput: React.FC<Props> = ({
           }
         />
 
-        <input
+        <UiInput
           id="LocationInput__longitude"
           type="text"
           value={longitude}
@@ -95,12 +96,12 @@ const CoordinateInput: React.FC<Props> = ({
         />
 
         {geolocationAvailable && (
-          <button
+          <UiButton
             className="button--primary button--icon"
             onClick={handleLocate}
           >
             <Icon name="navigation" />
-          </button>
+          </UiButton>
         )}
       </div>
     </div>

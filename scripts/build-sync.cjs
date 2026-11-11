@@ -68,5 +68,7 @@ webpack(config, (error, stats) => {
     path.join(root, "sync/source/interface.css"),
     path.join(root, "sync/theme.css")
   );
+  const stylesheet = path.join(root, "sync/js/options.css");
+  fs.writeFileSync(stylesheet, fs.readFileSync(stylesheet, "utf8").trimEnd() + "\n");
   console.log("Interface de sincronização compilada.");
 });

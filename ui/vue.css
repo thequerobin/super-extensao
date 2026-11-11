@@ -1,0 +1,139 @@
+/* Shared skin for the validated Sync* adapters. Preserve library behavior. */
+
+.sync-workspace .v-card,
+.sync-workspace .v-stepper {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius) !important;
+  box-shadow: none !important;
+}
+.sync-workspace .v-card__title,
+.sync-workspace .v-card__text {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  color: var(--text) !important;
+}
+.sync-workspace .v-card__title,
+.sync-workspace .text-h5 {
+  font: 650 14px/1.5 var(--ui-font) !important;
+}
+.sync-workspace .v-card__text {
+  padding: 14px 16px;
+}
+.sync-workspace .v-card__text p,
+.sync-workspace .v-messages {
+  color: var(--muted);
+}
+.sync-workspace .v-sheet,
+.sync-workspace .v-list {
+  background: var(--surface);
+  color: var(--text);
+}
+.sync-workspace .v-btn {
+  border: 1px solid var(--line);
+  background: var(--accent-bg) !important;
+  color: var(--accent) !important;
+  box-shadow: none !important;
+  text-transform: none;
+  letter-spacing: 0;
+  font: 600 12px var(--ui-font);
+  border-radius: var(--control-radius);
+}
+.sync-workspace .v-btn.primary {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+  border-color: transparent;
+}
+.sync-workspace .v-label {
+  font-size: 13px;
+}
+.sync-confirm .v-card__actions {
+  justify-content: flex-end;
+}
+.sync-workspace .sync-section-title h2,
+.sync-workspace .sync-profile h3,
+.sync-workspace .v-card__title,
+.sync-workspace .text-h5,
+.sync-workspace .headline,
+.sync-workspace .text-h6 {
+  font: var(--weight-title) var(--font-title) / 1.5 var(--ui-font) !important;
+}
+.sync-workspace .v-btn {
+  min-height: var(--button-height);
+  height: auto;
+  padding: var(--button-padding) !important;
+  background: var(--accent-bg) !important;
+  color: var(--accent) !important;
+  font: 600 var(--font-control) / 1.5 var(--ui-font);
+}
+.sync-workspace .v-btn.primary {
+  background: var(--accent) !important;
+  color: var(--bg) !important;
+}
+.sync-workspace .v-text-field--outlined {
+  border-radius: var(--control-radius);
+}
+.sync-workspace .v-text-field--outlined fieldset {
+  border-color: var(--line);
+}
+.sync-workspace .v-text-field--outlined .v-input__slot {
+  min-height: var(--control-height);
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+.sync-workspace .v-input input,
+.sync-workspace .v-select__selection,
+.sync-workspace .v-label {
+  font-size: var(--font-control);
+  color: var(--text);
+}
+.sync-workspace .v-input input::placeholder {
+  color: var(--muted);
+}
+.sync-workspace .v-input--switch .v-input--selection-controls__input {
+  width: 32px;
+  height: 24px;
+}
+.sync-workspace .v-input--switch .v-input--switch__track {
+  width: 32px;
+  height: 19px;
+  left: 0;
+  right: auto;
+  top: 2.5px;
+  border-radius: 20px;
+  opacity: 1;
+  color: var(--line) !important;
+}
+.sync-workspace .v-input--switch .v-input--switch__thumb {
+  width: 13px;
+  height: 13px;
+  position: absolute;
+  left: 3px;
+  top: 5.5px;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  transform: none !important;
+}
+.sync-workspace .v-input--switch.v-input--is-dirty .v-input--switch__track {
+  color: var(--accent) !important;
+}
+.sync-workspace .v-input--switch.v-input--is-dirty .v-input--switch__thumb {
+  color: var(--bg) !important;
+  transform: translateX(13px) !important;
+}
+.sync-workspace .v-input--switch .v-input--selection-controls__ripple {
+  display: none;
+}
+.sync-workspace
+  .v-input--switch.v-input--is-disabled
+  .v-input--selection-controls__input {
+  opacity: 0.5;
+}
+.sync-workspace
+  .v-input--switch
+  .v-input--selection-controls__input:focus-within
+  .v-input--switch__track {
+  outline: var(--focus-width) solid var(--accent);
+  outline-offset: calc(-1 * var(--focus-width));
+}

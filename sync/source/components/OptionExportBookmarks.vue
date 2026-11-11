@@ -7,9 +7,9 @@
     <div class="caption">
       {{ t("DescriptionExportBookmarks") }}
     </div>
-    <v-btn class="mb-5" @click="onExport()">
+    <SyncButton class="mb-5" @click="onExport()">
       {{ t("LabelExportBookmarks") }}
-    </v-btn>
+    </SyncButton>
   </div>
 </template>
 

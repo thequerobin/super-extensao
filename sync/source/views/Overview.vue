@@ -1,69 +1,69 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <section class="sync-overview">
-    <div class="sync-section-title">
-      <div>
-        <h2>
-          {{ t("UiProfiles") }}
-          <span class="sync-count ui-count">{{ accounts.length }}</span>
-        </h2>
-        <p>{{ t("UiProfilesHelp") }}</p>
-      </div>
-      <button
-        v-if="accounts.length"
-        class="sync-button ui-button"
-        :disabled="busy || loading"
-        @click="syncAll"
-      >
-        <v-icon small aria-hidden="true">mdi-sync</v-icon
-        >{{ t("LabelSyncall") }}
-      </button>
+<section class="sync-overview">
+  <UiHeading class="sync-section-title">
+    <div>
+      <h2>
+        {{ t("UiProfiles") }}
+        <span class="sync-count ui-count">{{ accounts.length }}</span>
+      </h2>
+      <p>{{ t("UiProfilesHelp") }}</p>
     </div>
-    <p
-      v-if="error"
-      role="alert"
-      class="ui-notice sync-notice sync-error ui-notice-error"
+    <UiButton
+      v-if="accounts.length"
+      class="sync-button ui-button"
+      :disabled="busy || loading"
+      @click="syncAll"
+     type="submit">
+      <SyncIcon small aria-hidden="true">mdi-sync</SyncIcon
+      >{{ t("LabelSyncall") }}
+    </UiButton>
+  </UiHeading>
+  <UiNotice
+    v-if="error"
+    role="alert"
+    class="ui-notice sync-notice sync-error ui-notice-error"
+  >
+    {{ error }}
+  </UiNotice>
+  <div v-if="loading && !accounts.length" class="sync-empty" role="status">
+    <SyncSpinner indeterminate size="24" />
+    <p>{{ t("UiWorking") }}</p>
+  </div>
+  <template v-else-if="accounts.length">
+    <UiField class="sync-search ui-focus-within ui-search"
+      ><span class="ui-icon ui-icon-search" aria-hidden="true"></span
+      ><span class="sr-only">{{ t("UiSearch") }}</span
+      ><input v-model="query" type="search" :placeholder="t('UiSearch')"
+    /></UiField>
+    <div class="sync-profiles">
+      <AccountCard
+        v-for="account in filtered"
+        :key="account.id"
+        :account="account"
+      />
+    </div>
+    <p v-if="!filtered.length" class="sync-empty">{{ t("UiNoMatches") }}</p>
+    <router-link class="sync-add-profile" to="/new"
+      ><SyncIcon small aria-hidden="true">mdi-plus</SyncIcon
+      >{{ t("UiNew") }}</router-link
     >
-      {{ error }}
-    </p>
-    <div v-if="loading && !accounts.length" class="sync-empty" role="status">
-      <v-progress-circular indeterminate size="24" />
-      <p>{{ t("UiWorking") }}</p>
+  </template>
+  <UiCard v-else class="sync-empty sync-welcome ui-card">
+    <div class="sync-empty-icon">
+      <SyncIcon large aria-hidden="true">mdi-bookmark-multiple-outline</SyncIcon>
     </div>
-    <template v-else-if="accounts.length">
-      <label class="sync-search ui-focus-within ui-search"
-        ><span class="ui-icon ui-icon-search" aria-hidden="true"></span
-        ><span class="sr-only">{{ t("UiSearch") }}</span
-        ><input v-model="query" type="search" :placeholder="t('UiSearch')"
-      /></label>
-      <div class="sync-profiles">
-        <AccountCard
-          v-for="account in filtered"
-          :key="account.id"
-          :account="account"
-        />
-      </div>
-      <p v-if="!filtered.length" class="sync-empty">{{ t("UiNoMatches") }}</p>
-      <router-link class="sync-add-profile" to="/new"
-        ><v-icon small aria-hidden="true">mdi-plus</v-icon
-        >{{ t("UiNew") }}</router-link
-      >
-    </template>
-    <div v-else class="sync-empty sync-welcome ui-card">
-      <div class="sync-empty-icon">
-        <v-icon large aria-hidden="true">mdi-bookmark-multiple-outline</v-icon>
-      </div>
-      <h2>{{ t("UiEmptyTitle") }}</h2>
-      <p>{{ t("UiEmptyHelp") }}</p>
-      <router-link
-        class="sync-button sync-primary ui-button ui-button-primary"
-        to="/new"
-        >{{ t("UiCreate")
-        }}<v-icon small aria-hidden="true">mdi-arrow-right</v-icon></router-link
-      >
-      <router-link to="/importexport">{{ t("LabelImport") }}</router-link>
-    </div>
-  </section>
+    <h2>{{ t("UiEmptyTitle") }}</h2>
+    <p>{{ t("UiEmptyHelp") }}</p>
+    <router-link
+      class="sync-button sync-primary ui-button ui-button-primary"
+      to="/new"
+      >{{ t("UiCreate")
+      }}<SyncIcon small aria-hidden="true">mdi-arrow-right</SyncIcon></router-link
+    >
+    <router-link to="/importexport">{{ t("LabelImport") }}</router-link>
+  </UiCard>
+</section>
 </template>
 <script>
 import AccountCard from "../components/AccountCard";

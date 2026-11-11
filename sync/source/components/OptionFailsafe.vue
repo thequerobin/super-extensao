@@ -7,10 +7,10 @@
     <div class="caption">
       {{ t("DescriptionFailsafe") }}
     </div>
-    <v-radio-group :value="value" @change="$emit('input', $event)">
-      <v-radio :label="t('LabelFailsafeon')" :value="true" />
-      <v-radio :label="t('LabelFailsafeoff')" :value="false" />
-    </v-radio-group>
+    <SyncRadioGroup :value="value" @change="$emit('input', $event)">
+      <SyncRadio :label="t('LabelFailsafeon')" :value="true" />
+      <SyncRadio :label="t('LabelFailsafeoff')" :value="false" />
+    </SyncRadioGroup>
   </div>
 </template>
 

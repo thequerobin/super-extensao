@@ -19,6 +19,7 @@ function fixture(options = {}) {
     fetch: async (...args) => { calls.push(args); return options.fetch ? options.fetch(...args) : Promise.reject(Error('Unexpected request')); }, ...(options.globals || {}) };
   function load(relative) {
     const filename = path.resolve(source, relative);
+    if (filename.endsWith('.json')) return JSON.parse(fs.readFileSync(filename, 'utf8'));
     if (cache.has(filename)) return cache.get(filename);
     const exports = {}; cache.set(filename, exports);
     const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React, esModuleInterop: true, target: ts.ScriptTarget.ES2020 } }).outputText;
@@ -31,6 +32,7 @@ function fixture(options = {}) {
       if (name === './useTime') return { useTime: () => new Date(options.now || 1000) };
       if (name.startsWith('.')) {
         let target = path.resolve(path.dirname(filename), name);
+        if (fs.existsSync(target) && fs.statSync(target).isDirectory()) target = path.join(target, 'index.tsx');
         if (!path.extname(target)) target += fs.existsSync(target + '.ts') ? '.ts' : '.tsx';
         return load(target);
       }
@@ -42,6 +44,26 @@ function fixture(options = {}) {
 }
 const photo = { urls: { raw: 'https://images.unsplash.com/photo-test' }, links: { html: 'https://unsplash.com/photos/test' }, user: { name: 'Photographer', links: { html: 'https://unsplash.com/@test' } }, location: { title: 'Place' } };
 const photoConfig = { by: 'search', collections: '', topics: '', featured: false, search: 'nature' };
+test('React controls share the catalog and preserve controlled values, checkbox state and disabled actions', async () => {
+  const ui = dom(), f = fixture(), { UiField, UiInput, UiSelect, UiButton, UiCard } = f.load('ui/index.tsx');
+  let typed, selected, clicks = 0;
+  try {
+    await act(async () => ui.root.render(React.createElement(UiCard, { as: 'fieldset' },
+      React.createElement(UiField, { htmlFor: 'draft' }, 'Draft'),
+      React.createElement(UiInput, { id: 'draft', value: 'saved', onChange: event => { typed = event.target.value; } }),
+      React.createElement(UiInput, { type: 'checkbox', checked: true, readOnly: true }),
+      React.createElement(UiSelect, { value: 'en', onChange: event => { selected = event.target.value; } }, React.createElement('option', { value: 'en' }, 'English'), React.createElement('option', { value: 'pt-BR' }, 'Português')),
+      React.createElement(UiButton, { disabled: true, onClick: () => clicks++ }, 'Save'))));
+    const d = ui.d.window.document;
+    assert.equal(d.querySelector('label').control, d.getElementById('draft'));
+    assert.equal(d.querySelector('select').value, 'en');
+    assert.equal(d.querySelector('[type="checkbox"]').checked, true);
+    assert.ok(d.querySelector('fieldset.ui-card'));
+    await act(async () => { Simulate.change(d.getElementById('draft'), { target: { value: 'typed' } }); Simulate.change(d.querySelector('select'), { target: { value: 'pt-BR' } }); d.querySelector('button').click(); });
+    assert.equal(typed, 'typed'); assert.equal(selected, 'pt-BR'); assert.equal(clicks, 0);
+    assert.equal(d.querySelector('button').type, 'button');
+  } finally { await ui.close(); }
+});
 test('missing provider keys stop before network requests instead of sending undefined credentials', async () => {
   const f = fixture(), api = f.load('plugins/backgrounds/unsplash/api.ts'), gif = f.load('plugins/backgrounds/giphy/api.ts');
   await assert.rejects(() => api.fetchImages(photoConfig), error => error.code === 'key');

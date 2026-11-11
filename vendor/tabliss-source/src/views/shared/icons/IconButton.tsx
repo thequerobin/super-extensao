@@ -1,3 +1,4 @@
+import { UiButton } from "../../../ui";
 import React, { FC } from "react";
 
 interface Props {
@@ -8,12 +9,12 @@ interface Props {
 }
 
 const IconButton: FC<Props> = ({ children, primary, ...props }) => (
-  <button
-    className={`button--icon ${primary ? "button--primary" : ""}`}
+  <UiButton
+    className={`ui-button-icon button--icon ${primary ? "button--primary" : ""}`}
     {...props}
   >
     {children}
-  </button>
+  </UiButton>
 );
 
 export default IconButton;

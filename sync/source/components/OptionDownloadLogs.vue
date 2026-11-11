@@ -7,18 +7,18 @@
     <div class="caption">
       {{ t("DescriptionDownloadlogs") }}
     </div>
-    <v-row>
-      <v-col>
-        <v-btn small class="mb-5" @click="onGetLogs(true)">
+    <SyncRow>
+      <SyncCol>
+        <SyncButton small class="mb-5" @click="onGetLogs(true)">
           {{ t("LabelDownloadanonymizedlogs") }}
-        </v-btn>
-      </v-col>
-      <v-col>
-        <v-btn small class="mb-5" @click="onGetLogs(false)">
+        </SyncButton>
+      </SyncCol>
+      <SyncCol>
+        <SyncButton small class="mb-5" @click="onGetLogs(false)">
           {{ t("LabelDownloadfulllogs") }}
-        </v-btn>
-      </v-col>
-    </v-row>
+        </SyncButton>
+      </SyncCol>
+    </SyncRow>
   </div>
 </template>
 

@@ -7,11 +7,11 @@
     <div class="caption">
       {{ t("DescriptionStrategy") }}
     </div>
-    <v-radio-group :value="value" @change="$emit('input', $event)">
-      <v-radio :label="t('LabelStrategydefault')" value="default" />
-      <v-radio :label="t('LabelStrategyslave')" value="slave" />
-      <v-radio :label="t('LabelStrategyoverwrite')" value="overwrite" />
-    </v-radio-group>
+    <SyncRadioGroup :value="value" @change="$emit('input', $event)">
+      <SyncRadio :label="t('LabelStrategydefault')" value="default" />
+      <SyncRadio :label="t('LabelStrategyslave')" value="slave" />
+      <SyncRadio :label="t('LabelStrategyoverwrite')" value="overwrite" />
+    </SyncRadioGroup>
   </div>
 </template>
 

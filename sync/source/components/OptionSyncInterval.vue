@@ -4,7 +4,7 @@
     <div class="text-h6" role="heading" aria-level="3">
       {{ t("LabelSyncinterval") }}
     </div>
-    <v-slider
+    <SyncSlider
       v-model="syncIntervalStep"
       class="mt-8 mb-5"
       :aria-label="t('LabelSyncinterval')"
@@ -19,7 +19,7 @@
       <template #thumb-label="{ value: step }">
         {{ humanizeDuration(syncIntervalSteps[step] * 1000 * 60) }}
       </template>
-    </v-slider>
+    </SyncSlider>
   </div>
 </template>
 

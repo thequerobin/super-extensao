@@ -1,848 +1,848 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <v-container class="sync-wizard">
-    <v-stepper v-model="currentStep" class="options mt-3 mb-9">
-      <ol class="sync-steps" :aria-label="t('UiNew')">
-        <li
-          v-for="(name, index) in [
-            'UiProvider',
-            'UiName',
-            'UiAccess',
-            'UiFolder',
-            'UiDone',
-          ]"
-          :key="name"
-          :class="{
-            current: currentStep === index,
-            complete: currentStep > index,
-          }"
-          :aria-current="currentStep === index ? 'step' : null"
+<SyncContainer class="sync-wizard">
+  <SyncStepper v-model="currentStep" class="options mt-3 mb-9">
+    <ol class="sync-steps" :aria-label="t('UiNew')">
+      <li
+        v-for="(name, index) in [
+          'UiProvider',
+          'UiName',
+          'UiAccess',
+          'UiFolder',
+          'UiDone',
+        ]"
+        :key="name"
+        :class="{
+          current: currentStep === index,
+          complete: currentStep > index,
+        }"
+        :aria-current="currentStep === index ? 'step' : null"
+      >
+        <span>{{ index + 1 }}</span
+        >{{ t(name) }}
+      </li>
+    </ol>
+    <SyncStepperItems>
+      <UiNotice
+        v-if="createError"
+        class="ui-notice sync-notice sync-error ui-notice-error"
+        role="alert"
+      >
+        {{ createError }}
+      </UiNotice>
+      <SyncStepperContent step="0">
+        <div class="headline" role="heading" aria-level="2">
+          {{ t("LabelChooseadapter") }}
+        </div>
+        <p class="sync-wizard-help">{{ t("UiWizardHelp") }}</p>
+        <div
+          class="sync-service-grid"
+          role="group"
+          :aria-label="t('LabelChooseadapter')"
         >
-          <span>{{ index + 1 }}</span
-          >{{ t(name) }}
-        </li>
-      </ol>
-      <v-stepper-items>
-        <p
-          v-if="createError"
-          class="ui-notice sync-notice sync-error ui-notice-error"
-          role="alert"
-        >
-          {{ createError }}
-        </p>
-        <v-stepper-content step="0">
-          <div class="headline" role="heading" aria-level="2">
-            {{ t("LabelChooseadapter") }}
-          </div>
-          <p class="sync-wizard-help">{{ t("UiWizardHelp") }}</p>
-          <div
-            class="sync-service-grid"
-            role="group"
-            :aria-label="t('LabelChooseadapter')"
+          <UiButton
+            v-for="a in adapters"
+            :key="a.type"
+            type="button"
+            class="sync-service"
+            :class="{ selected: adapter === a.type }"
+            :aria-pressed="adapter === a.type"
+            @click="adapter = a.type"
           >
-            <button
-              v-for="a in adapters"
-              :key="a.type"
-              type="button"
-              class="sync-service"
-              :class="{ selected: adapter === a.type }"
-              :aria-pressed="adapter === a.type"
-              @click="adapter = a.type"
-            >
-              <span class="sync-service-heading"
-                ><v-icon small aria-hidden="true">{{
-                  providerIcon(a.type)
-                }}</v-icon
-                ><strong>{{ providerName(a.type) }}</strong
-                ><v-icon v-if="adapter === a.type" small aria-hidden="true"
-                  >mdi-check-circle</v-icon
-                ></span
-              ><span>{{ t("UiService" + a.type) }}</span>
-            </button>
-          </div>
-          <div class="form-buttons flex-row-reverse justify-start">
-            <v-btn class="primary" @click="currentStep++">
-              {{ t("LabelContinue") }}
-            </v-btn>
-            <v-btn
-              :to="{ name: 'IMPORTEXPORT' }"
-              :aria-label="t('LabelImportExport')"
-              class="me-2"
-            >
-              <v-icon aria-hidden="true"> mdi-export </v-icon>
-              <template v-if="isBrowser && true">
-                {{ t("LabelImportExport") }}
-              </template>
-            </v-btn>
-          </div>
-        </v-stepper-content>
+            <span class="sync-service-heading"
+              ><SyncIcon small aria-hidden="true">{{
+                providerIcon(a.type)
+              }}</SyncIcon
+              ><strong>{{ providerName(a.type) }}</strong
+              ><SyncIcon v-if="adapter === a.type" small aria-hidden="true"
+                >mdi-check-circle</SyncIcon
+              ></span
+            ><span>{{ t("UiService" + a.type) }}</span>
+          </UiButton>
+        </div>
+        <UiActions class="form-buttons flex-row-reverse justify-start">
+          <SyncButton class="primary" @click="currentStep++">
+            {{ t("LabelContinue") }}
+          </SyncButton>
+          <SyncButton
+            :to="{ name: 'IMPORTEXPORT' }"
+            :aria-label="t('LabelImportExport')"
+            class="me-2"
+          >
+            <SyncIcon aria-hidden="true"> mdi-export </SyncIcon>
+            <template v-if="isBrowser && true">
+              {{ t("LabelImportExport") }}
+            </template>
+          </SyncButton>
+        </UiActions>
+      </SyncStepperContent>
 
-        <v-stepper-content step="1">
+      <SyncStepperContent step="1">
+        <div class="headline" role="heading" aria-level="2">
+          {{ t("LabelAccountlabel") }}
+        </div>
+        <SyncForm>
+          <SyncTextField
+            outlined
+            dense
+            v-model="label"
+            append-icon="mdi-label"
+            class="mt-2 mb-4"
+            :label="t('LabelAccountlabel')"
+            :hint="t('DescriptionAccountlabel')"
+            :persistent-hint="true"
+            @keydown.enter.prevent="currentStep++"
+          />
+        </SyncForm>
+        <UiActions class="form-buttons">
+          <SyncButton @click="currentStep--">
+            {{ t("LabelBack") }}
+          </SyncButton>
+          <SyncButton class="primary" @click="currentStep++">
+            {{ t("LabelContinue") }}
+          </SyncButton>
+        </UiActions>
+      </SyncStepperContent>
+
+      <SyncStepperContent step="2">
+        <template v-if="adapter === 'nextcloud-bookmarks'">
           <div class="headline" role="heading" aria-level="2">
-            {{ t("LabelAccountlabel") }}
+            {{ t("LabelServersetup") }}
           </div>
-          <v-form>
-            <v-text-field
+          <SyncForm>
+            <SyncTextField
               outlined
               dense
-              v-model="label"
-              append-icon="mdi-label"
-              class="mt-2 mb-4"
-              :label="t('LabelAccountlabel')"
-              :hint="t('DescriptionAccountlabel')"
-              :persistent-hint="true"
-              @keydown.enter.prevent="currentStep++"
-            />
-          </v-form>
-          <div class="form-buttons">
-            <v-btn @click="currentStep--">
-              {{ t("LabelBack") }}
-            </v-btn>
-            <v-btn class="primary" @click="currentStep++">
-              {{ t("LabelContinue") }}
-            </v-btn>
-          </div>
-        </v-stepper-content>
-
-        <v-stepper-content step="2">
-          <template v-if="adapter === 'nextcloud-bookmarks'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelNextcloudurl')"
-                :loading="isServerTestRunning || isLoginFlowRunning"
-                :error-messages="
-                  serverisNotHttps || serverTestError || loginFlowError
-                "
-                @keydown.enter="testNextcloudServer"
-              >
-                <template slot="append-outer">
-                  <v-icon
-                    v-if="serverTestSuccessful"
-                    color="green"
-                    role="img"
-                    :aria-label="t('LabelServerconnectionsuccessful')"
-                  >
-                    mdi-check
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn
-                v-if="!serverTestSuccessful"
-                class="primary"
-                @click="testNextcloudServer"
-              >
-                {{ t("LabelConnect") }}
-              </v-btn>
-              <template v-if="serverTestSuccessful">
-                <v-btn
-                  v-if="!isLoginFlowRunning"
-                  class="primary"
-                  @click="onFlowStart"
-                >
-                  {{ t("LabelLoginFlowStart") }}
-                </v-btn>
-                <v-btn v-if="isLoginFlowRunning" @click="onFlowStop">
-                  {{ t("LabelLoginFlowStop") }}
-                </v-btn>
-              </template>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'linkwarden'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelLinkwardenurl')"
-                :loading="isServerTestRunning"
-                :error-messages="serverTestError || serverisNotHttps"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="username"
-                :label="t('LabelUsername')"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="password"
-                :label="t('LabelAccesstoken')"
-                :type="showPassword ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassword
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassword = !showPassword"
-                    @keydown.enter="showPassword = !showPassword"
-                    @keydown.space.prevent="showPassword = !showPassword"
-                  >
-                    {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn class="primary" @click="testLinkwardenServer">
-                {{ t("LabelContinue") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'karakeep'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelKarakeepurl')"
-                :loading="isServerTestRunning"
-                :error-messages="serverTestError || serverisNotHttps"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="password"
-                :label="t('LabelApiKey')"
-                :type="showPassword ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassword
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassword = !showPassword"
-                    @keydown.enter="showPassword = !showPassword"
-                    @keydown.space.prevent="showPassword = !showPassword"
-                  >
-                    {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn class="primary" @click="testKarakeepServer">
-                {{ t("LabelContinue") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'webdav'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-select
-                outlined
-                dense
-                :items="Object.keys(predefinedWebdavUrls)"
-                :label="t('LabelPredefinedwebdavurls')"
-                :placeholder="t('DescriptionPredefinedwebdavurls')"
-                persistent-placeholder
-                @change="server = predefinedWebdavUrls[$event]"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelWebdavurl')"
-                :loading="isServerTestRunning"
-                :error-messages="serverTestError || serverisNotHttps"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="username"
-                :label="t('LabelUsername')"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="password"
-                :label="t('LabelPassword')"
-                :type="showPassword ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassword
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassword = !showPassword"
-                    @keydown.enter="showPassword = !showPassword"
-                    @keydown.space.prevent="showPassword = !showPassword"
-                  >
-                    {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-              <v-text-field
-                outlined
-                dense
-                v-model="passphrase"
-                class="mt-2"
-                :label="t('LabelPassphrase')"
-                :hint="t('DescriptionPassphrase')"
-                :persistent-hint="true"
-                :type="showPassphrase ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassphrase
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassphrase = !showPassphrase"
-                    @keydown.enter="showPassphrase = !showPassphrase"
-                    @keydown.space.prevent="showPassphrase = !showPassphrase"
-                  >
-                    {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-              <OptionClientCert v-model="includeCredentials" class="mt-2" />
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn class="primary" @click="testWebdavServer">
-                {{ t("LabelContinue") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 's3'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelS3endpoint')"
-                :hint="t('DescriptionS3endpoint')"
-                :persistent-hint="true"
-                :loading="isServerTestRunning"
-                :error-messages="serverTestError || serverisNotHttps"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="region"
-                class="mt-2"
-                :label="t('LabelS3region')"
-                :hint="t('DescriptionS3region')"
-                :persistent-hint="true"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="bucket"
-                class="mt-2"
-                :rules="[validateBucket]"
-                :label="t('LabelS3bucket')"
-              />
-              <v-switch
-                v-model="pathStyle"
-                :label="t('LabelS3pathstyle')"
-                :hint="t('DescriptionS3pathstyle')"
-                :persistent-hint="true"
-                dense
-                class="mt-0 pt-0 mb-4"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="username"
-                :label="t('LabelS3accesskey')"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="password"
-                :label="t('LabelS3secretkey')"
-                :type="showPassword ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassword
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassword = !showPassword"
-                    @keydown.enter="showPassword = !showPassword"
-                    @keydown.space.prevent="showPassword = !showPassword"
-                  >
-                    {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-              <v-text-field
-                outlined
-                dense
-                v-model="passphrase"
-                class="mt-2"
-                :label="t('LabelPassphrase')"
-                :hint="t('DescriptionPassphrase')"
-                :persistent-hint="true"
-                :type="showPassphrase ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassphrase
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassphrase = !showPassphrase"
-                    @keydown.enter="showPassphrase = !showPassphrase"
-                    @keydown.space.prevent="showPassphrase = !showPassphrase"
-                  >
-                    {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn class="primary" @click="testS3Server">
-                {{ t("LabelContinue") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'git'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelServersetup") }}
-            </div>
-            <v-form>
-              <v-text-field
-                outlined
-                dense
-                v-model="server"
-                :rules="[validateUrl]"
-                :label="t('LabelGiturl')"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="username"
-                :label="t('LabelUsername')"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="password"
-                :label="t('LabelPassword')"
-                :type="showPassword ? 'text' : 'password'"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassword
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassword = !showPassword"
-                    @keydown.enter="showPassword = !showPassword"
-                    @keydown.space.prevent="showPassword = !showPassword"
-                  >
-                    {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-              <v-btn class="primary" @click="currentStep++">
-                {{ t("LabelContinue") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'google-drive'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelGoogledrivesetup") }}
-            </div>
-            <v-form class="mt-2">
-              <v-alert v-if="loginFlowError" dense color="error">
-                {{ loginFlowError }}
-              </v-alert>
-              <v-btn color="primary" @click="loginGoogleDrive">
-                {{ t("LabelLogingoogle") }}
-              </v-btn>
-              <p class="mt-2">
-                {{ t("DescriptionLogingoogle") }}
-              </p>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-            </div>
-          </template>
-
-          <template v-else-if="adapter === 'dropbox'">
-            <div class="headline" role="heading" aria-level="2">
-              {{ t("LabelDropboxsetup") }}
-            </div>
-            <v-form class="mt-2">
-              <v-alert v-if="loginFlowError" dense color="error">
-                {{ loginFlowError }}
-              </v-alert>
-              <v-btn color="primary" @click="loginDropbox">
-                {{ t("LabelLogindropbox") }}
-              </v-btn>
-              <p class="mt-2">
-                {{ t("DescriptionLogindropbox") }}
-              </p>
-            </v-form>
-            <div class="form-buttons">
-              <v-btn @click="currentStep--">
-                {{ t("LabelBack") }}
-              </v-btn>
-            </div>
-          </template>
-        </v-stepper-content>
-
-        <v-stepper-content step="3">
-          <div class="headline" role="heading" aria-level="2">
-            {{ t("LabelSyncfoldersetup") }}
-          </div>
-          <v-form>
-            <template v-if="adapter === 'nextcloud-bookmarks'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelServerfolder") }}
-              </div>
-              <div class="caption">
-                {{ t("DescriptionServerfolder") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="serverRoot"
-                :placeholder="'/'"
-                :rules="[validateServerRoot]"
-                :label="t('LabelServerfolder')"
-              />
-            </template>
-
-            <template v-if="adapter === 'linkwarden'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelServerfolder") }}
-              </div>
-              <div class="caption">
-                {{ t("DescriptionServerfolderlinkwarden") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="serverFolder"
-                :label="t('LabelServerfolder')"
-              />
-            </template>
-
-            <template v-if="adapter === 'karakeep'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelServerfolder") }}
-              </div>
-              <div class="caption">
-                {{ t("DescriptionServerfolderkarakeep") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="serverFolder"
-                :label="t('LabelServerfolder')"
-              />
-            </template>
-
-            <template v-if="adapter === 'webdav'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelBookmarksfile") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="bookmark_file"
-                class="mb-2"
-                append-icon="mdi-file-document"
-                :rules="[validateBookmarksFile]"
-                :label="t('LabelBookmarksfile')"
-                :hint="t('DescriptionBookmarksfile')"
-                :persistent-hint="true"
-              />
-              <OptionFileType v-model="bookmark_file_type" />
-            </template>
-
-            <template v-if="adapter === 's3'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelBookmarksfile") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="bookmark_file"
-                class="mb-2"
-                append-icon="mdi-file-document"
-                :rules="[validateBookmarksFile]"
-                :label="t('LabelBookmarksfile')"
-                :hint="t('DescriptionBookmarksfiles3')"
-                :persistent-hint="true"
-              />
-              <OptionFileType v-model="bookmark_file_type" />
-            </template>
-
-            <template v-if="adapter === 'git'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelBookmarksfile") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="bookmark_file"
-                class="mb-2"
-                append-icon="mdi-file-document"
-                :rules="[validateBookmarksFile]"
-                :label="t('LabelBookmarksfile')"
-                :hint="t('DescriptionBookmarksfilegit')"
-                :persistent-hint="true"
-              />
-              <OptionFileType v-model="bookmark_file_type" />
-              <v-text-field
-                outlined
-                dense
-                v-model="branch"
-                class="mb-2"
-                :label="t('LabelGitbranch')"
-              />
-            </template>
-
-            <template v-if="adapter === 'google-drive'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelBookmarksfile") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="bookmark_file"
-                append-icon="mdi-file-document"
-                :rules="[validateBookmarksFileGoogle]"
-                :label="t('LabelBookmarksfile')"
-                :hint="t('DescriptionBookmarksfilegoogle')"
-                :persistent-hint="true"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="passphrase"
-                :type="showPassphrase ? 'text' : 'password'"
-                class="mt-2"
-                :label="t('LabelPassphrase')"
-                :hint="t('DescriptionPassphrase')"
-                :persistent-hint="true"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassphrase
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassphrase = !showPassphrase"
-                    @keydown.enter="showPassphrase = !showPassphrase"
-                    @keydown.space.prevent="showPassphrase = !showPassphrase"
-                  >
-                    {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </template>
-
-            <template v-if="adapter === 'dropbox'">
-              <div class="text-h6" role="heading" aria-level="3">
-                {{ t("LabelBookmarksfile") }}
-              </div>
-              <v-text-field
-                outlined
-                dense
-                v-model="bookmark_file"
-                append-icon="mdi-file-document"
-                :rules="[validateBookmarksFileDropbox]"
-                :label="t('LabelBookmarksfile')"
-                :hint="t('DescriptionBookmarksfiledropbox')"
-                :persistent-hint="true"
-              />
-              <v-text-field
-                outlined
-                dense
-                v-model="passphrase"
-                :type="showPassphrase ? 'text' : 'password'"
-                class="mt-2"
-                :label="t('LabelPassphrase')"
-                :hint="t('DescriptionPassphrase')"
-                :persistent-hint="true"
-              >
-                <template #append>
-                  <v-icon
-                    role="button"
-                    tabindex="0"
-                    :aria-label="
-                      showPassphrase
-                        ? t('LabelHidepassword')
-                        : t('LabelShowpassword')
-                    "
-                    @click="showPassphrase = !showPassphrase"
-                    @keydown.enter="showPassphrase = !showPassphrase"
-                    @keydown.space.prevent="showPassphrase = !showPassphrase"
-                  >
-                    {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
-                  </v-icon>
-                </template>
-              </v-text-field>
-            </template>
-            <OptionSyncFolder v-if="isBrowser" v-model="localRoot" />
-          </v-form>
-
-          <div class="form-buttons pt-4">
-            <v-btn @click="currentStep--">
-              {{ t("LabelBack") }}
-            </v-btn>
-            <v-btn
-              :disabled="isBrowser ? !localRoot : false"
-              color="primary"
-              @click="currentStep++"
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelNextcloudurl')"
+              :loading="isServerTestRunning || isLoginFlowRunning"
+              :error-messages="
+                serverisNotHttps || serverTestError || loginFlowError
+              "
+              @keydown.enter="testNextcloudServer"
             >
-              {{ t("LabelContinue") }}
-            </v-btn>
-          </div>
-        </v-stepper-content>
-
-        <v-stepper-content step="4">
-          <div class="headline" role="heading" aria-level="2">
-            {{ t("LabelSyncbehaviorsetup") }}
-          </div>
-          <v-form>
-            <OptionAutoSync v-model="enabled" />
-            <OptionSyncOnStartup v-model="syncOnStartupEnabled" />
-            <template v-if="isBrowser">
-              <OptionSyncIntervalEnabled v-model="syncIntervalEnabled" />
-              <OptionSyncInterval
-                v-if="syncIntervalEnabled"
-                v-model="syncInterval"
-              />
-              <OptionNotifyOnly
-                :notify-only.sync="notifyOnly"
-                :notifications-enabled.sync="notificationsEnabled"
-              />
+              <template slot="append-outer">
+                <SyncIcon
+                  v-if="serverTestSuccessful"
+                  color="green"
+                  role="img"
+                  :aria-label="t('LabelServerconnectionsuccessful')"
+                >
+                  mdi-check
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton
+              v-if="!serverTestSuccessful"
+              class="primary"
+              @click="testNextcloudServer"
+            >
+              {{ t("LabelConnect") }}
+            </SyncButton>
+            <template v-if="serverTestSuccessful">
+              <SyncButton
+                v-if="!isLoginFlowRunning"
+                class="primary"
+                @click="onFlowStart"
+              >
+                {{ t("LabelLoginFlowStart") }}
+              </SyncButton>
+              <SyncButton v-if="isLoginFlowRunning" @click="onFlowStop">
+                {{ t("LabelLoginFlowStop") }}
+              </SyncButton>
             </template>
-            <OptionSyncStrategy v-model="strategy" />
-            <OptionNestedSync v-if="isBrowser" v-model="nestedSync" />
-            <v-switch
-              v-if="adapter === 'nextcloud-bookmarks'"
-              v-model="clickCountEnabled"
-              :aria-label="t('LabelClickcount')"
-              :label="t('LabelClickcount')"
-              :hint="t('DescriptionClickcount')"
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 'linkwarden'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelServersetup") }}
+          </div>
+          <SyncForm>
+            <SyncTextField
+              outlined
+              dense
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelLinkwardenurl')"
+              :loading="isServerTestRunning"
+              :error-messages="serverTestError || serverisNotHttps"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="username"
+              :label="t('LabelUsername')"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="password"
+              :label="t('LabelAccesstoken')"
+              :type="showPassword ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassword
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassword = !showPassword"
+                  @keydown.enter="showPassword = !showPassword"
+                  @keydown.space.prevent="showPassword = !showPassword"
+                >
+                  {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton class="primary" @click="testLinkwardenServer">
+              {{ t("LabelContinue") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 'karakeep'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelServersetup") }}
+          </div>
+          <SyncForm>
+            <SyncTextField
+              outlined
+              dense
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelKarakeepurl')"
+              :loading="isServerTestRunning"
+              :error-messages="serverTestError || serverisNotHttps"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="password"
+              :label="t('LabelApiKey')"
+              :type="showPassword ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassword
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassword = !showPassword"
+                  @keydown.enter="showPassword = !showPassword"
+                  @keydown.space.prevent="showPassword = !showPassword"
+                >
+                  {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton class="primary" @click="testKarakeepServer">
+              {{ t("LabelContinue") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 'webdav'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelServersetup") }}
+          </div>
+          <SyncForm>
+            <SyncSelect
+              outlined
+              dense
+              :items="Object.keys(predefinedWebdavUrls)"
+              :label="t('LabelPredefinedwebdavurls')"
+              :placeholder="t('DescriptionPredefinedwebdavurls')"
+              persistent-placeholder
+              @change="server = predefinedWebdavUrls[$event]"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelWebdavurl')"
+              :loading="isServerTestRunning"
+              :error-messages="serverTestError || serverisNotHttps"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="username"
+              :label="t('LabelUsername')"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="password"
+              :label="t('LabelPassword')"
+              :type="showPassword ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassword
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassword = !showPassword"
+                  @keydown.enter="showPassword = !showPassword"
+                  @keydown.space.prevent="showPassword = !showPassword"
+                >
+                  {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+            <SyncTextField
+              outlined
+              dense
+              v-model="passphrase"
+              class="mt-2"
+              :label="t('LabelPassphrase')"
+              :hint="t('DescriptionPassphrase')"
+              :persistent-hint="true"
+              :type="showPassphrase ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassphrase
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassphrase = !showPassphrase"
+                  @keydown.enter="showPassphrase = !showPassphrase"
+                  @keydown.space.prevent="showPassphrase = !showPassphrase"
+                >
+                  {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+            <OptionClientCert v-model="includeCredentials" class="mt-2" />
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton class="primary" @click="testWebdavServer">
+              {{ t("LabelContinue") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 's3'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelServersetup") }}
+          </div>
+          <SyncForm>
+            <SyncTextField
+              outlined
+              dense
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelS3endpoint')"
+              :hint="t('DescriptionS3endpoint')"
+              :persistent-hint="true"
+              :loading="isServerTestRunning"
+              :error-messages="serverTestError || serverisNotHttps"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="region"
+              class="mt-2"
+              :label="t('LabelS3region')"
+              :hint="t('DescriptionS3region')"
+              :persistent-hint="true"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="bucket"
+              class="mt-2"
+              :rules="[validateBucket]"
+              :label="t('LabelS3bucket')"
+            />
+            <SyncSwitch
+              v-model="pathStyle"
+              :label="t('LabelS3pathstyle')"
+              :hint="t('DescriptionS3pathstyle')"
               :persistent-hint="true"
               dense
               class="mt-0 pt-0 mb-4"
             />
-          </v-form>
-          <div class="form-buttons">
-            <v-btn @click="currentStep--">
-              {{ t("LabelBack") }}
-            </v-btn>
-            <v-btn
-              color="primary"
-              :disabled="creating"
-              :loading="creating"
-              @click="onCreate()"
+            <SyncTextField
+              outlined
+              dense
+              v-model="username"
+              :label="t('LabelS3accesskey')"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="password"
+              :label="t('LabelS3secretkey')"
+              :type="showPassword ? 'text' : 'password'"
             >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassword
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassword = !showPassword"
+                  @keydown.enter="showPassword = !showPassword"
+                  @keydown.space.prevent="showPassword = !showPassword"
+                >
+                  {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+            <SyncTextField
+              outlined
+              dense
+              v-model="passphrase"
+              class="mt-2"
+              :label="t('LabelPassphrase')"
+              :hint="t('DescriptionPassphrase')"
+              :persistent-hint="true"
+              :type="showPassphrase ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassphrase
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassphrase = !showPassphrase"
+                  @keydown.enter="showPassphrase = !showPassphrase"
+                  @keydown.space.prevent="showPassphrase = !showPassphrase"
+                >
+                  {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton class="primary" @click="testS3Server">
               {{ t("LabelContinue") }}
-            </v-btn>
-          </div>
-        </v-stepper-content>
+            </SyncButton>
+          </UiActions>
+        </template>
 
-        <v-stepper-content step="5">
+        <template v-else-if="adapter === 'git'">
           <div class="headline" role="heading" aria-level="2">
-            {{ t("LabelAccountcreated") }}
-            <v-icon aria-hidden="true"> mdi-check </v-icon>
+            {{ t("LabelServersetup") }}
           </div>
-          <v-form>
-            <div v-if="isBrowser">
-              {{ t("DescriptionAccountcreated") }}
-              <router-link
-                class="sync-button sync-primary ui-button ui-button-primary"
-                to="/"
-                >{{ t("UiProfiles") }}</router-link
-              >
+          <SyncForm>
+            <SyncTextField
+              outlined
+              dense
+              v-model="server"
+              :rules="[validateUrl]"
+              :label="t('LabelGiturl')"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="username"
+              :label="t('LabelUsername')"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="password"
+              :label="t('LabelPassword')"
+              :type="showPassword ? 'text' : 'password'"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassword
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassword = !showPassword"
+                  @keydown.enter="showPassword = !showPassword"
+                  @keydown.space.prevent="showPassword = !showPassword"
+                >
+                  {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+            <SyncButton class="primary" @click="currentStep++">
+              {{ t("LabelContinue") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 'google-drive'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelGoogledrivesetup") }}
+          </div>
+          <SyncForm class="mt-2">
+            <SyncAlert v-if="loginFlowError" dense color="error">
+              {{ loginFlowError }}
+            </SyncAlert>
+            <SyncButton color="primary" @click="loginGoogleDrive">
+              {{ t("LabelLogingoogle") }}
+            </SyncButton>
+            <p class="mt-2">
+              {{ t("DescriptionLogingoogle") }}
+            </p>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+
+        <template v-else-if="adapter === 'dropbox'">
+          <div class="headline" role="heading" aria-level="2">
+            {{ t("LabelDropboxsetup") }}
+          </div>
+          <SyncForm class="mt-2">
+            <SyncAlert v-if="loginFlowError" dense color="error">
+              {{ loginFlowError }}
+            </SyncAlert>
+            <SyncButton color="primary" @click="loginDropbox">
+              {{ t("LabelLogindropbox") }}
+            </SyncButton>
+            <p class="mt-2">
+              {{ t("DescriptionLogindropbox") }}
+            </p>
+          </SyncForm>
+          <UiActions class="form-buttons">
+            <SyncButton @click="currentStep--">
+              {{ t("LabelBack") }}
+            </SyncButton>
+          </UiActions>
+        </template>
+      </SyncStepperContent>
+
+      <SyncStepperContent step="3">
+        <div class="headline" role="heading" aria-level="2">
+          {{ t("LabelSyncfoldersetup") }}
+        </div>
+        <SyncForm>
+          <template v-if="adapter === 'nextcloud-bookmarks'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelServerfolder") }}
             </div>
-          </v-form>
-        </v-stepper-content>
-      </v-stepper-items>
-    </v-stepper>
-  </v-container>
+            <div class="caption">
+              {{ t("DescriptionServerfolder") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="serverRoot"
+              :placeholder="'/'"
+              :rules="[validateServerRoot]"
+              :label="t('LabelServerfolder')"
+            />
+          </template>
+
+          <template v-if="adapter === 'linkwarden'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelServerfolder") }}
+            </div>
+            <div class="caption">
+              {{ t("DescriptionServerfolderlinkwarden") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="serverFolder"
+              :label="t('LabelServerfolder')"
+            />
+          </template>
+
+          <template v-if="adapter === 'karakeep'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelServerfolder") }}
+            </div>
+            <div class="caption">
+              {{ t("DescriptionServerfolderkarakeep") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="serverFolder"
+              :label="t('LabelServerfolder')"
+            />
+          </template>
+
+          <template v-if="adapter === 'webdav'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelBookmarksfile") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="bookmark_file"
+              class="mb-2"
+              append-icon="mdi-file-document"
+              :rules="[validateBookmarksFile]"
+              :label="t('LabelBookmarksfile')"
+              :hint="t('DescriptionBookmarksfile')"
+              :persistent-hint="true"
+            />
+            <OptionFileType v-model="bookmark_file_type" />
+          </template>
+
+          <template v-if="adapter === 's3'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelBookmarksfile") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="bookmark_file"
+              class="mb-2"
+              append-icon="mdi-file-document"
+              :rules="[validateBookmarksFile]"
+              :label="t('LabelBookmarksfile')"
+              :hint="t('DescriptionBookmarksfiles3')"
+              :persistent-hint="true"
+            />
+            <OptionFileType v-model="bookmark_file_type" />
+          </template>
+
+          <template v-if="adapter === 'git'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelBookmarksfile") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="bookmark_file"
+              class="mb-2"
+              append-icon="mdi-file-document"
+              :rules="[validateBookmarksFile]"
+              :label="t('LabelBookmarksfile')"
+              :hint="t('DescriptionBookmarksfilegit')"
+              :persistent-hint="true"
+            />
+            <OptionFileType v-model="bookmark_file_type" />
+            <SyncTextField
+              outlined
+              dense
+              v-model="branch"
+              class="mb-2"
+              :label="t('LabelGitbranch')"
+            />
+          </template>
+
+          <template v-if="adapter === 'google-drive'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelBookmarksfile") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="bookmark_file"
+              append-icon="mdi-file-document"
+              :rules="[validateBookmarksFileGoogle]"
+              :label="t('LabelBookmarksfile')"
+              :hint="t('DescriptionBookmarksfilegoogle')"
+              :persistent-hint="true"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="passphrase"
+              :type="showPassphrase ? 'text' : 'password'"
+              class="mt-2"
+              :label="t('LabelPassphrase')"
+              :hint="t('DescriptionPassphrase')"
+              :persistent-hint="true"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassphrase
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassphrase = !showPassphrase"
+                  @keydown.enter="showPassphrase = !showPassphrase"
+                  @keydown.space.prevent="showPassphrase = !showPassphrase"
+                >
+                  {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </template>
+
+          <template v-if="adapter === 'dropbox'">
+            <div class="text-h6" role="heading" aria-level="3">
+              {{ t("LabelBookmarksfile") }}
+            </div>
+            <SyncTextField
+              outlined
+              dense
+              v-model="bookmark_file"
+              append-icon="mdi-file-document"
+              :rules="[validateBookmarksFileDropbox]"
+              :label="t('LabelBookmarksfile')"
+              :hint="t('DescriptionBookmarksfiledropbox')"
+              :persistent-hint="true"
+            />
+            <SyncTextField
+              outlined
+              dense
+              v-model="passphrase"
+              :type="showPassphrase ? 'text' : 'password'"
+              class="mt-2"
+              :label="t('LabelPassphrase')"
+              :hint="t('DescriptionPassphrase')"
+              :persistent-hint="true"
+            >
+              <template #append>
+                <SyncIcon
+                  role="button"
+                  tabindex="0"
+                  :aria-label="
+                    showPassphrase
+                      ? t('LabelHidepassword')
+                      : t('LabelShowpassword')
+                  "
+                  @click="showPassphrase = !showPassphrase"
+                  @keydown.enter="showPassphrase = !showPassphrase"
+                  @keydown.space.prevent="showPassphrase = !showPassphrase"
+                >
+                  {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
+                </SyncIcon>
+              </template>
+            </SyncTextField>
+          </template>
+          <OptionSyncFolder v-if="isBrowser" v-model="localRoot" />
+        </SyncForm>
+
+        <UiActions class="form-buttons pt-4">
+          <SyncButton @click="currentStep--">
+            {{ t("LabelBack") }}
+          </SyncButton>
+          <SyncButton
+            :disabled="isBrowser ? !localRoot : false"
+            color="primary"
+            @click="currentStep++"
+          >
+            {{ t("LabelContinue") }}
+          </SyncButton>
+        </UiActions>
+      </SyncStepperContent>
+
+      <SyncStepperContent step="4">
+        <div class="headline" role="heading" aria-level="2">
+          {{ t("LabelSyncbehaviorsetup") }}
+        </div>
+        <SyncForm>
+          <OptionAutoSync v-model="enabled" />
+          <OptionSyncOnStartup v-model="syncOnStartupEnabled" />
+          <template v-if="isBrowser">
+            <OptionSyncIntervalEnabled v-model="syncIntervalEnabled" />
+            <OptionSyncInterval
+              v-if="syncIntervalEnabled"
+              v-model="syncInterval"
+            />
+            <OptionNotifyOnly
+              :notify-only.sync="notifyOnly"
+              :notifications-enabled.sync="notificationsEnabled"
+            />
+          </template>
+          <OptionSyncStrategy v-model="strategy" />
+          <OptionNestedSync v-if="isBrowser" v-model="nestedSync" />
+          <SyncSwitch
+            v-if="adapter === 'nextcloud-bookmarks'"
+            v-model="clickCountEnabled"
+            :aria-label="t('LabelClickcount')"
+            :label="t('LabelClickcount')"
+            :hint="t('DescriptionClickcount')"
+            :persistent-hint="true"
+            dense
+            class="mt-0 pt-0 mb-4"
+          />
+        </SyncForm>
+        <UiActions class="form-buttons">
+          <SyncButton @click="currentStep--">
+            {{ t("LabelBack") }}
+          </SyncButton>
+          <SyncButton
+            color="primary"
+            :disabled="creating"
+            :loading="creating"
+            @click="onCreate()"
+          >
+            {{ t("LabelContinue") }}
+          </SyncButton>
+        </UiActions>
+      </SyncStepperContent>
+
+      <SyncStepperContent step="5">
+        <div class="headline" role="heading" aria-level="2">
+          {{ t("LabelAccountcreated") }}
+          <SyncIcon aria-hidden="true"> mdi-check </SyncIcon>
+        </div>
+        <SyncForm>
+          <div v-if="isBrowser">
+            {{ t("DescriptionAccountcreated") }}
+            <router-link
+              class="sync-button sync-primary ui-button ui-button-primary"
+              to="/"
+              >{{ t("UiProfiles") }}</router-link
+            >
+          </div>
+        </SyncForm>
+      </SyncStepperContent>
+    </SyncStepperItems>
+  </SyncStepper>
+</SyncContainer>
 </template>
 
 <script>

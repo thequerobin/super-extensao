@@ -7,9 +7,9 @@
     <div class="caption">
       {{ t("DescriptionRemoveaccount") }}
     </div>
-    <v-btn small color="red accent-1" class="mt-3" @click="onClick">
+    <SyncButton small color="red accent-1" class="mt-3" @click="onClick">
       {{ t("LabelRemoveaccount") }}
-    </v-btn>
+    </SyncButton>
   </div>
 </template>
 

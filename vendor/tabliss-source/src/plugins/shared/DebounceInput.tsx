@@ -1,3 +1,4 @@
+import { UiInput } from "../../ui";
 import React, { FC, useState, useEffect } from "react";
 import { useDebounce } from "../../hooks";
 
@@ -21,7 +22,7 @@ export const DebounceInput: FC<Props> = ({
   }, [debouncedValue]);
 
   return (
-    <input
+    <UiInput
       {...props}
       value={newValue}
       onChange={(event) => setNewValue(event.target.value)}

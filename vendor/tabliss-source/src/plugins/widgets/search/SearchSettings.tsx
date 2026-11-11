@@ -1,3 +1,4 @@
+import { UiField, UiInput, UiSelect } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -6,8 +7,8 @@ import { Props, defaultData } from "./types";
 
 const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="SearchSettings">
-    <label>
-      {t("Search Provider")}<select
+    <UiField>
+      {t("Search Provider")}<UiSelect
         onChange={(event) =>
           setData({ ...data, searchEngine: event.target.value })
         }
@@ -18,12 +19,12 @@ const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
             {name}
           </option>
         ))}
-      </select>
-    </label>
+      </UiSelect>
+    </UiField>
 
     {BUILD_TARGET === "web" && (
-      <label>
-        {t("Suggestions Provider")}<select
+      <UiField>
+        {t("Suggestions Provider")}<UiSelect
           onChange={(event) =>
             setData({ ...data, suggestionsEngine: event.target.value })
           }
@@ -38,13 +39,13 @@ const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
                 {name}
               </option>
             ))}
-        </select>
-      </label>
+        </UiSelect>
+      </UiField>
     )}
 
     {data.suggestionsEngine && (
-      <label>
-        {t("Suggestion Quanitity")}<input
+      <UiField>
+        {t("Suggestion Quanitity")}<UiInput
           type="number"
           min="1"
           max="10"
@@ -56,7 +57,7 @@ const SearchSettings: FC<Props> = ({ data = defaultData, setData }) => (
             })
           }
         />
-      </label>
+      </UiField>
     )}
   </div>
 );

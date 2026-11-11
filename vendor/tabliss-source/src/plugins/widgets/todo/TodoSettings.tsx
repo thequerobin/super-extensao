@@ -1,3 +1,4 @@
+import { UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -5,8 +6,8 @@ import { Props, defaultData } from "./types";
 
 const TodoSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="SearchSettings">
-    <label>
-      {t("Tasks to show")}<input
+    <UiField>
+      {t("Tasks to show")}<UiInput
         type="number"
         min="0"
         onChange={(event) =>
@@ -15,10 +16,10 @@ const TodoSettings: FC<Props> = ({ data = defaultData, setData }) => (
         placeholder={t("Number of todo items to show")}
         value={data.show}
       />
-    </label>
+    </UiField>
 
-    <label>
-      {t("New task keybind")}<input
+    <UiField>
+      {t("New task keybind")}<UiInput
         type="text"
         maxLength={1}
         onChange={(event) =>
@@ -26,7 +27,7 @@ const TodoSettings: FC<Props> = ({ data = defaultData, setData }) => (
         }
         value={data.keyBind}
       />
-    </label>
+    </UiField>
   </div>
 );
 

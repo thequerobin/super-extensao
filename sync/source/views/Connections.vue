@@ -1,66 +1,66 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <section class="sync-connections">
-    <div class="sync-section-title">
-      <div>
-        <h2>{{ t("UiConnections") }}</h2>
-        <p>{{ t("UiConnectionHelp") }}</p>
-      </div>
+<section class="sync-connections">
+  <UiHeading class="sync-section-title">
+    <div>
+      <h2>{{ t("UiConnections") }}</h2>
+      <p>{{ t("UiConnectionHelp") }}</p>
     </div>
-    <form class="sync-form" @submit.prevent="save">
-      <p class="ui-notice sync-notice">{{ t("SuperOAuthHelp") }}</p>
-      <label
-        >{{ t("SuperRedirect")
+  </UiHeading>
+  <UiForm class="sync-form" @submit.prevent="save">
+    <UiNotice class="ui-notice sync-notice">{{ t("SuperOAuthHelp") }}</UiNotice>
+    <UiField
+      >{{ t("SuperRedirect")
+      }}<input
+        :value="redirectUrl"
+        readonly
+        @focus="$event.target.select()"
+        class="ui-control"
+    /></UiField>
+    <UiFieldset>
+      <legend>Google Drive</legend>
+      <UiField
+        >{{ t("SuperGoogleId")
         }}<input
-          :value="redirectUrl"
-          readonly
-          @focus="$event.target.select()"
+          v-model.trim="oauth.googleClientId"
+          autocomplete="off"
           class="ui-control"
-      /></label>
-      <fieldset>
-        <legend>Google Drive</legend>
-        <label
-          >{{ t("SuperGoogleId")
-          }}<input
-            v-model.trim="oauth.googleClientId"
-            autocomplete="off"
-            class="ui-control"
-        /></label>
-        <label
-          >{{ t("SuperGoogleSecret")
-          }}<input
-            v-model.trim="oauth.googleClientSecret"
-            type="password"
-            autocomplete="new-password"
-            class="ui-control"
-        /></label>
-      </fieldset>
-      <fieldset>
-        <legend>Dropbox</legend>
-        <label
-          >{{ t("SuperDropboxKey")
-          }}<input
-            v-model.trim="oauth.dropboxClientId"
-            autocomplete="off"
-            class="ui-control"
-        /></label>
-      </fieldset>
-      <p v-if="error" role="alert" class="sync-error ui-notice-error ui-notice">
-        {{ error }}
-      </p>
-      <div class="sync-save-row">
-        <span role="status" class="ui-inline-status">{{
-          saved ? t("UiSaved") : ""
-        }}</span
-        ><button
-          class="sync-button sync-primary ui-button ui-button-primary"
-          :disabled="saving || loading"
-        >
-          {{ saving ? t("UiWorking") : t("SuperSave") }}
-        </button>
-      </div>
-    </form>
-  </section>
+      /></UiField>
+      <UiField
+        >{{ t("SuperGoogleSecret")
+        }}<input
+          v-model.trim="oauth.googleClientSecret"
+          type="password"
+          autocomplete="new-password"
+          class="ui-control"
+      /></UiField>
+    </UiFieldset>
+    <UiFieldset>
+      <legend>Dropbox</legend>
+      <UiField
+        >{{ t("SuperDropboxKey")
+        }}<input
+          v-model.trim="oauth.dropboxClientId"
+          autocomplete="off"
+          class="ui-control"
+      /></UiField>
+    </UiFieldset>
+    <UiNotice v-if="error" role="alert" class="sync-error ui-notice-error ui-notice">
+      {{ error }}
+    </UiNotice>
+    <UiActions class="sync-save-row">
+      <span role="status" class="ui-inline-status">{{
+        saved ? t("UiSaved") : ""
+      }}</span
+      ><UiButton
+        class="sync-button sync-primary ui-button ui-button-primary"
+        :disabled="saving || loading"
+       type="submit">
+        {{ saving ? t("UiWorking") : t("SuperSave") }}
+      </UiButton>
+    </UiActions>
+  </UiForm>
+</section>
 </template>
 <script>
 import browser from "@sync-engine/browser-api";

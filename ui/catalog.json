@@ -1,0 +1,20 @@
+{
+  "button": { "tag": "button", "class": "ui-button", "attrs": { "type": "button" }, "tags": ["button", "a"] },
+  "card": { "tag": "div", "class": "ui-card", "tags": ["div", "section", "article", "fieldset", "details", "main"] },
+  "field": { "tag": "label", "class": "ui-field" },
+  "control": { "tag": "input", "class": "ui-control", "tags": ["input", "select", "textarea"] },
+  "check": { "tag": "label", "class": "ui-check" },
+  "toggle": { "tag": "label", "class": "ui-toggle" },
+  "actions": { "tag": "div", "class": "ui-actions" },
+  "stack": { "tag": "div", "class": "ui-stack" },
+  "heading": { "tag": "div", "class": "ui-section-heading" },
+  "title": { "tag": "h2", "class": "ui-title", "tags": ["h1", "h2", "h3", "h4", "legend"] },
+  "note": { "tag": "p", "class": "ui-note" },
+  "notice": { "tag": "p", "class": "ui-notice", "attrs": { "role": "status" }, "tags": ["p", "div"] },
+  "empty": { "tag": "div", "class": "ui-empty", "tags": ["div", "p", "section"] },
+  "nav": { "tag": "nav", "class": "ui-nav" },
+  "tab": { "tag": "button", "class": "ui-tab", "attrs": { "type": "button" }, "tags": ["button", "a"] },
+  "form": { "tag": "form", "class": "ui-form" },
+  "fieldset": { "tag": "fieldset", "class": "ui-fieldset" },
+  "sr": { "tag": "span", "class": "ui-sr-only" }
+}

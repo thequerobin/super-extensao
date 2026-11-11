@@ -1,3 +1,4 @@
+import { UiCheck, UiField, UiInput, UiSelect } from "../../../ui";
 import { ProviderAccess } from "../shared/ProviderAccess";
 import { t } from "../../../locales/ui";
 import React from "react";
@@ -9,14 +10,14 @@ import { defaultData, Props } from "./types";
 const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
   <div className="UnsplashSettings">
     <ProviderAccess provider="unsplash" />
-    <label>
+    <UiField>
       <span style={{ float: "right" }}>
         {data.paused ? <span className="text--grey">{t("(Paused) ")}</span> : null}
         <a onClick={() => setData({ ...data, paused: !data.paused })}>
           <Icon name={data.paused ? "play" : "pause"} />
         </a>
       </span>
-      {t("Show a new photo")}<select
+      {t("Show a new photo")}<UiSelect
         value={data.timeout}
         onChange={(event) =>
           setData({ ...data, timeout: Number(event.target.value) })
@@ -28,44 +29,44 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
         <option value="3600">{t("Every hour")}</option>
         <option value="86400">{t("Every day")}</option>
         <option value="604800">{t("Every week")}</option>
-      </select>
-    </label>
+      </UiSelect>
+    </UiField>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="radio"
         checked={data.by === "official"}
         onChange={() => setData({ ...data, by: "official" })}
       />{" "}
-      {t("Official Collection")}</label>
+      {t("Official Collection")}</UiCheck>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="radio"
         checked={data.by === "topics"}
         onChange={() => setData({ ...data, by: "topics" })}
       />{" "}
-      {t("Topic")}</label>
+      {t("Topic")}</UiCheck>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="radio"
         checked={data.by === "search"}
         onChange={() => setData({ ...data, by: "search" })}
       />{" "}
-      {t("Search")}</label>
+      {t("Search")}</UiCheck>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="radio"
         checked={data.by === "collections"}
         onChange={() => setData({ ...data, by: "collections" })}
       />{" "}
-      {t("Collection")}</label>
+      {t("Collection")}</UiCheck>
 
     {data.by === "topics" && (
-      <label>
-        {t("Topic")}<select
+      <UiField>
+        {t("Topic")}<UiSelect
           value={data.topics}
           onChange={(event) => setData({ ...data, topics: event.target.value })}
         >
@@ -74,13 +75,13 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
               {t(topic.title)}
             </option>
           ))}
-        </select>
-      </label>
+        </UiSelect>
+      </UiField>
     )}
 
     {data.by === "search" && (
       <>
-        <label>
+        <UiField>
           {t("Tags")}<DebounceInput
             type="text"
             value={data.search}
@@ -88,20 +89,20 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
             onChange={(value) => setData({ ...data, search: value })}
             wait={500}
           />
-        </label>
+        </UiField>
 
-        <label>
-          <input
+        <UiCheck>
+          <UiInput
             type="checkbox"
             checked={data.featured}
             onChange={(event) => setData({ ...data, featured: !data.featured })}
           />{" "}
-          {t("Only featured images")}</label>
+          {t("Only featured images")}</UiCheck>
       </>
     )}
 
     {data.by === "collections" && (
-      <label>
+      <UiField>
         {t("Collection")}<DebounceInput
           type="text"
           value={data.collections}
@@ -109,7 +110,7 @@ const UnsplashSettings: React.FC<Props> = ({ data = defaultData, setData }) => (
           onChange={(value) => setData({ ...data, collections: value })}
           wait={500}
         />
-      </label>
+      </UiField>
     )}
   </div>
 );

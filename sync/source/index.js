@@ -8,6 +8,12 @@ import store from "./store";
 import i18nPlugin, { setupDirection } from "./plugins/i18n";
 import { i18n } from "@sync-engine/native/I18n";
 import "@mdi/font/css/materialdesignicons.css";
+import { installUi } from "../../ui/vue";
+import { installEngineUi } from "./components/ui/engine";
+import "../../ui/vue.css";
+
+Vue.use(installUi);
+Vue.use(installEngineUi);
 
 Vue.mixin(i18nPlugin);
 Vue.mixin(capacitor);

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Extensão</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><img class="brand-icon" src="icons/icon48.png" alt="" width="36" height="36"><div><h1>Super Extensão</h1><p data-i18n="uiCleanupmediaandtabsf4faa">Limpeza, mídia e abas.</p></div></div>
+    <div class="ui-header-controls"><ui-field class="theme-label ui-field-compact"><span data-i18n="uiTheme6ae1b">Tema</span><ui-control id="theme" class="ui-select" as="select"><option value="dark" data-i18n="uiDark0d7f9">Escuro</option><option value="light" data-i18n="uiLight21f72">Claro</option><option value="system" data-i18n="uiSystemc0041">Sistema</option></ui-control></ui-field><ui-field class="theme-label ui-field-compact"><span data-i18n="uiLanguage00943">Idioma</span><ui-control id="language" class="ui-select" as="select"><option value="pt-BR">PT-BR</option><option value="en">EN</option></ui-control></ui-field></div>
+  </header>
+  <div class="popup-navigation">
+    <ui-nav class="main-nav" aria-label="Seções" data-i18n-aria-label="uiSectionscec5a">
+      <ui-tab class="tab active" id="section-cleanup" aria-pressed="true" aria-controls="cleanupSubmenu" data-i18n="uiCleanup5e061">Limpeza</ui-tab>
+      <ui-tab class="tab" id="tab-autoplay" data-tab="autoplay" aria-pressed="false">Autoplay</ui-tab>
+      <ui-tab class="tab" id="tab-tabs" data-tab="tabs" aria-pressed="false" data-i18n="uiTabs3cc23">Abas</ui-tab>
+      <ui-tab class="tab" id="tab-sync" data-tab="sync" aria-pressed="false" data-i18n="uiSyncda8aa">Sincronização</ui-tab>
+      <ui-tab class="tab" id="tab-vpn" data-tab="vpn" aria-pressed="false">VPN</ui-tab>
+    </ui-nav>
+    <ui-nav id="cleanupSubmenu" class="sub-nav ui-submenu" aria-label="Opções de limpeza" data-i18n-aria-label="uiCleanupoptions18c23">
+      <ui-tab class="tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true" data-i18n="uiWhattoclear08caf">O que apagar</ui-tab>
+      <ui-tab class="tab" id="tab-exceptions" data-tab="exceptions" aria-pressed="false">Cookies</ui-tab>
+      <ui-tab class="tab" id="tab-bookmarks" data-tab="bookmarks" aria-pressed="false" data-i18n="uiBookmarks33b33">Favoritos</ui-tab>
+    </ui-nav>
+    <div id="syncSubmenu" class="module-submenu" hidden=""></div>
+    <div id="vpnSubmenu" class="module-submenu" hidden=""></div>
+  </div>
+  <main>
+    <ui-notice id="error" class="message error ui-notice-error" role="alert" hidden="" as="div"></ui-notice>
+    <!-- include:popup/cleanup.html -->
+    <!-- include:popup/exceptions.html -->
+    <!-- include:popup/bookmarks.html -->
+    <!-- include:popup/autoplay.html -->
+    <!-- include:popup/tabs.html -->
+    <!-- include:popup/vpn.html -->
+    <!-- include:popup/sync.html -->
+    <ui-notice id="popupStatus" class="ui-notice-success" role="status" aria-live="polite"></ui-notice>
+    <!-- include:popup/footer.html -->
+  </main>
+  <div id="popupResize" role="separator" tabindex="0" aria-label="Ajustar altura do popup" aria-orientation="horizontal" aria-valuemin="360" aria-valuemax="600" aria-valuenow="580" title="Arraste para ajustar a altura. Use ↑ e ↓ ou dê dois cliques para restaurar." data-i18n-title="uiDragtoresizeUseand9c407" data-i18n-aria-label="uiAdjustpopupheight48122"></div>
+  <script src="ui.js"></script><script src="preferences.js"></script><script src="i18n.js"></script>
+  <script src="popup-resize.js"></script>
+  <script src="popup-panels.js"></script>
+  <script src="rules.js"></script><script src="navigation-rules.js"></script><script src="popup.js"></script><script src="tools-popup.js"></script>
+
+
+
+</body></html>

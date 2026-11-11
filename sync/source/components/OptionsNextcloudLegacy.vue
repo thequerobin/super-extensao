@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
   <div>
-    <v-expansion-panels v-model="panels" hover multiple>
-      <v-expansion-panel>
-        <v-expansion-panel-header>{{
+    <SyncPanels v-model="panels" hover multiple>
+      <SyncPanel>
+        <SyncPanelHeader>{{
           t("LabelOptionsServerDetails")
-        }}</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-text-field
+        }}</SyncPanelHeader>
+        <SyncPanelContent>
+          <SyncTextField
             outlined
             dense
             :value="url"
@@ -15,14 +15,14 @@
             :label="t('LabelNextcloudurl')"
             @input="$emit('update:url', $event)"
           />
-          <v-text-field
+          <SyncTextField
             outlined
             dense
             :value="username"
             :label="t('LabelUsername')"
             @input="$emit('update:username', $event)"
           />
-          <v-text-field
+          <SyncTextField
             outlined
             dense
             :value="password"
@@ -30,22 +30,22 @@
             :label="t('LabelPassword')"
             @input="$emit('update:password', $event)"
           />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+        </SyncPanelContent>
+      </SyncPanel>
 
-      <v-expansion-panel>
-        <v-expansion-panel-header>{{
+      <SyncPanel>
+        <SyncPanelHeader>{{
           t("LabelOptionsFolderMapping")
-        }}</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-container>
+        }}</SyncPanelHeader>
+        <SyncPanelContent>
+          <SyncContainer>
             <div class="heading">
               {{ t("LabelServerfolder") }}
             </div>
             <div class="caption">
               {{ t("DescriptionServerfolder") }}
             </div>
-            <v-text-field
+            <SyncTextField
               outlined
               dense
               :value="serverRoot"
@@ -54,7 +54,7 @@
               :label="t('LabelServerfolder')"
               @input="$emit('update:serverRoot', $event)"
             />
-          </v-container>
+          </SyncContainer>
           <OptionSyncFolder
             :value="localRoot"
             @input="$emit('update:localRoot', $event)"
@@ -63,14 +63,14 @@
             :value="nestedSync"
             @input="$emit('update:nestedSync', $event)"
           />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+        </SyncPanelContent>
+      </SyncPanel>
 
-      <v-expansion-panel>
-        <v-expansion-panel-header>{{
+      <SyncPanel>
+        <SyncPanelHeader>{{
           t("LabelOptionsSyncBehavior")
-        }}</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        }}</SyncPanelHeader>
+        <SyncPanelContent>
           <OptionSyncInterval
             :value="syncInterval"
             @input="$emit('update:syncInterval', $event)"
@@ -79,19 +79,19 @@
             :value="strategy"
             @input="$emit('update:strategy', $event)"
           />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+        </SyncPanelContent>
+      </SyncPanel>
 
-      <v-expansion-panel>
-        <v-expansion-panel-header>{{
+      <SyncPanel>
+        <SyncPanelHeader>{{
           t("LabelOptionsDangerous")
-        }}</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        }}</SyncPanelHeader>
+        <SyncPanelContent>
           <OptionResetCache @click="$emit('reset')" />
           <OptionDeleteAccount @click="$emit('delete')" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+        </SyncPanelContent>
+      </SyncPanel>
+    </SyncPanels>
   </div>
 </template>
 

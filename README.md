@@ -4,13 +4,13 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.6.6.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.6.8.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
 | Área | Implementado | O que ainda depende de trabalho |
 | --- | --- | --- |
-| Interface | Abas e submenus fixos, componentes/preferências compartilhados, foco unificado e tema também na aba de reserva/Nova guia | Conferência visual no navegador, inclusive foco, rolagem e setas dos países |
+| Interface | Catálogo comum com adaptadores HTML/DOM, Vue e React; páginas estáticas separadas em seções; preferências e foco compartilhados | Ampliar a conferência visual para todos os diálogos e estados com contas reais |
 | Sincronização | Google Drive/favoritos pelo núcleo próprio; demais provedores e abas pelo motor legado | Dois navegadores reais, restauração de backups por interface e migração dos demais conectores |
 | Núcleo Google Drive | Reconciliação, escrita condicional, criptografia, backup e retomada pelo diário | Ampliar a validação real relatada pelo usuário, medir grandes importações e suportar pastas sobrepostas |
 | VPN | Interface e núcleo de regras próprios, controlador/sessão Proton, servidores por país e indicador no ícone | Validação real de login, tráfego, IP, regras e recuperação; núcleo próprio de regras entregue; controlador e sessão pendentes |
@@ -39,7 +39,7 @@ Os arquivos compilados já estão no repositório: instalar a extensão não exi
 
 Tema e idioma ficam no cabeçalho e atendem toda a extensão. Limpeza, Sincronização e VPN têm submenus fixos; o conteúdo interno continua rolável sem barras visíveis. Arraste a alça inferior para ajustar a altura do popup. A seção selecionada é preservada; a VPN também guarda sua página e rolagem.
 
-A [base visual](docs/ui-components.md) centraliza botões, campos, buscas, cartões, switches, avisos e medidas. Os ajustes de largura e das setas dos países foram implementados nas versões 1.5.17/1.5.18; a geometria real ainda precisa da conferência descrita no roteiro.
+A [biblioteca de componentes](docs/ui-components.md) centraliza estrutura, botões, campos, grupos de ações, cartões, avisos e espaçamento. Popup, sincronização, VPN, editor da nova guia e aba de reserva consomem essa base por seus adaptadores. React, Vue/Vuetify e os motores existentes permanecem; componentizar a interface não substitui esses motores.
 
 ### Sincronização de favoritos
 
@@ -104,6 +104,7 @@ Node.js 20 ou superior. Para instalar as dependências da suíte:
 ```sh
 npm ci
 npm run setup:vpn
+npm run setup:newtab
 npm test
 ```
 
@@ -111,6 +112,9 @@ npm test
 
 | Alteração | Comando |
 | --- | --- |
+| Templates estáticos e controles DOM do popup | `npm run build:ui` |
+| Todas as interfaces, após instalar as três dependências de origem | `npm run build:interfaces` |
+| Conferir artefatos estáticos | `npm run check:ui` |
 | Interface da Sincronização | `npm run build:sync` |
 | Worker com núcleo Google Drive próprio | `npm run build:sync-engine` |
 | Somente interface da VPN | `npm run build:vpn-ui` |
@@ -121,7 +125,9 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A última execução registrada na implementação **1.6.6 passou 148 testes**, com APIs simuladas e testes DOM. Os testes simulados não comprovam tráfego de VPN nem geometria nativa. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
+A execução da **1.6.8 passou 154 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface também foi conferida no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
+
+As fontes das páginas estáticas ficam em `ui/templates/`; `popup.html`, `spare-tab.html`, `newtab/index.html` e `ui.js` são gerados por `build:ui`. Consulte [os contratos e adaptadores](docs/ui-components.md) antes de alterar componentes. Incremente a versão conforme `AGENTS.md` ao entregar alterações instaláveis.
 
 ## Documentação
 

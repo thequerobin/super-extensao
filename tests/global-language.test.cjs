@@ -159,6 +159,7 @@ test("global header locale updates all local tabs, dynamic messages and both emb
       "i18n.js",
       "rules.js",
       "navigation-rules.js",
+      "ui.js",
       "popup.js",
       "tools-popup.js",
     ]);

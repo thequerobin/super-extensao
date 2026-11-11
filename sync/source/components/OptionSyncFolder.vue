@@ -8,11 +8,11 @@
       <div class="caption">
         {{ t("DescriptionLocaltarget") }}
       </div>
-      <v-radio-group v-model="mode" column>
-        <v-radio value="folder">
+      <SyncRadioGroup v-model="mode" column>
+        <SyncRadio value="folder">
           <template #label>
             {{ t("LabelLocalfolder") }}
-            <v-text-field
+            <SyncTextField
               outlined
               dense
               v-model="path"
@@ -22,41 +22,41 @@
               @click="onTriggerFinder"
             >
               <template #append>
-                <v-icon
+                <SyncIcon
                   color="blue darken-1"
                   aria-hidden="true"
                   @click="onTriggerFinder"
                 >
                   mdi-folder
-                </v-icon>
+                </SyncIcon>
               </template>
-            </v-text-field>
+            </SyncTextField>
           </template>
-        </v-radio>
+        </SyncRadio>
         <div class="caption ms-8 mb-6">
           {{ t("DescriptionLocalfolder") }}
         </div>
-        <v-radio :label="t('LabelSyncTabs')" value="tabs" />
+        <SyncRadio :label="t('LabelSyncTabs')" value="tabs" />
         <div class="caption ms-8 mb-2">
           {{ t("DescriptionSyncTabs") }}
         </div>
-      </v-radio-group>
+      </SyncRadioGroup>
     </div>
-    <v-dialog v-model="finder" max-width="600" :style="{ height: '500px' }">
-      <v-card>
-        <v-row no-gutters>
-          <v-col class="flex-grow-1">
-            <v-card-title class="headline">
+    <SyncDialog v-model="finder" max-width="600" :style="{ height: '500px' }">
+      <SyncCard>
+        <SyncRow no-gutters>
+          <SyncCol class="flex-grow-1">
+            <SyncCardTitle class="headline">
               {{ t("LabelLocalfolder") }}
-            </v-card-title>
-          </v-col>
-          <v-col class="flex-grow-0">
-            <v-btn class="primary ma-2" @click="onSave">
+            </SyncCardTitle>
+          </SyncCol>
+          <SyncCol class="flex-grow-0">
+            <SyncButton class="primary ma-2" @click="onSave">
               {{ t("LabelSave") }}
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-treeview
+            </SyncButton>
+          </SyncCol>
+        </SyncRow>
+        <SyncTree
           v-if="folders.length"
           class="pa-4"
           activatable
@@ -69,22 +69,22 @@
           @update:active="onUpdateSelection"
         >
           <template #prepend="{ open }">
-            <v-icon aria-hidden="true">
+            <SyncIcon aria-hidden="true">
               {{ open ? "mdi-folder-open" : "mdi-folder" }}
-            </v-icon>
+            </SyncIcon>
           </template>
           <template #label="{ item }">
             {{ item.title || t("LabelUntitledfolder") }}
           </template>
-        </v-treeview>
-        <v-progress-circular
+        </SyncTree>
+        <SyncSpinner
           v-else
           color="primary"
           indeterminate
           class="ma-8"
         />
-      </v-card>
-    </v-dialog>
+      </SyncCard>
+    </SyncDialog>
   </div>
 </template>
 

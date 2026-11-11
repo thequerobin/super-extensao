@@ -1,3 +1,4 @@
+import { UiButton, UiField, UiTextarea } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC, useState } from "react";
 
@@ -9,16 +10,16 @@ const JsSettings: FC<Props> = ({ data = defaultData, setData }) => {
 
   return (
     <div className="JsSettings">
-      <label>
-        {t("JavaScript Snippet")}<textarea
+      <UiField>
+        {t("JavaScript Snippet")}<UiTextarea
           rows={3}
           style={{ fontFamily: "monospace" }}
           value={input}
           onChange={(event) => setInput(event.target.value)}
         />
-      </label>
+      </UiField>
 
-      <button onClick={handleSave}>{t("Apply")}</button>
+      <UiButton onClick={handleSave}>{t("Apply")}</UiButton>
 
       <p className="info">
         {t("Warning: this functionality is intended for advanced users. Custom scripts may break at any time. The snippet will run once after the dashboard has loaded. Be careful of persisting event listeners when editing the snippet.")}</p>

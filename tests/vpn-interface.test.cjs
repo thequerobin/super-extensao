@@ -26,6 +26,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
       ...globals,
       require(spec) {
         if (spec in mocks) return mocks[spec];
+        if (spec.endsWith('.cjs')) return require(path.resolve(path.dirname(filename), spec));
         if (spec.startsWith("."))
           return load(
             path.relative(

@@ -1,4 +1,10 @@
-# Interface de sincronização — referência 1.6.3
+# Interface de sincronização — referência 1.6.8
+
+## Componentização 1.6.8
+
+As telas usam os componentes `Ui*` do catálogo comum para campos nativos, cartões, avisos, ações, formulários e navegação. Os controles validados e compostos passam pelos adaptadores `Sync*` em `sync/source/components/ui/engine.js`. Esses adaptadores estendem os controles Vuetify e preservam eventos, modelos, validações, slots, referências e relações entre componentes. A aparência da biblioteca fica em `ui/vue.css`; o layout das telas permanece em `sync/source/interface.css`.
+
+O registro ocorre em `sync/source/index.js`. Para mudar um controle comum, altere o adaptador ou o catálogo, em vez de replicar a implementação em cada provedor. Os fluxos de perfis, rascunhos, backup, autorização e os motores não foram alterados por essa migração. [Catálogo, fontes e compilação](ui-components.md).
 
 A aplicação fica em `sync/source`. Os perfis Google Drive de favoritos executam o núcleo próprio de `sync/engine` pelo worker; demais provedores e perfis de abas continuam no Floccus adaptado de `vendor/floccus-source`. O bloco de comparação foi removido em 1.6.0. Cadastro, autenticação interativa e comandos da interface mantêm a camada de compatibilidade.
 
@@ -41,7 +47,7 @@ Para alterar as telas, edite `sync/source`, e não as telas antigas em `vendor/f
 
 A suíte Node inclui testes DOM do bundle de produção com JSDOM e APIs Chromium simuladas: navegação, idioma, oito serviços, configuração OAuth isolada, leitura de perfis existentes, rascunhos antes/depois de salvar, seleção na exportação, confirmação de sincronização direcional, teste de conexão e criação WebDAV, e bloqueio das telas quando o motor está protegido.
 
-O Chromium não iniciou neste ambiente (`socket() failed: Operation not permitted`). Os testes DOM não verificam geometria, contraste, foco nativo ou tráfego real. Antes de liberar, conferir no Helium/Chromium: temas claro/escuro/sistema, rolagem e altura do popup, seleção de pastas e diálogos, criação/edição/importação/exportação e login/sincronização nos provedores usados. Nenhuma conta real foi conectada durante estes testes.
+Na rodada 1.6.8, o Helium com perfil temporário abriu os bundles e permitiu conferir a visão de perfis vazia, a seleção de serviço no assistente e os campos de Conexões, sem erros de página ou estouro horizontal nos estados medidos. Os testes DOM continuam cobrindo perfis existentes, rascunhos, backup e validações. Diálogos de pastas, autenticação e sincronização com contas reais continuam pendentes nessa rodada. [Evidências e limites](validacao.md).
 
 ## Núcleo próprio Google Drive (1.6.0)
 

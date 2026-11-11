@@ -7,10 +7,10 @@
     <div class="caption">
       {{ t("DescriptionFiletype") }}
     </div>
-    <v-radio-group :value="value" @change="$emit('input', $event)">
-      <v-radio :label="t('LabelFiletypexbel')" value="xbel" />
-      <v-radio :label="t('LabelFiletypehtml')" value="html" />
-    </v-radio-group>
+    <SyncRadioGroup :value="value" @change="$emit('input', $event)">
+      <SyncRadio :label="t('LabelFiletypexbel')" value="xbel" />
+      <SyncRadio :label="t('LabelFiletypehtml')" value="html" />
+    </SyncRadioGroup>
   </div>
 </template>
 

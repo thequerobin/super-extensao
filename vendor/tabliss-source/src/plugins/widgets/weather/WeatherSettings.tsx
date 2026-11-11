@@ -1,3 +1,4 @@
+import { UiCheck, UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 import LocationInput from "./LocationInput";
@@ -13,8 +14,8 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
 
     {data.latitude && data.latitude ? (
       <>
-        <label>
-          {t("Name")}<input
+        <UiField>
+          {t("Name")}<UiInput
             type="text"
             value={data.name || ""}
             placeholder={t("Optional name")}
@@ -22,35 +23,35 @@ const WeatherSettings: FC<Props> = ({ data = defaultData, setData }) => (
               setData({ ...data, name: event.target.value || undefined })
             }
           />
-        </label>
+        </UiField>
 
         <hr />
 
-        <label>
-          <input
+        <UiCheck>
+          <UiInput
             type="checkbox"
             checked={data.showDetails}
             onChange={() =>
               setData({ ...data, showDetails: !data.showDetails })
             }
           />{" "}
-          {t("Show extended details")}</label>
+          {t("Show extended details")}</UiCheck>
 
-        <label>
-          <input
+        <UiCheck>
+          <UiInput
             type="radio"
             checked={data.units === "si"}
             onChange={() => setData({ ...data, units: "si" })}
           />{" "}
-          {t("Metric units")}</label>
+          {t("Metric units")}</UiCheck>
 
-        <label>
-          <input
+        <UiCheck>
+          <UiInput
             type="radio"
             checked={data.units === "us"}
             onChange={() => setData({ ...data, units: "us" })}
           />{" "}
-          {t("Imperial units")}</label>
+          {t("Imperial units")}</UiCheck>
 
         <p>
           <a

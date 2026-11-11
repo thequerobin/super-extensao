@@ -1,3 +1,4 @@
+import { UiButton, UiCheck, UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -13,8 +14,8 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
 
   return (
     <div className="LinksSettings">
-      <label>
-        {t("Number of columns")}<input
+      <UiField>
+        {t("Number of columns")}<UiInput
           type="number"
           value={data.columns}
           onChange={(event) =>
@@ -22,25 +23,25 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
           }
           min={1}
         />
-      </label>
+      </UiField>
 
-      <label>
-        <input
+      <UiCheck>
+        <UiInput
           type="checkbox"
           checked={data.visible}
           onChange={() => setData({ ...data, visible: !data.visible })}
         />
-        {t("Links are always visible")}</label>
+        {t("Links are always visible")}</UiCheck>
 
-      <label>
-        <input
+      <UiCheck>
+        <UiInput
           type="checkbox"
           checked={data.linkOpenStyle}
           onChange={() =>
             setData({ ...data, linkOpenStyle: !data.linkOpenStyle })
           }
         />
-        {t("Links open in a new tab")}</label>
+        {t("Links open in a new tab")}</UiCheck>
 
       <hr />
 
@@ -67,11 +68,11 @@ const LinksSettings: FC<Props> = ({ data = defaultData, setData }) => {
       ))}
 
       <p style={{ marginTop: "0.5rem" }}>
-        <button
+        <UiButton
           className="button button--primary"
           onClick={() => dispatch(addLink())}
         >
-          {t("Add link")}</button>
+          {t("Add link")}</UiButton>
       </p>
     </div>
   );

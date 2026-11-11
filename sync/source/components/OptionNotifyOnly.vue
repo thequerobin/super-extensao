@@ -7,7 +7,7 @@
     <div class="caption">
       {{ t("DescriptionNotifyonly") }}
     </div>
-    <v-switch
+    <SyncSwitch
       :input-value="notifyOnly"
       :aria-label="t('LabelNotifyonly')"
       :label="t('LabelNotifyonly')"
@@ -19,7 +19,7 @@
       <div class="caption">
         {{ t("DescriptionNotifyonlynotifications") }}
       </div>
-      <v-switch
+      <SyncSwitch
         :input-value="notificationsEnabled"
         :aria-label="t('LabelNotifyonlynotifications')"
         :label="t('LabelNotifyonlynotifications')"

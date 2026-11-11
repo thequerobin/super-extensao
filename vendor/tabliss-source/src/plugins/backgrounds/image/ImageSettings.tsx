@@ -1,3 +1,4 @@
+import { UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React from "react";
 import { useObjectUrls } from "../../../hooks";
@@ -18,8 +19,8 @@ const ImageSettings: React.FC<Props> = ({ cache = defaultCache, setCache }) => {
 
   return (
     <div className="ImageSettings">
-      <label>
-        <input
+      <UiField>
+        <UiInput
           accept="image/*"
           multiple={true}
           onChange={(event) =>
@@ -27,7 +28,7 @@ const ImageSettings: React.FC<Props> = ({ cache = defaultCache, setCache }) => {
           }
           type="file"
         />
-      </label>
+      </UiField>
 
       <div className="grid">
         {urls &&

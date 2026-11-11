@@ -1,95 +1,95 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <section class="sync-settings">
-    <div class="sync-section-title">
-      <div>
-        <p class="sync-eyebrow">{{ data.type }}</p>
-        <h2>{{ data.label || folderName || t("LabelOptions") }}</h2>
-      </div>
-      <router-link class="sync-button ui-button" to="/">{{
-        t("LabelBack")
-      }}</router-link>
+<section class="sync-settings">
+  <UiHeading class="sync-section-title">
+    <div>
+      <p class="sync-eyebrow">{{ data.type }}</p>
+      <h2>{{ data.label || folderName || t("LabelOptions") }}</h2>
     </div>
-    <p
-      v-if="error"
-      role="alert"
-      class="ui-notice sync-notice sync-error ui-notice-error"
-    >
-      {{ error }}
-    </p>
-    <p v-if="loading" role="status">{{ t("UiWorking") }}</p>
-    <v-form v-if="!loading" class="mt-3 mb-3">
-      <OptionsNextcloudFolders
-        v-if="
-          data.type === 'nextcloud-folders' ||
-          data.type === 'nextcloud-bookmarks'
-        "
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsLinkwarden
-        v-if="data.type === 'linkwarden'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsKarakeep
-        v-if="data.type === 'karakeep'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsWebdav
-        v-if="data.type === 'webdav'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsS3
-        v-if="data.type === 's3'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsGit
-        v-if="data.type === 'git'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsFake
-        v-if="data.type === 'fake'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsGoogleDrive
-        v-if="data.type === 'google-drive'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-      <OptionsDropbox
-        v-if="data.type === 'dropbox'"
-        v-bind.sync="data"
-        @reset="onReset"
-        @delete="onDelete"
-      />
-    </v-form>
-    <div class="sync-save-row">
-      <span role="status" class="ui-inline-status">{{
-        saved ? t("UiSaved") : ""
-      }}</span
-      ><button
-        class="sync-button sync-primary ui-button ui-button-primary"
-        :disabled="loading || saving"
-        @click="onSave"
-      >
-        {{ saving ? t("UiWorking") : t("LabelSave") }}
-      </button>
-    </div>
-  </section>
+    <router-link class="sync-button ui-button" to="/">{{
+      t("LabelBack")
+    }}</router-link>
+  </UiHeading>
+  <UiNotice
+    v-if="error"
+    role="alert"
+    class="ui-notice sync-notice sync-error ui-notice-error"
+  >
+    {{ error }}
+  </UiNotice>
+  <p v-if="loading" role="status">{{ t("UiWorking") }}</p>
+  <SyncForm v-if="!loading" class="mt-3 mb-3">
+    <OptionsNextcloudFolders
+      v-if="
+        data.type === 'nextcloud-folders' ||
+        data.type === 'nextcloud-bookmarks'
+      "
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsLinkwarden
+      v-if="data.type === 'linkwarden'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsKarakeep
+      v-if="data.type === 'karakeep'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsWebdav
+      v-if="data.type === 'webdav'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsS3
+      v-if="data.type === 's3'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsGit
+      v-if="data.type === 'git'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsFake
+      v-if="data.type === 'fake'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsGoogleDrive
+      v-if="data.type === 'google-drive'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+    <OptionsDropbox
+      v-if="data.type === 'dropbox'"
+      v-bind.sync="data"
+      @reset="onReset"
+      @delete="onDelete"
+    />
+  </SyncForm>
+  <UiActions class="sync-save-row">
+    <span role="status" class="ui-inline-status">{{
+      saved ? t("UiSaved") : ""
+    }}</span
+    ><UiButton
+      class="sync-button sync-primary ui-button ui-button-primary"
+      :disabled="loading || saving"
+      @click="onSave"
+     type="submit">
+      {{ saving ? t("UiWorking") : t("LabelSave") }}
+    </UiButton>
+  </UiActions>
+</section>
 </template>
 <script>
 import PathHelper from "@sync-engine/PathHelper";

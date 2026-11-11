@@ -1,3 +1,4 @@
+import { UiCheck, UiField, UiInput } from "../../../ui";
 import { t } from "../../../locales/ui";
 import React, { FC } from "react";
 
@@ -5,26 +6,26 @@ import { Props, defaultData } from "./types";
 
 const IpInfoSettings: FC<Props> = ({ data = defaultData, setData }) => (
   <div className="IpInfoSettings">
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="checkbox"
         checked={data.displayCity}
         onChange={() => setData({ ...data, displayCity: !data.displayCity })}
       />
-      {t("Display City")}</label>
+      {t("Display City")}</UiCheck>
 
-    <label>
-      <input
+    <UiCheck>
+      <UiInput
         type="checkbox"
         checked={data.displayCountry}
         onChange={() =>
           setData({ ...data, displayCountry: !data.displayCountry })
         }
       />
-      {t("Display Country")}</label>
+      {t("Display Country")}</UiCheck>
 
-    <label>
-      {t("Refresh interval (minutes)")}<input
+    <UiField>
+      {t("Refresh interval (minutes)")}<UiInput
         type="number"
         value={data.refreshInterval}
         onChange={(event) =>
@@ -33,7 +34,7 @@ const IpInfoSettings: FC<Props> = ({ data = defaultData, setData }) => (
         min={1}
         max={60}
       />
-    </label>
+    </UiField>
   </div>
 );
 

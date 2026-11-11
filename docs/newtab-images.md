@@ -1,4 +1,6 @@
-# Imagens da Nova guia — 1.6.6
+# Imagens da Nova guia — 1.6.8
+
+O editor e as configurações de fundos/widgets usam os componentes React compartilhados em `vendor/tabliss-source/src/ui`. A estrutura vem de `ui/catalog.json`, e a aparência de `ui-components.css`. `ProviderAccess` usa os mesmos componentes de campo, descrição, grupo de ações e aviso para Unsplash e GIPHY. A chave e as ações têm espaçamento explícito, inclusive em telas estreitas. Essa mudança preserva o armazenamento e o comportamento dos provedores descritos abaixo.
 
 A distribuição anterior continha `Client-ID undefined` para Unsplash e `api_key=undefined` para GIPHY. Isso fazia os serviços responderem com erro. O código tratava a resposta como imagem, causando as exceções de `.map` e `images.original`, sem encerrar corretamente todos os fluxos de carregamento.
 

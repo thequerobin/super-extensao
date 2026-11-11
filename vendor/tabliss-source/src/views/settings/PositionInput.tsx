@@ -1,3 +1,4 @@
+import { UiField } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { WidgetPosition } from "../../db/state";
@@ -50,7 +51,7 @@ type Props = {
 
 const PositionInput: React.FC<Props> = ({ value, onChange }) => (
   <div className="PositionInput">
-    <label>{t("Position")}</label>
+    <UiField>{t("Position")}</UiField>
 
     <div className="grid">
       {positions.map((position) => (

@@ -1,3 +1,4 @@
+import { UiCard, UiField, UiInput, UiSelect } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
@@ -27,8 +28,8 @@ const Background: React.FC = () => {
         />
       </h2>
 
-      <label>
-        <select
+      <UiField>
+        <UiSelect
           value={data.key}
           onChange={(event) => setBackground(event.target.value)}
           className="primary"
@@ -38,11 +39,11 @@ const Background: React.FC = () => {
               {plugin.name}
             </option>
           ))}
-        </select>
-      </label>
+        </UiSelect>
+      </UiField>
 
       {plugin && (
-        <div className="Widget">
+        <UiCard className="Widget">
           <h4>{plugin.name}</h4>
 
           {plugin.settingsComponent && (
@@ -54,9 +55,9 @@ const Background: React.FC = () => {
           {plugin.supportsBackdrop && (
             <ToggleSection name={t("Display Settings")}>
               <>
-                <label>
+                <UiField>
                   {t("Blur ")}<br />
-                  <input
+                  <UiInput
                     type="range"
                     list="blur-markers"
                     min="0"
@@ -73,11 +74,11 @@ const Background: React.FC = () => {
                     <option value="0" />
                     <option value="50" />
                   </datalist>
-                </label>
+                </UiField>
 
-                <label>
+                <UiField>
                   {t("Luminosity ")}<br />
-                  <input
+                  <UiInput
                     type="range"
                     list="luminosity-markers"
                     min="-1"
@@ -95,11 +96,11 @@ const Background: React.FC = () => {
                     <option value="0" />
                     <option value="1" label={t("Lighten")} />
                   </datalist>
-                </label>
+                </UiField>
               </>
             </ToggleSection>
           )}
-        </div>
+        </UiCard>
       )}
     </div>
   );

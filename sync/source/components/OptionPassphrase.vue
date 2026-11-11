@@ -9,21 +9,21 @@
     </div>
     <template v-if="!editing">
       <template v-if="value">
-        <v-btn @click="editing = true">
-          <v-icon>mdi-pencil-lock</v-icon>{{ t("LabelChange") }}
-        </v-btn>
-        <v-btn @click="$emit('input', '')">
-          <v-icon>mdi-lock-remove</v-icon>{{ t("LabelRemove") }}
-        </v-btn>
+        <SyncButton @click="editing = true">
+          <SyncIcon>mdi-pencil-lock</SyncIcon>{{ t("LabelChange") }}
+        </SyncButton>
+        <SyncButton @click="$emit('input', '')">
+          <SyncIcon>mdi-lock-remove</SyncIcon>{{ t("LabelRemove") }}
+        </SyncButton>
       </template>
       <template v-else>
-        <v-btn @click="editing = true">
-          <v-icon>mdi-lock-plus</v-icon>{{ t("LabelAdd") }}
-        </v-btn>
+        <SyncButton @click="editing = true">
+          <SyncIcon>mdi-lock-plus</SyncIcon>{{ t("LabelAdd") }}
+        </SyncButton>
       </template>
     </template>
     <template v-else>
-      <v-text-field
+      <SyncTextField
         outlined
         dense
         class="mt-2"
@@ -32,7 +32,7 @@
         @input="passphrase = $event"
       >
         <template #append>
-          <v-icon
+          <SyncIcon
             role="button"
             tabindex="0"
             :aria-label="
@@ -43,23 +43,23 @@
             @keydown.space.prevent="showPassphrase = !showPassphrase"
           >
             {{ showPassphrase ? "mdi-eye" : "mdi-eye-off" }}
-          </v-icon>
+          </SyncIcon>
         </template>
-      </v-text-field>
-      <v-btn
+      </SyncTextField>
+      <SyncButton
         color="primary"
         @click="
           $emit('input', passphrase);
           editing = false;
         "
       >
-        <v-icon>mdi-check</v-icon>
+        <SyncIcon>mdi-check</SyncIcon>
         {{ t("LabelSave") }}
-      </v-btn>
-      <v-btn @click="editing = false">
-        <v-icon>mdi-close</v-icon>
+      </SyncButton>
+      <SyncButton @click="editing = false">
+        <SyncIcon>mdi-close</SyncIcon>
         {{ t("LabelCancel") }}
-      </v-btn>
+      </SyncButton>
     </template>
   </div>
 </template>

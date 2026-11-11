@@ -1,3 +1,4 @@
+import { UiButton, UiCard } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 
@@ -20,17 +21,17 @@ const Persist: React.FC = () => {
   };
 
   return (
-    <div className="Widget" style={{ textAlign: "center" }}>
+    <UiCard className="Widget" style={{ textAlign: "center" }}>
       <h4>{t("Persist Settings")}</h4>
       <p>
         {t("Would you like Tabliss to ask your browser to save your setting permanently?")}</p>
       {error ? (
         <p>{t("Could not persist settings at this time.")}</p>
       ) : (
-        <button className="button button--primary" onClick={handleClick}>
-          {t("Persist Settings")}</button>
+        <UiButton className="button button--primary" onClick={handleClick}>
+          {t("Persist Settings")}</UiButton>
       )}
-    </div>
+    </UiCard>
   );
 };
 

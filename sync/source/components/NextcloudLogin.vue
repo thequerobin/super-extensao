@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
   <div>
-    <v-text-field
+    <SyncTextField
       outlined
       dense
       :value="username"
@@ -11,35 +11,35 @@
       @input="$emit('update:username', $event)"
     >
       <template slot="append-outer">
-        <v-tooltip v-if="!isRunning" left>
+        <SyncTooltip v-if="!isRunning" left>
           <template #activator="{ on }">
-            <v-btn
+            <SyncButton
               icon
               :aria-label="t('LabelLoginFlowStart')"
               @click="onFlowStart"
               v-on="on"
             >
-              <v-icon aria-hidden="true"> mdi-account-circle </v-icon>
-            </v-btn>
+              <SyncIcon aria-hidden="true"> mdi-account-circle </SyncIcon>
+            </SyncButton>
           </template>
           <span>{{ t("LabelLoginFlowStart") }}</span>
-        </v-tooltip>
-        <v-tooltip v-else left>
+        </SyncTooltip>
+        <SyncTooltip v-else left>
           <template #activator="{ on }">
-            <v-btn
+            <SyncButton
               icon
               :aria-label="t('LabelLoginFlowStop')"
               @click="onFlowStop"
               v-on="on"
             >
-              <v-icon aria-hidden="true"> mdi-cancel </v-icon>
-            </v-btn>
+              <SyncIcon aria-hidden="true"> mdi-cancel </SyncIcon>
+            </SyncButton>
           </template>
           <span>{{ t("LabelLoginFlowStop") }}</span>
-        </v-tooltip>
+        </SyncTooltip>
       </template>
-    </v-text-field>
-    <v-text-field
+    </SyncTextField>
+    <SyncTextField
       outlined
       dense
       :type="showPassword ? 'text' : 'password'"
@@ -47,7 +47,7 @@
       @input="$emit('update:password', $event)"
     >
       <template #append>
-        <v-icon
+        <SyncIcon
           role="button"
           tabindex="0"
           :aria-label="
@@ -58,9 +58,9 @@
           @keydown.space.prevent="showPassword = !showPassword"
         >
           {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-        </v-icon>
+        </SyncIcon>
       </template>
-    </v-text-field>
+    </SyncTextField>
   </div>
 </template>
 

@@ -1,3 +1,4 @@
+import { UiSelect } from "../../../ui";
 import { t } from "../../../locales/ui";
 import { getTimezoneOffset } from "date-fns-tz";
 import React from "react";
@@ -46,7 +47,7 @@ const TimeZoneInput: React.FC<Props> = ({ timeZone, onChange }) => {
   }, []);
 
   return (
-    <select
+    <UiSelect
       value={timeZone || ""}
       onChange={(event) => onChange(event.target.value || null)}
     >
@@ -60,7 +61,7 @@ const TimeZoneInput: React.FC<Props> = ({ timeZone, onChange }) => {
       ) : (
         <option disabled>{t("Loading...")}</option>
       )}
-    </select>
+    </UiSelect>
   );
 };
 

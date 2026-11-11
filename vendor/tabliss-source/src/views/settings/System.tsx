@@ -1,3 +1,4 @@
+import { UiField, UiSelect } from "../../ui";
 import { t } from "../../locales/ui";
 import React from "react";
 import { FormattedMessage } from "react-intl";
@@ -19,7 +20,7 @@ const System: React.FC = () => {
         />
       </h2>
 
-      <label
+      <UiField
         style={{
           alignItems: "center",
           display: "grid",
@@ -30,16 +31,16 @@ const System: React.FC = () => {
         }}
       >
         <span>{t("Language")}</span>
-        <select
+        <UiSelect
           value={locale}
           onChange={(event) => setLocale(event.target.value)}
         >
           <option value="pt-BR">Português do Brasil</option>
           <option value="en">English</option>
-        </select>
-      </label>
+        </UiSelect>
+      </UiField>
 
-      <label
+      <UiField
         style={{
           alignItems: "center",
           display: "grid",
@@ -50,7 +51,7 @@ const System: React.FC = () => {
         }}
       >
         {t("Time Zone")}<TimeZoneInput timeZone={timeZone} onChange={setTimeZone} />
-      </label>
+      </UiField>
     </div>
   );
 };

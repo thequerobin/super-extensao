@@ -1,4 +1,10 @@
-# Interface própria da VPN — referência 1.6.5
+# Interface própria da VPN — referência 1.6.8
+
+## Componentização 1.6.8
+
+As funções de tela em `vpn/source/app.js` compõem botões, campos, cartões, toggles e ações pelo mesmo catálogo das demais telas. `ui/render.cjs` transforma os templates `ui-*` em HTML nativo na fronteira de renderização. Os eventos delegados, atributos `data-*`, foco, rascunhos e estado da interface foram preservados. Valores externos continuam escapados antes da interpolação; o renderizador de componentes não sanitiza HTML arbitrário.
+
+O adaptador não consulta a rede e não modifica `bridge.ts`, autorização de plano, controlador de proxy ou regras de tunelamento. [Contratos e compilação](ui-components.md).
 
 A aba VPN usa `vpn/source`, sem montar o HTML, JavaScript ou CSS do popup original. A compilação das regras/PAC já usa o núcleo próprio de `vpn/engine`; autenticação, servidores, autorização de plano, aplicação do proxy e estado continuam no adaptador Proton. O worker Proton permanece ativo, com uma ponte para o indicador próprio do host. A primeira substituição e os contratos restantes estão em [vpn-engine.md](vpn-engine.md).
 
@@ -32,7 +38,7 @@ A entrada integrada é `vpn/interface.js`; `vpn/interface.html` oferece a mesma 
 
 Testes DOM cobrem o posicionamento da automação de limpeza antes do relatório, espaçamento consistente do cabeçalho, login, busca, filtros de plano/manutenção, confirmação do estado conectado, saída com confirmação, regras de inclusão/exclusão, idioma e proteção contra injeção de HTML. Testes do adaptador verificam comandos reais esperados pelo motor, proteção de credenciais, limites de plano, isolamento de canais, WebRTC e atualização das regras em uma conexão ativa. O bundle de produção também é carregado com um perfil simulado vazio. A ponte TypeScript é verificada com `tsc --noEmit -p vpn/tsconfig.interface.json` usando as dependências do motor.
 
-A inicialização do Chromium permanece bloqueada no ambiente por `socket() failed: Operation not permitted`. Os testes DOM e de tipos não substituem a validação visual no Helium/Chromium nem validam login real, mudança de IP, tráfego por domínio ou recuperação da conexão. Esses pontos continuam pendentes antes de considerar a VPN validada para uso diário.
+Na rodada 1.6.8, o painel sem login foi aberto no Helium com perfil temporário, sem erros de página nem estouro horizontal no estado medido. Testes DOM continuam cobrindo os demais estados com APIs simuladas. Login real, mudança de IP, tráfego por domínio e recuperação da conexão continuam pendentes. [Evidências e limites](validacao.md).
 
 O carregamento é progressivo: sessão, estado do worker, preferências e histórico aparecem primeiro; a conta/plano são consultados em seguida, e a lista de servidores e o contexto de rede chegam por último. A busca de servidores não bloqueia os menus, os recursos já autorizados nem a desconexão. Ações de conexão aguardam os servidores; falhas da busca ficam na seção de servidores, com opção de tentar novamente.
 

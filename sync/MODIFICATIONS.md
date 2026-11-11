@@ -1,4 +1,6 @@
-# Estado atual — Super Extensão 1.6.3
+# Estado atual — Super Extensão 1.6.8
+
+As telas agora usam o catálogo comum por `Ui*` e os adaptadores validados `Sync*`. A aparência Vuetify está em `ui/vue.css`, e a fronteira dos controles em `sync/source/components/ui/engine.js`. Essa mudança preserva o motor, modelos, validação, eventos e fluxos existentes. [Componentes e compilação](../docs/ui-components.md).
 
 A interface ativa continua em `sync/source`. Perfis Google Drive de favoritos passam a executar o núcleo próprio em `sync/engine`; os demais provedores e perfis de abas mantêm o motor legado. O painel de comparação foi removido. Cadastro, OAuth interativo, formato dos perfis e agendamento permanecem na camada de compatibilidade.
 

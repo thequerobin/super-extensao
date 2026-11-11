@@ -1,73 +1,108 @@
-# Base visual e idioma compartilhados — referência 1.6.4
+# Componentes da interface — 1.6.8
 
-`ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define cores, família tipográfica e raios; `ui-components.css` define a escala de tamanhos e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
+Revisado em 11 de novembro de 2026. As telas usam um catálogo comum de componentes com adaptadores para HTML, DOM, Vue e React. Tema, cores, medidas e foco ficam em `ui-theme.css` e `ui-components.css`. Os componentes não acessam armazenamento, rede, credenciais ou motores.
 
-- `ui-header-controls`: grupo de seletores do cabeçalho.
-- `ui-field` e `ui-field-compact`: rótulo e campo, com espaçamento consistente.
-- `ui-select`: seletor nativo com as cores e bordas da extensão.
-- `ui-button` e `ui-card`: bases visuais para botões e cartões.
-- `ui-scroll-panel`: área rolável sem barra visível.
+## Fontes e responsabilidades
 
-Tema e Idioma usam essa base no cabeçalho global. Os botões e cartões da VPN também adotam as classes comuns. Os painéis existentes continuam com seus fluxos e validações. Botões, campos nativos, buscas, switches, cartões, contadores e avisos das abas usam essas primitivas. Os formulários Vuetify recebem um adaptador para a mesma escala visual, preservando validações e comportamento.
+| Fonte | Responsabilidade |
+| --- | --- |
+| `ui/catalog.json` | Tags nativas, classes, atributos padrão e variantes permitidas |
+| `ui/render.cjs` | Expansão dos componentes declarativos em HTML nativo, na compilação e na VPN |
+| `ui/dom.cjs` → `ui.js` | Criação dos controles dinâmicos do popup com nós DOM |
+| `ui/vue.js` | Componentes funcionais `Ui*` para Vue, sem elemento adicional |
+| `sync/source/components/ui/engine.js` | Adaptadores `Sync*` dos controles validados, diálogos, árvore e assistente Vuetify |
+| `ui/vue.css` | Aparência dos controles validados, separada do layout das telas |
+| `vendor/tabliss-source/src/ui/index.tsx` | Componentes React do editor, fundos, widgets e controles auxiliares |
+| `ui/templates/` | Fontes das páginas estáticas; popup separado em seções e rodapé |
+| `ui-components.css` | Aparência e espaçamento dos componentes comuns |
+| CSS de cada módulo | Composição específica, como grupos de países e editor de widgets |
 
-O contorno de foco continua ativo e usa deslocamento interno para permanecer inteiro mesmo em áreas que recortam o conteúdo. A mesma geometria é aplicada ao editor da Nova guia.
+React, Vue e Vuetify permanecem como dependências. Os adaptadores `Sync*` estendem os controles existentes para preservar validação, modelos, slots, referências, injeção e protocolos entre pais e filhos. Esta refatoração componentiza a interface; não substitui os frameworks, motores, autenticação ou conectores legados por implementações independentes.
 
-## Idioma
+## Catálogo
 
-A única preferência de idioma é `SuperPreferences.locale`, mantendo a chave `tabliss/config/locale`. O seletor global grava essa preferência; Sincronização, VPN e Nova guia continuam observando o mesmo valor. O seletor da Sincronização e o da conta VPN ficam disponíveis somente nas páginas independentes, quando não há cabeçalho global.
+| Componente | Uso |
+| --- | --- |
+| `button` | Ação nativa com `type="button"` por padrão; formulários exigem `type="submit"` explícito |
+| `field`, `control` | Rótulo e campo; variantes `input`, `select` e `textarea` |
+| `check`, `toggle` | Rótulos de caixas de seleção e switches |
+| `card`, `fieldset` | Cartões e grupos de campos, com variantes semânticas |
+| `stack`, `form`, `actions` | Organização vertical, formulário e grupo de ações com quebra de linha |
+| `heading`, `title`, `note` | Cabeçalhos, títulos e descrições |
+| `notice`, `empty` | Avisos e estados vazios |
+| `nav`, `tab`, `sr` | Navegação e texto para leitores de tela |
 
-Textos fixos do popup e da aba de reserva usam `data-i18n`, com atributos correspondentes para título, descrição acessível e placeholder. Mensagens dinâmicas, contagens, confirmações, datas e notificações de limpeza usam `SuperI18n`. O serviço de limpeza recebe o idioma escolhido sem depender do idioma do navegador.
+As variantes visuais continuam nas classes `ui-button-primary`, `ui-button-secondary`, `ui-button-danger`, `ui-button-compact`, `ui-notice-error`, `ui-notice-warning` e `ui-notice-success`. `ui-card-framed` reserva o preenchimento para o corpo do cartão. Buscas compostas usam `ui-search ui-focus-within`. Controles especiais React, como checkbox, range, cor e arquivo, recebem classes específicas.
 
-Edite `_locales/en/messages.json` e `_locales/pt_BR/messages.json`, mantendo as mesmas chaves. `i18n/literal-keys.json` associa os textos legados aos respectivos identificadores; não faz substituição no conteúdo do usuário. `i18n/runtime.js` é a fonte do tradutor, e `npm run build:i18n` gera `i18n.js`, incluído no repositório. Alterações na interface Vue exigem `npm run build:sync`; alterações na VPN exigem `npm run build:vpn-ui`.
+O catálogo define a estrutura e o CSS comum define sua apresentação. Não copie a implementação de um campo nem valores de cor/foco para outra tela. Use o adaptador correspondente e deixe os estilos locais cuidarem da composição.
 
-O bloco de limpeza e o relatório ficam apenas nas seções de Limpeza. Autoplay e Abas mantêm suas mensagens de resultado fora desse bloco.
+## Usar os adaptadores
 
-Os testes DOM verificam troca de idioma no cabeçalho e nos dois módulos incorporados, preservação de campos e configurações, contagens e mensagens dinâmicas, catálogos e placeholders das notificações. A validação visual e das notificações reais no navegador continua pendente no ambiente de desenvolvimento.
+### HTML estático e VPN
 
-## Submenus fixos
-
-Limpeza, Sincronização e VPN usam a mesma apresentação `sub-nav ui-submenu`, na área `.popup-navigation` fora da rolagem do conteúdo. Sincronização e VPN montam seus controles nos espaços `syncSubmenu` e `vpnSubmenu`, mantendo rotas, estado selecionado e idioma. Nas páginas independentes, a navegação permanece no próprio módulo.
-
-Campos compostos, como a busca de perfis, usam `ui-focus-within`: o contorno é desenhado dentro do limite do contêiner, inclusive quando o foco está no input interno. Isso substitui a antiga regra externa `sync-search:focus-within` que podia ser recortada pelo painel.
-
-## Escala e variantes
-
-A Limpeza orienta a apresentação comum: controles de 40 px, botões de no mínimo 36 px, fonte de controle de 12 px, títulos de seção de 14 px, descrições de 11 px e cartões com 16 px de preenchimento. A escala de espaçamento usa 4, 8, 12, 16 e 24 px. As ações principais, controles compactos e cartões de boas-vindas têm variantes explícitas.
-
-- `ui-button`, `ui-button-primary`, `ui-button-secondary`, `ui-button-danger`, `ui-button-compact`.
-- `ui-control` para campos nativos; `ui-search` e `ui-focus-within` para buscas compostas.
-- `ui-card`, `ui-count`, `ui-switch`, `ui-footer-note`.
-- `ui-notice`, com `ui-notice-error`, `ui-notice-warning` ou `ui-notice-success`.
-
-A configuração da Nova guia segue as mesmas dimensões, preservando a personalização do painel. Na compilação do popup, a base compartilhada é reaplicada dentro da Sincronização, depois do CSS do motor: isso impede que o reset do Vuetify apague o preenchimento, as bordas e as cores dos componentes nativos.
-
-## Largura, setas e validação
-
-Os painéis e filhos flex/grid têm limites de largura e permissão para encolher; o eixo horizontal dos painéis roláveis fica contido. Os países da VPN reservam uma caixa fixa de 16 px para o SVG `icons/chevron-right.svg`, com folga à direita; a rotação ocorre dentro da caixa. O foco continua interno. Esses ajustes foram implementados em 1.5.17/1.5.18 e precisam de conferência visual real nos estados aberto/fechado. Os testes DOM/CSS não substituem essa verificação. Veja [validacao.md](validacao.md).
-
-## Rodada de manutenção 1.6.3
-
-- `SuperPreferences.bindTheme(element, onChange?)` aplica o atributo único `data-super-theme` e retorna a função de desligamento. O callback recebe o tema escolhido e o resolvido. Popup, Sincronização, VPN, Nova guia e aba de reserva usam essa integração; as chaves existentes de armazenamento foram mantidas.
-- A aba de reserva passa a respeitar a seleção explícita claro/escuro, além de acompanhar mudanças do sistema quando selecionado **Sistema**. Antes, ela usava apenas a preferência do sistema operacional.
-- As configurações da Nova guia importam `ui-theme.css` e mantêm os nomes `--se-*` apenas como aliases dos tokens comuns. O fundo e os widgets do painel continuam sob a personalização da Nova guia.
-- `ui-components.css` é a fonte do contorno de teclado, sempre interno. Nos campos compostos, somente `ui-focus-within` desenha o anel; o input interno não recebe um segundo contorno.
-- Botões comuns permitem quebra de textos longos; buscas e cartões podem encolher dentro dos painéis. Esses contratos recebem cobertura CSS/DOM, que não substitui a medição de largura no navegador.
-
-### Uso e descarte das preferências
-
-```js
-const stop = SuperPreferences.bindTheme(document.documentElement);
-window.addEventListener("unload", stop, { once: true });
+```html
+<ui-stack>
+  <ui-field for="token">Chave de API</ui-field>
+  <ui-control id="token" type="password" />
+  <ui-actions>
+    <ui-button type="submit">Salvar</ui-button>
+  </ui-actions>
+</ui-stack>
 ```
 
-Em componentes com ciclo de vida próprio, execute `stop()` ao destruí-los. Para integração com um framework, forneça o callback opcional; o adaptador Vue atualiza também o tema do Vuetify. O modo **Sistema** acompanha `prefers-color-scheme`; uma seleção explícita não é alterada pelo sistema. Observadores ignoram mudanças de outras áreas/chaves, normalizam valores antigos e não aplicam uma leitura inicial depois do descarte da tela.
+`build:ui` expande os templates estáticos antes da instalação. Na VPN, `renderUi` expande os templates ao renderizar a tela. A saída é HTML nativo. Não há custom elements, Shadow DOM ou observador de mutações para montar os componentes do popup.
 
-### Critério para novos controles
+`renderUi` aceita apenas templates controlados pelo projeto e não sanitiza HTML arbitrário. Na VPN, valores externos continuam passando por `escapeHtml` antes da interpolação. O adaptador DOM transforma strings em nós de texto.
 
-Use as classes existentes e ajuste apenas o layout no módulo: `ui-button` com sua variante, `ui-control` para campos, `ui-search ui-focus-within` para busca composta, `ui-card` para cartões e `ui-notice` para mensagens. Não copie valores de cor ou regras de foco de outro módulo. Não é necessária uma página de Configurações gerais nesta rodada: tema/idioma já estão no cabeçalho; opções funcionais permanecem no respectivo módulo.
+```js
+const remove = SuperUi.create("button", {
+  className: "ui-button-compact ui-button-danger",
+  attrs: { "aria-label": "Remover domínio" },
+  on: { click: onRemove }
+}, "×");
+```
 
-A matriz automatizada cobre PT-BR/inglês nos módulos, troca dos três temas e mudança do sistema, preservação de rascunho ao trocar tema e encerramento das assinaturas. A conferência manual de assistentes/diálogos, contraste, foco nativo, alturas mínima/máxima e nomes longos continua no [checklist de validação](validacao.md).
+### Vue e React
 
-## Seletores — 1.6.4
+Vue registra `Ui*` globalmente. Campos nativos simples podem continuar com o `v-model` do compilador e a classe `ui-control`; `UiControl` também suporta modelo textual e seleção simples. Os formulários de provedores usam `SyncTextField`, `SyncSelect`, `SyncSwitch`, `SyncForm`, `SyncDialog`, `SyncTree` e os demais adaptadores validados. Não substitua esses controles por inputs nativos sem cobrir suas regras e eventos.
 
-Os seletores nativos simples usam uma seta comum, de 12 px, posicionada a 12 px da borda direita. O espaço de texto reserva 36 px à direita para evitar sobreposição. A cor acompanha os tokens claro/escuro. Seletores com `multiple` ou `size` mantêm a apresentação de lista; o menu de opções continua nativo. Isso elimina a diferença de posicionamento da seta entre plataformas.
+React importa `UiField`, `UiInput`, `UiSelect`, `UiTextarea`, `UiButton`, `UiCard`, `UiStack`, `UiActions`, `UiNote` e `UiNotice` de `src/ui`. Propriedades e eventos permanecem os das tags correspondentes. Os componentes preservam valores controlados e não contêm regras dos provedores de imagens. O painel de chaves é a mesma composição para Unsplash e GIPHY.
+
+## Compilar
+
+Node.js 20 ou superior, na raiz:
+
+```sh
+npm ci
+npm run setup:sync
+npm run setup:vpn
+npm run setup:newtab
+npm run build:interfaces
+npm run check:ui
+npm test
+```
+
+`build:interfaces` gera as páginas estáticas e compila sincronização, VPN, nova guia e estilos dos painéis. Não recompila os workers. Os arquivos gerados continuam versionados e a instalação sem compactação dispensa Node.js.
+
+| Alteração | Regenerar |
+| --- | --- |
+| Templates estáticos ou adaptador DOM | `npm run build:ui` |
+| Catálogo comum | `npm run build:interfaces` |
+| Adaptador/skin Vue ou tela de sincronização | `npm run build:sync` |
+| Templates da VPN | `npm run build:vpn-ui` |
+| Adaptador React ou editor da nova guia | `npm run build:newtab` |
+| `ui-components.css` | `npm run build:panels`; páginas independentes importam o CSS diretamente |
+
+Não edite `popup.html`, `spare-tab.html`, `newtab/index.html` ou `ui.js` diretamente. As fontes estão em `ui/templates/`, `ui/dom.cjs` e `ui/catalog.json`. `check:ui` detecta divergências entre fontes e artefatos instalados.
+
+## Tema, idioma e acessibilidade
+
+`SuperPreferences.bindTheme(element, onChange?)` aplica `data-super-theme` e retorna a função de descarte. O tema sistema acompanha mudanças do sistema operacional. A preferência de idioma mantém a chave `tabliss/config/locale`; os módulos observam o mesmo valor. Textos permanecem nos catálogos existentes.
+
+Rótulos e campos preservam associações, IDs, atributos ARIA, estados desabilitados e tipos de botão. O foco tem contorno interno; buscas compostas possuem um único contorno. A escala usa espaços de 4, 8, 12, 16 e 24 px, campos de 40 px e botões de pelo menos 36 px. Navegação e alça de redimensionamento permanecem fora da rolagem.
+
+## Verificação
+
+Os testes de contrato cobrem semântica HTML, formulários, conteúdo escapado, estados desabilitados, referências e `v-model` no Vue, valores controlados no React e correspondência dos artefatos estáticos. Os testes existentes cobrem navegação, idiomas, perfis, rascunhos, autorização, backup, regras e estados da VPN. O teste de logs aceita LF e CRLF, respeitando a exportação nativa do Windows.
+
+Veja [validacao.md](validacao.md) para resultados e limites da conferência no navegador. Testes DOM não comprovam geometria nem autenticação ou tráfego real.

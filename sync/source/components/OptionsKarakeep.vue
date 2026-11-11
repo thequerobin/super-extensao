@@ -1,8 +1,8 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 <template>
-  <v-container>
+  <SyncContainer>
     <div>
-      <v-text-field
+      <SyncTextField
         outlined
         dense
         append-icon="mdi-label"
@@ -14,13 +14,13 @@
         @input="$emit('update:label', $event)"
       />
     </div>
-    <v-card class="mb-4">
-      <v-card-text id="server" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-account-box </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardBody id="server" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-account-box </SyncIcon>
         {{ t("LabelOptionsServerDetails") }}
-      </v-card-text>
-      <v-card-text>
-        <v-text-field
+      </SyncCardBody>
+      <SyncCardBody>
+        <SyncTextField
           outlined
           dense
           :value="url"
@@ -28,7 +28,7 @@
           :label="t('LabelKarakeepurl')"
           @input="$emit('update:url', $event)"
         />
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           :label="t('LabelApiKey')"
@@ -36,7 +36,7 @@
           @input="$emit('update:password', $event)"
         >
           <template #append>
-            <v-icon
+            <SyncIcon
               role="button"
               tabindex="0"
               :aria-label="
@@ -47,25 +47,25 @@
               @keydown.space.prevent="showPassword = !showPassword"
             >
               {{ showPassword ? "mdi-eye" : "mdi-eye-off" }}
-            </v-icon>
+            </SyncIcon>
           </template>
-        </v-text-field>
-      </v-card-text>
-    </v-card>
+        </SyncTextField>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card v-if="isBrowser" class="mb-4">
-      <v-card-title id="folder" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-folder-outline </v-icon>
+    <SyncCard v-if="isBrowser" class="mb-4">
+      <SyncCardTitle id="folder" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-folder-outline </SyncIcon>
         {{ t("LabelOptionsFolderMapping") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <div class="text-h6" role="heading" aria-level="3">
           {{ t("LabelServerfolder") }}
         </div>
         <div class="caption">
           {{ t("DescriptionServerfolderkarakeep") }}
         </div>
-        <v-text-field
+        <SyncTextField
           outlined
           dense
           v-model="serverFolder"
@@ -76,29 +76,29 @@
           :value="localRoot"
           @input="$emit('update:localRoot', $event)"
         />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card v-if="!isBrowser" class="mb-4">
-      <v-card-title id="mobile" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-cellphone-settings </v-icon>
+    <SyncCard v-if="!isBrowser" class="mb-4">
+      <SyncCardTitle id="mobile" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-cellphone-settings </SyncIcon>
         {{ t("LabelMobilesettings") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionAllowNetwork
           :value="allowNetwork"
           @input="$emit('update:allowNetwork', $event)"
         />
         <OptionExportBookmarks />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card class="mb-4">
-      <v-card-title id="sync" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-sync-circle </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardTitle id="sync" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-sync-circle </SyncIcon>
         {{ t("LabelOptionsSyncBehavior") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionAutoSync
           :value="enabled"
           @input="$emit('update:enabled', $event)"
@@ -135,15 +135,15 @@
           :value="nestedSync"
           @input="$emit('update:nestedSync', $event)"
         />
-      </v-card-text>
-    </v-card>
+      </SyncCardBody>
+    </SyncCard>
 
-    <v-card class="mb-4">
-      <v-card-title id="danger" class="text-h5" role="heading" aria-level="2">
-        <v-icon aria-hidden="true"> mdi-alert-circle </v-icon>
+    <SyncCard class="mb-4">
+      <SyncCardTitle id="danger" class="text-h5" role="heading" aria-level="2">
+        <SyncIcon aria-hidden="true"> mdi-alert-circle </SyncIcon>
         {{ t("LabelOptionsDangerous") }}
-      </v-card-title>
-      <v-card-text>
+      </SyncCardTitle>
+      <SyncCardBody>
         <OptionDownloadLogs />
         <OptionClientCert
           v-if="isBrowser"
@@ -160,9 +160,9 @@
           @input="$emit('update:failsafe', $event)"
         />
         <OptionDeleteAccount @click="$emit('delete')" />
-      </v-card-text>
-    </v-card>
-  </v-container>
+      </SyncCardBody>
+    </SyncCard>
+  </SyncContainer>
 </template>
 
 <script>

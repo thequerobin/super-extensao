@@ -1,6 +1,8 @@
-# Super Extensão — guia rápido (1.6.6)
+# Super Extensão — guia rápido (1.6.8)
 
 Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
+
+A interface agora usa componentes comuns no popup, sincronização, VPN, editor da nova guia e aba de reserva. Os fluxos e as configurações existentes foram preservados. A instalação continua usando a pasta sem compactação; após atualizar, recarregue a extensão e abra novamente suas páginas.
 
 ## Instalar e atualizar
 
