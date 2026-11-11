@@ -538,5 +538,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 // Motor de sincronizacao isolado em superSync: e super-sync.
 importScripts("sync/js/background-script.js");
 
+// The host owns the VPN status overlay; cleanup pause badges remain independent.
+importScripts("vpn-indicator.js");
+
 // Proton VPN has its own message channel and storage namespace.
 importScripts("vpn/js/service.js");

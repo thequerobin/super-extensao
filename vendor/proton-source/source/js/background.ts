@@ -27,3 +27,12 @@ initPostInstallationHook();
 initFocusWatcher();
 initProxySettingsWatcher();
 initIdleWatcher();
+
+// Share only effective routing rules and confirmed state with the host icon.
+import {getCurrentStateIfDefined, isCurrentStateConnected} from './state';
+import {getFixedServerConfig} from './tools/proxy';
+(globalThis as any).SuperVpnIndicator?.attach(() => {
+  const split = getCurrentStateIfDefined()?.data?.server?.splitTunneling;
+  const {bypassList, includeOnly} = getFixedServerConfig('', 0, split).rules;
+  return {connected: isCurrentStateConnected(), bypassList, includeOnly};
+});

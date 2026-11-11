@@ -35,3 +35,9 @@ Testes DOM cobrem o posicionamento da automação de limpeza antes do relatório
 A inicialização do Chromium permanece bloqueada no ambiente por `socket() failed: Operation not permitted`. Os testes DOM e de tipos não substituem a validação visual no Helium/Chromium nem validam login real, mudança de IP, tráfego por domínio ou recuperação da conexão. Esses pontos continuam pendentes antes de considerar a VPN validada para uso diário.
 
 O carregamento é progressivo: sessão, estado do worker, preferências e histórico aparecem primeiro; a conta/plano são consultados em seguida, e a lista de servidores e o contexto de rede chegam por último. A busca de servidores não bloqueia os menus, os recursos já autorizados nem a desconexão. Ações de conexão aguardam os servidores; falhas da busca ficam na seção de servidores, com opção de tentar novamente.
+
+## Indicador no ícone
+
+O host carrega `vpn-indicator.js` antes do motor e recebe um leitor sem credenciais, limitado ao estado confirmado e às regras efetivas de `getFixedServerConfig`. Um símbolo verde com visto indica que o endereço da aba usa a VPN; um símbolo azul com traço indica VPN conectada e endereço fora do túnel. Sem conexão confirmada, o ícone original volta. O símbolo fica no canto superior direito e preserva o badge de limpeza pausada.
+
+A indicação acompanha navegação, troca de aba, alterações das regras e idioma. Respeita inclusão/exclusão, subdomínios, redes locais e o controle efetivo do proxy pelo navegador, incluindo abas anônimas. Representa o roteamento do endereço da aba, não um contador de tráfego nem uma verificação externa do IP.

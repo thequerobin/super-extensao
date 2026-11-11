@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 .vpn-app {
+  min-width: 0;
+  width: 100%;
   font: 13px/1.5 var(--ui-font);
   color: var(--text);
   max-width: 820px;
@@ -192,6 +194,7 @@
   margin-bottom: 14px;
 }
 .vpn-field {
+  min-width: 0;
   display: grid;
   gap: 6px;
   font-size: 12px;
@@ -456,6 +459,7 @@
   margin-bottom: var(--section-gap);
 }
 .vpn-field {
+  min-width: 0;
   margin: var(--section-gap) 0;
 }
 .vpn-search {
@@ -530,3 +534,12 @@
   align-items: center;
   gap: var(--space-1);
 }
+
+/* Country/server labels and form rows share the available panel width. */
+.vpn-app > section, .vpn-section-heading > h2, .vpn-toggle > span,
+.vpn-server > span:first-child, .vpn-country-group > summary > span:first-of-type {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.vpn-server > span:first-child { flex: 1; }
+.vpn-server-meta { flex-shrink: 0; }

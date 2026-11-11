@@ -30,6 +30,7 @@ export const broadcastMessage = <
 	type: T['type'],
 	data: T['data'] | undefined = undefined,
 ): void => {
+	if (type === 'changeState') void (globalThis as any).SuperVpnIndicator?.refresh();
 	const notification = {channel: 'super-vpn', type, data, respondTo: 'none'};
 	void getRuntime().sendMessage(notification).catch((e: any) => {
 		const noListener = /receiving end does not exist|message port closed before a response/i;

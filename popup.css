@@ -93,7 +93,7 @@ body[data-active-tab="vpn"] > main,
 body[data-active-tab="sync"] > main { display:flex; flex-direction:column; overflow:hidden; }
 #panel-vpn, #panel-sync { flex:1; min-height:0; display:flex; flex-direction:column; }
 #panel-vpn, #panel-sync { margin-top:12px; }
-#vpnPanel, #syncPanel { flex:1; min-height:0; width:100%; }
+#vpnPanel, #syncPanel { flex:1; min-height:0; min-width:0; width:100%; max-width:100%; overflow-x:hidden; }
 #syncPanel[data-embedded] { min-width:0; overflow-y:auto; }
 #syncPanel[data-embedded] .v-application--wrap { min-height:100%; }
 #popupResize { flex:0 0 16px; display:flex; align-items:center; justify-content:center; cursor:ns-resize; touch-action:none; background:var(--bg); border-top:1px solid var(--line); }
@@ -140,3 +140,6 @@ h2, .report h2 { font: var(--weight-title) var(--font-title)/1.5 var(--ui-font);
 
 .presets .ui-button { display: block; }
 .link-button { font: 600 var(--font-description)/1.5 var(--ui-font); cursor: pointer; }
+
+/* Flex/grid children must shrink within the popup instead of growing its scroll width. */
+body > main, #panel-vpn, #panel-sync { min-width: 0; max-width: 100%; overflow-x: hidden; }
