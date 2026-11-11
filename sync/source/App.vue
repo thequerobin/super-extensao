@@ -6,7 +6,7 @@
         <p class="sync-eyebrow">{{ t("SuperSyncTitle") }}</p>
         <h1>{{ t("UiIntro") }}</h1>
       </div>
-      <label class="sync-language"
+      <label v-if="!embedded" class="sync-language"
         ><span class="sr-only">{{ t("SuperLanguage") }}</span
         ><select
           v-model="locale"
@@ -68,6 +68,7 @@ export default {
   data() {
     return {
       locale: i18n.getLocale(),
+      embedded:Boolean(document.getElementById("language")),
       key: "",
       unlockError: "",
       loadError: "",

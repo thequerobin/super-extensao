@@ -20,7 +20,7 @@
     $("currentAutoplayRule").disabled = !currentHost;
     if (currentHost) {
       const policy = SuperTools.autoplayPolicy(currentHost,currentAutoplay);
-      $("currentAutoplayEffective").textContent = !currentAutoplay.enabled ? "Controle desativado." : `${policy.block ? "Bloqueando" : "Permitindo"} autoplay${policy.matched ? " · regra de " + policy.matched : " · padrão global"}.`;
+      $("currentAutoplayEffective").textContent = !currentAutoplay.enabled ? SuperI18n.text("Controle desativado.") : SuperI18n.t(policy.matched?"uiAutoplayMatched":"uiAutoplayGlobal",{action:SuperI18n.text(policy.block?"Bloqueando":"Permitindo"),domain:policy.matched});
     }
     const filter = $("autoplaySearch").value.trim().toLowerCase();
     const entries = Object.entries(currentAutoplay.siteSettings).filter(([domain]) => domain.includes(filter)).sort(([a],[b]) => a.localeCompare(b));
@@ -28,18 +28,18 @@
     for (const [domain, permission] of entries) {
       const li = document.createElement("li");
       const text = document.createElement("span"); text.className="rule-domain"; text.textContent=domain;
-      const select = document.createElement("select"); select.setAttribute("aria-label",`Autoplay em ${domain}`);
-      for (const [value,label] of [["allow","Permitir"],["block","Bloquear"]]) {
+      const select = document.createElement("select"); select.setAttribute("aria-label",SuperI18n.t("uiAutoplayLabel",{domain}));
+      for (const [value,label] of [["allow",SuperI18n.text("Permitir")],["block",SuperI18n.text("Bloquear")]]) {
         const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);
       }
       select.value=permission;
       select.addEventListener("change",handle(() => changeAutoplay(next => {next.siteSettings[domain]=select.value;})));
-      const remove=document.createElement("button");remove.textContent="×";remove.setAttribute("aria-label",`Remover regra de ${domain}`);
+      const remove=document.createElement("button");remove.textContent="×";remove.setAttribute("aria-label",SuperI18n.t("uiRemoveRule",{domain}));
       remove.addEventListener("click",handle(() => changeAutoplay(next => {delete next.siteSettings[domain];})));
       li.append(text,select,remove);$("autoplayRules").append(li);
     }
     $("autoplayEmpty").hidden=entries.length>0;
-    $("autoplayEmpty").textContent=filter?"Nenhuma regra corresponde à busca.":"Nenhuma regra por site.";
+    $("autoplayEmpty").textContent=filter?SuperI18n.text("Nenhuma regra corresponde à busca."):SuperI18n.text("Nenhuma regra por site.");
   }
   async function renderTabs() {
     const {tabGuard}=await chrome.storage.local.get({tabGuard:SuperTools.TAB_DEFAULTS});
@@ -51,11 +51,13 @@
     $("newTabLast").disabled=!settings.singleNewTab;
   }
   async function initTools() {
+    await SuperI18n.ready;
+    SuperI18n.watch(()=>{ $("currentAutoplayHost").textContent=currentHost||SuperI18n.text("Abra um site HTTP/HTTPS para ajustar sua regra");renderAutoplay().catch(showError); });
     try {
       const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
       if (tab?.url && /^https?:\/\//u.test(tab.url)) currentHost=new URL(tab.url).hostname;
     } catch {}
-    $("currentAutoplayHost").textContent=currentHost || "Abra um site HTTP/HTTPS para ajustar sua regra";
+    $("currentAutoplayHost").textContent=currentHost || SuperI18n.text("Abra um site HTTP/HTTPS para ajustar sua regra");
     await renderAutoplay();await renderTabs();
     $("autoplayEnabled").addEventListener("change",handle(() => changeAutoplay(next => {next.enabled=$("autoplayEnabled").checked;})));
     $("autoplayDefault").addEventListener("change",handle(() => changeAutoplay(next => {next.globalBehavior=$("autoplayDefault").value;})));
@@ -63,14 +65,14 @@
       if (!currentHost) return;
       const permission=$("currentAutoplayRule").value;
       await changeAutoplay(next => {if(permission==="default") delete next.siteSettings[currentHost]; else next.siteSettings[currentHost]=permission;});
-      notify("Regra do site salva.");
+      notify(SuperI18n.text("Regra do site salva."));
     }));
     $("autoplayForm").addEventListener("submit",event => {
       event.preventDefault();handle(async () => {
         const domain=SuperTools.normalizeHostname($("autoplayDomain").value);
         const permission=$("autoplayPermission").value;
         await changeAutoplay(next => {next.siteSettings[domain]=permission;});
-        $("autoplayDomain").value="";notify("Regra de autoplay salva.");
+        $("autoplayDomain").value="";notify(SuperI18n.text("Regra de autoplay salva."));
       })();
     });
     $("autoplaySearch").addEventListener("input",handle(renderAutoplay));
@@ -79,26 +81,26 @@
       const url=URL.createObjectURL(new Blob([json],{type:"application/json"}));
       const a=document.createElement("a");a.href=url;a.download="super-extensao-autoplay.json";a.click();
       setTimeout(() => URL.revokeObjectURL(url),1000);
-      notify("Regras de autoplay exportadas.");
+      notify(SuperI18n.text("Regras de autoplay exportadas."));
     });
     $("chooseAutoplayImport").addEventListener("click",() => $("autoplayImportFile").click());
     $("autoplayImportFile").addEventListener("change",handle(async () => {
       const file=$("autoplayImportFile").files[0];if(!file)return;
       try {
-        if(file.size>1024*1024) throw new Error("O arquivo de regras deve ter até 1 MB.");
+        if(file.size>1024*1024) throw new Error(SuperI18n.text("O arquivo de regras deve ter até 1 MB."));
         const data=JSON.parse(await file.text());
         const raw=Array.isArray(data)?Object.fromEntries(data.map(domain=>[domain,"allow"])):data?.siteSettings;
-        if(!raw || typeof raw!=="object" || Array.isArray(raw))throw new Error("Arquivo de regras inválido.");
+        if(!raw || typeof raw!=="object" || Array.isArray(raw))throw new Error(SuperI18n.text("Arquivo de regras inválido."));
         const parsed=SuperTools.autoplaySettings({siteSettings:raw});
         const count=Object.keys(parsed.siteSettings).length;
-        if(!count)throw new Error("Nenhuma regra válida encontrada no arquivo.");
+        if(!count)throw new Error(SuperI18n.text("Nenhuma regra válida encontrada no arquivo."));
         await changeAutoplay(next=>{next.siteSettings={...next.siteSettings,...parsed.siteSettings};});
-        notify(`${count} regras importadas. Regras existentes foram mescladas.`);
+        notifyMessage("uiRulesImported",{count});
       } finally {$("autoplayImportFile").value="";}
     }));
     for(const id of ["tabGuardEnabled","tabGuardScope","singleNewTab","newTabLast"]) $(id).addEventListener("change",handle(async()=>{
       const next=SuperTools.tabSettings({enabled:$("tabGuardEnabled").checked,scope:$("tabGuardScope").value,singleNewTab:$("singleNewTab").checked,newTabLast:$("newTabLast").checked});
-      await serializeMutation(()=>chrome.storage.local.set({tabGuard:next}));await renderTabs();notify("Preferências de abas salvas.");
+      await serializeMutation(()=>chrome.storage.local.set({tabGuard:next}));await renderTabs();notify(SuperI18n.text("Preferências de abas salvas."));
     }));
     chrome.storage.onChanged.addListener((changes,area)=>{
       if(area!=="local")return;

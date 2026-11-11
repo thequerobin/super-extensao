@@ -44,7 +44,7 @@
         }
         status.hidden = true;
       }).catch(error => {
-        status.textContent = "Não foi possível carregar este painel. Feche o popup e tente novamente.";
+        status.textContent = SuperI18n.text("Não foi possível carregar este painel. Feche o popup e tente novamente.");
         console.error(error);
       });
       panels.set(tab, loaded);

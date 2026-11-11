@@ -1,4 +1,4 @@
-importScripts("preferences.js", "rules.js");
+importScripts("preferences.js", "i18n.js", "rules.js");
 importScripts("navigation-rules.js", "tab-guard.js");
 // ====== デフォルト設定 ======
 const DEFAULT_SETTINGS = {
@@ -36,7 +36,7 @@ let clearQueue = Promise.resolve();
 const pendingSessionClears = new Map();
 
 function getTypeLabels() {
-  const m = chrome.i18n.getMessage;
+  const m = SuperI18n.t;
   return {
     history: m("browsingHistory"), cache: m("cache"), cookies: m("cookies"),
     downloads: m("downloadHistory"), formData: m("formData"),
@@ -253,7 +253,8 @@ async function clearPendingSession(trigger, pendingSession) {
 
 // ====== デスクトップ通知 ======
 async function showClearNotification(receipt, { deferred = false } = {}) {
-  const m = chrome.i18n.getMessage;
+  await SuperI18n.ready;
+  const m = SuperI18n.t;
   const trigger = receipt.trigger;
   const clearedTypes = Array.isArray(receipt.clearedTypeKeys)
     ? receipt.clearedTypeKeys.map((key) => getTypeLabels()[key]).filter(Boolean)
@@ -265,7 +266,7 @@ async function showClearNotification(receipt, { deferred = false } = {}) {
   }[trigger] || trigger;
 
   const completedAt = new Date(receipt.time || Date.now());
-  const timeStr = completedAt.toLocaleString(undefined, {
+  const timeStr = completedAt.toLocaleString(SuperI18n.locale, {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
   });
   const notificationId = CLEAR_NOTIFICATION_PREFIX + receipt.id;

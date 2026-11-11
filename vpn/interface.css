@@ -528,6 +528,5 @@
   border-radius: 3px;
 }
 .vpn-app select:focus-visible {
-  outline: none;
   border-color: var(--accent);
 }

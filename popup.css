@@ -110,3 +110,12 @@ body.resizing :is(#vpnPanel,#syncPanel) { pointer-events:none; }
 /* Match panel gutters and header spacing across all sections. */
 #vpnPanel { overflow-y:auto; }
 body > main > footer .automation {padding:0 0 14px;}
+
+.ui-header-controls .theme-label select {min-width:64px;}
+
+/* Cleanup controls belong only to cleanup sections; feedback stays available. */
+body[data-active-tab="autoplay"] > main > footer,
+body[data-active-tab="tabs"] > main > footer,
+body[data-active-tab="sync"] #popupStatus,
+body[data-active-tab="vpn"] #popupStatus {display:none!important;}
+#popupStatus:empty {display:none;}

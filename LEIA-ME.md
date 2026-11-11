@@ -1,4 +1,4 @@
-# Super Extensão 1.5.10
+# Super Extensão 1.5.13
 
 A VPN agora tem interface própria em Conexão, Servidores, Recursos e Conta; sessões, regras e motor Proton são preservados. A automação de limpeza fica acima da última limpeza, com o mesmo espaçamento entre abas. [Detalhes](docs/vpn-interface.md).
 

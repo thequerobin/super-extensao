@@ -369,5 +369,506 @@
    },
    "tabFaq": {
       "message": "Perguntas frequentes"
+   },
+   "uiCleanupmediaandtabsf4faa": {
+      "message": "Limpeza, mídia e abas."
+   },
+   "uiTheme6ae1b": {
+      "message": "Tema"
+   },
+   "uiLanguage00943": {
+      "message": "Idioma"
+   },
+   "uiDark0d7f9": {
+      "message": "Escuro"
+   },
+   "uiLight21f72": {
+      "message": "Claro"
+   },
+   "uiSystemc0041": {
+      "message": "Sistema"
+   },
+   "uiCleanup5e061": {
+      "message": "Limpeza"
+   },
+   "uiTabs3cc23": {
+      "message": "Abas"
+   },
+   "uiSyncda8aa": {
+      "message": "Sincronização"
+   },
+   "uiWhattoclear08caf": {
+      "message": "O que apagar"
+   },
+   "uiBookmarks33b33": {
+      "message": "Favoritos"
+   },
+   "uiSavedautomatically299aa": {
+      "message": "Salvo automaticamente"
+   },
+   "uiSafe39c09": {
+      "message": "Seguro"
+   },
+   "uiHistorybea29": {
+      "message": "Histórico"
+   },
+   "uiStandardd8e00": {
+      "message": "Padrão"
+   },
+   "uiStronga88f9": {
+      "message": "Forte"
+   },
+   "uiAlldatatypes067ff": {
+      "message": "Todos os tipos"
+   },
+   "uiBrowsinghistory8c5ab": {
+      "message": "Histórico de navegação"
+   },
+   "uiBrowsercache18f9e": {
+      "message": "Cache do navegador"
+   },
+   "uiMaysignoutaccountsoutside23482": {
+      "message": "Pode desconectar contas fora das exceções"
+   },
+   "uiDownloadhistorya142a": {
+      "message": "Histórico de downloads"
+   },
+   "uiDownloadedfilesarepreserved42e52": {
+      "message": "Os arquivos baixados são preservados"
+   },
+   "uiFormdata06d50": {
+      "message": "Dados de formulários"
+   },
+   "uiLocalstorage3d640": {
+      "message": "Armazenamento local"
+   },
+   "uiWebsitelocalStorage2e49d": {
+      "message": "localStorage dos sites"
+   },
+   "uiSavedpasswordsarenotdeleted74677": {
+      "message": "Senhas salvas não são apagadas. A limpeza pode ser concluída na próxima abertura se o navegador encerrar antes de terminar."
+   },
+   "uiKeepcookiesbywebsite78b44": {
+      "message": "Preservar cookies por site"
+   },
+   "uiCookiesforthewebsitesin80c36": {
+      "message": "Os cookies dos sites desta lista serão preservados durante a limpeza. Esta proteção não inclui cache nem armazenamento local, e não garante a preservação de todos os logins."
+   },
+   "uiCookiesareprotectedforthe852f6": {
+      "message": "Cookies são protegidos para o domínio registrável inteiro: uma exceção para accounts.exemplo.com também preserva cookies de exemplo.com e seus subdomínios."
+   },
+   "uiDomainorURL10cc7": {
+      "message": "Domínio ou URL"
+   },
+   "uiAddfadcf": {
+      "message": "Adicionar"
+   },
+   "ui0domains890d3": {
+      "message": "0 domínios"
+   },
+   "uiImportfrombookmarksa9c2c": {
+      "message": "Importar de favoritos →"
+   },
+   "uiNodomainsinthislist5b710": {
+      "message": "Nenhum domínio nesta lista."
+   },
+   "uiAddinganexceptiondoesnot95152": {
+      "message": "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada na aba Limpeza."
+   },
+   "uiImportfrombookmarksab35d": {
+      "message": "Importar dos favoritos"
+   },
+   "uiImportdomainsfromafolder684b6": {
+      "message": "Importe os domínios de uma pasta para a lista de exceções de cookies. Os favoritos não serão modificados."
+   },
+   "uiChooseabookmarksfolder55714": {
+      "message": "Escolher pasta de favoritos"
+   },
+   "uiFolderea675": {
+      "message": "Pasta"
+   },
+   "uiIncludesubfolders6a3bc": {
+      "message": "Incluir subpastas"
+   },
+   "uiImportdomainsdd303": {
+      "message": "Importar domínios"
+   },
+   "uiBookmarkaccessalsoallowsfoldere6e7f": {
+      "message": "O acesso aos favoritos também permite sincronizar pastas no painel de sincronização. A importação é uma cópia: mudanças futuras na pasta não atualizam as exceções. Links HTTP/HTTPS são aceitos e duplicados são ignorados."
+   },
+   "uiAutoplaycontrol8eebb": {
+      "message": "Controle da reprodução automática"
+   },
+   "uiControlautoplay93d4a": {
+      "message": "Controlar reprodução automática"
+   },
+   "uiVideoandaudioonHTTP7b60f": {
+      "message": "Vídeos e áudios em páginas HTTP/HTTPS"
+   },
+   "uiDefaultbehaviord8503": {
+      "message": "Comportamento padrão"
+   },
+   "uiBlockautoplay8218a": {
+      "message": "Bloquear reprodução automática"
+   },
+   "uiAllowautoplayc9632": {
+      "message": "Permitir reprodução automática"
+   },
+   "uiCURRENTWEBSITE408b6": {
+      "message": "SITE ATUAL"
+   },
+   "uiIdentifyingf5531": {
+      "message": "Identificando…"
+   },
+   "uiRuleforthiswebsite407fa": {
+      "message": "Regra deste site"
+   },
+   "uiUsedefaultinheritedruleb49be": {
+      "message": "Usar padrão / regra herdada"
+   },
+   "uiAllow91652": {
+      "message": "Permitir"
+   },
+   "uiBlock5c3d5": {
+      "message": "Bloquear"
+   },
+   "uiAddadomainrule253bf": {
+      "message": "Adicionar regra por domínio"
+   },
+   "uiSave93bf2": {
+      "message": "Salvar"
+   },
+   "uiSearchrulesa8439": {
+      "message": "Buscar regras"
+   },
+   "uiNowebsiterules6a0a6": {
+      "message": "Nenhuma regra por site."
+   },
+   "uiExportrulesc2a64": {
+      "message": "Exportar regras"
+   },
+   "uiImportruleseb6ba": {
+      "message": "Importar regras"
+   },
+   "uiRulesapplytothedomaina7b32": {
+      "message": "As regras valem para o domínio e seus subdomínios; a mais específica tem prioridade. Uma interação real na página libera a reprodução nesse quadro até a próxima navegação. As permissões nativas do navegador continuam valendo. Recarregue abas que já estavam abertas ao instalar ou atualizar a extensão."
+   },
+   "uiKeepthewindowopen78b41": {
+      "message": "Manter a janela aberta"
+   },
+   "uiProtectthelasttab5d38c": {
+      "message": "Proteger a última aba"
+   },
+   "uiAsparetabpreventsaccidental4a814": {
+      "message": "Uma aba de reserva evita o fechamento acidental"
+   },
+   "uiWhichwindowstoprotectffdbb": {
+      "message": "Quais janelas proteger"
+   },
+   "uiOnlythelastopenwindow28af9": {
+      "message": "Somente a última janela aberta"
+   },
+   "uiFirstwindowandlastremainingf154e": {
+      "message": "Primeira janela e última restante"
+   },
+   "uiAllwindows7359f": {
+      "message": "Todas as janelas"
+   },
+   "uiOneNewTabpageperafbc1": {
+      "message": "Uma única Nova guia por janela"
+   },
+   "uiSkipspinnedtabsandpagesff0d1": {
+      "message": "Ignora abas fixadas e páginas em uso"
+   },
+   "uiKeepNewTabinthe54864": {
+      "message": "Manter Nova guia na última posição"
+   },
+   "uiAvailablewhentheoptionaboveb6a61": {
+      "message": "Disponível com a opção acima ativada"
+   },
+   "uiToexitclosethewindow2b03f": {
+      "message": "Para encerrar de verdade, feche a janela pelo X ou saia do navegador. A limpeza ao sair só começa quando a última janela for fechada."
+   },
+   "uiThesparetabiscreated54311": {
+      "message": "A aba de reserva é criada apenas quando necessária e removida quando há outras abas suficientes. Abas fixadas por você são preservadas. Janelas anônimas exigem a autorização separada do navegador."
+   },
+   "uiLoadingVPN1f4b7": {
+      "message": "Carregando VPN…"
+   },
+   "uiLoadingsyncf4eb5": {
+      "message": "Carregando sincronização…"
+   },
+   "uiClearwhenthelastwindow0250c": {
+      "message": "Limpar ao fechar a última janela"
+   },
+   "uiPause8e0f5": {
+      "message": "Pausar"
+   },
+   "ui30minutes75eae": {
+      "message": "30 minutos"
+   },
+   "ui1houreed75": {
+      "message": "1 hora"
+   },
+   "uiUntiltomorrow7286d": {
+      "message": "Até amanhã"
+   },
+   "uiUntilresumedd56d7": {
+      "message": "Até retomar"
+   },
+   "uiResumedaaa7": {
+      "message": "Retomar"
+   },
+   "uiLASTCLEANUP21453": {
+      "message": "ÚLTIMA LIMPEZA"
+   },
+   "uiLoadingbca48": {
+      "message": "Carregando…"
+   },
+   "uiClearnow139b3": {
+      "message": "Limpar agora"
+   },
+   "uiLocalcleanupandcontrolsOptional7d8a0": {
+      "message": "Limpeza e controles locais · Nova guia e sincronização opcionais"
+   },
+   "uiSectionscec5a": {
+      "message": "Seções"
+   },
+   "uiCleanupoptions18c23": {
+      "message": "Opções de limpeza"
+   },
+   "uiCleanupmodeseebda": {
+      "message": "Modos de limpeza"
+   },
+   "uiegaccountsexamplecomf1f8e": {
+      "message": "ex.: accounts.exemplo.com"
+   },
+   "uiegyoutubecom90e62": {
+      "message": "ex.: youtube.com"
+   },
+   "uiDomainpermission24fe9": {
+      "message": "Permissão do domínio"
+   },
+   "uiFilterbydomain39fd8": {
+      "message": "Filtrar por domínio…"
+   },
+   "uiDragtoresizeUseand9c407": {
+      "message": "Arraste para ajustar a altura. Use ↑ e ↓ ou dê dois cliques para restaurar."
+   },
+   "uiAdjustpopupheight48122": {
+      "message": "Ajustar altura do popup"
+   },
+   "uiSparetabSuperExtenso852a9": {
+      "message": "Aba de reserva · Super Extensão"
+   },
+   "uiYourwindowstaysopenea535": {
+      "message": "Sua janela continua aberta."
+   },
+   "uiThissparetabpreventsthe159a6": {
+      "message": "Esta aba de reserva protege contra fechar a janela ao encerrar a última aba. Ela sai automaticamente quando houver outras abas suficientes."
+   },
+   "uiToquitthebrowserand88239": {
+      "message": "Para encerrar o navegador e executar a limpeza ao sair, feche a janela pelo X. Você pode ajustar a proteção em"
+   },
+   "uiSuperExtensoTabsdf951": {
+      "message": "Super Extensão → Abas"
+   },
+   "uiThelastattemptdidnot2c69a": {
+      "message": "A última tentativa não foi concluída"
+   },
+   "uiCheckyoursettingsPendingautomatic8fb59": {
+      "message": "Confira as configurações. Uma limpeza automática pendente será tentada na próxima abertura."
+   },
+   "uiManual4e836": {
+      "message": "Manual"
+   },
+   "uiOnexitb4160": {
+      "message": "Ao fechar"
+   },
+   "uiRecoveryonstartup7fa69": {
+      "message": "Recuperação na abertura"
+   },
+   "uiAutomatic20ec1": {
+      "message": "Automática"
+   },
+   "uiNocleanuprecorded19546": {
+      "message": "Nenhuma limpeza registrada"
+   },
+   "uiOnlyhistoryisclearedby4b72a": {
+      "message": "Por padrão, somente o histórico será apagado."
+   },
+   "uiPauseduntilyouresume72e5a": {
+      "message": "Pausada até você retomar"
+   },
+   "uiThecleanupservicedidnotab798": {
+      "message": "O serviço de limpeza não respondeu."
+   },
+   "uiExceptionremoved098bd": {
+      "message": "Exceção removida."
+   },
+   "uiBookmarkaccesswasnotgrantedc3dab": {
+      "message": "Acesso aos favoritos não concedido. Você ainda pode adicionar domínios manualmente."
+   },
+   "uiRefreshbookmarksfolderse7161": {
+      "message": "Atualizar pastas de favoritos"
+   },
+   "uiNobookmarksfoldersavailable92817": {
+      "message": "Nenhuma pasta de favoritos disponível."
+   },
+   "uiDeletingcookiesmaysignyoudaaf9": {
+      "message": "Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?"
+   },
+   "uiStrongmodeclearsallselectable60bf4": {
+      "message": "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. Exceções preservam somente cookies. Aplicar?"
+   },
+   "uiCleanupmodesaved0c164": {
+      "message": "Modo de limpeza salvo."
+   },
+   "uiDomainaddedtocookieexceptionsd13f7": {
+      "message": "Domínio adicionado às exceções de cookies."
+   },
+   "uiThisdomainisalreadyin3da47": {
+      "message": "Esse domínio já está na lista."
+   },
+   "uiChooseabookmarksfolder971e1": {
+      "message": "Escolha uma pasta de favoritos."
+   },
+   "uiSelectatleastonedata0db03": {
+      "message": "Escolha pelo menos um tipo de dado na aba Limpeza."
+   },
+   "uiClearselecteddatanowCookiesf009c": {
+      "message": "Limpar os dados selecionados agora? Cookies fora das exceções serão apagados e isso pode desconectar contas."
+   },
+   "uiClearing7deed": {
+      "message": "Limpando…"
+   },
+   "uiCleanupdidnotrun507eb": {
+      "message": "A limpeza não foi executada."
+   },
+   "uiCleanupcompleted6d5be": {
+      "message": "Limpeza concluída."
+   },
+   "uiControldisabled76ef0": {
+      "message": "Controle desativado."
+   },
+   "uiBlocking8a50b": {
+      "message": "Bloqueando"
+   },
+   "uiAllowingec37e": {
+      "message": "Permitindo"
+   },
+   "uiNorulesmatchyoursearchb858c": {
+      "message": "Nenhuma regra corresponde à busca."
+   },
+   "uiOpenanHTTPHTTPSwebsiteceed2": {
+      "message": "Abra um site HTTP/HTTPS para ajustar sua regra"
+   },
+   "uiWebsiterulesavedb844f": {
+      "message": "Regra do site salva."
+   },
+   "uiAutoplayrulesaved95537": {
+      "message": "Regra de autoplay salva."
+   },
+   "uiAutoplayrulesexportedc02a3": {
+      "message": "Regras de autoplay exportadas."
+   },
+   "uiTherulesfilemustbe45d35": {
+      "message": "O arquivo de regras deve ter até 1 MB."
+   },
+   "uiInvalidrulesfile758a3": {
+      "message": "Arquivo de regras inválido."
+   },
+   "uiNovalidrulesfoundin56d52": {
+      "message": "Nenhuma regra válida encontrada no arquivo."
+   },
+   "uiTabpreferencessavedaa126": {
+      "message": "Preferências de abas salvas."
+   },
+   "uiUnabletoloadthispanel13eb1": {
+      "message": "Não foi possível carregar este painel. Feche o popup e tente novamente."
+   },
+   "uiEnteradomainorHTTPe8fca": {
+      "message": "Informe um domínio ou uma URL HTTP/HTTPS."
+   },
+   "uiInvaliddomainDonotuse2da49": {
+      "message": "Domínio inválido. Não use espaços nem curingas (*)."
+   },
+   "uiUsedomainsorHTTPHTTPS474ac": {
+      "message": "Use somente domínios ou URLs HTTP/HTTPS sem usuário e senha."
+   },
+   "uiInvaliddomain6f616": {
+      "message": "Domínio inválido."
+   },
+   "uiInvalidexceptionslistcleanupcancelled508df": {
+      "message": "Lista de exceções inválida; limpeza cancelada."
+   },
+   "uiEnteravaliddomainorbf2e6": {
+      "message": "Informe um domínio ou URL válido, sem curingas."
+   },
+   "uiUseadomainorHTTPca1dd": {
+      "message": "Use um domínio ou URL HTTP/HTTPS."
+   },
+   "uihistoryb8d62": {
+      "message": "histórico"
+   },
+   "uicacheb0359": {
+      "message": "cache"
+   },
+   "uicookiesd2bd3": {
+      "message": "cookies"
+   },
+   "uidownloadhistory2429d": {
+      "message": "histórico de downloads"
+   },
+   "uiformdata457a1": {
+      "message": "formulários"
+   },
+   "uilocalstorageabedc": {
+      "message": "armazenamento local"
+   },
+   "uiRemoveDomain": {
+      "message": "Remover {domain}"
+   },
+   "uiDomainsOne": {
+      "message": "{count} domínio"
+   },
+   "uiDomainsMany": {
+      "message": "{count} domínios"
+   },
+   "uiNewDomainsOne": {
+      "message": "{count} novo domínio"
+   },
+   "uiNewDomainsMany": {
+      "message": "{count} novos domínios"
+   },
+   "uiPreview": {
+      "message": "{total} únicos nesta pasta · {existing} já na lista · {skipped} links incompatíveis ignorados"
+   },
+   "uiAlreadyListed": {
+      "message": " (já na lista)"
+   },
+   "uiImportedOne": {
+      "message": "{count} domínio importado para as exceções de cookies."
+   },
+   "uiImportedMany": {
+      "message": "{count} domínios importados para as exceções de cookies."
+   },
+   "uiPausedUntil": {
+      "message": "Pausada até {time}"
+   },
+   "uiAutoplayLabel": {
+      "message": "Autoplay em {domain}"
+   },
+   "uiRemoveRule": {
+      "message": "Remover regra de {domain}"
+   },
+   "uiAutoplayGlobal": {
+      "message": "{action} autoplay · padrão global."
+   },
+   "uiAutoplayMatched": {
+      "message": "{action} autoplay · regra de {domain}."
+   },
+   "uiRulesImported": {
+      "message": "{count} regras importadas. Regras existentes foram mescladas."
    }
 }

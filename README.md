@@ -6,6 +6,8 @@ Uma extensão para Helium e navegadores Chromium que reúne a Nova guia personal
 
 ## Recursos
 
+**Preferências globais (1.5.13):** idioma ao lado do tema, aplicado ao popup, Sincronização, VPN, Nova guia, aba de reserva e notificações. A interface passa a ter uma [base visual compartilhada](docs/ui-components.md).
+
 **Interface da VPN (1.5.10):** telas próprias de Conexão, Servidores, Recursos e Conta, com tema e idioma compartilhados. O motor Proton é mantido, assim como sessões, regras e restrições de plano. O controle de limpeza ao fechar fica acima do relatório de última limpeza, e todas as abas usam o mesmo espaçamento do cabeçalho. [Detalhes e validação pendente](docs/vpn-interface.md).
 
 **Proton VPN integrado (1.5.0):** abra a aba **VPN**, entre na sua conta Proton e selecione um servidor permitido pelo seu plano. Contas Free usam o seletor completo para os servidores gratuitos disponíveis. Tunelamento dividido permite excluir sites da VPN ou usar a VPN apenas nos sites escolhidos, incluindo subdomínios. O tema é compartilhado com o painel principal. O proxy cobre o navegador e depende da autorização da API Proton. Login e conexão real ainda precisam de validação. [Detalhes da integração](vpn/INTEGRACAO.md).

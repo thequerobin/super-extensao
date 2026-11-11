@@ -369,5 +369,506 @@
    },
    "tabFaq": {
       "message": "FAQ"
+   },
+   "uiCleanupmediaandtabsf4faa": {
+      "message": "Cleanup, media and tabs."
+   },
+   "uiTheme6ae1b": {
+      "message": "Theme"
+   },
+   "uiLanguage00943": {
+      "message": "Language"
+   },
+   "uiDark0d7f9": {
+      "message": "Dark"
+   },
+   "uiLight21f72": {
+      "message": "Light"
+   },
+   "uiSystemc0041": {
+      "message": "System"
+   },
+   "uiCleanup5e061": {
+      "message": "Cleanup"
+   },
+   "uiTabs3cc23": {
+      "message": "Tabs"
+   },
+   "uiSyncda8aa": {
+      "message": "Sync"
+   },
+   "uiWhattoclear08caf": {
+      "message": "What to clear"
+   },
+   "uiBookmarks33b33": {
+      "message": "Bookmarks"
+   },
+   "uiSavedautomatically299aa": {
+      "message": "Saved automatically"
+   },
+   "uiSafe39c09": {
+      "message": "Safe"
+   },
+   "uiHistorybea29": {
+      "message": "History"
+   },
+   "uiStandardd8e00": {
+      "message": "Standard"
+   },
+   "uiStronga88f9": {
+      "message": "Strong"
+   },
+   "uiAlldatatypes067ff": {
+      "message": "All data types"
+   },
+   "uiBrowsinghistory8c5ab": {
+      "message": "Browsing history"
+   },
+   "uiBrowsercache18f9e": {
+      "message": "Browser cache"
+   },
+   "uiMaysignoutaccountsoutside23482": {
+      "message": "May sign out accounts outside the exceptions"
+   },
+   "uiDownloadhistorya142a": {
+      "message": "Download history"
+   },
+   "uiDownloadedfilesarepreserved42e52": {
+      "message": "Downloaded files are preserved"
+   },
+   "uiFormdata06d50": {
+      "message": "Form data"
+   },
+   "uiLocalstorage3d640": {
+      "message": "Local storage"
+   },
+   "uiWebsitelocalStorage2e49d": {
+      "message": "Website localStorage"
+   },
+   "uiSavedpasswordsarenotdeleted74677": {
+      "message": "Saved passwords are not deleted. Cleanup may finish on the next launch if the browser exits before it completes."
+   },
+   "uiKeepcookiesbywebsite78b44": {
+      "message": "Keep cookies by website"
+   },
+   "uiCookiesforthewebsitesin80c36": {
+      "message": "Cookies for the websites in this list are kept during cleanup. This protection does not include cache or local storage and does not guarantee that every login will be preserved."
+   },
+   "uiCookiesareprotectedforthe852f6": {
+      "message": "Cookies are protected for the entire registrable domain: an exception for accounts.example.com also keeps cookies for example.com and its subdomains."
+   },
+   "uiDomainorURL10cc7": {
+      "message": "Domain or URL"
+   },
+   "uiAddfadcf": {
+      "message": "Add"
+   },
+   "ui0domains890d3": {
+      "message": "0 domains"
+   },
+   "uiImportfrombookmarksa9c2c": {
+      "message": "Import from bookmarks →"
+   },
+   "uiNodomainsinthislist5b710": {
+      "message": "No domains in this list."
+   },
+   "uiAddinganexceptiondoesnot95152": {
+      "message": "Adding an exception does not enable cookie deletion. This option is controlled in the Cleanup tab."
+   },
+   "uiImportfrombookmarksab35d": {
+      "message": "Import from bookmarks"
+   },
+   "uiImportdomainsfromafolder684b6": {
+      "message": "Import domains from a folder into the cookie exceptions list. Bookmarks will not be changed."
+   },
+   "uiChooseabookmarksfolder55714": {
+      "message": "Choose a bookmarks folder"
+   },
+   "uiFolderea675": {
+      "message": "Folder"
+   },
+   "uiIncludesubfolders6a3bc": {
+      "message": "Include subfolders"
+   },
+   "uiImportdomainsdd303": {
+      "message": "Import domains"
+   },
+   "uiBookmarkaccessalsoallowsfoldere6e7f": {
+      "message": "Bookmark access also allows folder synchronization in the Sync panel. Import creates a copy: future folder changes do not update the exceptions. HTTP/HTTPS links are accepted and duplicates are ignored."
+   },
+   "uiAutoplaycontrol8eebb": {
+      "message": "Autoplay control"
+   },
+   "uiControlautoplay93d4a": {
+      "message": "Control autoplay"
+   },
+   "uiVideoandaudioonHTTP7b60f": {
+      "message": "Video and audio on HTTP/HTTPS pages"
+   },
+   "uiDefaultbehaviord8503": {
+      "message": "Default behavior"
+   },
+   "uiBlockautoplay8218a": {
+      "message": "Block autoplay"
+   },
+   "uiAllowautoplayc9632": {
+      "message": "Allow autoplay"
+   },
+   "uiCURRENTWEBSITE408b6": {
+      "message": "CURRENT WEBSITE"
+   },
+   "uiIdentifyingf5531": {
+      "message": "Identifying…"
+   },
+   "uiRuleforthiswebsite407fa": {
+      "message": "Rule for this website"
+   },
+   "uiUsedefaultinheritedruleb49be": {
+      "message": "Use default / inherited rule"
+   },
+   "uiAllow91652": {
+      "message": "Allow"
+   },
+   "uiBlock5c3d5": {
+      "message": "Block"
+   },
+   "uiAddadomainrule253bf": {
+      "message": "Add a domain rule"
+   },
+   "uiSave93bf2": {
+      "message": "Save"
+   },
+   "uiSearchrulesa8439": {
+      "message": "Search rules"
+   },
+   "uiNowebsiterules6a0a6": {
+      "message": "No website rules."
+   },
+   "uiExportrulesc2a64": {
+      "message": "Export rules"
+   },
+   "uiImportruleseb6ba": {
+      "message": "Import rules"
+   },
+   "uiRulesapplytothedomaina7b32": {
+      "message": "Rules apply to the domain and its subdomains; the most specific rule takes priority. A real interaction on the page allows playback in that frame until the next navigation. Native browser permissions still apply. Reload tabs that were already open when installing or updating the extension."
+   },
+   "uiKeepthewindowopen78b41": {
+      "message": "Keep the window open"
+   },
+   "uiProtectthelasttab5d38c": {
+      "message": "Protect the last tab"
+   },
+   "uiAsparetabpreventsaccidental4a814": {
+      "message": "A spare tab prevents accidental window closure"
+   },
+   "uiWhichwindowstoprotectffdbb": {
+      "message": "Which windows to protect"
+   },
+   "uiOnlythelastopenwindow28af9": {
+      "message": "Only the last open window"
+   },
+   "uiFirstwindowandlastremainingf154e": {
+      "message": "First window and last remaining window"
+   },
+   "uiAllwindows7359f": {
+      "message": "All windows"
+   },
+   "uiOneNewTabpageperafbc1": {
+      "message": "One New Tab page per window"
+   },
+   "uiSkipspinnedtabsandpagesff0d1": {
+      "message": "Skips pinned tabs and pages in use"
+   },
+   "uiKeepNewTabinthe54864": {
+      "message": "Keep New Tab in the last position"
+   },
+   "uiAvailablewhentheoptionaboveb6a61": {
+      "message": "Available when the option above is enabled"
+   },
+   "uiToexitclosethewindow2b03f": {
+      "message": "To exit, close the window using X or quit the browser. Cleanup on exit starts only after the last window closes."
+   },
+   "uiThesparetabiscreated54311": {
+      "message": "The spare tab is created only when needed and removed when enough other tabs are open. Your pinned tabs are preserved. Incognito windows require separate browser permission."
+   },
+   "uiLoadingVPN1f4b7": {
+      "message": "Loading VPN…"
+   },
+   "uiLoadingsyncf4eb5": {
+      "message": "Loading sync…"
+   },
+   "uiClearwhenthelastwindow0250c": {
+      "message": "Clear when the last window closes"
+   },
+   "uiPause8e0f5": {
+      "message": "Pause"
+   },
+   "ui30minutes75eae": {
+      "message": "30 minutes"
+   },
+   "ui1houreed75": {
+      "message": "1 hour"
+   },
+   "uiUntiltomorrow7286d": {
+      "message": "Until tomorrow"
+   },
+   "uiUntilresumedd56d7": {
+      "message": "Until resumed"
+   },
+   "uiResumedaaa7": {
+      "message": "Resume"
+   },
+   "uiLASTCLEANUP21453": {
+      "message": "LAST CLEANUP"
+   },
+   "uiLoadingbca48": {
+      "message": "Loading…"
+   },
+   "uiClearnow139b3": {
+      "message": "Clear now"
+   },
+   "uiLocalcleanupandcontrolsOptional7d8a0": {
+      "message": "Local cleanup and controls · Optional New Tab and Sync"
+   },
+   "uiSectionscec5a": {
+      "message": "Sections"
+   },
+   "uiCleanupoptions18c23": {
+      "message": "Cleanup options"
+   },
+   "uiCleanupmodeseebda": {
+      "message": "Cleanup modes"
+   },
+   "uiegaccountsexamplecomf1f8e": {
+      "message": "e.g. accounts.example.com"
+   },
+   "uiegyoutubecom90e62": {
+      "message": "e.g. youtube.com"
+   },
+   "uiDomainpermission24fe9": {
+      "message": "Domain permission"
+   },
+   "uiFilterbydomain39fd8": {
+      "message": "Filter by domain…"
+   },
+   "uiDragtoresizeUseand9c407": {
+      "message": "Drag to resize. Use ↑ and ↓ or double-click to reset."
+   },
+   "uiAdjustpopupheight48122": {
+      "message": "Adjust popup height"
+   },
+   "uiSparetabSuperExtenso852a9": {
+      "message": "Spare tab · Super Extensão"
+   },
+   "uiYourwindowstaysopenea535": {
+      "message": "Your window stays open."
+   },
+   "uiThissparetabpreventsthe159a6": {
+      "message": "This spare tab prevents the window from closing when you close the last tab. It is removed automatically when enough other tabs are open."
+   },
+   "uiToquitthebrowserand88239": {
+      "message": "To quit the browser and run cleanup on exit, close the window using X. You can adjust protection in"
+   },
+   "uiSuperExtensoTabsdf951": {
+      "message": "Super Extensão → Tabs"
+   },
+   "uiThelastattemptdidnot2c69a": {
+      "message": "The last attempt did not finish"
+   },
+   "uiCheckyoursettingsPendingautomatic8fb59": {
+      "message": "Check your settings. Pending automatic cleanup will be retried on the next launch."
+   },
+   "uiManual4e836": {
+      "message": "Manual"
+   },
+   "uiOnexitb4160": {
+      "message": "On exit"
+   },
+   "uiRecoveryonstartup7fa69": {
+      "message": "Recovery on startup"
+   },
+   "uiAutomatic20ec1": {
+      "message": "Automatic"
+   },
+   "uiNocleanuprecorded19546": {
+      "message": "No cleanup recorded"
+   },
+   "uiOnlyhistoryisclearedby4b72a": {
+      "message": "Only history is cleared by default."
+   },
+   "uiPauseduntilyouresume72e5a": {
+      "message": "Paused until you resume"
+   },
+   "uiThecleanupservicedidnotab798": {
+      "message": "The cleanup service did not respond."
+   },
+   "uiExceptionremoved098bd": {
+      "message": "Exception removed."
+   },
+   "uiBookmarkaccesswasnotgrantedc3dab": {
+      "message": "Bookmark access was not granted. You can still add domains manually."
+   },
+   "uiRefreshbookmarksfolderse7161": {
+      "message": "Refresh bookmarks folders"
+   },
+   "uiNobookmarksfoldersavailable92817": {
+      "message": "No bookmarks folders available."
+   },
+   "uiDeletingcookiesmaysignyoudaaf9": {
+      "message": "Deleting cookies may sign you out of accounts. Exceptions protect cookies only. Enable cookie deletion?"
+   },
+   "uiStrongmodeclearsallselectable60bf4": {
+      "message": "Strong mode clears all selectable data types, including cookies and local storage. Exceptions preserve cookies only. Apply?"
+   },
+   "uiCleanupmodesaved0c164": {
+      "message": "Cleanup mode saved."
+   },
+   "uiDomainaddedtocookieexceptionsd13f7": {
+      "message": "Domain added to cookie exceptions."
+   },
+   "uiThisdomainisalreadyin3da47": {
+      "message": "This domain is already in the list."
+   },
+   "uiChooseabookmarksfolder971e1": {
+      "message": "Choose a bookmarks folder."
+   },
+   "uiSelectatleastonedata0db03": {
+      "message": "Select at least one data type in the Cleanup tab."
+   },
+   "uiClearselecteddatanowCookiesf009c": {
+      "message": "Clear selected data now? Cookies outside the exceptions will be deleted, which may sign you out of accounts."
+   },
+   "uiClearing7deed": {
+      "message": "Clearing…"
+   },
+   "uiCleanupdidnotrun507eb": {
+      "message": "Cleanup did not run."
+   },
+   "uiCleanupcompleted6d5be": {
+      "message": "Cleanup completed."
+   },
+   "uiControldisabled76ef0": {
+      "message": "Control disabled."
+   },
+   "uiBlocking8a50b": {
+      "message": "Blocking"
+   },
+   "uiAllowingec37e": {
+      "message": "Allowing"
+   },
+   "uiNorulesmatchyoursearchb858c": {
+      "message": "No rules match your search."
+   },
+   "uiOpenanHTTPHTTPSwebsiteceed2": {
+      "message": "Open an HTTP/HTTPS website to adjust its rule"
+   },
+   "uiWebsiterulesavedb844f": {
+      "message": "Website rule saved."
+   },
+   "uiAutoplayrulesaved95537": {
+      "message": "Autoplay rule saved."
+   },
+   "uiAutoplayrulesexportedc02a3": {
+      "message": "Autoplay rules exported."
+   },
+   "uiTherulesfilemustbe45d35": {
+      "message": "The rules file must be 1 MB or smaller."
+   },
+   "uiInvalidrulesfile758a3": {
+      "message": "Invalid rules file."
+   },
+   "uiNovalidrulesfoundin56d52": {
+      "message": "No valid rules found in the file."
+   },
+   "uiTabpreferencessavedaa126": {
+      "message": "Tab preferences saved."
+   },
+   "uiUnabletoloadthispanel13eb1": {
+      "message": "Unable to load this panel. Close the popup and try again."
+   },
+   "uiEnteradomainorHTTPe8fca": {
+      "message": "Enter a domain or HTTP/HTTPS URL."
+   },
+   "uiInvaliddomainDonotuse2da49": {
+      "message": "Invalid domain. Do not use spaces or wildcards (*)."
+   },
+   "uiUsedomainsorHTTPHTTPS474ac": {
+      "message": "Use domains or HTTP/HTTPS URLs without a username or password."
+   },
+   "uiInvaliddomain6f616": {
+      "message": "Invalid domain."
+   },
+   "uiInvalidexceptionslistcleanupcancelled508df": {
+      "message": "Invalid exceptions list; cleanup cancelled."
+   },
+   "uiEnteravaliddomainorbf2e6": {
+      "message": "Enter a valid domain or URL without wildcards."
+   },
+   "uiUseadomainorHTTPca1dd": {
+      "message": "Use a domain or HTTP/HTTPS URL."
+   },
+   "uihistoryb8d62": {
+      "message": "history"
+   },
+   "uicacheb0359": {
+      "message": "cache"
+   },
+   "uicookiesd2bd3": {
+      "message": "cookies"
+   },
+   "uidownloadhistory2429d": {
+      "message": "download history"
+   },
+   "uiformdata457a1": {
+      "message": "form data"
+   },
+   "uilocalstorageabedc": {
+      "message": "local storage"
+   },
+   "uiRemoveDomain": {
+      "message": "Remove {domain}"
+   },
+   "uiDomainsOne": {
+      "message": "{count} domain"
+   },
+   "uiDomainsMany": {
+      "message": "{count} domains"
+   },
+   "uiNewDomainsOne": {
+      "message": "{count} new domain"
+   },
+   "uiNewDomainsMany": {
+      "message": "{count} new domains"
+   },
+   "uiPreview": {
+      "message": "{total} unique in this folder · {existing} already listed · {skipped} incompatible links skipped"
+   },
+   "uiAlreadyListed": {
+      "message": " (already listed)"
+   },
+   "uiImportedOne": {
+      "message": "{count} domain imported into cookie exceptions."
+   },
+   "uiImportedMany": {
+      "message": "{count} domains imported into cookie exceptions."
+   },
+   "uiPausedUntil": {
+      "message": "Paused until {time}"
+   },
+   "uiAutoplayLabel": {
+      "message": "Autoplay on {domain}"
+   },
+   "uiRemoveRule": {
+      "message": "Remove rule for {domain}"
+   },
+   "uiAutoplayGlobal": {
+      "message": "{action} autoplay · global default."
+   },
+   "uiAutoplayMatched": {
+      "message": "{action} autoplay · rule for {domain}."
+   },
+   "uiRulesImported": {
+      "message": "{count} rules imported. Existing rules were merged."
    }
 }

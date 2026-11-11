@@ -1,0 +1,53 @@
+/* Shared UI primitives. Opt in with ui-* classes; focus geometry is global. */
+:root {
+  --focus-width: 2px;
+  --field-gap: 6px;
+  --panel-gutter: 6px;
+}
+.ui-header-controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  flex-shrink: 0;
+}
+.ui-field {
+  display: grid;
+  gap: var(--field-gap);
+  color: var(--muted);
+  font: 12px var(--ui-font);
+}
+.ui-field-compact {
+  gap: 3px;
+  font-size: 10px;
+}
+.ui-select {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.ui-button {
+  border-radius: var(--control-radius);
+  font-family: var(--ui-font);
+}
+.ui-card {
+  border-radius: var(--card-radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.ui-scroll-panel {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+/* Inset focus rings stay complete even in nested/clipped scroll areas. */
+:focus-visible {
+  outline-offset: calc(-1 * var(--focus-width)) !important;
+}
+@media (max-width: 420px) {
+  .ui-header-controls {
+    gap: 6px;
+  }
+}

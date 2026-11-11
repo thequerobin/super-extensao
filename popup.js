@@ -7,16 +7,19 @@ const PRESETS = {
   standard: {clearHistory:true, clearCache:true, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false},
   strong: {clearHistory:true, clearCache:true, clearCookies:true, clearDownloads:true, clearFormData:true, clearLocalStorage:true}
 };
-const LABELS = {history:"histórico", cache:"cache", cookies:"cookies", downloads:"histórico de downloads", formData:"formulários", localStorage:"armazenamento local"};
+const LABELS = {history:SuperI18n.text("histórico"), cache:SuperI18n.text("cache"), cookies:SuperI18n.text("cookies"), downloads:SuperI18n.text("histórico de downloads"), formData:SuperI18n.text("formulários"), localStorage:SuperI18n.text("armazenamento local")};
 let folders = new Map();
 let preview = {domains:[], skipped:0};
 let mutationQueue = Promise.resolve();
 
 function showError(error) {
-  $("error").textContent = error?.message || String(error);
+  $("error").textContent = SuperI18n.text(error?.message || String(error));
   $("error").hidden = false;
 }
-function notify(message) { $("popupStatus").textContent = message; $("error").hidden = true; }
+let lastNotice;
+function renderNotice(){if(lastNotice)$("popupStatus").textContent=lastNotice.key?SuperI18n.t(lastNotice.key,lastNotice.values):SuperI18n.text(lastNotice.literal);}
+function notify(message) {lastNotice={literal:message};renderNotice();$("error").hidden=true;}
+function notifyMessage(key,values){lastNotice={key,values};renderNotice();$("error").hidden=true;}
 function handle(action) { return (...args) => Promise.resolve().then(() => action(...args)).catch(showError); }
 function serializeMutation(action) {
   const result = mutationQueue.catch(() => {}).then(action);
@@ -51,27 +54,27 @@ function refreshPresets() {
 async function refreshReport() {
   const data = await chrome.storage.local.get(["lastClearTime", "lastClearReason", "lastClearTypeKeys", "lastClearTypes", "lastClearErrorAt"]);
   if (data.lastClearErrorAt && (!data.lastClearTime || Date.parse(data.lastClearErrorAt) > Date.parse(data.lastClearTime))) {
-    $("reportTitle").textContent = "A última tentativa não foi concluída";
-    $("reportDetail").textContent = "Confira as configurações. Uma limpeza automática pendente será tentada na próxima abertura.";
+    $("reportTitle").textContent = SuperI18n.text("A última tentativa não foi concluída");
+    $("reportDetail").textContent = SuperI18n.text("Confira as configurações. Uma limpeza automática pendente será tentada na próxima abertura.");
   } else if (data.lastClearTime) {
-    const reason = {manual:"Manual", exit:"Ao fechar", startup:"Recuperação na abertura"}[data.lastClearReason] || "Automática";
-    $("reportTitle").textContent = new Date(data.lastClearTime).toLocaleString("pt-BR");
-    const labels = data.lastClearTypeKeys?.map(key => LABELS[key]).filter(Boolean) || data.lastClearTypes || [];
+    const reason = {manual:SuperI18n.text("Manual"), exit:SuperI18n.text("Ao fechar"), startup:SuperI18n.text("Recuperação na abertura")}[data.lastClearReason] || SuperI18n.text("Automática");
+    $("reportTitle").textContent = new Date(data.lastClearTime).toLocaleString(SuperI18n.locale);
+    const labels = data.lastClearTypeKeys?.map(key => SuperI18n.text(LABELS[key])).filter(Boolean) || data.lastClearTypes?.map(value=>SuperI18n.text(value)) || [];
     $("reportDetail").textContent = `${reason} · ${labels.join(", ")}`;
   } else {
-    $("reportTitle").textContent = "Nenhuma limpeza registrada";
-    $("reportDetail").textContent = "Por padrão, somente o histórico será apagado.";
+    $("reportTitle").textContent = SuperI18n.text("Nenhuma limpeza registrada");
+    $("reportDetail").textContent = SuperI18n.text("Por padrão, somente o histórico será apagado.");
   }
 }
 async function refreshPause() {
   const {paused, pauseUntil} = await chrome.storage.local.get(DEFAULTS);
   const active = paused && (!pauseUntil || Date.parse(pauseUntil) > Date.now());
   $("pauseRow").hidden = !active;
-  $("pauseStatus").textContent = pauseUntil ? "Pausada até " + new Date(pauseUntil).toLocaleString("pt-BR") : "Pausada até você retomar";
+  $("pauseStatus").textContent = pauseUntil ? SuperI18n.t("uiPausedUntil",{time:new Date(pauseUntil).toLocaleString(SuperI18n.locale)}) : SuperI18n.text("Pausada até você retomar");
 }
 async function message(payload) {
   const response = await chrome.runtime.sendMessage(payload);
-  if (!response?.ok) throw new Error(response?.error || "O serviço de limpeza não respondeu.");
+  if (!response?.ok) throw new Error(response?.error || SuperI18n.text("O serviço de limpeza não respondeu."));
   return response;
 }
 async function refreshList() {
@@ -84,7 +87,7 @@ async function refreshList() {
     text.textContent = domain;
     const remove = document.createElement("button");
     remove.textContent = "×";
-    remove.setAttribute("aria-label", `Remover ${domain}`);
+    remove.setAttribute("aria-label", SuperI18n.t("uiRemoveDomain",{domain}));
     remove.addEventListener("click", handle(async () => {
       remove.disabled = true;
       await serializeMutation(async () => {
@@ -93,12 +96,12 @@ async function refreshList() {
       });
       await refreshList();
       await refreshPreview();
-      notify("Exceção removida.");
+      notify(SuperI18n.text("Exceção removida."));
     }));
     li.append(text, remove);
     $("domainList").append(li);
   }
-  $("listCount").textContent = `${sites.length} ${sites.length === 1 ? "domínio" : "domínios"}`;
+  $("listCount").textContent = SuperI18n.t(sites.length===1?"uiDomainsOne":"uiDomainsMany",{count:sites.length});
   $("emptyList").hidden = sites.length > 0;
 }
 async function addDomains(values) {
@@ -117,12 +120,12 @@ async function refreshPreview() {
   const {excludedSites} = await chrome.storage.local.get({excludedSites:[]});
   const existing = new Set(ClearRules.normalizeList(excludedSites));
   const fresh = preview.domains.filter(domain => !existing.has(domain));
-  $("previewCount").textContent = `${fresh.length} ${fresh.length === 1 ? "novo domínio" : "novos domínios"}`;
-  $("previewDetail").textContent = `${preview.domains.length} únicos nesta pasta · ${preview.domains.length - fresh.length} já na lista · ${preview.skipped} links incompatíveis ignorados`;
+  $("previewCount").textContent = SuperI18n.t(fresh.length===1?"uiNewDomainsOne":"uiNewDomainsMany",{count:fresh.length});
+  $("previewDetail").textContent = SuperI18n.t("uiPreview",{total:preview.domains.length,existing:preview.domains.length-fresh.length,skipped:preview.skipped});
   $("previewDomains").replaceChildren();
   for (const domain of preview.domains) {
     const li = document.createElement("li");
-    li.textContent = domain + (existing.has(domain) ? " (já na lista)" : "");
+    li.textContent = domain + (existing.has(domain) ? SuperI18n.t("uiAlreadyListed") : "");
     $("previewDomains").append(li);
   }
   $("importBookmarks").disabled = fresh.length === 0;
@@ -130,7 +133,7 @@ async function refreshPreview() {
 async function loadBookmarks() {
   // Must be called directly from the click listener to retain the user gesture.
   const granted = await chrome.permissions.request({permissions:["bookmarks"]});
-  if (!granted) { notify("Acesso aos favoritos não concedido. Você ainda pode adicionar domínios manualmente."); return; }
+  if (!granted) { notify(SuperI18n.text("Acesso aos favoritos não concedido. Você ainda pode adicionar domínios manualmente.")); return; }
   const tree = await chrome.bookmarks.getTree();
   folders = new Map();
   function index(nodes) { for (const node of nodes) { if (!node.url) { folders.set(node.id, node); index(node.children || []); } } }
@@ -143,11 +146,22 @@ async function loadBookmarks() {
     $("bookmarkFolder").append(option);
   }
   $("bookmarkControls").hidden = false;
-  $("loadFolders").textContent = "Atualizar pastas de favoritos";
-  if (!$("bookmarkFolder").options.length) notify("Nenhuma pasta de favoritos disponível.");
+  $("loadFolders").dataset.i18n="uiRefreshbookmarksfolderse7161";
+  $("loadFolders").textContent = SuperI18n.text("Atualizar pastas de favoritos");
+  if (!$("bookmarkFolder").options.length) notify(SuperI18n.text("Nenhuma pasta de favoritos disponível."));
   await refreshPreview();
 }
+async function refreshLanguage(){
+  $("language").value=SuperI18n.locale;
+  SuperI18n.apply();renderNotice();
+  if(!$("error").hidden)$("error").textContent=SuperI18n.text($("error").textContent);
+  await Promise.all([refreshReport(),refreshPause(),refreshList(),refreshPreview()]);
+}
 async function init() {
+  await SuperI18n.ready;
+  $("language").addEventListener("change",handle(()=>SuperPreferences.locale.set($("language").value)));
+  SuperI18n.watch(()=>{refreshLanguage().catch(showError);});
+  $("language").value=SuperI18n.locale;
   const settings = await chrome.storage.local.get({...DEFAULTS, popupView:null});
   for (const key of TOGGLES) $(key).checked = settings[key] === true;
   SuperPreferences.watchTheme((theme, resolved) => {
@@ -162,7 +176,7 @@ async function init() {
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
   $("section-cleanup").addEventListener("click", () => activateTab(lastCleanupTab));
   for (const key of TOGGLES) $(key).addEventListener("change", handle(async () => {
-    if (key === "clearCookies" && $(key).checked && !confirm("Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?")) {
+    if (key === "clearCookies" && $(key).checked && !confirm(SuperI18n.text("Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?"))) {
       $(key).checked = false; return;
     }
     await serializeMutation(() => chrome.storage.local.set({[key]:$(key).checked}));
@@ -170,10 +184,10 @@ async function init() {
   }));
   document.querySelectorAll("[data-preset]").forEach(button => button.addEventListener("click", handle(async () => {
     const preset = PRESETS[button.dataset.preset];
-    if (preset.clearCookies && !confirm("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. Exceções preservam somente cookies. Aplicar?")) return;
+    if (preset.clearCookies && !confirm(SuperI18n.text("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. Exceções preservam somente cookies. Aplicar?"))) return;
     await serializeMutation(() => chrome.storage.local.set(preset));
     Object.entries(preset).forEach(([key, value]) => { $(key).checked = value; });
-    refreshPresets(); notify("Modo de limpeza salvo.");
+    refreshPresets(); notify(SuperI18n.text("Modo de limpeza salvo."));
   })));
   $("pauseToggle").addEventListener("click", () => {
     $("pauseMenu").hidden = !$("pauseMenu").hidden;
@@ -197,7 +211,7 @@ async function init() {
       const count = await addDomains([domain]);
       $("domainInput").value = "";
       await refreshList(); await refreshPreview();
-      notify(count ? "Domínio adicionado às exceções de cookies." : "Esse domínio já está na lista.");
+      notify(count ? SuperI18n.text("Domínio adicionado às exceções de cookies.") : SuperI18n.text("Esse domínio já está na lista."));
     })();
   });
   $("goImport").addEventListener("click", () => activateTab("bookmarks"));
@@ -208,26 +222,26 @@ async function init() {
     $("importBookmarks").disabled = true;
     try {
       const folder = folders.get($("bookmarkFolder").value);
-      if (!folder) throw new Error("Escolha uma pasta de favoritos.");
+      if (!folder) throw new Error(SuperI18n.text("Escolha uma pasta de favoritos."));
       const selected = ClearRules.bookmarkDomains(folder, $("includeSubfolders").checked);
       const count = await addDomains(selected.domains);
       await refreshList(); await refreshPreview();
-      notify(`${count} ${count === 1 ? "domínio importado" : "domínios importados"} para as exceções de cookies.`);
+      notifyMessage(count===1?"uiImportedOne":"uiImportedMany",{count});
     } finally { await refreshPreview(); }
   }));
   $("clearNow").addEventListener("click", handle(async () => {
     await mutationQueue;
     const snapshot = await chrome.storage.local.get(DEFAULTS);
     if (!Object.keys(LABELS).some(type => snapshot[{history:"clearHistory", cache:"clearCache", cookies:"clearCookies", downloads:"clearDownloads", formData:"clearFormData", localStorage:"clearLocalStorage"}[type]])) {
-      notify("Escolha pelo menos um tipo de dado na aba Limpeza."); return;
+      notify(SuperI18n.text("Escolha pelo menos um tipo de dado na aba Limpeza.")); return;
     }
-    if (snapshot.clearCookies && !confirm("Limpar os dados selecionados agora? Cookies fora das exceções serão apagados e isso pode desconectar contas.")) return;
+    if (snapshot.clearCookies && !confirm(SuperI18n.text("Limpar os dados selecionados agora? Cookies fora das exceções serão apagados e isso pode desconectar contas."))) return;
     $("clearNow").disabled = true;
-    notify("Limpando…");
+    notify(SuperI18n.text("Limpando…"));
     try {
       const response = await message({action:"clearNow", settings:snapshot});
-      if (!response.cleared) throw new Error("A limpeza não foi executada.");
-      notify("Limpeza concluída.");
+      if (!response.cleared) throw new Error(SuperI18n.text("A limpeza não foi executada."));
+      notify(SuperI18n.text("Limpeza concluída."));
     } finally { $("clearNow").disabled = false; await refreshReport(); }
   }));
   chrome.storage.onChanged.addListener((changes, area) => {
