@@ -412,7 +412,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 0;
+  padding: 13px 8px 13px 0;
+  min-width: 0;
+  max-width: 100%;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -421,16 +423,7 @@
 .vpn-country-group > summary::-webkit-details-marker {
   display: none;
 }
-.vpn-country-group > summary::after {
-  content: "";
-  margin-left: 4px;
-  color: var(--muted);
-  font-size: 20px;
-  line-height: 1;
-}
-.vpn-country-group[open] > summary::after {
-  transform: rotate(90deg);
-}
+
 .vpn-country-group > summary .vpn-count {
   margin-left: auto;
 }
@@ -511,17 +504,6 @@
 .vpn-provider-note {
   padding: var(--space-3) 0;
 }
-.vpn-country-group > summary::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-top: 1.5px solid currentColor;
-  border-right: 1.5px solid currentColor;
-  transform: rotate(45deg);
-}
-.vpn-country-group[open] > summary::after {
-  transform: rotate(135deg);
-}
 
 .vpn-save-row .ui-inline-status {
   color: var(--success);
@@ -543,3 +525,19 @@
 }
 .vpn-server > span:first-child { flex: 1; }
 .vpn-server-meta { flex-shrink: 0; }
+
+/* Reserve a fixed icon box: rotating borders could extend past the scroll edge. */
+.vpn-country-group > summary::after {
+  content: "";
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  color: var(--muted);
+  background: currentColor;
+  mask: url("/icons/chevron-right.svg") center / 16px 16px no-repeat;
+}
+.vpn-country-group[open] > summary::after {
+  transform: rotate(90deg);
+}
