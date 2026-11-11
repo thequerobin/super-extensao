@@ -42,3 +42,7 @@ Para alterar as telas, edite `sync/source`, e não as telas antigas em `vendor/f
 A suíte Node inclui testes DOM do bundle de produção com JSDOM e APIs Chromium simuladas: navegação, idioma, oito serviços, configuração OAuth isolada, leitura de perfis existentes, rascunhos antes/depois de salvar, seleção na exportação, confirmação de sincronização direcional, teste de conexão e criação WebDAV, e bloqueio das telas quando o motor está protegido.
 
 O Chromium não iniciou neste ambiente (`socket() failed: Operation not permitted`). Os testes DOM não verificam geometria, contraste, foco nativo ou tráfego real. Antes de liberar, conferir no Helium/Chromium: temas claro/escuro/sistema, rolagem e altura do popup, seleção de pastas e diálogos, criação/edição/importação/exportação e login/sincronização nos provedores usados. Nenhuma conta real foi conectada durante estes testes.
+
+## Início do motor próprio (1.5.19)
+
+As opções de um perfil Google Drive incluem uma comparação somente de leitura, implementada em `sync/engine` sem importar o motor legado. Ela usa a configuração salva para comparar o inventário local e o XBEL remoto; não migra perfis nem altera a execução da sincronização. Escopo, limitações e próximos passos estão em [sync-engine.md](sync-engine.md).

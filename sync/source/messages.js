@@ -1,5 +1,127 @@
 /* SPDX-License-Identifier: MPL-2.0 */
 export const uiMessages = {
+  SyncLocalTreeChanged: {
+    "pt-BR":
+      "Os favoritos locais mudaram durante a leitura. Tente comparar novamente.",
+    en: "Local bookmarks changed while being read. Compare again.",
+  },
+  UiCompareTitle: { "pt-BR": "Conferir favoritos", en: "Compare bookmarks" },
+  UiCompareHelp: {
+    "pt-BR":
+      "Compara a pasta deste perfil com o arquivo salvo no Google Drive, usando a configuração salva. Não altera os favoritos.",
+    en: "Compares this profile’s folder with its Google Drive file using the saved settings. Bookmarks are not changed.",
+  },
+  UiCompareDrive: {
+    "pt-BR": "Comparar com Google Drive",
+    en: "Compare with Google Drive",
+  },
+  UiCompareNoFile: {
+    "pt-BR":
+      "O arquivo deste perfil ainda não existe no Drive. Nenhum arquivo foi criado.",
+    en: "This profile’s file does not exist in Drive yet. No file was created.",
+  },
+  UiCompareCommon: { "pt-BR": "Itens em comum", en: "Matching items" },
+  UiCompareLocal: {
+    "pt-BR": "Somente neste navegador",
+    en: "Only in this browser",
+  },
+  UiCompareRemote: {
+    "pt-BR": "Somente no Google Drive",
+    en: "Only in Google Drive",
+  },
+  UiCompareInventory: {
+    "pt-BR":
+      "A contagem inclui favoritos e pastas, considerando nome, endereço e caminho. Não identifica mudanças de ordem nem decide o que será excluído.",
+    en: "Counts include bookmarks and folders, considering title, URL and path. This comparison does not detect reordered items or decide deletions.",
+  },
+  SyncFileTooLarge: {
+    "pt-BR": "O arquivo excede o limite de 20 MB para esta comparação.",
+    en: "The file exceeds the 20 MB comparison limit.",
+  },
+  SyncUnsupportedXml: {
+    "pt-BR":
+      "Este arquivo contém recursos XBEL ainda não suportados pela comparação.",
+    en: "This file contains XBEL features not yet supported by the comparison.",
+  },
+  SyncInvalidFile: {
+    "pt-BR":
+      "O arquivo não é um XBEL válido. Se estiver criptografado, esta comparação ainda não pode lê-lo.",
+    en: "The file is not valid XBEL. Encrypted files are not supported by this comparison yet.",
+  },
+  SyncTreeTooLarge: {
+    "pt-BR": "A pasta ou o arquivo ultrapassa os limites desta comparação.",
+    en: "The folder or file exceeds the comparison limits.",
+  },
+  SyncDuplicateIds: {
+    "pt-BR":
+      "O arquivo contém identificadores repetidos. A comparação foi interrompida.",
+    en: "The file contains duplicate identifiers. The comparison was stopped.",
+  },
+  SyncInvalidLocalTree: {
+    "pt-BR": "Não foi possível interpretar a pasta local deste perfil.",
+    en: "This profile’s local folder could not be read.",
+  },
+  SyncGoogleAuthorizationRequired: {
+    "pt-BR":
+      "Confira a configuração do Google em Conexões e a autorização deste perfil.",
+    en: "Check the Google configuration in Connections and this profile’s authorization.",
+  },
+  SyncCancelled: {
+    "pt-BR": "Comparação cancelada.",
+    en: "Comparison cancelled.",
+  },
+  SyncGoogleRateLimited: {
+    "pt-BR": "O Google limitou as requisições. Aguarde e tente novamente.",
+    en: "Google limited the requests. Wait and try again.",
+  },
+  SyncGoogleRequestFailed: {
+    "pt-BR": "Não foi possível consultar o Google Drive. Tente novamente.",
+    en: "Google Drive could not be reached. Try again.",
+  },
+  SyncRequestTimedOut: {
+    "pt-BR": "A consulta ao Google Drive demorou demais. Tente novamente.",
+    en: "The Google Drive request timed out. Try again.",
+  },
+  SyncInvalidResponse: {
+    "pt-BR": "O Google Drive retornou dados incompletos ou inesperados.",
+    en: "Google Drive returned incomplete or unexpected data.",
+  },
+  SyncInvalidFileName: {
+    "pt-BR": "Salve um nome de arquivo válido nas opções do perfil.",
+    en: "Save a valid file name in this profile’s options.",
+  },
+  SyncAmbiguousDriveFile: {
+    "pt-BR":
+      "Há mais de um arquivo com esse nome no Drive. A comparação não escolheu nem removeu arquivos.",
+    en: "More than one file has this name in Drive. No files were selected or removed.",
+  },
+  SyncRemoteFileChanged: {
+    "pt-BR": "O arquivo mudou durante a leitura. Tente comparar novamente.",
+    en: "The file changed while being read. Compare again.",
+  },
+  SyncUnsupportedProvider: {
+    "pt-BR": "Esta comparação está disponível apenas para Google Drive.",
+    en: "This comparison is available only for Google Drive.",
+  },
+  SyncBookmarksOnly: {
+    "pt-BR":
+      "Esta comparação precisa de uma pasta de favoritos. Perfis de abas ainda não são suportados.",
+    en: "This comparison requires a bookmarks folder. Tab profiles are not supported yet.",
+  },
+  SyncEncryptedFileUnsupported: {
+    "pt-BR":
+      "A comparação ainda não suporta arquivos criptografados. Não desative sua criptografia para usá-la.",
+    en: "This comparison does not support encrypted files yet. Keep your encryption enabled.",
+  },
+  SyncProfileBusy: {
+    "pt-BR": "Aguarde a sincronização deste perfil terminar antes de comparar.",
+    en: "Wait for this profile’s synchronization to finish before comparing.",
+  },
+  SyncLocalFolderMissing: {
+    "pt-BR": "A pasta de favoritos deste perfil não foi encontrada.",
+    en: "This profile’s bookmarks folder was not found.",
+  },
+
   UiIntro: {
     "pt-BR": "Seus favoritos, em todos os navegadores.",
     en: "Your bookmarks, across browsers.",
