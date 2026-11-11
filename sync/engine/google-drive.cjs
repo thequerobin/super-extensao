@@ -1,11 +1,20 @@
 // Independent, read-only Google Drive connector. Credentials stay in memory.
 const { LIMITS, fail } = require("./tree.cjs");
 const API = "https://www.googleapis.com/drive/v3/files";
+function requestStage(url, options = {}) {
+  const address = new URL(url);
+  if (address.hostname === "oauth2.googleapis.com") return "oauth";
+  if (address.pathname.includes("/upload/")) return "upload";
+  if (options.method === "PATCH") return "lock";
+  if (address.pathname.endsWith("/generateIds")) return "createId";
+  if (address.searchParams.get("alt") === "media") return "download";
+  return address.pathname.endsWith("/files") ? "list" : "metadata";
+}
 class GoogleDriveReader {
   constructor({
     oauth,
     refreshToken,
-    fetchImpl = globalThis.fetch,
+    fetchImpl = globalThis.fetch.bind(globalThis),
     signal,
     timeout = 30000,
   }) {
@@ -18,6 +27,7 @@ class GoogleDriveReader {
     this.timeout = timeout;
   }
   async request(url, options = {}) {
+    const stage = requestStage(url, options);
     const abort = new AbortController();
     const cancel = () => abort.abort();
     if (this.signal?.aborted) fail("SyncCancelled");
@@ -78,11 +88,18 @@ class GoogleDriveReader {
         stream.releaseLock();
       }
     } catch (error) {
-      if (this.signal?.aborted) fail("SyncCancelled");
-      if (abort.signal.aborted) fail("SyncRequestTimedOut");
-      if (typeof error.code === "string" && error.code.startsWith("Sync"))
-        throw error;
-      fail("SyncGoogleRequestFailed");
+      let result = error;
+      if (this.signal?.aborted) result = Object.assign(new Error("SyncCancelled"), { code: "SyncCancelled" });
+      else if (abort.signal.aborted) result = Object.assign(new Error("SyncRequestTimedOut"), { code: "SyncRequestTimedOut" });
+      else if (typeof error.code !== "string" || !error.code.startsWith("Sync")) {
+        result = Object.assign(new Error("SyncGoogleNetworkFailed"), { code: "SyncGoogleNetworkFailed" });
+        // Browser exception messages can include URLs or request data. Keep only
+        // a fixed exception category; never copy the message/body into logs.
+        if (["TypeError", "NetworkError", "SecurityError", "AbortError"].includes(error.name))
+          result.reason = error.name;
+      }
+      result.requestStage = stage;
+      throw result;
     } finally {
       clearTimeout(timer);
       this.signal?.removeEventListener("abort", cancel);

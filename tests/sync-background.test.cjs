@@ -30,9 +30,9 @@ function boot(config = {}) {
     '@sync-engine/browser/BrowserController': { default: Controller },
     '@sync-engine/Account': { default: { get: async id => accounts[id], getAllAccounts: async () => Object.values(accounts) } },
     '@sync-engine/browser-api': { default: browser },
-    '@sync-engine/Logger': { default: { log() {} } },
+    '@sync-engine/Logger': { default: { log(value) { calls.push(['log', value]); } } },
     '@sync-engine/native/I18n': { i18n: { setLocales() {}, async load() {} } },
-    '../source/messages': { uiMessages: { SyncConflict: { 'pt-BR': 'Conflito seguro' } } },
+    '../source/messages': { uiMessages: { SyncConflict: { 'pt-BR': 'Conflito seguro' }, SyncGoogleNetworkFailed: { 'pt-BR': 'Falha de conexão' } }, requestStageMessages: { oauth: { 'pt-BR': 'autenticação', en: 'authentication' } } },
     './crypto.cjs': { fingerprint },
     './runner.cjs': { async synchronize(input) { calls.push(['own', input.id, input.profile.strategy, input.dryRun]); await input.validate(); return config.execute ? config.execute(input) : { local: 0, server: 0 }; } },
   };
@@ -108,4 +108,14 @@ test('locking profiles during execution prevents later status writes from restor
   assert.equal(f.accounts.a.data.lastSync, undefined);
   await f.controller.unlock();
   assert.equal(f.store.accountsLocked, null);
+});
+
+test('network failures show a localized request stage and sanitized diagnostic categories', async () => {
+  const f = boot({ execute: async () => { throw Object.assign(new TypeError('private url/token'), { code: 'SyncGoogleNetworkFailed', requestStage: 'oauth', reason: 'TypeError' }); } });
+  await f.controller.syncAccount('a');
+  assert.equal(f.accounts.a.data.error, 'Falha de conexão (autenticação)');
+  assert.equal(f.accounts.a.data.isTransientError, true);
+  const log = f.calls.find(([kind]) => kind === 'log')[1];
+  assert.match(log, /SyncGoogleNetworkFailed stage=oauth reason=TypeError/);
+  assert.doesNotMatch(log, /private|token/);
 });

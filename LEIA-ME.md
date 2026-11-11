@@ -1,4 +1,4 @@
-# Super Extensão — guia rápido (1.6.1)
+# Super Extensão — guia rápido (1.6.2)
 
 Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
 
@@ -52,4 +52,4 @@ O sinal não mede tráfego nem verifica o IP externamente. O proxy cobre este na
 - A importação de domínios de favoritos é manual e não altera os favoritos.
 - A importação da Nova guia substitui sua configuração; imagens próprias precisam ser selecionadas novamente.
 
-A suíte da implementação 1.6.1 passou 114 testes simulados. Login real, tráfego, recuperação e ajustes visuais ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
+A suíte da implementação 1.6.2 passou 120 testes simulados. Login real, tráfego, recuperação e ajustes visuais ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).

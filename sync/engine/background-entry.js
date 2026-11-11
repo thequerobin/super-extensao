@@ -5,7 +5,7 @@ import Account from "@sync-engine/Account";
 import browser from "@sync-engine/browser-api";
 import Logger from "@sync-engine/Logger";
 import { i18n } from "@sync-engine/native/I18n";
-import { uiMessages } from "../source/messages";
+import { uiMessages, requestStageMessages } from "../source/messages";
 import { synchronize } from "./runner.cjs";
 import { fingerprint } from "./crypto.cjs";
 
@@ -172,7 +172,10 @@ async function execute(id, strategy, abort, dryRun = false) {
     const code =
       typeof error.code === "string" ? error.code : "SyncGoogleRequestFailed";
     const locale = await globalThis.SuperPreferences.locale.get();
-    const text = uiMessages[code]?.[locale] || uiMessages[code]?.en || code;
+    const stage = requestStageMessages[error.requestStage];
+    const stageLabel = stage?.[locale] || stage?.en;
+    const text = (uiMessages[code]?.[locale] || uiMessages[code]?.en || code)
+      + (stageLabel ? ` (${stageLabel})` : "");
     if (code === "SyncCancelled") {
       const state = await storage.load(id);
       if (state?.journal) {
@@ -194,6 +197,7 @@ async function execute(id, strategy, abort, dryRun = false) {
         errorCount: (account.getData().errorCount || 0) + 1,
         isTransientError: [
           "SyncGoogleRequestFailed",
+          "SyncGoogleNetworkFailed",
           "SyncGoogleRateLimited",
           "SyncRequestTimedOut",
           "SyncRemoteLocked",
@@ -205,6 +209,8 @@ async function execute(id, strategy, abort, dryRun = false) {
     Logger.log(
       `Super Sync ${id}: ${code}${
         Number.isInteger(error.status) ? ` HTTP ${error.status}` : ""
+      }${stage ? ` stage=${error.requestStage}` : ""}${
+        ["TypeError", "NetworkError", "SecurityError", "AbortError"].includes(error.reason) ? ` reason=${error.reason}` : ""
       }`
     );
   } finally {

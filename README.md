@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.6.1.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.6.2.** Documentação revisada em 11 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -47,7 +47,7 @@ Em **Sincronização → Novo perfil**, escolha o serviço e a pasta. O motor at
 
 Para Google Drive e Dropbox, configure credenciais OAuth próprias em **Conexões**, usando o endereço de redirecionamento exibido. O Google usa ID e segredo do cliente; o Dropbox usa a chave do aplicativo. Os outros conectores usam as configurações do perfil.
 
-**Motor próprio Google Drive (1.6.1):** os perfis de favoritos usam `sync/engine` no botão **Sincronizar** e no agendamento existente. O núcleo faz leitura, reconciliação de três versões, escrita condicional, criptografia compatível, backup e aplicação local com checkpoints. Conflitos incompatíveis e exclusões grandes são interrompidos; as ações avançadas permitem escolher o sentido. O painel de comparação foi removido. Perfis com a raiz geral preservam as pastas permanentes e sincronizam seu conteúdo.
+**Motor próprio Google Drive (1.6.2):** os perfis de favoritos usam `sync/engine` no botão **Sincronizar** e no agendamento existente. O núcleo faz leitura, reconciliação de três versões, escrita condicional, criptografia compatível, backup e aplicação local com checkpoints. Conflitos incompatíveis e exclusões grandes são interrompidos; as ações avançadas permitem escolher o sentido. O painel de comparação foi removido. Perfis com a raiz geral preservam as pastas permanentes e sincronizam seu conteúdo.
 
 Os perfis existentes são aproveitados, incluindo cache e mapeamentos quando consistentes. Outros serviços e perfis de abas continuam no legado; cadastro, OAuth interativo e a estrutura de agendamento ainda usam a camada de compatibilidade. Pastas sobrepostas entre perfis são recusadas por enquanto. Os backups ficam no armazenamento local; ainda não há tela de restauração.
 
@@ -120,7 +120,7 @@ npm test
 
 `build:sync` não recompila o worker Floccus. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A última execução registrada na implementação **1.6.1 passou 114 testes**, com APIs simuladas e testes DOM. Não comprova login real, tráfego de VPN, geometria do popup ou sincronização com contas reais. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
+A última execução registrada na implementação **1.6.2 passou 120 testes**, com APIs simuladas e testes DOM. Não comprova login real, tráfego de VPN, geometria do popup ou sincronização com contas reais. O Chromium não iniciou no ambiente atual por `socket() failed: Operation not permitted`. [Cobertura e checklist manual](docs/validacao.md).
 
 ## Documentação
 

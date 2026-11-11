@@ -115,3 +115,37 @@ test('HTTP URL normalization matches browser bookmark canonicalization without c
   assert.equal(compareTrees(local, remote).common, 1);
   assert.throws(() => parseXbel('<xbel><bookmark id="1" href="relative/path"><title>Bad</title></bookmark></xbel>'), /SyncInvalidUrl/);
 });
+test('the default browser fetch keeps its global receiver instead of the connector instance', async () => {
+  const original = globalThis.fetch;
+  let calls = 0, reader;
+  globalThis.fetch = function () {
+    assert.equal(this, globalThis, 'native worker fetch requires the global receiver');
+    return Promise.resolve(new Response(JSON.stringify(++calls === 1 ? { access_token: 'private' } : { files: [] })));
+  };
+  try { reader = new GoogleDriveReader({ oauth, refreshToken: 'private' }); }
+  finally { globalThis.fetch = original; }
+  assert.deepEqual(await reader.read('bookmarks.xbel'), { exists: false, content: null });
+  assert.equal(calls, 2);
+});
+test('network diagnostics identify the failing stage without exposing exception messages or URLs', async () => {
+  const f = fixture({ fetch: async () => { throw new TypeError('private-refresh https://private.test/?token=secret'); } });
+  for (const [url, options, stage] of [
+    ['https://oauth2.googleapis.com/token', {}, 'oauth'],
+    ['https://www.googleapis.com/drive/v3/files?q=private', {}, 'list'],
+    ['https://www.googleapis.com/drive/v3/files/private?alt=media', {}, 'download'],
+    ['https://www.googleapis.com/drive/v2/files/private?fields=etag', {}, 'metadata'],
+    ['https://www.googleapis.com/drive/v2/files/private', { method: 'PATCH' }, 'lock'],
+    ['https://www.googleapis.com/upload/drive/v2/files/private', { method: 'PUT' }, 'upload'],
+    ['https://www.googleapis.com/drive/v3/files/generateIds', {}, 'createId'],
+  ]) {
+    await assert.rejects(() => f.reader.request(url, options), error => {
+      assert.equal(error.code, 'SyncGoogleNetworkFailed'); assert.equal(error.requestStage, stage);
+      assert.equal(error.reason, 'TypeError'); assert.doesNotMatch(JSON.stringify(error) + error.message, /private|secret/);
+      return true;
+    });
+  }
+});
+test('HTTP failures retain their numeric status and failing stage', async () => {
+  const f = fixture({ fetch: async () => new Response('private', { status: 503 }) });
+  await assert.rejects(() => f.reader.read('bookmarks.xbel'), error => error.code === 'SyncGoogleRequestFailed' && error.status === 503 && error.requestStage === 'oauth');
+});

@@ -3,9 +3,14 @@
 // Drive bookmark execution to the independent core; other providers stay legacy.
 import { actionsDefinition as engineActions } from "../../../vendor/floccus-source/src/ui/store/actions";
 import Controller from "@sync-engine/Controller";
+import Logger from "@sync-engine/Logger";
+import { downloadSyncLogs } from "../logs.cjs";
 import { actions, mutations } from "./definitions";
 export const actionsDefinition = {
   ...engineActions,
+  async [actions.DOWNLOAD_LOGS](_context, anonymous) {
+    return downloadSyncLogs({ logger: Logger, version: chrome.runtime.getManifest().version, anonymous });
+  },
   async [actions.RESET_ACCOUNT](context, id) {
     const response = await chrome.runtime.sendMessage({
       channel: "super-sync",

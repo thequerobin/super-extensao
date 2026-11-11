@@ -75,6 +75,10 @@ export const uiMessages = {
     "pt-BR": "O Google limitou as requisições. Aguarde e tente novamente.",
     en: "Google limited the requests. Wait and try again.",
   },
+  SyncGoogleNetworkFailed: {
+    "pt-BR": "Falha de conexão com o Google Drive. Verifique a conexão e a VPN e tente novamente.",
+    en: "Connection to Google Drive failed. Check your connection and VPN and try again.",
+  },
   SyncGoogleRequestFailed: {
     "pt-BR": "Não foi possível consultar o Google Drive. Tente novamente.",
     en: "Google Drive could not be reached. Try again.",
@@ -338,4 +342,14 @@ export const uiMessages = {
       "Há perfis com pastas sobrepostas. Separe as pastas antes de usar o motor próprio nessa configuração.",
     en: "Profiles have overlapping folders. Separate their folders before using the own engine for this configuration.",
   },
+};
+
+export const requestStageMessages = {
+  oauth: { "pt-BR": "autenticação", en: "authentication" },
+  list: { "pt-BR": "busca do arquivo", en: "file lookup" },
+  metadata: { "pt-BR": "metadados do arquivo", en: "file metadata" },
+  download: { "pt-BR": "leitura do arquivo", en: "file download" },
+  upload: { "pt-BR": "gravação do arquivo", en: "file upload" },
+  lock: { "pt-BR": "bloqueio do arquivo", en: "file locking" },
+  createId: { "pt-BR": "preparação do arquivo", en: "file preparation" },
 };

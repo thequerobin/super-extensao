@@ -1,4 +1,4 @@
-# Estado atual — Super Extensão 1.6.1
+# Estado atual — Super Extensão 1.6.2
 
 A interface ativa continua em `sync/source`. Perfis Google Drive de favoritos passam a executar o núcleo próprio em `sync/engine`; os demais provedores e perfis de abas mantêm o motor legado. O painel de comparação foi removido. Cadastro, OAuth interativo, formato dos perfis e agendamento permanecem na camada de compatibilidade.
 
@@ -35,3 +35,7 @@ Na versão 1.5.6, o aplicativo monta suas rotas no elemento da seção Sincroniz
 ## 1.6.1 — Sincronização da raiz
 
 Removida a restrição que impedia perfis do Google Drive com a raiz geral do navegador. O motor preserva as pastas permanentes e sincroniza seu conteúdo, reutilizando os mapeamentos e o cache do motor anterior. Os títulos das pastas especiais são normalizados para compatibilidade entre idiomas, sem renomeá-las no navegador. Testes cobrem migração, idempotência, download, organização do remoto e proteção das pastas nativas.
+
+## 1.6.2 — Requisições Google e arquivo de diagnóstico
+
+A implementação padrão de fetch permanece vinculada ao contexto global do worker. Falhas de transporte agora têm código próprio e identificam a etapa (autenticação, listagem, leitura, metadados, bloqueio ou escrita), com status HTTP quando disponível. Os logs incluem somente categorias fixas da exceção, sem URL, corpo, mensagem bruta ou credenciais. A exportação usa `super-extensao-sincronizacao-<versão>-<data>-completo.log` ou `-anonimizado.log`, cabeçalho próprio e a versão instalada da extensão; a anonimização existente foi preservada.
