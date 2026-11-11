@@ -200,6 +200,28 @@ test("global header locale updates all local tabs, dynamic messages and both emb
     scripts(ui.w, ["sync/js/options.js", "vpn/interface.js"]);
     await tick();
     assert.equal(doc.querySelector("#syncPanel .sync-language"), null);
+    const syncMenu = doc.querySelector("#syncSubmenu .sub-nav");
+    assert.ok(syncMenu);
+    assert.equal(doc.querySelector("#syncPanel .sync-navigation"), null);
+    assert.equal(doc.querySelector("main #syncSubmenu"), null);
+    assert.equal(syncMenu.querySelectorAll("a.tab").length, 4);
+    assert.equal(syncMenu.querySelectorAll(".v-icon").length, 0);
+    doc.querySelector("#tab-sync").click();
+    assert.equal(doc.querySelector("#syncSubmenu").hidden, false);
+    assert.equal(doc.querySelector("#cleanupSubmenu").hidden, true);
+    syncMenu.querySelector('a[href="#/new"]').click();
+    await tick();
+    assert.ok(
+      doc
+        .querySelector('#syncSubmenu a[href="#/new"]')
+        .classList.contains("active"),
+    );
+    assert.ok(doc.querySelector("#syncPanel .sync-wizard"));
+    doc.querySelector('#syncSubmenu a[href="#/"]').click();
+    await tick();
+    doc.querySelector("#tab-autoplay").click();
+    assert.equal(doc.querySelector("#syncSubmenu").hidden, true);
+
     assert.match(doc.querySelector("#syncPanel").textContent, /Your bookmarks/);
     doc.querySelector("#language").value = "pt-BR";
     doc

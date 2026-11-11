@@ -1,4 +1,4 @@
-# Base visual e idioma compartilhados — 1.5.13
+# Base visual e idioma compartilhados — 1.5.14
 
 `ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define os tokens de cor, tipografia, bordas e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
 
@@ -23,3 +23,9 @@ Edite `_locales/en/messages.json` e `_locales/pt_BR/messages.json`, mantendo as 
 O bloco de limpeza e o relatório ficam apenas nas seções de Limpeza. Autoplay e Abas mantêm suas mensagens de resultado fora desse bloco.
 
 Os testes DOM verificam troca de idioma no cabeçalho e nos dois módulos incorporados, preservação de campos e configurações, contagens e mensagens dinâmicas, catálogos e placeholders das notificações. A validação visual e das notificações reais no navegador continua pendente no ambiente de desenvolvimento.
+
+## Submenus fixos
+
+Limpeza, Sincronização e VPN usam a mesma apresentação `sub-nav ui-submenu`, na área `.popup-navigation` fora da rolagem do conteúdo. Sincronização e VPN montam seus controles nos espaços `syncSubmenu` e `vpnSubmenu`, mantendo rotas, estado selecionado e idioma. Nas páginas independentes, a navegação permanece no próprio módulo.
+
+Campos compostos, como a busca de perfis, usam `ui-focus-within`: o contorno é desenhado dentro do limite do contêiner, inclusive quando o foco está no input interno. Isso substitui a antiga regra externa `sync-search:focus-within` que podia ser recortada pelo painel.

@@ -109,10 +109,14 @@ const snapshot = () => ({
   recents: [],
 });
 async function boot(initial = snapshot(), options = {}) {
-  const dom = new JSDOM('<div id="vpnPanel"></div>', {
-    url: "https://extension.test/popup.html",
-    pretendToBeVisual: true,
-  });
+  const dom = new JSDOM(
+    (options.hostNavigation ? '<div id="vpnSubmenu"></div>' : "") +
+      '<div id="vpnPanel"></div>',
+    {
+      url: "https://extension.test/popup.html",
+      pretendToBeVisual: true,
+    },
+  );
   const w = dom.window,
     calls = [];
   let broadcast, localeWatcher;
@@ -757,6 +761,32 @@ test("country groups start collapsed, use local SVG flags and paginate independe
       false;
     await tick();
     assert.equal(ui.w.document.querySelectorAll("[data-server]").length, 0);
+  } finally {
+    await ui.close();
+  }
+});
+
+test("embedded VPN uses the fixed shared submenu and keeps navigation and locale updates working", async () => {
+  const ui = await boot(snapshot(), { hostNavigation: true });
+  try {
+    const menu = () => ui.w.document.querySelector("#vpnSubmenu .sub-nav");
+    assert.ok(menu());
+    assert.equal(menu().querySelectorAll("button.tab").length, 4);
+    assert.equal(
+      ui.w.document.querySelector("#vpnPanel .vpn-navigation"),
+      null,
+    );
+    menu().querySelector('[data-page="servers"]').click();
+    await tick();
+    assert.equal(menu().querySelector(".active").dataset.page, "servers");
+    assert.ok(ui.w.document.querySelector('#vpnPanel [data-field="search"]'));
+    await ui.preferences.locale.set("en");
+    await tick();
+    assert.equal(menu().querySelector(".active").textContent, "Servers");
+    menu().querySelector('[data-page="account"]').click();
+    await tick();
+    assert.equal(menu().querySelector(".active").dataset.page, "account");
+    assert.ok(ui.w.document.querySelector("#vpnPanel .vpn-account-links"));
   } finally {
     await ui.close();
   }

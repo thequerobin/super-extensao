@@ -34,6 +34,8 @@ function activateTab(tab, persist = true) {
   const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
+  $("syncSubmenu").hidden = tab !== "sync";
+  $("vpnSubmenu").hidden = tab !== "vpn";
   $("section-cleanup").classList.toggle("active", isCleanup);
   $("section-cleanup").setAttribute("aria-pressed", String(isCleanup));
   for (const name of NAV_TABS) {

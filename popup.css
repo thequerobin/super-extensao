@@ -119,3 +119,8 @@ body[data-active-tab="tabs"] > main > footer,
 body[data-active-tab="sync"] #popupStatus,
 body[data-active-tab="vpn"] #popupStatus {display:none!important;}
 #popupStatus:empty {display:none;}
+
+/* One fixed submenu style for cleanup, sync and VPN. */
+.sub-nav .tab {border-radius:var(--control-radius);font-weight:600;line-height:1.5;}
+.sub-nav a.tab {display:block;text-decoration:none;text-align:center;}
+.module-submenu:empty {display:none;}

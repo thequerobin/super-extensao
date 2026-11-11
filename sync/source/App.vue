@@ -18,14 +18,21 @@
         </select></label
       >
     </header>
-    <nav class="sync-navigation" :aria-label="t('SuperSyncTitle')">
+    <nav
+      ref="navigation"
+      :class="hostNavigation ? 'sub-nav ui-submenu' : 'sync-navigation'"
+      :aria-label="t('SuperSyncTitle')"
+    >
       <router-link
         v-for="item in navigation"
         :key="item.path"
+        :class="{ tab: hostNavigation, active: active(item.path) }"
         :to="item.path"
         :exact="item.path === '/'"
         :aria-current="active(item.path) ? 'page' : null"
-        ><v-icon small aria-hidden="true">{{ item.icon }}</v-icon
+        ><v-icon v-if="!hostNavigation" small aria-hidden="true">{{
+          item.icon
+        }}</v-icon
         >{{ t(item.label) }}</router-link
       >
     </nav>
@@ -68,7 +75,8 @@ export default {
   data() {
     return {
       locale: i18n.getLocale(),
-      embedded:Boolean(document.getElementById("language")),
+      embedded: Boolean(document.getElementById("language")),
+      hostNavigation: Boolean(document.getElementById("syncSubmenu")),
       key: "",
       unlockError: "",
       loadError: "",
@@ -94,6 +102,16 @@ export default {
     locked() {
       return this.$store.state.locked;
     },
+  },
+  mounted() {
+    const target = document.getElementById("syncSubmenu");
+    const navigation = this.$refs.navigation;
+    if (target && navigation) {
+      target.append(navigation);
+      this.$once("hook:beforeDestroy", () => {
+        if (navigation.parentElement === target) navigation.remove();
+      });
+    }
   },
   async created() {
     const preferences = globalThis.SuperPreferences;

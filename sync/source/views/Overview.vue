@@ -25,7 +25,7 @@
       <p>{{ t("UiWorking") }}</p>
     </div>
     <template v-else-if="accounts.length">
-      <label class="sync-search"
+      <label class="sync-search ui-focus-within"
         ><v-icon small aria-hidden="true">mdi-magnify</v-icon
         ><span class="sr-only">{{ t("UiSearch") }}</span
         ><input v-model="query" type="search" :placeholder="t('UiSearch')"

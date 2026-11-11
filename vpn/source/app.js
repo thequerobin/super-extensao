@@ -12,6 +12,7 @@ import {
 } from "./model";
 
 export async function mountVpn(root, engine, preferences) {
+  const hostNavigation = document.getElementById("vpnSubmenu");
   const model = {
     page: "connection",
     locale: await preferences.locale.get(),
@@ -171,9 +172,16 @@ export async function mountVpn(root, engine, preferences) {
     const account = model.snapshot.account || {};
     return `<section class="vpn-card ui-card"><p class="vpn-eyebrow">PROTON</p><h2>${e(account.name)}</h2><p class="vpn-note">${e(t("plan"))}: ${e(account.plan || "Free")}</p>${document.getElementById("language") ? "" : `<label class="vpn-field">${e(t("language"))}<select data-field="locale"><option value="pt-BR" ${model.locale === "pt-BR" ? "selected" : ""}>Português do Brasil</option><option value="en" ${model.locale === "en" ? "selected" : ""}>English</option></select></label>`}<div class="vpn-account-links"><a href="https://account.proton.me/vpn/dashboard" target="_blank" rel="noopener noreferrer">${e(t("manage"))} ↗</a><a href="https://protonvpn.com/support/browser-extensions" target="_blank" rel="noopener noreferrer">${e(t("help"))} ↗</a></div></section><section class="vpn-card ui-card"><h2>${e(t("signOut"))}</h2><p class="vpn-note">${e(t("signOutHelp"))}</p>${model.confirmSignOut ? `<div class="vpn-signout-confirm" role="alertdialog" aria-labelledby="vpnSignoutTitle"><p id="vpnSignoutTitle">${e(t("confirmSignOut"))}</p><div class="vpn-action-row">${button(t("keepAccount"), "cancel-signout")}${button(t("signOut"), "signout", "", "vpn-danger")}</div></div>` : button(t("signOut"), "confirm-signout", "", "vpn-danger")}</section>`;
   }
+  function navigationMarkup() {
+    if (!model.snapshot.signedIn) return "";
+    return `<nav class="${hostNavigation ? "sub-nav ui-submenu" : "vpn-navigation"}" aria-label="VPN">${pages.map((page) => `<button type="button" data-action="navigate" data-page="${page}" class="${hostNavigation ? "tab " : ""}${model.page === page ? "active" : ""}" ${model.page === page ? 'aria-current="page"' : ""}>${e(t(page))}</button>`).join("")}</nav>`;
+  }
   function render() {
     if (disposed) return;
     const oldScroll = root.scrollTop;
+    const focusedNavigation = hostNavigation?.contains(document.activeElement)
+      ? document.activeElement.dataset.page
+      : null;
     const focused = root.contains(document.activeElement)
       ? document.activeElement
       : null;
@@ -188,7 +196,14 @@ export async function mountVpn(root, engine, preferences) {
         : null;
     const freeOpen = Boolean(root.querySelector("[data-free]")?.open);
     root.lang = model.locale;
-    root.innerHTML = `<div class="vpn-app"><header class="vpn-heading"><div><p class="vpn-eyebrow">VPN</p><h1>${e(t("heading"))}</h1></div><span class="vpn-provider-badge">Proton</span></header>${model.snapshot.signedIn ? `<nav class="vpn-navigation" aria-label="VPN">${pages.map((page) => `<button type="button" data-action="navigate" data-page="${page}" class="${model.page === page ? "active" : ""}" ${model.page === page ? 'aria-current="page"' : ""}>${e(t(page))}</button>`).join("")}</nav>` : ""}<p class="vpn-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<section class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</section>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note">${e(t("provider"))}</footer></div>`;
+    root.innerHTML = `<div class="vpn-app"><header class="vpn-heading"><div><p class="vpn-eyebrow">VPN</p><h1>${e(t("heading"))}</h1></div><span class="vpn-provider-badge">Proton</span></header>${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<section class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</section>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note">${e(t("provider"))}</footer></div>`;
+    if (hostNavigation) {
+      hostNavigation.innerHTML = navigationMarkup();
+      if (focusedNavigation)
+        hostNavigation
+          .querySelector(`[data-page="${focusedNavigation}"]`)
+          ?.focus({ preventScroll: true });
+    }
     const freeDetails = root.querySelector("[data-free]");
     if (freeDetails) freeDetails.open = freeOpen;
     root.scrollTop = oldScroll;
@@ -317,7 +332,12 @@ export async function mountVpn(root, engine, preferences) {
   }
   const click = (event) => {
     const button = event.target.closest("[data-action]");
-    if (!button || !root.contains(button) || button.disabled) return;
+    if (
+      !button ||
+      (!root.contains(button) && !hostNavigation?.contains(button)) ||
+      button.disabled
+    )
+      return;
     const action = button.dataset.action;
     if (action === "navigate") {
       void navigate(button.dataset.page);
@@ -517,6 +537,7 @@ export async function mountVpn(root, engine, preferences) {
   };
   root.addEventListener("toggle", toggleCountry, true);
   root.addEventListener("click", click);
+  hostNavigation?.addEventListener("click", click);
   root.addEventListener("input", input);
   root.addEventListener("change", change);
   root.addEventListener("submit", submit);
@@ -547,6 +568,8 @@ export async function mountVpn(root, engine, preferences) {
     stopTheme();
     root.removeEventListener("toggle", toggleCountry, true);
     root.removeEventListener("click", click);
+    hostNavigation?.removeEventListener("click", click);
+    hostNavigation?.replaceChildren();
     root.removeEventListener("input", input);
     root.removeEventListener("change", change);
     root.removeEventListener("submit", submit);
