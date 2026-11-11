@@ -1,6 +1,6 @@
-# Interface própria da VPN — 1.5.12
+# Interface própria da VPN — referência 1.5.19
 
-A aba VPN usa `vpn/source`, sem montar o HTML, JavaScript ou CSS do popup original. O motor, a autenticação, os servidores e a autorização de plano continuam sendo do Proton. O worker não foi alterado nesta etapa.
+A aba VPN usa `vpn/source`, sem montar o HTML, JavaScript ou CSS do popup original. O motor, a autenticação, os servidores e a autorização de plano continuam sendo do Proton. O worker Proton permanece ativo, com uma ponte para o indicador próprio do host. A reescrita do motor ainda não foi iniciada.
 
 ## Telas
 
@@ -41,3 +41,7 @@ O carregamento é progressivo: sessão, estado do worker, preferências e histó
 O host carrega `vpn-indicator.js` antes do motor e recebe um leitor sem credenciais, limitado ao estado confirmado e às regras efetivas de `getFixedServerConfig`. Um símbolo verde com visto indica que o endereço da aba usa a VPN; um símbolo azul com traço indica VPN conectada e endereço fora do túnel. Sem conexão confirmada, o ícone original volta. O símbolo fica no canto superior direito e preserva o badge de limpeza pausada.
 
 A indicação acompanha navegação, troca de aba, alterações das regras e idioma. Respeita inclusão/exclusão, subdomínios, redes locais e o controle efetivo do proxy pelo navegador, incluindo abas anônimas. Representa o roteamento do endereço da aba, não um contador de tráfego nem uma verificação externa do IP.
+
+## Trabalho restante
+
+Login real, roteamento por domínio, cores do indicador, modo anônimo, recuperação e geometria do popup continuam no [checklist de validação](validacao.md). A substituição do motor exige mapear autenticação, estado, proxy, regras e persistência; o roteiro está em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).

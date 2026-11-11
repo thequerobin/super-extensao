@@ -31,3 +31,5 @@ São tratados cancelamento, tempo limite, erros de autorização, limites da API
 ## Validação
 
 `npm test` cobre o leitor XML, o transporte Google Drive, a comparação e a tela integrada com APIs simuladas. Os testes verificam ausência de escritas, credenciais fora dos resultados, configuração salva em vez de rascunhos, cancelamento e leituras concorrentes. Nenhuma conta Google real foi acessada durante o desenvolvimento.
+
+O roteiro detalhado, com prioridades e critérios de conclusão de cada fase, fica em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md). A evidência disponível e os testes manuais pendentes ficam em [validacao.md](validacao.md). Não há migração agendada nem ativação automática do novo motor.

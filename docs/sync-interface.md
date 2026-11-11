@@ -1,6 +1,6 @@
-# Interface de sincronização — 1.5.9
+# Interface de sincronização — referência 1.5.19
 
-A aplicação de sincronização da Super Extensão fica em `sync/source`. O motor Floccus 5.13.0 continua em `vendor/floccus-source`; esta etapa não altera o algoritmo, os conectores nem o bundle de segundo plano.
+A aplicação de sincronização da Super Extensão fica em `sync/source`. O motor Floccus 5.13.0 continua em `vendor/floccus-source`; a sincronização normal continua usando esse algoritmo, seus conectores e o bundle de segundo plano. O novo núcleo Google Drive é usado somente pela comparação sem escrita.
 
 ## Telas
 

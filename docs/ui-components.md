@@ -1,6 +1,6 @@
-# Base visual e idioma compartilhados — 1.5.16
+# Base visual e idioma compartilhados — referência 1.5.19
 
-`ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define os tokens de cor, tipografia, bordas e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
+`ui-components.css` reúne as primitivas reutilizáveis da extensão. `ui-theme.css` carrega essa base e define cores, família tipográfica e raios; `ui-components.css` define a escala de tamanhos e espaçamento. Os componentes optam por classes `ui-*`, para evitar alterar indiscriminadamente os formulários herdados do motor de sincronização.
 
 - `ui-header-controls`: grupo de seletores do cabeçalho.
 - `ui-field` e `ui-field-compact`: rótulo e campo, com espaçamento consistente.
@@ -40,3 +40,7 @@ A Limpeza orienta a apresentação comum: controles de 40 px, botões de no mín
 - `ui-notice`, com `ui-notice-error`, `ui-notice-warning` ou `ui-notice-success`.
 
 A configuração da Nova guia segue as mesmas dimensões, preservando a personalização do painel. Na compilação do popup, a base compartilhada é reaplicada dentro da Sincronização, depois do CSS do motor: isso impede que o reset do Vuetify apague o preenchimento, as bordas e as cores dos componentes nativos.
+
+## Largura, setas e validação
+
+Os painéis e filhos flex/grid têm limites de largura e permissão para encolher; o eixo horizontal dos painéis roláveis fica contido. Os países da VPN reservam uma caixa fixa de 16 px para o SVG `icons/chevron-right.svg`, com folga à direita; a rotação ocorre dentro da caixa. O foco continua interno. Esses ajustes foram implementados em 1.5.17/1.5.18 e precisam de conferência visual real nos estados aberto/fechado. Os testes DOM/CSS não substituem essa verificação. Veja [validacao.md](validacao.md).
