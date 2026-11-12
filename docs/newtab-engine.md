@@ -32,6 +32,23 @@ O build continua partindo da aplicação React adaptada, mas agora inclui o núc
 
 A fila é local a cada documento. Não implementa transação atômica entre `storage.set` e `remove`, merge de conflitos entre dispositivos, diário de retomada após encerrar o processo nem garantia de conclusão de escrita durante o fechamento do navegador. O flush de saída é uma tentativa, não confirmação durável de tudo. Essas limitações não devem ser confundidas com o núcleo de sincronização de favoritos ou com a proteção da VPN.
 
+## Próxima ação combinada: testes em casa — pendente
+
+Em 12 de novembro de 2026, o usuário pediu apenas atualização documental e informou que executará os testes quando chegar em casa. Não há nova aprovação de uso real nem execução agendada. Nesta atualização não foram alterados código, versão instalada ou dados, e não foram executados novos testes.
+
+Roteiro manual para a 1.7.18:
+
+- [ ] Confirmar a versão instalada e registrar navegador/versão e commit dos arquivos carregados.
+- [ ] Abrir a Nova guia com a configuração existente e conferir fundos, widgets, textos/notas, posições e aparência.
+- [ ] Abrir o editor, adicionar/reordenar/remover um widget de teste e mudar sua posição/aparência; fechar e reabrir a Nova guia para conferir persistência.
+- [ ] Conferir imagens locais já salvas; testar uma imagem de exemplo e reabrir a página, sem apagar o cache existente.
+- [ ] Abrir duas abas da Nova guia e conferir propagação de alterações de configuração e idioma, sem escritas em ciclo ou perda de uma edição nova.
+- [ ] Exportar uma cópia da configuração antes dos testes de importação. Em um perfil de teste, importar JSON válido e depois um arquivo inválido/de versão futura; o inválido deve produzir erro sem alterar a configuração nem as imagens do perfil.
+- [ ] Reiniciar o navegador e conferir configurações, notas e imagens novamente. A exportação JSON não inclui as imagens locais.
+- [ ] Registrar o resultado de cada cenário e eventuais mensagens de erro, sem compartilhar configurações privadas ou chaves de serviços.
+
+Os 418 testes automatizados abaixo são evidência da implementação anterior. A conferência manual acima continua pendente até o usuário relatar os resultados; só então atualizar o registro de evidências e decidir a próxima etapa da extração.
+
 ## Evidência e reprodução
 
 A suíte completa passou **418 testes**, incluindo 21 novos contratos de banco/ações, importação v2/v3 sem perda por arquivo inválido, filas/falhas/respostas antigas, isolamento e mudanças entre abas, IndexedDB com imagens binárias, migração confirmada e inicialização do bundle de produção em DOM simulado. A implementação IndexedDB é exercitada com `fake-indexeddb` já disponível no ambiente de testes do Floccus; não foi adicionada dependência de execução à Nova guia.

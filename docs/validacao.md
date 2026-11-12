@@ -2,6 +2,10 @@
 
 Revisado em 12 de novembro de 2026, referência **1.7.18**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
+## Nova guia: validação pelo usuário em casa — pendente
+
+O usuário informou que fará os testes da 1.7.18 em casa e pediu apenas atualização da documentação neste momento. O [checklist da Nova guia](newtab-engine.md#próxima-ação-combinada-testes-em-casa--pendente) cobre configuração existente, editor/widgets, imagens locais, múltiplas abas, importação/exportação e reinício. Nenhum cenário manual novo foi marcado como aprovado. Esta atualização não executou testes, não alterou código e mantém a versão 1.7.18.
+
 ## Nova guia: primeira extração do Tabliss 1.7.18
 
 A suíte completa passou **418 testes**, com 21 contratos novos do núcleo de estado/configuração/persistência, ações de widgets e importação/exportação. Eles cobrem importações inválidas sem apagar dados, v2/v3 e IDs, isolamento de namespace, filas e falhas de gravação, eco antigo, atualizações entre abas, imagens binárias reabertas em IndexedDB, migração com confirmação e inicialização do bundle de produção em DOM simulado. O núcleo não importa Tabliss/React; os componentes atuais usam suas fachadas.

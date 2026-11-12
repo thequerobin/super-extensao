@@ -120,6 +120,8 @@ A extração dos módulos funcionais está implementada: regras/PAC, controlador
 
 ### Extração da Nova guia
 
+**Próxima ação combinada:** o usuário fará a validação da 1.7.18 quando estiver em casa, seguindo o [checklist](docs/newtab-engine.md#próxima-ação-combinada-testes-em-casa--pendente). Aguardamos o relato para registrar a evidência e retomar a próxima etapa. Esta atualização é somente documental; não executa testes nem altera a implementação.
+
 - [x] Etapa 1 na 1.7.18: banco reativo, modelo/defaults, ações, importação/exportação, fila de persistência e migração passam ao núcleo próprio `newtab/engine`. Caminhos de armazenamento e imagens existentes são preservados.
 - [x] Validar importação antes de limpar o estado; ordenar escritas e preservar a origem legada até confirmar a persistência.
 - [ ] Conferir os dados existentes, editor, importação/exportação, imagens e várias abas no navegador real.
