@@ -1,6 +1,6 @@
 # Motor da VPN — estado e recuperação próprios, 1.7.4
 
-Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, as chamadas HTTP, a obtenção de credenciais temporárias, a seleção/rotação de servidores e a proteção WebRTC ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
+Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, as chamadas HTTP, a chamada ao endpoint de credenciais, a seleção/rotação de servidores e a proteção WebRTC ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
 
 ## Responsabilidades ativas
 
@@ -13,7 +13,7 @@ Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gra
 | Recuperação | `vpn/engine/recovery.ts` + `vpn/initState.ts` | Listener síncrono, alarme `superVpn:recovery` a cada 30 s, verificações simultâneas agrupadas |
 | Persistência/rotação | `vpn/engine/session.ts` + `account/sessionStore.ts` | Escritas ordenadas, refresh agrupado, comparação de sessão antes do commit, logout invalida respostas pendentes |
 | Login e transporte Proton | `account/fork/*`, `messaging/forkSession.ts`, `api.ts` | Página oficial e formato do serviço preservados; fork atrasado não salva depois do logout |
-| Credenciais temporárias | `account/credentials/*` adaptado | Resposta de geração/conta anterior é descartada; cache validado por UID |
+| Credenciais temporárias | `vpn/engine/credentials.ts` + `credential-data.ts` | Cache e pedidos agrupados por UID/geração, validade, renovação e cancelamento próprios; adaptador fornece o endpoint |
 | Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
 | WebRTC | Adaptadores `webrtc/*` | Proteção antes do proxy; restauração depois da limpeza; erros da API são observados |
 | Protocolo e seleção | `state.ts` como fachada, `getLogicals.ts`, `pickServerInLogical.ts` | Autenticação, seleção/rotação e preferências de auto-conexão fornecidas ao núcleo por portas |
@@ -48,7 +48,7 @@ A preferência `persistent` é preservada como metadado; o armazenamento já era
 
 Com um servidor na sessão, a inicialização pode instalar o endereço de espera `localhost:9` antes de recuperar a conexão. O trabalho de inicialização também possui guarda de geração. A restauração do estado acontece uma vez; foi removida a segunda recuperação baseada em um servidor salvo que poderia sobrepor uma desconexão durante o início.
 
-O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. A obtenção/renovação de credenciais temporárias, a seleção/rotação de servidor e a atualização de caches de localização/carga ainda usam adaptadores Proton. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
+O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. A seleção/rotação de servidor e a atualização de caches de localização/carga ainda usam adaptadores Proton. Obtenção/cache/renovação de credenciais são coordenados pelo núcleo próprio desde a 1.7.9, com a chamada HTTP mantida no adaptador. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
 
 ## Máquina de estados própria — 1.7.4
 
@@ -90,10 +90,24 @@ Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada p
 ## Trabalho restante
 
 1. Validar os novos fluxos com conta de teste no Chromium/Helium: login, IP, regras, erro de rede, logout durante conexão e retomada do worker.
-2. Extrair a obtenção/cache/renovação das credenciais temporárias do adaptador, preservando os contratos de sessão e geração.
+2. Extrair o transporte HTTP e a seleção de servidores, preservando os contratos de autenticação e autorização.
 3. Migrar transporte, cache e seleção de servidores; manter a autorização do plano e a compatibilidade com o serviço.
 4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
 
 ## Indicador após trocar de servidor — 1.7.8
 
 O leitor do host recebe a geração da conexão junto das regras e do estado confirmado. O cache de ícones por aba inclui essa geração, cor e idioma; mudanças do proxy também invalidam o cache. Assim, eventos intermediários de conexão agrupados não permitem considerar aplicado um ícone antigo depois de selecionar outro servidor. Somente o indicador por aba é alterado; o badge de pausa da limpeza permanece independente.
+
+## Credenciais temporárias próprias — 1.7.9
+
+`vpn/engine/credentials.ts` controla requisições, cache, expiração, renovação e falhas por portas de IO. `credential-data.ts` interpreta metadados de expiração/grupos/sessão e decide substituição de credenciais. Não importa módulos Proton nem APIs Chrome. Os arquivos em `account/credentials` mantêm os nomes públicos anteriores e adaptam a chamada autenticada a `vpn/v1/browser/token?Duration=...`, os desafios de autenticação e o armazenamento nativo.
+
+- Pedidos simultâneos da mesma sessão/geração compartilham uma requisição. Troca de conta, logout ou cancelamento abortam o pedido e invalidam a resposta; mesmo um transporte que ignore o abort não consegue gravar/entregar uma resposta antiga. Eventos de troca de UID em outras páginas da extensão também invalidam o núcleo.
+- A chave `superVpn:credentials` e os campos `credentials`, `sessionUid`, `time` e `halfLife` permanecem. `renewAt` é adicional e opcional; registros antigos válidos são reaproveitados. Caches sem UID, de outra sessão ou vencidos não são usados. Leituras/remoções antigas em storage.session continuam aceitas, mas as gravações ficam no mesmo armazenamento local existente.
+- A validade usa o menor prazo entre o TTL da resposta nova e o `exp` dessa mesma credencial, corrigindo o uso acidental do token anterior. Os metadados são dicas conservadoras; não substituem a autorização do serviço. Tokens opacos continuam aceitos pelo TTL e podem ser substituídos por novas credenciais.
+- A renovação começa em 90% da validade efetiva. O alarme de recuperação existente faz a manutenção quando há intenção ativa de conexão, inclusive depois de suspensão do worker. Consultas síncronas usam somente cache válido em memória e podem solicitar renovação sem bloquear o pedido atual. Não há mais um temporizador de longa duração do Proton para essa política.
+- Cada chamada ao endpoint de credenciais tem prazo limite de 20 s. Falhas transitórias e limitação de requisições usam espera progressiva de 1 s até 60 s entre tentativas, sem bloquear o worker com sleeps. O transporte existente continua respeitando Retry-After. Uma credencial anterior ainda válida pode continuar em uso; após vencer, deixa de ser fornecida, e a falha transitória solicita recuperação da conexão.
+- Um erro de token de acesso pode renovar a sessão e repetir o pedido uma única vez, sem zerar uma sessão válida. Logout exigido pelo serviço e recusas definitivas preservam o tratamento de autorização existente. Respostas incompletas ou inválidas são recusadas antes de qualquer gravação.
+- Escritas e remoções são ordenadas; uma gravação atrasada não restaura credenciais após logout. O código de remoção usado pelo popup não importa o cliente do worker. A invalidação não espera uma leitura de sessão dentro da fila de armazenamento, evitando dependência circular durante logout.
+
+Os 27 testes de `tests/vpn-credentials.test.cjs` cobrem concorrência, cache legado, expiração do token novo, renovação após suspensão, falhas/limites/prazo máximo, troca de conta, callbacks atrasados, descarte durante escrita e renovação de sessão, falhas nativas de armazenamento e integração do adaptador com recuperação. São transportes e dados fictícios; nenhum segredo real foi colocado nos testes ou logs.

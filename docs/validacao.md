@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.8**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.9**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Credenciais temporárias próprias 1.7.9
+
+A suíte completa passou **249 testes**, incluindo 27 contratos novos de credenciais. A compilação de produção, as checagens TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. Os testes exercitam o núcleo próprio e os adaptadores de protocolo/armazenamento reais com rede e APIs nativas simuladas. Cobrem concorrência, TTL e expiração JWT da resposta nova, cache legado, renovação em wake, timeout, erros transitórios, reautorização limitada, logout/troca de conta durante pedidos e gravações, armazenamento sem confirmação e isolamento entre páginas da extensão.
+
+O usuário informou ter validado a versão 1.7.8 antes de autorizar esta etapa; não forneceu logs ou resultados separados por cenário. Esta confirmação não cobre a nova renovação 1.7.9: conta Proton real, passagem pelo prazo de renovação e suspensão/reinício nativos continuam pendentes nesta versão. Não foram usados tokens reais nem houve alteração de dados de uma conta durante a implementação.
 
 ## Indicador após troca manual de servidor 1.7.8
 

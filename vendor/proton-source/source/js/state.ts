@@ -459,8 +459,8 @@ export function getCurrentState(): ConnectionState {
 export function waitForReadyState(): Promise<void> {
 	return machine.ready();
 }
-export function reportNetworkFailure(error: unknown): void {
-	machine.networkFailed(error);
+export function reportNetworkFailure(error: unknown, warning?: ApiError): void {
+	machine.networkFailed(error, warning);
 }
 export function requestConnectionRecovery(): Promise<void> {
 	return machine.retryConnection();

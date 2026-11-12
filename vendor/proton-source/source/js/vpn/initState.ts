@@ -1,3 +1,4 @@
+import {maintainConnectionCredentials} from '../account/credentials/getConnectionCredentials';
 import {getCurrentState, waitForReadyState} from '../state';
 import {updateLocation} from './updateLocation';
 import {updateLogicalLoad} from './updateLogicalLoad';
@@ -16,6 +17,7 @@ const recovery = new RecoveryLoop({
 	},
 	async recover() {
 		await waitForReadyState();
+		await maintainConnectionCredentials();
 		await getCurrentState().refreshState?.();
 	},
 	failed: (error) => handleError(error),

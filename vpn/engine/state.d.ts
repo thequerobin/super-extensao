@@ -88,7 +88,7 @@ export declare class ConnectionMachine<S extends StateServer, C extends Credenti
     private recover;
     private probe;
     private connectionFailed;
-    networkFailed(error: unknown): void;
+    networkFailed(error: unknown, warning?: unknown): void;
     retryConnection(): Promise<void>;
     checkConnectingState(): void;
 }

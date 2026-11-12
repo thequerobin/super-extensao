@@ -1,6 +1,5 @@
-import {triggerPromise} from '../../tools/triggerPromise';
-import {storedCredentials} from './storedCredentials';
-
-export const removeCredentials = () => storedCredentials.remove();
-
-export const forgetCredentials = () => triggerPromise(removeCredentials());
+import { triggerPromise } from "../../tools/triggerPromise";
+import { clearCredentials } from "./credentialInvalidation";
+export const removeCredentials = (): Promise<void> => clearCredentials();
+export const forgetCredentials = (): void =>
+	triggerPromise(removeCredentials());

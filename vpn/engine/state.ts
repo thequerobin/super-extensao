@@ -395,10 +395,10 @@ export class ConnectionMachine<
       this.ports.failed(error);
     }
   }
-  networkFailed(error: unknown): void {
+  networkFailed(error: unknown, warning?: unknown): void {
     const state = this.state;
     if (state?.name === "on") {
-      state.data.error = this.ports.networkWarning();
+      state.data.error = warning ?? this.ports.networkWarning();
       this.ports.present(
         state.proxyEnabled ? "connected" : "connecting",
         state,
