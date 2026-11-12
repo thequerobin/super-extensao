@@ -1,6 +1,14 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.0**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.1**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Indicador VPN 1.7.1
+
+A suíte completa passou **177 testes**; os seis testes do indicador passaram, incluindo três cenários novos de navegação/recarga sem mudança de cor, ativação/substituição de aba e eventos em sequência. O teste remove o estado de action do navegador simulado antes do evento de conclusão, inclusive quando a URL não muda. Os testes novos reproduzem a perda do ícone com a fonte 1.7.0 e passam com a correção. Perder o controle do proxy agora restaura ícone/título normais, em vez de exibir azul com a mensagem de VPN ativa.
+
+O cache `applied` era mantido apenas por aba/cor/idioma. O Chromium limpa valores de action da aba ao navegar entre documentos ([código do navegador](https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/extensions/extension_action_runner.cc)); o cache passa a ser invalidado em mudanças de URL, início/conclusão da carga, ativação e substituição da aba. Eventos pendentes têm revisão própria para descartar trabalho ultrapassado. O badge de pausa não é modificado.
+
+A tentativa de validar uma extensão isolada no Chromium 156 desta rodada foi bloqueada na inicialização por `socket() failed: Operation not permitted`. Portanto, a evidência nova é automatizada com APIs simuladas e inspeção da implementação do Chromium; não comprova login/tráfego real nem uma execução nativa desta versão. `check:ui`, consistência de versões e `git diff --check` passaram.
 
 ## Motor VPN 1.7.0
 

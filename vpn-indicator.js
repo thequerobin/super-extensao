@@ -33,8 +33,8 @@
     return rendered.get(mode);
   }
   function refresh() {
-    ++revision;
-    queue = queue.then(() => update(revision));
+    const ticket = ++revision;
+    queue = queue.catch(() => {}).then(() => update(ticket));
     return queue;
   }
   function controlsProxy(incognito) {
@@ -59,6 +59,7 @@
     });
   }
   async function update(ticket) {
+    if (ticket !== revision) return;
     try {
       const snapshot = reader() || {};
       const [tabs, locale] = await Promise.all([chrome.tabs.query({}), SuperPreferences.locale.get()]);
@@ -68,7 +69,8 @@
       if (ticket !== revision) return;
       for (const tab of tabs) {
         if (!Number.isInteger(tab.id)) continue;
-        const mode = !snapshot.connected ? "off" : (tab.incognito ? privateProxy : regularProxy) && usesVpn(tab.url, snapshot) ? "protected" : "direct";
+        const controlled = tab.incognito ? privateProxy : regularProxy;
+        const mode = !snapshot.connected || !controlled ? "off" : usesVpn(tab.url, snapshot) ? "protected" : "direct";
         const key = `${mode}:${locale}`;
         if (applied.get(tab.id) === key) continue;
         const title = mode === "off" ? "Super Extensão" : locale === "pt-BR"
@@ -89,8 +91,18 @@
     refresh,
     usesVpn,
   };
-  chrome.tabs?.onActivated?.addListener(() => { void refresh(); });
-  chrome.tabs?.onUpdated?.addListener((_id, change) => { if (change.url || change.status === "complete") void refresh(); });
+  function refreshTab(id) {
+    // Chromium clears tab-specific action values on a committed navigation.
+    // A same-color destination/reload must not reuse our previous "applied" cache.
+    applied.delete(id);
+    void refresh();
+  }
+  chrome.tabs?.onActivated?.addListener(({ tabId }) => { refreshTab(tabId); });
+  chrome.tabs?.onUpdated?.addListener((id, change) => {
+    if (change.url || change.status === "loading" || change.status === "complete") refreshTab(id);
+  });
+  chrome.tabs?.onCreated?.addListener((tab) => { refreshTab(tab.id); });
+  chrome.tabs?.onReplaced?.addListener((added, removed) => { applied.delete(removed); refreshTab(added); });
   chrome.tabs?.onRemoved?.addListener((id) => { applied.delete(id); });
   chrome.windows?.onFocusChanged?.addListener(() => { void refresh(); });
   chrome.proxy?.settings?.onChange?.addListener(() => { void refresh(); });

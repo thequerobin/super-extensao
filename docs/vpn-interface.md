@@ -53,3 +53,7 @@ A indicação acompanha navegação, troca de aba, alterações das regras e idi
 Login real, roteamento por domínio, cores do indicador, modo anônimo, recuperação e geometria do popup continuam no [checklist de validação](validacao.md). Regras, controlador de proxy, gerações, alarmes e persistência/renovação de tokens são próprios na 1.7.0. As próximas extrações são o restante da máquina de estados, credenciais e transporte. O roteiro está em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
 
 Tema e foco usam a [base compartilhada](ui-components.md), revisada em 1.6.3. Confira o [registro de validação](validacao.md) para distinguir testes DOM, relatos do usuário e cenários ainda pendentes.
+
+### Correção do indicador 1.7.1
+
+A navegação e a recarga invalidam o cache de action da aba, permitindo reaplicar azul/verde mesmo quando a política de roteamento permanece igual. Ativação e substituição da aba também forçam a atualização. Sem controle confirmado do proxy, o ícone fica normal. A alteração não muda quais sites usam a VPN nem modifica o badge da limpeza.

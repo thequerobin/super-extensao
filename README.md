@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.0.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.1.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -67,7 +67,7 @@ O ícone acompanha a aba:
 - **Azul com traço:** conexão confirmada e endereço fora do túnel.
 - **Ícone original:** sem conexão confirmada.
 
-O sinal fica no canto superior direito, preservando o badge de limpeza pausada. Ele representa o roteamento configurado, sem medir tráfego ou verificar externamente o IP. Páginas internas não usam o túnel. Veja [uso e integração](docs/proton-vpn.md) e [interface, indicador e limites](docs/vpn-interface.md).
+O sinal fica no canto superior direito, preservando o badge de limpeza pausada. Na 1.7.1, ele é reaplicado após navegação/recarregamento e ativação da aba, mesmo quando a cor continua igual; perda de controle do proxy restaura o ícone normal. Ele representa o roteamento configurado, sem medir tráfego ou verificar externamente o IP. Páginas internas não usam o túnel. Veja [uso e integração](docs/proton-vpn.md) e [interface, indicador e limites](docs/vpn-interface.md).
 
 ### Nova guia
 
@@ -128,7 +128,7 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A execução da **1.7.0 passou 174 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
+A execução da **1.7.1 passou 177 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
 
 As fontes das páginas estáticas ficam em `ui/templates/`; `popup.html`, `spare-tab.html`, `newtab/index.html` e `ui.js` são gerados por `build:ui`. Consulte [os contratos e adaptadores](docs/ui-components.md) antes de alterar componentes. Incremente a versão conforme `AGENTS.md` ao entregar alterações instaláveis.
 
