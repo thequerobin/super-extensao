@@ -60,3 +60,6 @@ A 1.7.14 adiciona prazos ao armazenamento e às mensagens do worker, mantendo es
 
 
 A 1.7.15 adiciona `vpn-blocked.html`: novas navegações durante o bloqueio abrem um aviso local com motivo/estado, tentativa de recuperação e confirmação explícita para liberar sem VPN. Notificação e painel também dão acesso. A página não guarda nem repete o endereço original. Recursos de segundo plano continuam bloqueados. [Arquitetura, prioridades e limites](vpn-engine.md#página-de-bloqueio--1715).
+
+
+A 1.7.16 corrige o aviso abrindo mesmo com a VPN confirmada: bloqueio e permissão de sessão declaram `main_frame` e demais tipos DNR explicitamente, e a confirmação rejeita regras legadas sem essa cobertura. Atualize/recarregue a extensão antes de abrir os sites novamente. [Correção e validação](vpn-engine.md#correção-de-navegação-confirmada--1716).

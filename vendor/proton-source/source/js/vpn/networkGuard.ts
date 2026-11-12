@@ -14,12 +14,32 @@ const api = () => {
 	if (!value) throw new Error("VpnTrafficGuardUnavailable");
 	return value;
 };
+// Never rely on an empty exclusion list: Chromium's default resource mask
+// omits main_frame, so an apparently installed allowance can lose to redirect.
+const resourceTypes: NonNullable<
+	chrome.declarativeNetRequest.RuleCondition["resourceTypes"]
+> = [
+	"main_frame",
+	"sub_frame",
+	"stylesheet",
+	"script",
+	"image",
+	"font",
+	"object",
+	"xmlhttprequest",
+	"ping",
+	"csp_report",
+	"media",
+	"websocket",
+	"webtransport",
+	"webbundle",
+	"other",
+];
 const condition: chrome.declarativeNetRequest.RuleCondition = {
 	regexFilter: "^(https?|wss?)://",
 	excludedInitiatorDomains: [chrome.runtime.id],
 	excludedRequestDomains: ["account.proton.me", "account.protonvpn.com"],
-	// Empty exclusion explicitly covers main_frame as well as subresources and sockets.
-	excludedResourceTypes: [],
+	resourceTypes,
 };
 const rule = (
 	id: number,
@@ -52,14 +72,16 @@ const same = (
 			) &&
 		JSON.stringify([...(c.excludedRequestDomains || [])].sort()) ===
 			JSON.stringify([...(condition.excludedRequestDomains || [])].sort()) &&
-		Array.isArray(c.excludedResourceTypes) &&
-		c.excludedResourceTypes.length === 0 &&
+		Array.isArray(c.resourceTypes) &&
+		JSON.stringify([...c.resourceTypes].sort()) ===
+			JSON.stringify([...resourceTypes].sort()) &&
+		!c.excludedResourceTypes &&
 		Object.keys(c).every((key) =>
 			[
 				"regexFilter",
 				"excludedInitiatorDomains",
 				"excludedRequestDomains",
-				"excludedResourceTypes",
+				"resourceTypes",
 				"isUrlFilterCaseSensitive",
 			].includes(key),
 		)

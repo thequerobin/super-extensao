@@ -1,6 +1,14 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.15**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.16**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Redirecionamento com VPN conectada 1.7.16
+
+O usuário relatou que todas as navegações abriam a página local já exibindo conexão confirmada. A correção declara a cobertura de navegação principal explicitamente na permissão de sessão e no bloqueio; o readback não aceita mais uma lista vazia legada como comprovação dessa cobertura.
+
+A suíte completa passou **390 testes**, com três regressões novas: seleção de redirecionamento/permissão por tipo real do pedido e prioridade, rejeição da permissão legada com exclusões vazias e rejeição da permissão sem `main_frame`. Os contratos anteriores de tipos e reordenação também foram ajustados. Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram.
+
+Esta rodada usou APIs simuladas e a semântica de tipos DNR. Não foi medida uma conexão Proton nem executado o runner nativo. Após carregar a 1.7.16, conferir em navegador real abertura de sites conectado, nova falha, reconexão e liberação explícita, além da validação de tráfego/IP/DNS já pendente.
 
 ## Página de bloqueio 1.7.15
 

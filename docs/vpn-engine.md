@@ -198,3 +198,12 @@ O serviço `protectionPage.ts` retorna somente estado confirmado, disponibilidad
 O único recurso publicado em `web_accessible_resources` é o HTML de destino, requisito do redirecionamento DNR. A entrada do script mantém cópias embutidas em páginas externas inativas. Parâmetros da URL e mensagens de páginas web não acionam comandos. A notificação de privacidade abre a página; pedidos bloqueados em abas já carregadas mantêm a página atual e continuam tendo o aviso/ícone/painel como acesso à recuperação.
 
 A avaliação antes do envio, as prioridades e o requisito de recurso acessível seguem a [documentação oficial do Chromium](https://developer.chrome.com/docs/extensions/reference/api/declarativeNetRequest). Essa integração ainda precisa de execução nativa: DNR não substitui firewall do sistema nem controla conteúdo respondido inteiramente pelo cache de um service worker. Se outra extensão bloquear a navegação, o navegador também poderá exibir seu erro genérico em vez da página local.
+
+
+## Correção de navegação confirmada — 1.7.16
+
+A 1.7.15 podia mostrar conexão confirmada enquanto toda nova navegação abria o aviso. A regra de permissão 880002 usava `excludedResourceTypes: []`, sem declarar `main_frame` explicitamente. A máscara padrão do Chromium não cobre navegação principal; prioridade maior não ajuda quando a regra não corresponde ao tipo de pedido. O readback anterior conferia apenas a lista vazia, portanto podia considerar liberada uma navegação que ainda correspondia ao redirecionamento.
+
+Bloqueio e permissão passam a enumerar os tipos DNR explicitamente, incluindo `main_frame`, subquadros e recursos em segundo plano. O readback exige a lista completa, independentemente da ordem, e rejeita exclusões vazias legadas ou uma permissão sem navegação principal. A regra WebTransport de prioridade 11000 continua bloqueando esse transporte. As regras duráveis antigas são substituídas pelo bootstrap já existente; a confirmação da conexão continua dependendo de proxy e guard válidos.
+
+Os testes de regressão avaliam a seleção por tipo e prioridade: bloqueado → redirecionar navegação; conectado → permitir navegação e recursos; nova falha → redirecionar novamente. Também reproduzem a regra legada vazia e a permissão sem `main_frame`, que devem ser consideradas bloqueadas. A [referência oficial das condições DNR](https://developer.chrome.com/docs/extensions/reference/api/declarativeNetRequest#type-RuleCondition) documenta a exclusão de `main_frame` da cobertura padrão. A reprodução/validação em navegador real permanece pendente.
