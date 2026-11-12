@@ -139,3 +139,33 @@ test("bursts of navigation/rule updates converge to the latest policy", async ()
   assert.equal(ui.actionState.get(1).imageData[16].color, "#18a568");
   assert.equal(ui.actionState.get(2).imageData[16].color, "#287de0");
 });
+
+
+test("manual server changes reapply same-color overlays when connecting events coalesce", async () => {
+  for (const mode of ["direct", "protected"]) {
+    const ui = boot();
+    const routing = {bypassList: [], includeOnly: mode === "direct" ? ["vpn-only.test"] : undefined};
+    ui.setState({connected: true, connectionRevision: 1, ...routing});
+    await ui.latest();
+    ui.resetAction(1);
+    // The intermediate connecting refresh can be superseded by confirmation.
+    ui.setState({connected: false, connectionRevision: 2, ...routing});
+    const connecting = ui.api.refresh();
+    ui.setState({connected: true, connectionRevision: 3, ...routing});
+    await ui.api.refresh(); await connecting;
+    assert.equal(ui.actionState.get(1).imageData[16].color, mode === "direct" ? "#287de0" : "#18a568");
+    ui.resetAction(1);
+    ui.setState({connected: true, connectionRevision: 4, ...routing});
+    await ui.api.refresh();
+    assert.ok(ui.actionState.has(1), "another selection must refresh even if the endpoint/color repeats");
+  }
+});
+test("a proxy settings event invalidates applied icons even without a state or color change", async () => {
+  const ui = boot();
+  ui.setState({connected: true, connectionRevision: 1, bypassList: []});
+  await ui.latest(); ui.resetAction(1);
+  ui.listeners.proxy(); await ui.latest();
+  assert.equal(ui.actionState.get(1).imageData[16].color, "#18a568");
+  ui.resetAction(1); ui.loseProxy(); ui.listeners.proxy(); await ui.latest();
+  assert.ok(ui.actionState.get(1).path);
+});

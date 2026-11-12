@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.7**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.8**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -135,3 +135,5 @@ A reescrita continua parcial: regras/PAC, controlador de proxy, máquina de esta
 Alterações apenas documentais mantêm a versão instalada. Alterações que afetem a extensão devem seguir [AGENTS.md](AGENTS.md), incluindo versão igual no manifest, package e lockfile.
 
 Na 1.7.7, o submenu de limpeza usa Geral e Arm. Local em uma única linha; automação, pausa e ações de limpeza aparecem somente em Geral.
+
+Na 1.7.8, o cache do indicador inclui a geração da conexão e é invalidado por mudanças do proxy, reaplicando o ícone após troca manual de servidor mesmo quando a cor permanece igual.

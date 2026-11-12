@@ -71,7 +71,7 @@
         if (!Number.isInteger(tab.id)) continue;
         const controlled = tab.incognito ? privateProxy : regularProxy;
         const mode = !snapshot.connected || !controlled ? "off" : usesVpn(tab.url, snapshot) ? "protected" : "direct";
-        const key = `${mode}:${locale}`;
+        const key = `${mode}:${locale}:${snapshot.connectionRevision ?? 0}`;
         if (applied.get(tab.id) === key) continue;
         const title = mode === "off" ? "Super Extensão" : locale === "pt-BR"
           ? `Super Extensão · VPN ativa: ${mode === "protected" ? "este site usa a VPN" : "este site não usa a VPN"}`
@@ -105,7 +105,12 @@
   chrome.tabs?.onReplaced?.addListener((added, removed) => { applied.delete(removed); refreshTab(added); });
   chrome.tabs?.onRemoved?.addListener((id) => { applied.delete(id); });
   chrome.windows?.onFocusChanged?.addListener(() => { void refresh(); });
-  chrome.proxy?.settings?.onChange?.addListener(() => { void refresh(); });
+  chrome.proxy?.settings?.onChange?.addListener(() => {
+    // Proxy changes may invalidate browser action values even when routing keeps
+    // the same color. Confirmation will refresh again with the new connection.
+    applied.clear();
+    void refresh();
+  });
   chrome.storage?.onChanged?.addListener((changes) => {
     if ("tabliss/config/locale" in changes) void refresh();
   });

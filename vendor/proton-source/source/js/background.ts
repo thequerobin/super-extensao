@@ -46,5 +46,10 @@ import {getFixedServerConfig} from './tools/proxy';
 (globalThis as any).SuperVpnIndicator?.attach(() => {
 	const split = getCurrentStateIfDefined()?.data?.server?.splitTunneling;
 	const {bypassList, includeOnly} = getFixedServerConfig('', 0, split).rules;
-	return {connected: isCurrentStateConnected(), bypassList, includeOnly};
+	return {
+    connected: isCurrentStateConnected(),
+    connectionRevision: connectionLifecycle.capture(),
+    bypassList,
+    includeOnly,
+  };
 });

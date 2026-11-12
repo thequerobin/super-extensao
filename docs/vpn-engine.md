@@ -93,3 +93,7 @@ Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada p
 2. Extrair a obtenção/cache/renovação das credenciais temporárias do adaptador, preservando os contratos de sessão e geração.
 3. Migrar transporte, cache e seleção de servidores; manter a autorização do plano e a compatibilidade com o serviço.
 4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
+
+## Indicador após trocar de servidor — 1.7.8
+
+O leitor do host recebe a geração da conexão junto das regras e do estado confirmado. O cache de ícones por aba inclui essa geração, cor e idioma; mudanças do proxy também invalidam o cache. Assim, eventos intermediários de conexão agrupados não permitem considerar aplicado um ícone antigo depois de selecionar outro servidor. Somente o indicador por aba é alterado; o badge de pausa da limpeza permanece independente.

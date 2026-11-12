@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.7**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.8**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Indicador após troca manual de servidor 1.7.8
+
+A suíte completa passou **222 testes**. Os dois contratos novos reproduzem o ícone perdido com a fonte 1.7.7 e passam com a correção: troca manual cujos eventos intermediários são agrupados, seleções sucessivas com mesma cor e mudança do proxy sem mudança de cor/estado. Cobrem tanto o indicador verde quanto o azul, perda de controle e preservação do badge de pausa. O cache de ações por aba agora inclui a revisão da conexão, fornecida pelo worker a partir de `connectionLifecycle.capture()`; eventos de alteração do proxy invalidam as ações aplicadas. Os pixels renderizados continuam em cache, sem recriar o desenho em cada troca.
+
+Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. As APIs e o canvas são simulados; não foi observada uma troca com conta Proton real nesta rodada.
 
 ## Limpeza Geral 1.7.7
 
