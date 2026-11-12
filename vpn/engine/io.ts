@@ -92,6 +92,7 @@ export class StorageLane {
 }
 export const readRequests = new Set([
   "connectionState",
+  "protectionStatus",
   "state",
   "user",
   "pmUser",

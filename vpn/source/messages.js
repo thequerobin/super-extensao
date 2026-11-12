@@ -1,5 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
+  protectionDetails: {
+    "pt-BR": "Ver proteção e recuperação",
+    en: "Protection and recovery",
+  },
   VpnStorageReadTimedOut: {
     "pt-BR":
       "O armazenamento da VPN não respondeu a tempo. Tente consultar novamente; o último estado exibido pode estar desatualizado.",

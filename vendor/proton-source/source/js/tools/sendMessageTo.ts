@@ -12,7 +12,14 @@ export const sendMessageTo = async <K>(
 	if (!response?.received)
 		throw new VpnIOError(
 			"VpnWorkerUnavailable",
-			!["state", "connectionState", "user", "pmUser", "locale"].includes(type),
+			![
+				"state",
+				"connectionState",
+				"protectionStatus",
+				"user",
+				"pmUser",
+				"locale",
+			].includes(type),
 		);
 	const result = response.result;
 	if (result?.error && !result.error.Warning) throw result.error;

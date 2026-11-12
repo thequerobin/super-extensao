@@ -129,6 +129,7 @@ test('page WebRTC facade delegates writes to the worker while native worker faca
 test('worker privacy route follows current connection and preference, rejecting late UI results after disconnect',async()=>{
  const calls=[];let state='on',enabled=true,current=true,configGate;
  const mocks={
+ '../vpn/protectionPage':{},
  '../account/loginFlow':{loginFlow:{begin:async value=>{calls.push(['begin',value]);return 'url';}}},
  '../webrtc/privacyController':{privacyController:{apply:async value=>{calls.push(['privacy',value]);return true;}}},
  '../webrtc/state':{WebRTCState},'../vpn/features/PreventWebrtcLeak':{PreventWebrtcLeak:{create:async()=>({getConfig:async()=>{if(configGate)await configGate.promise;return {value:enabled};}})}},

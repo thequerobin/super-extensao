@@ -17,6 +17,8 @@ export enum PermissionGrant {
 export enum BackgroundAction {
 	FORK = "fork",
 	BEGIN_LOGIN = "beginLogin",
+	PROTECTION_STATUS = "protectionStatus",
+	RETRY_PROTECTION = "retryProtection",
 	SET_WEBRTC = "setWebRTC",
 	FORGET_ERROR = "forgetError",
 	LOG = "log",

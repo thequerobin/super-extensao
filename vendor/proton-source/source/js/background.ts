@@ -1,6 +1,10 @@
 "use background";
 import { nativeStorage } from "./tools/nativeStorage";
-import { networkGuard, networkBlocked } from "./vpn/networkGuard";
+import {
+	networkGuard,
+	networkBlocked,
+	bootstrapNetworkGuard,
+} from "./vpn/networkGuard";
 import { initPrivacyWatchers } from "./vpn/initPrivacyWatchers";
 import { emitPrivacyWarning } from "./notifications/privacyWarning";
 import { setupHandleProxyRequest } from "./tools/setupHandleProxyRequest";
@@ -27,7 +31,7 @@ triggerPromise(
 	(async () => {
 		const current = connectionLifecycle.guard();
 		try {
-			await networkGuard.bootstrap();
+			await bootstrapNetworkGuard();
 			if ((await networkGuard.status()).blocked) emitPrivacyWarning();
 			if ((await connectedServer.get())?.value && current())
 				await setProxyToWaiterHost(current);

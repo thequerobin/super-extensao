@@ -57,3 +57,6 @@ A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de
 
 
 A 1.7.14 adiciona prazos ao armazenamento e às mensagens do worker, mantendo escritas nativas em ordem e exibindo estado não confirmado em caso de falha de IO. Chaves e contratos do serviço foram preservados. [Detalhes e limites](vpn-engine.md#prazos-de-io--1714).
+
+
+A 1.7.15 adiciona `vpn-blocked.html`: novas navegações durante o bloqueio abrem um aviso local com motivo/estado, tentativa de recuperação e confirmação explícita para liberar sem VPN. Notificação e painel também dão acesso. A página não guarda nem repete o endereço original. Recursos de segundo plano continuam bloqueados. [Arquitetura, prioridades e limites](vpn-engine.md#página-de-bloqueio--1715).

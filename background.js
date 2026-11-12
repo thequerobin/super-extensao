@@ -364,6 +364,11 @@ async function openSettingsPopup() {
 }
 
 async function handleClearNotificationAction(notificationId) {
+  if (notificationId === "super-vpn-privacy") {
+    await chrome.tabs.create({url: chrome.runtime.getURL("vpn-blocked.html")});
+    await chrome.notifications.clear(notificationId);
+    return;
+  }
   if (!notificationId.startsWith(CLEAR_NOTIFICATION_PREFIX)) return;
   await openSettingsPopup();
   await chrome.notifications.clear(notificationId);

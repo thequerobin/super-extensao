@@ -1,4 +1,5 @@
 "use background";
+import { getProtectionStatus, retryProtection } from "../vpn/protectionPage";
 import { loginFlow } from "../account/loginFlow";
 import type { LoginOptions } from "../../../../../vpn/engine/login";
 import { privacyController } from "../webrtc/privacyController";
@@ -42,6 +43,10 @@ export const routeMessage = async <T extends BackgroundMessage>(message: {
 	const { type, data } = message;
 
 	switch (type) {
+		case BackgroundAction.PROTECTION_STATUS:
+			return getProtectionStatus();
+		case BackgroundAction.RETRY_PROTECTION:
+			return retryProtection();
 		case BackgroundAction.BEGIN_LOGIN:
 			return loginFlow.begin(data as LoginOptions);
 		case BackgroundAction.SET_WEBRTC: {

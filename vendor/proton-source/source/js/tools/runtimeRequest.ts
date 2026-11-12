@@ -16,7 +16,9 @@ export function runtimeRequest<T>(
 			? requestTimeouts.fork
 			: ["user", "pmUser"].includes(type)
 				? requestTimeouts.account
-				: ["connectionState", "state", "locale"].includes(type)
+				: ["connectionState", "protectionStatus", "state", "locale"].includes(
+							type,
+					  )
 					? requestTimeouts.state
 					: requestTimeouts.command;
 	return channel.send(
@@ -27,9 +29,14 @@ export function runtimeRequest<T>(
 			} catch {
 				throw new VpnIOError(
 					"VpnWorkerUnavailable",
-					!["connectionState", "state", "user", "pmUser", "locale"].includes(
-						type,
-					),
+					![
+						"connectionState",
+						"protectionStatus",
+						"state",
+						"user",
+						"pmUser",
+						"locale",
+					].includes(type),
 				);
 			}
 		},

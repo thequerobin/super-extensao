@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.14**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.15**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Página de bloqueio 1.7.15
+
+A suíte completa passou **387 testes**: 15 contratos novos verificam carregamento sem comandos automáticos, tentativa que mantém o bloqueio, confirmação de liberação e readback, falhas/resultado desconhecido, consulta atrasada durante liberação, temas/idiomas e descarte, motivo sem dados do serviço, recuperação indisponível após desconectar/logout, recurso público inerte quando embutido, geração alterada, falha de leitura do guard, prioridades da página/permissão/WebTransport, atualização de regras antigas rejeição de destino adulterado e inicialização do bundle de produção da página. Os testes usam DOM, worker e DNR simulados.
+
+Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. O runner nativo `scripts/check-vpn-native.cjs` foi atualizado para verificar o redirecionamento local antes da conexão, após perda de configuração e após reiniciar. Ele preserva a verificação de falha do proxy sem fallback direto. **O runner não foi executado nesta etapa**, e continuam pendentes a instalação real, o redirecionamento DNR, a notificação clicável, login, reconexão e medições IP/DNS/tráfego. Não há certificação de ausência de vazamentos.
 
 ## Prazos de armazenamento e mensagens 1.7.14
 

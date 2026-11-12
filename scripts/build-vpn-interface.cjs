@@ -10,10 +10,13 @@ const config = {
   context: engine,
   target: ["web", "es2020"],
   devtool: false,
-  entry: path.join(root, "vpn/source/index.js"),
+  entry: {
+    interface: path.join(root, "vpn/source/index.js"),
+    blocked: path.join(root, "vpn/source/blocked-index.js"),
+  },
   output: {
     path: path.join(root, "vpn"),
-    filename: "interface.js",
+    filename: "[name].js",
     uniqueName: "superVpnInterface",
   },
   resolve: {

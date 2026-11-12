@@ -15,8 +15,8 @@ export function emitPrivacyWarning(): void {
 				priority: 2,
 				requireInteraction: true,
 				message: pt
-					? "VPN interrompida. Bloqueio de segurança acionado; verifique a proteção antes de navegar. Abra a extensão para reconectar ou liberar a rede sem VPN."
-					: "VPN interrupted. Safety blocking triggered; verify protection before browsing. Open the extension to reconnect or explicitly release networking without VPN.",
+					? "VPN interrompida. Bloqueio de segurança acionado; verifique a proteção antes de navegar. Clique neste aviso para reconectar ou liberar a rede sem VPN."
+					: "VPN interrupted. Safety blocking triggered; verify protection before browsing. Click this warning to reconnect or explicitly release networking without VPN.",
 			},
 			() => {
 				void chrome.runtime.lastError;

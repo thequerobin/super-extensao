@@ -1,7 +1,8 @@
 import { NetworkGuard } from "../../../../../vpn/engine/network-guard";
 const blockId = 880001,
 	allowId = 880002,
-	transportId = 880003;
+	transportId = 880003,
+	pageId = 880004;
 const transportRule: chrome.declarativeNetRequest.Rule = {
 	id: transportId,
 	priority: 11000,
@@ -28,7 +29,10 @@ const rule = (
 	id,
 	priority,
 	action: { type },
-	condition,
+	condition:
+		type === "allow"
+			? { ...condition, excludedInitiatorDomains: [] }
+			: condition,
 });
 const same = (
 	item: chrome.declarativeNetRequest.Rule,
@@ -43,7 +47,9 @@ const same = (
 		item.action.type === type &&
 		c.regexFilter === condition.regexFilter &&
 		JSON.stringify([...(c.excludedInitiatorDomains || [])].sort()) ===
-			JSON.stringify(condition.excludedInitiatorDomains) &&
+			JSON.stringify(
+				type === "allow" ? [] : condition.excludedInitiatorDomains,
+			) &&
 		JSON.stringify([...(c.excludedRequestDomains || [])].sort()) ===
 			JSON.stringify([...(condition.excludedRequestDomains || [])].sort()) &&
 		Array.isArray(c.excludedResourceTypes) &&
@@ -59,6 +65,44 @@ const same = (
 		)
 	);
 };
+const pageRule: chrome.declarativeNetRequest.Rule = {
+	id: pageId,
+	priority: 10002,
+	action: {
+		type: "redirect",
+		redirect: { extensionPath: "/vpn-blocked.html" },
+	},
+	condition: {
+		regexFilter: "^https?://",
+		excludedRequestDomains: condition.excludedRequestDomains,
+		resourceTypes: ["main_frame"],
+	},
+};
+const samePage = (item: chrome.declarativeNetRequest.Rule) => {
+	const c = item.condition;
+	return (
+		item.id === pageId &&
+		item.priority === 10002 &&
+		item.action.type === "redirect" &&
+		Object.keys(item.action).length === 2 &&
+		item.action.redirect?.extensionPath === "/vpn-blocked.html" &&
+		Object.keys(item.action.redirect).length === 1 &&
+		c.regexFilter === pageRule.condition.regexFilter &&
+		c.resourceTypes?.join(",") === "main_frame" &&
+		!c.excludedInitiatorDomains &&
+		JSON.stringify([...(c.excludedRequestDomains || [])].sort()) ===
+			JSON.stringify([...(condition.excludedRequestDomains || [])].sort()) &&
+		Object.keys(c).every((key) =>
+			[
+				"regexFilter",
+				"excludedInitiatorDomains",
+				"excludedRequestDomains",
+				"resourceTypes",
+				"isUrlFilterCaseSensitive",
+			].includes(key),
+		)
+	);
+};
 let lastState = { armed: false, blocked: false };
 export const networkBlocked = () => lastState.blocked;
 const read = async () => {
@@ -69,6 +113,7 @@ const read = async () => {
 		]);
 		const armed =
 			dynamic.some((item) => same(item, blockId, 10000, "block")) &&
+			dynamic.some(samePage) &&
 			dynamic.some(
 				(item) =>
 					item.id === transportId &&
@@ -77,7 +122,7 @@ const read = async () => {
 					Object.keys(item.condition).length === 1 &&
 					item.condition.resourceTypes?.join(",") === "webtransport",
 			);
-		const allowed = session.some((item) => same(item, allowId, 10001, "allow"));
+		const allowed = session.some((item) => same(item, allowId, 10003, "allow"));
 		lastState = { armed, blocked: armed && !allowed };
 		return lastState;
 	} catch {
@@ -88,20 +133,22 @@ export const networkGuard = new NetworkGuard({
 	async installBlock() {
 		try {
 			await api().updateDynamicRules({
-				removeRuleIds: [blockId, transportId],
-				addRules: [rule(blockId, 10000, "block"), transportRule],
+				removeRuleIds: [blockId, transportId, pageId],
+				addRules: [rule(blockId, 10000, "block"), transportRule, pageRule],
 			});
 		} catch {
 			throw new Error("VpnTrafficGuardFailed");
 		}
 	},
 	async removeBlock() {
-		await api().updateDynamicRules({ removeRuleIds: [blockId, transportId] });
+		await api().updateDynamicRules({
+			removeRuleIds: [blockId, transportId, pageId],
+		});
 	},
 	async allow() {
 		await api().updateSessionRules({
 			removeRuleIds: [allowId],
-			addRules: [rule(allowId, 10001, "allow")],
+			addRules: [rule(allowId, 10003, "allow")],
 		});
 	},
 	async revoke() {
@@ -109,3 +156,10 @@ export const networkGuard = new NetworkGuard({
 	},
 	status: read,
 });
+
+/** Upgrade legacy durable rules before any restoration; never retain an old allowance. */
+export async function bootstrapNetworkGuard(): Promise<void> {
+	const dynamic = await api().getDynamicRules();
+	if (dynamic.some((item) => [blockId, transportId, pageId].includes(item.id)))
+		await networkGuard.block();
+}

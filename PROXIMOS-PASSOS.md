@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.14**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.15**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -9,7 +9,7 @@ Revisado em **12 de novembro de 2026**, referência **1.7.14**. Itens implementa
 | 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
 | 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; interface conferida parcialmente no Helium isolado | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
-| 4 | Motor próprio da VPN | 1.7.14: prazos de armazenamento/mensagens, fila de escrita preservada e estado não confirmado; bloqueio/avisos da 1.7.13 | Não certificado: teste nativo e captura IP/DNS/tráfego bloqueados neste ambiente; ver docs/auditoria-vpn.md |
+| 4 | Motor próprio da VPN | 1.7.15: página local de bloqueio/recuperação; prazos e filas da 1.7.14; bloqueio/avisos da 1.7.13 | Não certificado: teste nativo e captura IP/DNS/tráfego bloqueados neste ambiente; ver docs/auditoria-vpn.md |
 | Contínua | Interface e manutenção | Catálogo e adaptadores compartilhados entregues em 1.6.8; 154 testes aprovados; fontes das páginas estáticas e estilos validados centralizados | Ampliar a conferência visual de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização
@@ -145,7 +145,7 @@ Na 1.7.8, o cache do indicador inclui a geração da conexão e é invalidado po
 ### Próximas etapas da revisão VPN
 
 1. Concluído na 1.7.14: prazos de armazenamento/mensagens, tratamento de respostas tardias e estado não confirmado. Ver [limites e prazos](docs/vpn-engine.md#prazos-de-io--1714).
-2. Pendente: página de bloqueio com motivo, estado e ações explícitas de recuperação/liberação.
+2. Concluído na 1.7.15: página local de bloqueio com motivo, consulta de estado, reconexão e confirmação explícita de liberação sem VPN. Integração nativa real ainda pendente.
 3. Pendente: atualização controlada das dependências, com revisão de compatibilidade e licenças.
 
 Os testes nativos de tráfego, IP/DNS, reinício e falhas reais precisam ser executados quando houver ambiente disponível. Nenhuma certificação de privacidade é declarada por testes simulados.

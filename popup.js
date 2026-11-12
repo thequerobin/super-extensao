@@ -185,7 +185,7 @@ async function init() {
   window.addEventListener("unload", stopTheme, { once: true });
   const savedView = settings.popupView;
   if (CLEANUP_TABS.includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
-  activateTab(savedView?.tab, false);
+  activateTab(location.hash === "#vpn" ? "vpn" : savedView?.tab, false);
   refreshPresets();
   $("theme").addEventListener("change", handle(() => SuperPreferences.theme.set($("theme").value)));
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
