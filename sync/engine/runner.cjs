@@ -144,6 +144,46 @@ async function synchronizeCore({
   if (locked(file) && file.appProperties?.superSyncOwner !== owner)
     fail("SyncRemoteLocked");
   if (state.fileId && file.id !== state.fileId) fail("SyncRemoteReplaced");
+  // Rebase a stale checkpoint only when no browser API operation is in doubt.
+  // The expected local checkpoint is the merge base: using the remote target
+  // here would mistake remote items not yet downloaded for local deletions.
+  const interrupted = state.journal;
+  if (!dryRun && interrupted && !interrupted.pending &&
+      interrupted.scope === scope &&
+      interrupted.root === String(profile.localRoot) &&
+      interrupted.strategy === "default" &&
+      (profile.strategy || "default") === "default") {
+    const current = await local.read(bookmarks, interrupted.root);
+    if (!same(current, interrupted.expectedLocal)) {
+      const committed = file.exists && file.id === interrupted.fileId &&
+        file.content === interrupted.payload;
+      const untouched = interrupted.phase === "planned" &&
+        (interrupted.before.exists === false ? !file.exists :
+          file.id === interrupted.before.id && file.content === interrupted.before.content);
+      if (committed) {
+        function canonical(node) {
+          const result = copy(node);
+          if (node !== interrupted.expectedLocal) {
+            const id = interrupted.mapping[node.id];
+            if (id === undefined) fail("SyncRecoveryConflict");
+            result.id = id;
+          }
+          if (node.children) result.children = node.children.map(canonical);
+          return result;
+        }
+        state.tree = canonical(interrupted.expectedLocal);
+        state.mapping = copy(interrupted.mapping);
+        state.highestId = interrupted.highestId;
+        state.fileId = interrupted.fileId;
+      }
+      if (committed || untouched) {
+        // Persist the rebase before planning, so another interruption is safe.
+        await validate();
+        state.journal = null;
+        await storage.save(id, copy(state));
+      }
+    }
+  }
   const save = async (journal) => {
     await validate();
     await client.renewLease?.();

@@ -145,12 +145,14 @@ test('creation followed by a checkpoint failure resumes without duplicating the 
   assert.equal(f.d.calls.filter(([kind]) => kind === 'create').length, 1);
   assert.equal(f.d.tree.children.length, 1);
 });
-test('unrelated local edits while a journal is pending stop recovery rather than overwrite the user', async () => {
+test('local edits after an interrupted download rebase without losing remote items', async () => {
   let fail = true;
   const f = setup(root([]), root([bookmark('1', 'remote')]), { onSave(state) { if (state.journal?.phase === 'applying' && fail) { fail = false; throw Error('pause'); } } });
   await assert.rejects(f.run); f.d.edit(tree => tree.children.push(bookmark('user', 'user')));
-  await assert.rejects(f.run, /SyncLocalTreeChanged|SyncRecoveryConflict/);
-  assert.equal(f.d.tree.children[0].title, 'user');
+  await f.run();
+  assert.deepEqual(new Set(f.d.tree.children.map(item => item.title)), new Set(['user', 'remote']));
+  assert.deepEqual(content(f.d.tree), content(parseXbel(f.remote.file.content)));
+  assert.equal(f.data.profile.journal, null);
 });
 test('folder parent inversion moves children out before nesting the former parent', async () => {
   const f = setup(root([folder('a', 'A', [folder('b', 'B')])]), root([folder('1', 'A', [folder('2', 'B')])]));
@@ -443,4 +445,108 @@ test('older Chromium root caches with localized titles retain existing remote id
   const remote = parseXbel(f.remote.file.content);
   assert.deepEqual(remote.children.map(item => [item.id, item.title]), [['10', 'Bookmarks Bar'], ['12', 'Other Bookmarks']]);
   assert.equal(f.remote.calls.length, 1);
+});
+
+test('local changes before upload discard the stale plan and converge on the same retry', async () => {
+  let once = true;
+  const f = setup(root([bookmark('a', 'local')]), root([bookmark('1', 'remote')]), {
+    onSave(state) {
+      if (once && state.journal?.phase === 'planned') {
+        once = false;
+        f.d.edit(tree => tree.children[0].title = 'edited');
+      }
+    },
+  });
+  await assert.rejects(f.run, /SyncLocalTreeChanged/);
+  assert.equal(f.remote.calls.length, 0);
+  await f.run();
+  assert.deepEqual(new Set(f.d.tree.children.map(item => item.title)), new Set(['edited', 'remote']));
+  assert.deepEqual(content(f.d.tree), content(parseXbel(f.remote.file.content)));
+  const uploads = f.remote.calls.length;
+  await f.run();
+  assert.equal(f.remote.calls.length, uploads);
+});
+test('a committed upload and later local edits preserve both sides during recovery', async () => {
+  let once = true;
+  const f = setup(root([bookmark('a', 'local')]), root([bookmark('1', 'remote')]), {
+    afterWrite() { if (once) { once = false; throw Error('lost response'); } },
+  });
+  await assert.rejects(f.run);
+  f.d.edit(tree => tree.children[0].title = 'edited');
+  await f.run();
+  assert.deepEqual(new Set(f.d.tree.children.map(item => item.title)), new Set(['edited', 'remote']));
+  assert.deepEqual(content(f.d.tree), content(parseXbel(f.remote.file.content)));
+  assert.equal(f.d.calls.filter(([type]) => type === 'create').length, 1);
+});
+test('recovery after a partial download preserves a user deletion and remaining remote operations', async () => {
+  const items = Array.from({ length: 8 }, (_, i) => bookmark(String(i + 1), 'item' + i));
+  const f = setup(root(items.map((item, i) => ({ ...item, id: 'l' + i }))), root(items));
+  await f.run();
+  f.remote.edit(tree => {
+    tree.children[0].title = 'remote edit';
+    tree.children.splice(1, 1);
+    tree.children.push(bookmark('99', 'new remote', 'https://new.test'));
+  });
+  const save = f.args.storage.save;
+  let once = true;
+  f.args.storage.save = async (id, state) => {
+    await save(id, state);
+    if (once && state.journal?.phase === 'applying' && !state.journal.pending && f.d.calls.length) {
+      once = false;
+      throw Error('checkpoint interrupted');
+    }
+  };
+  await assert.rejects(f.run);
+  f.args.storage.save = save;
+  f.d.edit(tree => { tree.children = tree.children.filter(item => item.id !== 'l2'); });
+  await f.run();
+  assert.deepEqual(content(f.d.tree), content(parseXbel(f.remote.file.content)));
+  assert.ok(!f.d.tree.children.some(item => ['item1', 'item2'].includes(item.title)));
+  assert.ok(f.d.tree.children.some(item => item.title === 'new remote'));
+});
+test('a changed remote file or ambiguous pending operation cannot be automatically rebased', async () => {
+  let once = true;
+  const f = setup(root([]), root([bookmark('1', 'remote')]), { onSave(state) {
+    if (once && state.journal?.phase === 'applying') { once = false; throw Error('pause'); }
+  } });
+  await assert.rejects(f.run);
+  f.d.edit(tree => tree.children.push(bookmark('user', 'user')));
+  f.remote.edit(tree => tree.children.push(bookmark('99', 'other device', 'https://other.test')));
+  await assert.rejects(f.run, /SyncRecoveryConflict/);
+  assert.equal(f.d.calls.length, 0);
+  assert.ok(f.data.profile.journal);
+  const pending = setup(root([]), root([bookmark('1', 'remote')]));
+  const save = pending.args.storage.save;
+  pending.args.storage.save = async (id, state) => {
+    await save(id, state);
+    if (state.journal?.pending) throw Error('pending operation');
+  };
+  await assert.rejects(pending.run);
+  pending.args.storage.save = save;
+  pending.d.edit(tree => tree.children.push(bookmark('user', 'user')));
+  await assert.rejects(pending.run, /SyncRecoveryConflict/);
+  assert.equal(pending.d.calls.length, 0);
+});
+
+test('replanning preserves same-field conflicts and preview leaves the checkpoint intact', async () => {
+  const f = setup(root([bookmark('a', 'one')]), root([bookmark('1', 'one')]));
+  await f.run();
+  f.remote.edit(tree => { tree.children[0].title = 'remote-title'; });
+  const save = f.args.storage.save;
+  let once = true;
+  f.args.storage.save = async (id, state) => {
+    await save(id, state);
+    if (once && state.journal?.phase === 'applying') { once = false; throw Error('pause'); }
+  };
+  await assert.rejects(f.run);
+  f.args.storage.save = save;
+  f.d.edit(tree => { tree.children[0].title = 'local-title'; });
+  const checkpoint = clone(f.data.profile);
+  await f.run({ dryRun: true });
+  assert.deepEqual(f.data.profile, checkpoint);
+  const uploads = f.remote.calls.length;
+  await assert.rejects(f.run, /SyncConflict/);
+  assert.equal(f.remote.calls.length, uploads);
+  assert.equal(f.d.tree.children[0].title, 'local-title');
+  assert.equal(parseXbel(f.remote.file.content).children[0].title, 'remote-title');
 });

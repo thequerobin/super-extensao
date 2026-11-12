@@ -15,7 +15,7 @@ Os demais provedores e os perfis de **abas** continuam no motor legado. Cadastro
 7. Aplicar operações locais individualmente, registrando o passo pendente antes da API e verificando o resultado antes do próximo checkpoint.
 8. Conferir os dois lados, confirmar a nova base e liberar o bloqueio remoto.
 
-Fechar o popup não cancela a execução: ela fica no worker. Se ele for interrompido, o diário permite reconhecer uma gravação remota já concluída e operações locais já aplicadas. Uma criação cujo retorno não foi persistido é identificada pelo resultado exato esperado, sem criar outra cópia. Alterações externas incompatíveis interrompem a recuperação em vez de serem sobrescritas.
+Fechar o popup não cancela a execução: ela fica no worker. Se ele for interrompido, o diário permite reconhecer uma gravação remota já concluída e operações locais já aplicadas. Uma criação cujo retorno não foi persistido é identificada pelo resultado exato esperado, sem criar outra cópia. Se os favoritos mudarem fora de uma operação local pendente, a mesclagem padrão recalcula o plano a partir do último checkpoint local confirmado. Antes do envio, descarta apenas o plano não aplicado; após um envio confirmado, preserva o mapeamento e usa o checkpoint como base para manter tanto as edições locais quanto as alterações remotas ainda não baixadas. Isso também recupera diários antigos presos em `SyncLocalTreeChanged`. Operações locais pendentes ambíguas, alterações remotas incompatíveis e conflitos de mesclagem continuam interrompendo a recuperação em vez de sobrescrever dados.
 
 ## Conflitos, direção e exclusões
 
