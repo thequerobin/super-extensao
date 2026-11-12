@@ -1,8 +1,10 @@
-# Super Extensão — guia rápido (1.6.11)
+# Super Extensão — guia rápido (1.7.0)
 
-Revisado em 11 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
+Revisado em 12 de novembro de 2026. Para os detalhes técnicos, permissões, créditos e desenvolvimento, consulte o [README](README.md). O trabalho restante está em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md).
 
-A interface agora usa componentes comuns no popup, sincronização, VPN, editor da nova guia e aba de reserva. Os fluxos e as configurações existentes foram preservados. A instalação continua usando a pasta sem compactação; após atualizar, recarregue a extensão e abra novamente suas páginas.
+A VPN agora usa controlador próprio de proxy, descarte de operações atrasadas, recuperação por alarmes e persistência/renovação de tokens próprias. Login e parte do motor continuam nos adaptadores Proton; tráfego real ainda exige validação.
+
+A interface usa componentes comuns no popup, sincronização, VPN, editor da nova guia e aba de reserva. Os fluxos e as configurações existentes foram preservados. A instalação continua usando a pasta sem compactação; após atualizar, recarregue a extensão e abra novamente suas páginas.
 
 ## Instalar e atualizar
 
@@ -54,6 +56,6 @@ O sinal não mede tráfego nem verifica o IP externamente. O proxy cobre este na
 - A importação de domínios de favoritos é manual e não altera os favoritos.
 - A importação da Nova guia substitui sua configuração; imagens próprias precisam ser selecionadas novamente.
 
-A suíte da implementação 1.6.6 passou 148 testes simulados. O usuário confirmou a sincronização Google Drive na 1.6.2; tráfego VPN, recuperação após falhas e conferência visual ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
+A suíte 1.7.0 passou 174 testes com APIs/transportes simulados. O usuário confirmou a sincronização Google Drive na 1.6.2; tráfego VPN, recuperação após falhas e conferência visual ainda têm verificações pendentes. Consulte [o checklist de validação](docs/validacao.md).
 
 Para imagens Unsplash/GIPHY, abra as opções do fundo na Nova guia e salve sua chave de API. Ela fica apenas neste dispositivo. Veja [as instruções de imagens](docs/newtab-images.md).

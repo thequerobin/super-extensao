@@ -1,5 +1,4 @@
 import {disconnect, isCurrentStateConnected} from '../state';
-import {isConnected} from '../vpn/connectedServer';
 import {c} from '../tools/translate';
 import LevelOfControl = browser.types.LevelOfControl;
 import OnChangeDetails = browser.types._OnChangeDetails;
@@ -31,7 +30,7 @@ const getDisconnectionMessage = (
 };
 
 const proxySettingsWatcher = async (event: OnChangeDetails) => {
-	const connected = isCurrentStateConnected() || (await isConnected());
+	const connected = isCurrentStateConnected();
 
 	if (!connected) {
 		// Don't bother if Proton VPN is not currently connected

@@ -1,7 +1,7 @@
 import {assertServerAccess} from './vpn/assertServerAccess';
 // TODO: Remove this when VPNBEX-238 is done.
 /* eslint-disable @typescript-eslint/no-use-before-define */
-'use background';
+('use background');
 import type {
 	ConnectionState,
 	ConnectionStateSwitch,
@@ -28,7 +28,13 @@ import {
 import type {Credentials} from './account/credentials/Credentials';
 import {getCountryAndCoordinates} from './account/getLocation';
 import {setButton} from './tools/browserAction';
-import {clearProxy, hasProxy, proxyToServer} from './tools/proxy';
+import {
+	clearProxy,
+	hasProxy,
+	proxyToServer,
+	invalidateProxyOperations,
+} from './tools/proxy';
+import {ConnectionLifecycle} from '../../../../vpn/engine/lifecycle';
 import {
 	authCheck,
 	excludeApiFromProxy,
@@ -59,11 +65,8 @@ import {emitNotification} from './notifications/emitNotification';
 import {checkNetwork} from './vpn/checkNetwork';
 import {getAlternativeServer} from './vpn/getAlternatives';
 import {triggerPromise} from './tools/triggerPromise';
-import {
-	persistentlyStoredSession,
-	readSession,
-	storedSession,
-} from './account/readSession';
+import {readSession} from './account/readSession';
+import {sessionStore} from './account/sessionStore';
 import {
 	forgetLastChoice,
 	getLastChoice,
@@ -109,22 +112,27 @@ const info = bind(info_, '[state]');
 const warn = bind(warn_, '[state]');
 
 let currentState: ConnectionState;
+export const connectionLifecycle = new ConnectionLifecycle();
+let serverPersistence: Promise<unknown> = Promise.resolve();
+const persistServer = (server: ProxyServer | undefined) => {
+	serverPersistence = serverPersistence
+		.catch(() => undefined)
+		.then(() => connectedServer.setValue(server));
+	triggerPromise(serverPersistence);
+};
 
 let lastLogicalCheck = 0;
 
 const hasWarning = () => !!(currentState?.data?.error as ApiError)?.Warning;
 
-const serverHostnames: Record<string, boolean> = {};
-
 export const isProxyKnownHost = (host: string): boolean =>
-	host === currentState?.data?.server?.proxyHost ||
-	/^(.*\.)?protonvpn(\.net|\.com)(:\d+)?$/.test(host) ||
-	!!serverHostnames[host];
+	currentState?.name === 'on' && host === currentState.data.server?.proxyHost;
 
 export function getAuthCredentials(
 	credentials: Credentials | undefined,
 	requestDetails?: WithIdentifiableRequest,
 ): ProxyAuthentication | undefined {
+	if (currentState?.name !== 'on') return undefined;
 	const data = currentState.data;
 
 	if (
@@ -176,6 +184,10 @@ const onState = asConnectionStateSwitch({
 	initializedAt: 0,
 	proxyEnabled: false as boolean,
 	refreshingState: false,
+	connectionNotified: false,
+	proxyTask: undefined as
+		| {generation: number; promise: Promise<boolean>}
+		| undefined,
 
 	init(oldState?: ConnectionState): void {
 		this.proxyEnabled = false;
@@ -192,20 +204,34 @@ const onState = asConnectionStateSwitch({
 	},
 
 	async connectCurrentServer(): Promise<boolean> {
-		const server = currentState?.data?.server;
-		info('Connect to', server);
-
-		return (
-			!!server && (await this.setProxy(server, server.splitTunneling || {}))
-		);
+		if (this !== currentState) return false;
+		const generation = connectionLifecycle.capture();
+		if (this.proxyTask?.generation === generation)
+			return this.proxyTask.promise;
+		const server = currentState.data.server;
+		if (!server) return false;
+		const task = {
+			generation,
+			promise: this.setProxy(server, server.splitTunneling || {}),
+		};
+		this.proxyTask = task;
+		try {
+			return await task.promise;
+		} finally {
+			if (this.proxyTask === task) this.proxyTask = undefined;
+		}
 	},
 
 	async setOption(type: SettingChange, data: any): Promise<void> {
+		if (this !== currentState) return;
 		switch (type) {
 			case SettingChange.BYPASS_LIST:
 				if (currentState?.data?.server) {
+					connectionLifecycle.advance();
+					invalidateProxyOperations();
 					currentState.data.server.splitTunneling = data;
-					await this.connectCurrentServer();
+					this.proxyEnabled = false;
+					await this.setConnected();
 				}
 
 				break;
@@ -216,23 +242,25 @@ const onState = asConnectionStateSwitch({
 		server: ProxyServer,
 		splitTunneling: SplitTunnelingConfig = {},
 	): Promise<boolean> {
-		if (currentState.data?.starting) {
-			delete currentState.data.starting;
+		const state = currentState;
+		const current = connectionLifecycle.guard();
+		if (this !== state) return false;
+		if (state.data?.starting) {
+			delete state.data.starting;
 		}
 
-		serverHostnames[server.proxyHost] = true;
 		const credentials = await getCredentials();
+		if (!current()) return false;
+		const cached = await loadCachedCredentials();
+		if (!current()) return false;
 
-		if (
-			!credentials ||
-			((await loadCachedCredentials())?.time || 0) < Date.now()
-		) {
+		if (!credentials || (cached?.time || 0) < Date.now()) {
 			warn(credentials ? 'Expired token' : 'No token');
 
 			return false;
 		}
 
-		if (!(await proxyToServer(server, splitTunneling))) {
+		if (!(await proxyToServer(server, splitTunneling, current)) || !current()) {
 			return false;
 		}
 
@@ -245,6 +273,8 @@ const onState = asConnectionStateSwitch({
 	},
 
 	async setConnected(): Promise<void> {
+		const current = connectionLifecycle.guard();
+		if (this !== currentState) return;
 		if (!currentState?.data?.server) {
 			disconnect(new Error(c('Error').t`Server not found`));
 
@@ -257,7 +287,16 @@ const onState = asConnectionStateSwitch({
 		const name = currentState.data.server.name;
 		lastLogicalCheck = time;
 
-		if (!(await this.connectCurrentServer())) {
+		let applied: boolean;
+		try {
+			applied = await this.connectCurrentServer();
+		} catch (error) {
+			if (initialState === currentState && current())
+				disconnect(error as Error);
+			return;
+		}
+		if (initialState !== currentState || !current()) return;
+		if (!applied) {
 			disconnect(
 				new Error(
 					c('Error')
@@ -268,6 +307,16 @@ const onState = asConnectionStateSwitch({
 			return;
 		}
 
+		if (!this.connectionNotified) {
+			this.connectionNotified = true;
+			const city = server.exitCity;
+			emitNotification(
+				'connected-server',
+				city
+					? c('Info').t`Connected to ${name} in ${city}`
+					: c('Info').t`Connected to ${name}`,
+			);
+		}
 		const host = currentState.data.server?.proxyHost;
 
 		if (host) {
@@ -283,6 +332,7 @@ const onState = asConnectionStateSwitch({
 			() => {
 				if (
 					initialState !== currentState ||
+					!current() ||
 					currentState.data.server?.name !== name
 				) {
 					return;
@@ -302,6 +352,7 @@ const onState = asConnectionStateSwitch({
 	},
 
 	setCredentials(credentials: Credentials | undefined): void {
+		if (this !== currentState) return;
 		const userName = credentials?.Username;
 		const password = credentials?.Password;
 
@@ -312,7 +363,7 @@ const onState = asConnectionStateSwitch({
 		const credsData = currentState?.data?.credsData;
 
 		if (userName === credsData?.Username && password === credsData?.Password) {
-			if (currentState.data?.starting) {
+			if (currentState.data?.starting || !this.proxyEnabled) {
 				triggerPromise(this.setConnected());
 			}
 
@@ -335,6 +386,8 @@ const onState = asConnectionStateSwitch({
 	},
 
 	async checkLogicalIsUp(credentials?: Credentials): Promise<void> {
+		const state = currentState;
+		if (this !== state) return;
 		const time = Date.now();
 		const id = currentState?.data?.server?.id;
 
@@ -342,13 +395,16 @@ const onState = asConnectionStateSwitch({
 			return;
 		}
 
-		const initializedAt = this.initializedAt;
 		lastLogicalCheck = time;
 
 		try {
 			await delay(500);
 
-			if (!this.proxyEnabled || !isCurrentStateConnected()) {
+			if (
+				state !== currentState ||
+				!this.proxyEnabled ||
+				!isCurrentStateConnected()
+			) {
 				return;
 			}
 
@@ -366,11 +422,7 @@ const onState = asConnectionStateSwitch({
 						tier: guessTierFromCredentials(currentCredentials),
 					});
 
-					if (
-						logical &&
-						server &&
-						initializedAt === getCurrentState().initializedAt
-					) {
+					if (logical && server && state === currentState) {
 						await connectLogical(
 							logical,
 							server,
@@ -380,11 +432,14 @@ const onState = asConnectionStateSwitch({
 				}
 			}
 		} catch (e) {
+			if (state !== currentState) return;
 			checkNetwork(e);
 		}
 	},
 
 	async refreshState(): Promise<void> {
+		const state = currentState;
+		if (this !== state) return;
 		if (this.refreshingState) {
 			return;
 		}
@@ -394,14 +449,19 @@ const onState = asConnectionStateSwitch({
 		try {
 			triggerPromise(this.checkLogicalIsUp());
 
-			if (!currentState.data?.starting && (await hasProxy())) {
+			const applied = await hasProxy();
+			if (state !== currentState) return;
+			if (!applied) this.proxyEnabled = false;
+			if (!state.data?.starting && applied) {
 				return;
 			}
 
 			try {
 				let credentials = await loadCredentials();
+				if (state !== currentState) return;
 
 				if (credentials) {
+					this.proxyEnabled = false;
 					this.setCredentials(credentials);
 
 					return;
@@ -423,6 +483,7 @@ const onState = asConnectionStateSwitch({
 				);
 
 				credentials = await getCredentials(true);
+				if (state !== currentState) return;
 
 				if (
 					!hasWarning() &&
@@ -441,6 +502,7 @@ const onState = asConnectionStateSwitch({
 
 				await this.connectCurrentServer();
 			} catch (e) {
+				if (state !== currentState) return;
 				disconnect(e as ApiError);
 				handleError(e);
 			}
@@ -452,6 +514,7 @@ const onState = asConnectionStateSwitch({
 	handleProxyRequest(
 		requestDetails: OnRequestDetails,
 	): ProxyInfo | Promise<ProxyInfo> {
+		const current = connectionLifecycle.guard();
 		// This is only to avoid proxy for localhost, but we might actually want to access the API via the proxy in normal cases
 		// We should extend this to prevent proxying for LAN addresses
 		const splitTunneling = currentState?.data?.server?.splitTunneling;
@@ -473,6 +536,7 @@ const onState = asConnectionStateSwitch({
 		}
 
 		const formatOutput = (newCredentials: Credentials | undefined) => {
+			if (!current()) return {type: 'direct'} as ProxyInfo;
 			const config = {
 				type: scheme,
 				host: currentState?.data?.server?.proxyHost,
@@ -502,6 +566,7 @@ const onState = asConnectionStateSwitch({
 				}
 
 				return readSession().then((session) => {
+					if (!current()) return {type: 'direct'} as ProxyInfo;
 					if (retry > 0) {
 						return delay(400).then(() => tryCredentials(retry - 1));
 					}
@@ -522,6 +587,8 @@ const onState = asConnectionStateSwitch({
 	async handleProxyAuthentication(
 		requestDetails: OnAuthRequiredDetails,
 	): Promise<ProxyAuthentication | undefined> {
+		const state = currentState;
+		if (this !== state) return undefined;
 		if (requestDetails.isProxy) {
 			if (isPending(requestDetails)) {
 				return {cancel: true};
@@ -530,10 +597,11 @@ const onState = asConnectionStateSwitch({
 			const host = requestDetails.challenger.host;
 
 			if (
-				host === currentState?.data?.server?.proxyHost ||
-				serverHostnames[host]
+				host === state.data.server?.proxyHost &&
+				requestDetails.challenger.port === state.data.server.proxyPort
 			) {
 				const credentials = await getCredentials();
+				if (state !== currentState) return {cancel: true};
 
 				return (
 					(credentials && getAuthCredentials(credentials, requestDetails)) || {
@@ -631,14 +699,27 @@ const offState: ConnectionStateSwitch = {
 };
 
 export function switchState(state: ConnectionStateSwitch) {
+	connectionLifecycle.advance();
+	invalidateProxyOperations();
 	const oldState = currentState || undefined;
 	currentState = Object.assign({data: {}}, state, {
 		initializedAt: Date.now(),
 	});
 	info('Switch state to ' + currentState.name, currentState.data);
-	currentState.init?.(oldState);
-	currentState.refreshState?.();
-	triggerPromise(connectedServer.setValue(currentState.data?.server));
+	const initial = currentState;
+	triggerPromise(
+		Promise.resolve(initial.init?.(oldState)).catch((error) => {
+			if (initial !== currentState) return;
+			initial.data.error = error;
+			notifyStateChange(
+				initial.name === 'loggedout' ? 'logged-out' : 'disconnected',
+				{error},
+			);
+			setButton('error', getErrorAsString(error));
+		}),
+	);
+	triggerPromise(Promise.resolve(initial.refreshState?.()));
+	persistServer(currentState.data?.server);
 }
 
 export function logIn() {
@@ -647,19 +728,20 @@ export function logIn() {
 
 export function logOut(deleteSession: boolean) {
 	switchState(loggedoutState);
-	storedSession.get().then(async (session) => {
-		forgetUser();
-		triggerPromise(storedSession.remove());
-		triggerPromise(persistentlyStoredSession.remove());
-		forgetCredentials();
-		forgetLogicals();
-		forgetLastChoice();
-		forgetClientConfig();
-
-		if (deleteSession && session?.uid) {
-			triggerPromise(fetchApi('auth', {method: 'DELETE'}, undefined, session));
-		}
-	});
+	// Invalidate refresh synchronously, before the next login can save a session.
+	const previousSession = sessionStore.clear();
+	forgetUser();
+	forgetCredentials();
+	forgetLogicals();
+	forgetLastChoice();
+	forgetClientConfig();
+	triggerPromise(
+		previousSession.then((session) => {
+			if (deleteSession && session?.uid)
+				return fetchApi('auth', {method: 'DELETE'}, undefined, session);
+			return undefined;
+		}),
+	);
 
 	emitNotification('logged-out', c('Info').t`Logged out`);
 	info('Logged out');
@@ -684,7 +766,11 @@ export async function connectLogical(
 	server: Server,
 	splitTunneling?: SplitTunnelingConfig,
 ): Promise<void> {
-	assertServerAccess(await getUser(), logical);
+	const generation = connectionLifecycle.advance();
+	invalidateProxyOperations();
+	const user = await getUser();
+	if (!connectionLifecycle.isCurrent(generation)) return;
+	assertServerAccess(user, logical);
 	const secureCoreLogical = (logical.Features & Feature.SECURE_CORE) !== 0;
 	const label = server.Label || '';
 
@@ -709,7 +795,11 @@ export async function connectLogical(
 }
 
 export async function connect(data: ConnectionState['data']): Promise<void> {
-	return connectAfter(data, (await connectedServer.get())?.value?.name);
+	const generation = connectionLifecycle.advance();
+	invalidateProxyOperations();
+	const previous = await connectedServer.get();
+	if (!connectionLifecycle.isCurrent(generation)) return;
+	return connectAfter(data, previous?.value?.name);
 }
 
 export async function connectAfter(
@@ -720,23 +810,10 @@ export async function connectAfter(
 	Object.assign(currentState.data, data);
 	switchState(onState);
 
-	const name = data?.server?.name;
-	const city = data?.server?.exitCity;
-
-	if (!previousName || previousName !== name) {
-		emitNotification(
-			'connected-server',
-			name
-				? city
-					? /*
-						 * translator: ${name} is a server, example: Connected to US-NY#1 in New York
-						 */ c('Info').t`Connected to ${name} in ${city}`
-					: /*
-						 * translator: ${name} is a server, example: Connected to US-NY#1
-						 */ c('Info').t`Connected to ${name}`
-				: c('Info').t`Connected`,
-		);
-	}
+	(currentState as typeof onState).connectionNotified =
+		previousName === data.server?.name;
+	notifyStateChange('connecting', {server: data.server});
+	setButton('connecting');
 }
 
 export function isLoggedIn(): boolean {
@@ -744,11 +821,15 @@ export function isLoggedIn(): boolean {
 }
 
 export function isCurrentStateConnected(): boolean {
-	return currentState && currentState.name === 'on';
+	return (
+		currentState && currentState.name === 'on' && !!currentState.proxyEnabled
+	);
 }
 
 export async function checkAutoConnect(): Promise<void> {
+	const current = connectionLifecycle.guard();
 	const user = await getUser();
+	if (!current()) return;
 
 	if (!user) {
 		return;
@@ -770,9 +851,10 @@ export async function checkAutoConnect(): Promise<void> {
 		getCountryAndCoordinates(),
 	]);
 
+	if (!current()) return;
 	if (initialChoice?.connected && autoConnect?.value) {
 		// Quit auto-connect if there is no session
-		if (!(await readSession())?.uid) {
+		if (!(await readSession())?.uid || !current()) {
 			return;
 		}
 
@@ -842,9 +924,12 @@ export function getCurrentState(): ConnectionState {
 		currentState = {
 			data: {},
 		} as ConnectionState;
+		const initialState = currentState;
+		const current = connectionLifecycle.guard();
 		connectedServer
 			.get()
 			.then(async (data) => {
+				if (!current() || initialState !== currentState) return;
 				const server = data?.value;
 
 				if (server) {
@@ -854,7 +939,9 @@ export function getCurrentState(): ConnectionState {
 				}
 
 				debug('[getCurrentState]', data?.value);
-				switchState(await getDisconnectedState());
+				const disconnected = await getDisconnectedState();
+				if (!current() || initialState !== currentState) return;
+				switchState(disconnected);
 				await checkAutoConnect();
 			})
 			.finally(() => {

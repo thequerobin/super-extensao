@@ -50,6 +50,6 @@ A indicação acompanha navegação, troca de aba, alterações das regras e idi
 
 ## Trabalho restante
 
-Login real, roteamento por domínio, cores do indicador, modo anônimo, recuperação e geometria do popup continuam no [checklist de validação](validacao.md). O mapeamento e o núcleo próprio de regras foram entregues em 1.6.5; as próximas substituições são controlador de proxy, estado/recuperação e sessão. O roteiro está em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+Login real, roteamento por domínio, cores do indicador, modo anônimo, recuperação e geometria do popup continuam no [checklist de validação](validacao.md). Regras, controlador de proxy, gerações, alarmes e persistência/renovação de tokens são próprios na 1.7.0. As próximas extrações são o restante da máquina de estados, credenciais e transporte. O roteiro está em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
 
 Tema e foco usam a [base compartilhada](ui-components.md), revisada em 1.6.3. Confira o [registro de validação](validacao.md) para distinguir testes DOM, relatos do usuário e cenários ainda pendentes.

@@ -1,17 +1,16 @@
 'use background';
-import {createFixedConfig, createPacScript} from '../../../../../vpn/engine/routing';
-import {triggerPromise} from './triggerPromise';
+import {
+	createFixedConfig,
+	createPacScript,
+} from '../../../../../vpn/engine/routing';
 import {setWebRTCState} from '../webrtc/setWebRTCState';
 import {WebRTCState} from '../webrtc/state';
 import {preventLeak} from '../webrtc/preventLeak';
-import {isConnected} from '../vpn/connectedServer';
 import {setupHandleProxyRequest} from './setupHandleProxyRequest';
 import {
 	clearAuthInterceptor,
 	initAuthInterceptor,
 } from '../vpn/initAuthInterceptor';
-import {timeoutAfter} from '../tools/delay';
-import {milliSeconds} from '../tools/milliSeconds';
 import {ErrorCode, getErrorCode} from '../tools/getErrorCode';
 import {retryCredentials} from './retryCredentials';
 import {
@@ -26,124 +25,79 @@ interface PacScript {
 	mode: 'pac_script';
 	pacScript: {data: string};
 }
-
-interface SystemProxy {
-	mode: 'system';
-}
-
 interface FixedServersProxy {
 	mode: 'fixed_servers';
 	rules: {
-		singleProxy: {
-			scheme: 'http' | 'https'; // https is the only protocol authorized in production
-			host: string;
-			port: number;
-		};
+		singleProxy: {scheme: 'http' | 'https'; host: string; port: number};
 		includeOnly?: string[];
 		bypassList: string[];
 	};
 }
 
-const isFixedServersProxy = (value: any): value is FixedServersProxy =>
-	value.mode === 'fixed_servers' || value.mode === 'pac_script';
-
-let proxySet = false;
-
+// Browser/auth/WebRTC adapters; the controller owns ordering and confirmation.
+import {ProxyController} from '../../../../../vpn/engine/controller';
+import {chromiumProxy} from '../../../../../vpn/engine/chromium';
+let controller: ProxyController | undefined;
 let proxyErrorWatched = false;
-
-export const hasProxy = async (): Promise<boolean> =>
-	await timeoutAfter(
-		new Promise((resolve) => {
-			if (!chrome.proxy) {
-				resolve(false);
-
-				return;
+const getController = () =>
+	controller ||
+	(controller = new ProxyController({
+		...chromiumProxy(chrome),
+		prepare() {
+			if (!setupHandleProxyRequest()) throw new Error('VpnProxyUnavailable');
+			if (!proxyErrorWatched) {
+				proxyErrorWatched = true;
+				chrome.proxy.onProxyError?.addListener?.((event) => {
+					if (
+						[
+							ErrorCode.TIMED_OUT,
+							ErrorCode.TUNNEL_CONNECTION_FAILED,
+							ErrorCode.PROXY_CONNECTION_FAILED,
+						].includes(getErrorCode(event.error))
+					) {
+						void hasProxy()
+							.then((active) => {
+								if (active) retryCredentials(true);
+							})
+							.catch(() => undefined);
+					}
+				});
 			}
+		},
+		protect: () => preventLeak(),
+		restore: () => setWebRTCState(WebRTCState.CLEAR),
+		attachAuth: () => initAuthInterceptor(),
+		detachAuth: () => clearAuthInterceptor(),
+		flush: async () => {
+			await browser?.webRequest?.handlerBehaviorChanged?.();
+		},
+	}));
 
-			chrome.proxy.settings.get({}, async (details) => {
-				resolve(
-					details?.levelOfControl === 'controlled_by_this_extension' ||
-						(details?.value?.mode
-							? isFixedServersProxy(details?.value)
-							: details?.levelOfControl === 'controllable_by_this_extension' &&
-								(await isConnected())),
-				);
-			});
-		}),
-		milliSeconds.fromSeconds(5),
-		'Unable to check proxy settings',
-	);
-
-// Super Extensão owns rule compilation; session and browser writes remain here.
-export const getPacScript = (proxy: FixedServersProxy): PacScript =>
-  createPacScript(proxy, proxyLocalNetworkExclusion);
-
-const setProxy = (
-	value: FixedServersProxy | SystemProxy | PacScript,
-): Promise<boolean> =>
-	new Promise((resolve) => {
-		if (!chrome.proxy || !setupHandleProxyRequest()) {
-			resolve(false);
-
-			return;
-		}
-
-		proxySet = true;
-		initAuthInterceptor();
-		chrome.proxy.settings.set(
-			{
-				value,
-				scope: 'regular',
-			},
-			() => {
-				hasProxy()
-					.then((result) => {
-						const promise = browser?.webRequest?.handlerBehaviorChanged?.();
-
-						if (!promise) {
-							return result;
-						}
-
-						return promise.then(() => result);
-					})
-					.then((result) => {
-						if (!proxyErrorWatched) {
-							proxyErrorWatched = true;
-							chrome.proxy.onProxyError?.addListener?.(async (event) => {
-								switch (getErrorCode(event.error)) {
-									case ErrorCode.TIMED_OUT:
-									case ErrorCode.TUNNEL_CONNECTION_FAILED:
-									case ErrorCode.PROXY_CONNECTION_FAILED:
-										retryCredentials(true);
-										break;
-								}
-							});
-						}
-
-						resolve(result);
-					});
-			},
-		);
-
-		triggerPromise(
-			isFixedServersProxy(value)
-				? preventLeak()
-				: setWebRTCState(WebRTCState.CLEAR),
-		);
-	});
+export const invalidateProxyOperations = () => controller?.invalidate();
+export const hasProxy = (): Promise<boolean> => getController().isApplied();
+export const getPacScript = (proxy: FixedServersProxy): PacScript => ({
+	mode: 'pac_script',
+	pacScript: createPacScript(proxy, proxyLocalNetworkExclusion).pacScript,
+});
 
 export const getFixedServerConfig = (
-  host: string,
-  port: number,
-  splitTunneling: SplitTunnelingConfig = {},
-): FixedServersProxy => createFixedConfig(host, port, splitTunneling, {
-  scheme, excludeApi: excludeApiFromProxy, apiExclusions: apiDomainsExclusion,
-  localExclusions: proxyLocalNetworkExclusion,
+	host: string,
+	port: number,
+	splitTunneling: SplitTunnelingConfig = {},
+): FixedServersProxy => ({
+	...createFixedConfig(host, port, splitTunneling, {
+		scheme,
+		excludeApi: excludeApiFromProxy,
+		apiExclusions: apiDomainsExclusion,
+		localExclusions: proxyLocalNetworkExclusion,
+	}),
+	mode: 'fixed_servers',
 });
 
 export const proxyToServer = async (
 	server: ProxyServer,
 	splitTunneling: SplitTunnelingConfig = {},
+	guard: () => boolean = () => true,
 ) => {
 	const config = getFixedServerConfig(
 		server.proxyHost,
@@ -151,36 +105,17 @@ export const proxyToServer = async (
 		splitTunneling,
 	);
 
-	return await setProxy(
+	return await getController().apply(
 		typeof config.rules.includeOnly === 'undefined'
 			? config
 			: getPacScript(config),
+		guard,
 	);
 };
 
-export const setProxyToWaiterHost = async (): Promise<boolean> =>
-	await setProxy(
-		getFixedServerConfig(
-			'localhost', // 127.0.0.1
-			9,
-		),
-	);
+export const setProxyToWaiterHost = async (
+	guard: () => boolean = () => true,
+): Promise<boolean> =>
+	getController().apply(getFixedServerConfig('localhost', 9), guard);
 
-export const clearProxy = (): Promise<boolean> =>
-	new Promise<boolean>((resolve) => {
-		if (!chrome.proxy) {
-			resolve(false);
-
-			return;
-		}
-
-		proxySet = false;
-		chrome.proxy.settings.clear({}, (success: boolean | void) => {
-			if (!proxySet) {
-				clearAuthInterceptor();
-				triggerPromise(setWebRTCState(WebRTCState.CLEAR));
-			}
-
-			resolve(Boolean(success));
-		});
-	});
+export const clearProxy = (): Promise<boolean> => getController().disconnect();

@@ -1,6 +1,6 @@
-# Proton VPN na Super Extensão — referência 1.6.5
+# Proton VPN na Super Extensão — referência 1.7.0
 
-A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço, a sessão e o controlador de conexão permanecem Proton; regras e PAC já usam o núcleo próprio de `vpn/engine`. Veja [arquitetura, reconstrução e validação](vpn-interface.md).
+A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. Parte da máquina de estados, credenciais e transporte continua no adaptador. Veja [arquitetura, reconstrução e validação](vpn-interface.md).
 
 ## Usar
 
@@ -45,4 +45,4 @@ Os arquivos compilados são incluídos no repositório; instalar a extensão des
 
 ## Trabalho restante
 
-A reescrita parcial começou em 1.6.5: os contratos estão mapeados e o núcleo de regras/PAC é próprio. Sessão, credenciais, controlador de proxy e recuperação continuam no Proton adaptado. O próximo passo é o controlador de proxy, conforme [vpn-engine.md](vpn-engine.md). A integração já implementada e os itens pendentes estão separados em [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. O restante da máquina de estados, credenciais e transporte ainda precisa de extração. Veja [vpn-engine.md](vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).

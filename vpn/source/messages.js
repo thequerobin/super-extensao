@@ -1,5 +1,53 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
+  VpnProxyControlledElsewhere: {
+    "pt-BR": "Outra extensão ou uma política do navegador controla o proxy.",
+    en: "Another extension or a browser policy controls the proxy.",
+  },
+  VpnProxyNotApplied: {
+    "pt-BR": "O navegador não confirmou a configuração da VPN. Tente conectar novamente.",
+    en: "The browser did not confirm the VPN configuration. Try connecting again.",
+  },
+  VpnProxyClearFailed: {
+    "pt-BR": "Não foi possível confirmar a remoção do proxy. Tente desconectar novamente.",
+    en: "Could not confirm removal of the proxy. Try disconnecting again.",
+  },
+  VpnProxyApiError: {
+    "pt-BR": "O navegador não conseguiu alterar as configurações de proxy.",
+    en: "The browser could not change the proxy settings.",
+  },
+  VpnProxyUnavailable: {
+    "pt-BR": "A permissão de proxy não está disponível neste navegador.",
+    en: "Proxy access is unavailable in this browser.",
+  },
+  VpnInvalidProxyEndpoint: {
+    "pt-BR": "O endereço ou a porta do servidor é inválido. Atualize a lista de servidores.",
+    en: "The server address or port is invalid. Refresh the server list.",
+  },
+  VpnWebRTCProtectionUnavailable: {
+    "pt-BR": "Não foi possível ativar a proteção WebRTC. Verifique as permissões do navegador.",
+    en: "Could not enable WebRTC protection. Check browser permissions.",
+  },
+  VpnWebRTCSettingsFailed: {
+    "pt-BR": "O navegador não conseguiu atualizar a proteção WebRTC.",
+    en: "The browser could not update WebRTC protection.",
+  },
+  VpnSessionStorageFailed: {
+    "pt-BR": "Não foi possível salvar ou ler a sessão da VPN neste dispositivo.",
+    en: "Could not save or read the VPN session on this device.",
+  },
+  VpnInvalidSessionResponse: {
+    "pt-BR": "O serviço retornou uma sessão inválida. Entre na conta novamente.",
+    en: "The service returned an invalid session. Sign in again.",
+  },
+  VpnSessionUnavailable: {
+    "pt-BR": "Entre na conta Proton para conectar.",
+    en: "Sign in to your Proton account to connect.",
+  },
+  VpnSignInSuperseded: {
+    "pt-BR": "Este pedido de login foi cancelado por outra ação. Inicie o login novamente.",
+    en: "This sign-in request was superseded. Start signing in again.",
+  },
   heading: {
     "pt-BR": "VPN no navegador",
     en: "Browser VPN",

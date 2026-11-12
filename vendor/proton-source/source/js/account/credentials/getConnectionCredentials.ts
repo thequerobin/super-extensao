@@ -30,6 +30,7 @@ import {getCredentialsData} from './getCredentialsData';
 import {fetchWithUserInfo} from '../fetchWithUserInfo';
 
 let credentialsFetching = false;
+let credentialGeneration = 0;
 let waitingCredentialsPromises = [] as [
 	(session: Credentials | undefined) => void,
 	(error: any) => void,
@@ -46,6 +47,8 @@ let lastCredentials:
 export const getLastCredentials = () => lastCredentials;
 
 export const cancelNextCredentialFetch = () => {
+	credentialGeneration++;
+	lastCredentials = undefined;
 	if (credentialNextFetching) {
 		clearTimeout(credentialNextFetching);
 	}
@@ -77,6 +80,7 @@ const fetchConnectionCredentialsRequest = async (
 	sessionUid: string | undefined,
 	retryable = true,
 ): Promise<Credentials | undefined> => {
+	const generation = credentialGeneration;
 	credentialsFetching = true;
 	credentialsFetchingRetries++;
 
@@ -88,6 +92,11 @@ const fetchConnectionCredentialsRequest = async (
 			);
 		}
 
+		if (
+			generation !== credentialGeneration ||
+			sessionUid !== (await readSession()).uid
+		)
+			return undefined;
 		const credentials = await fetchWithUserInfo<Credentials | undefined>(
 			'vpn/v1/browser/token?Duration=' + tokenDuration,
 			{
@@ -96,6 +105,11 @@ const fetchConnectionCredentialsRequest = async (
 				},
 			},
 		);
+		if (
+			generation !== credentialGeneration ||
+			sessionUid !== (await readSession()).uid
+		)
+			return undefined;
 		await browser?.webRequest?.handlerBehaviorChanged?.();
 		credentialsFetchingRetries = 0;
 
@@ -131,6 +145,11 @@ const fetchConnectionCredentialsRequest = async (
 
 		return credentials;
 	} catch (error) {
+		if (
+			generation !== credentialGeneration ||
+			sessionUid !== (await readSession()).uid
+		)
+			return undefined;
 		(error as ApiError)._id = Date.now() + '-' + Math.random();
 
 		if (retryable && isInvalidTokenError(error)) {
@@ -188,7 +207,12 @@ const fetchConnectionCredentials = async (
 	try {
 		const credentials = await fetchConnectionCredentialsRequest(sessionUid);
 
-		if (credentials?.Code !== 1000) {
+		if (!credentials) {
+			waitingCredentialsPromises.forEach(([resolve]) => resolve(undefined));
+			waitingCredentialsPromises = [];
+			return undefined;
+		}
+		if (credentials.Code !== 1000) {
 			throw new Error(
 				getErrorAsString(
 					(credentials || {error: 'No credentials found'}) as any,
@@ -204,7 +228,7 @@ const fetchConnectionCredentials = async (
 		updateLastCredentials(credentials, sessionUid);
 
 		const margin = milliSeconds.fromSeconds(credentials.Expire) * 0.1;
-		cancelNextCredentialFetch();
+		if (credentialNextFetching) clearTimeout(credentialNextFetching);
 
 		credentialNextFetching = setJitterTimeout(
 			milliSeconds.fromSeconds(credentials.Expire) - margin,
@@ -237,7 +261,9 @@ const fetchConnectionCredentials = async (
 };
 
 export const loadCredentials = async (): Promise<Credentials | undefined> => {
-	const savedCredentials = await loadCachedCredentials();
+	let savedCredentials = await loadCachedCredentials();
+	if (savedCredentials?.sessionUid !== (await readSession()).uid)
+		savedCredentials = {};
 	const age = (savedCredentials?.time || 0) - Date.now();
 	const credentials = savedCredentials?.credentials;
 
@@ -267,7 +293,10 @@ export const getCredentials = async (
 		const credentials = await (async () => {
 			const savedCredentials = await loadCachedCredentials();
 
-			if ((savedCredentials?.time || 0) < Date.now()) {
+			if (
+				savedCredentials?.sessionUid !== sessionUid ||
+				(savedCredentials?.time || 0) < Date.now()
+			) {
 				return fetchConnectionCredentials(sessionUid);
 			}
 
@@ -308,7 +337,10 @@ export const getSynchronousCredentials = (): Credentials | undefined => {
 export const checkCredentials = async (sessionUid: string): Promise<void> => {
 	const savedCredentials = await loadCachedCredentials();
 
-	if ((savedCredentials?.time || 0) < Date.now()) {
+	if (
+		savedCredentials?.sessionUid !== sessionUid ||
+		(savedCredentials?.time || 0) < Date.now()
+	) {
 		await fetchConnectionCredentials(sessionUid);
 	}
 };

@@ -1,5 +1,5 @@
 import {consumeFork} from '../account/fork/consumeFork';
-import {saveSession} from '../account/saveSession';
+import {sessionStore} from '../account/sessionStore';
 import type {ForkMessage} from './Message';
 import {appId} from '../config';
 import {triggerPromise} from '../tools/triggerPromise';
@@ -40,12 +40,14 @@ export const forkSession = async (
 		state,
 	} = payload;
 
+	const generation = sessionStore.capture();
 	try {
 		const {session, forkState} = await consumeFork({state, selector});
 		session.persistent = persistent;
 		session.partnerId = forkState.partnerId || undefined;
 
-		await saveSession(session);
+		if (!(await sessionStore.saveIfCurrent(session, generation)))
+			throw new Error('VpnSignInSuperseded');
 
 		triggerPromise(getFreshUser());
 

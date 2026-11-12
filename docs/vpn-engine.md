@@ -1,82 +1,76 @@
-# Motor próprio da VPN — primeira etapa, 1.6.5
+# Motor da VPN — controlador próprio, 1.7.0
 
-O motor próprio foi iniciado pela **compilação das regras de roteamento**. `vpn/engine/routing.js` produz a configuração de proxy e o PAC usados no Chromium; o indicador usa o mesmo avaliador de destinos. Sessão, autenticação, servidores, credenciais, escrita nas APIs do navegador e recuperação continuam no adaptador Proton. O serviço de VPN continua sendo o Proton.
+Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, as chamadas HTTP, a obtenção de credenciais temporárias, a seleção de servidores e parte da máquina de estados ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
 
-## Responsabilidades atuais
+## Responsabilidades ativas
 
-| Responsabilidade | Implementação ativa | Contrato para a migração |
+| Parte | Implementação | Garantia / limite |
 | --- | --- | --- |
-| Interface e comandos | `vpn/source/app.js`, `vpn/source/bridge.ts` | Receber somente dados de apresentação; manter canal `super-vpn` e confirmações do worker |
-| Login oficial | `account/openForkTab.ts`, `account/fork/*`, `vpn/handleAccountFork.ts`, ponte `vpn-auth-bridge.js` | Abrir conta oficial; validar origem, estado pendente e resposta; nenhuma senha na interface |
-| Sessão e renovação | `account/readSession.ts`, `saveSession.ts`, `refreshToken.ts` | Preservar UID e rotação de tokens; agrupar renovações; uma resposta antiga não deve restaurar sessão encerrada |
-| Credenciais do proxy | `account/credentials/getConnectionCredentials.ts`, `storedCredentials.ts` | Obter credenciais de curta duração do serviço e renovar; mantê-las fora da interface e dos logs |
-| Plano e servidores | `vpn/assertServerAccess.ts`, `getLogicals.ts`, `pickServerInLogical.ts` | Respeitar autorização, manutenção, disponibilidade e características do servidor |
-| Regras e PAC | **Próprio:** `vpn/engine/routing.js` e `routing.d.ts` | Funções puras, sem armazenamento, rede ou credenciais; preservar os formatos consumidos pelo adaptador |
-| Aplicação do proxy | `tools/proxy.ts` | Continuar usando `chrome.proxy.settings`; confirmar controle efetivo, atualizar autenticação e WebRTC |
-| Autenticação de requisições | `vpn/initAuthInterceptor.ts`, `authHandler.ts`, `state.ts` | Responder somente a desafios de proxy conhecidos; não entregar credenciais a autenticação de sites |
-| Estado e recuperação | `state.ts`, `vpn/initState.ts`, `recoverState.ts`, `initProxySettingsWatcher.ts` | Separar intenção de conexão, proxy realmente aplicado, sessão disponível e erro de rede |
-| Indicador | `vpn-indicator.js` + núcleo próprio | Usar regras efetivas e verificar propriedade do proxy antes de mostrar verde |
+| Regras e PAC | `vpn/engine/routing.js` | Mesmo avaliador para proxy e indicador; inclusão/exclusão, portas e redes locais |
+| Controle do proxy | `vpn/engine/controller.ts` | Uma fila para aplicar/limpar; geração cancela aplicações antigas; confirma propriedade e configuração efetiva |
+| API Chromium | `vpn/engine/chromium.ts` | `settings.get/set/clear` no escopo regular; lê `runtime.lastError` dentro do callback |
+| Ciclo das operações | `vpn/engine/lifecycle.ts` + `state.ts` adaptado | Intenção de conexão invalidada antes dos awaits; resultado antigo não reconecta nem desconecta uma tentativa nova |
+| Recuperação | `vpn/engine/recovery.ts` + `vpn/initState.ts` | Listener síncrono, alarme `superVpn:recovery` a cada 30 s, verificações simultâneas agrupadas |
+| Persistência/rotação | `vpn/engine/session.ts` + `account/sessionStore.ts` | Escritas ordenadas, refresh agrupado, comparação de sessão antes do commit, logout invalida respostas pendentes |
+| Login e transporte Proton | `account/fork/*`, `messaging/forkSession.ts`, `api.ts` | Página oficial e formato do serviço preservados; fork atrasado não salva depois do logout |
+| Credenciais temporárias | `account/credentials/*` adaptado | Resposta de geração/conta anterior é descartada; cache validado por UID |
+| Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
+| WebRTC | Adaptadores `webrtc/*` | Proteção antes do proxy; restauração depois da limpeza; erros da API são observados |
+| Estado, seleção e rede | `state.ts`, `getLogicals.ts`, `pickServerInLogical.ts`, `checkNetwork.ts` | Compatibilidade mantida; ainda precisam ser extraídos integralmente do adaptador |
 
-Os caminhos não iniciados por `vpn/` nesta tabela são relativos a `vendor/proton-source/source/js/`.
+Os caminhos que não começam com `vpn/engine` são relativos a `vendor/proton-source/source/js/`. A interface própria permanece em `vpn/source`.
 
-## Contrato de sessão e armazenamento
+## Ordem das operações
 
-O formato `Session` contém `uid`, `accessToken`, `refreshToken`, estado do fork/selector, indicador de persistência e metadados de renovação. São dados privados do adaptador; o núcleo de regras não os recebe.
+Uma aplicação valida o endpoint, consulta a propriedade do proxy, instala o interceptor de autenticação, aplica a preferência WebRTC e grava o proxy. Depois lê novamente a configuração, exige `controlled_by_this_extension`, compara o endpoint/listas ou o PAC e atualiza o cache de autenticação. Somente então a conexão pode ser marcada como confirmada e emitir a notificação de sucesso.
 
-| Dados | Armazenamento atual | Observação |
+Conectar, trocar regras e desconectar compartilham a mesma fila. Uma desconexão invalida imediatamente operações antigas; se um `settings.set` já estiver em andamento, sua conclusão é aguardada e sua configuração é retirada antes de prosseguir. A fila aguarda callbacks de escrita/limpeza para impedir que uma gravação atrasada reapareça depois da desconexão. Não há timeout que libere a fila enquanto um callback de escrita ainda possa chegar.
+
+Em falhas após preparar a conexão, o controlador tenta retirar apenas a configuração desta extensão. Ele não instala uma configuração global `direct`/`system` nem altera o proxy de outra extensão. O interceptor e a proteção WebRTC são liberados depois da confirmação de que o proxy próprio foi removido. Se a limpeza falhar, a falha é reportada e uma nova desconexão pode tentar novamente.
+
+O endpoint é validado no modo fixo e na geração do PAC. Exclusões usam `fixed_servers`; inclusão usa `pac_script`. O modo fixo não envia a propriedade interna `includeOnly` à API. O indicador e os eventos de estado distinguem intenção de conexão de proxy confirmado; o indicador continua descrevendo política, sem medir pacotes ou certificar externamente o IP.
+
+## Sessão e compatibilidade
+
+| Dados | Chave / área | Compatibilidade |
 | --- | --- | --- |
-| Sessão | `chrome.storage.local`, `superVpn:session` | A adaptação atual define `sessionDataStorageType` como local; os dois auxiliares de sessão apontam para o mesmo item. Revisar esse detalhe antes de substituir a persistência |
-| Credenciais temporárias | local, `superVpn:credentials` | Cache com prazo e renovação; não é a senha digitada na página de login |
-| Servidor em andamento | `chrome.storage.session`, `superVpn:connectedServer` | Sobrevive à suspensão do worker, mas não é garantia de continuidade após reiniciar o navegador |
-| Escolhas/histórico | local, `superVpn:last-choice`, `superVpn:last-choices` | Usados por reconexão e histórico conforme as preferências |
-| Regras | local, `superVpn:split-tunneling` | Listas por modo, estado habilitado e opção de subdomínios |
-| Preferências | local, `superVpn:auto-connect`, `superVpn:secure-core`, entre outras | Manter IDs e valores durante cada migração |
+| Sessão e metadados do fork | `superVpn:session`, local | Mesma chave e formato existentes, sem migração de tokens |
+| Credenciais temporárias | `superVpn:credentials`, local | Cache identificado pelo UID; caches antigos sem UID são renovados |
+| Servidor em andamento | `superVpn:connectedServer`, session | Escritas ordenadas; sobrevive à suspensão do worker, não ao reinício completo do navegador |
+| Escolha/histórico | `superVpn:last-choice`, `superVpn:last-choices`, local | Preferências existentes preservadas |
+| Regras e recursos | `superVpn:split-tunneling`, `superVpn:auto-connect` e demais chaves locais | IDs e valores preservados |
 
-O logout invalida a sessão, esquece credenciais/caches e remove o proxy pelo controlador atual. A futura implementação de sessão deverá preservar a proteção contra respostas de renovação que chegam depois do logout, sem migrar tokens para outro espaço de armazenamento nesta etapa.
+O logout invalida imediatamente a geração da sessão e enfileira sua remoção. Uma troca de conta posterior não pode ser apagada por uma limpeza antiga; uma renovação ou fork antigos não podem restaurar a sessão encerrada. O refresh mantém UID, flags de persistência e metadados do fork. O adaptador continua usando a API oficial `auth/refresh`, sem colocar tokens nos logs ou na interface.
 
-## Núcleo de regras entregue
+A preferência `persistent` é preservada como metadado; o armazenamento já era local na versão anterior e continua assim. Esta entrega não redefine a semântica desse recurso nem transfere dados para outros módulos.
 
-API pública, também descrita em `routing.d.ts`:
+## Inicialização e recuperação
 
-- `createFixedConfig(host, port, split, options)`: devolve `{ mode: 'fixed_servers', rules }`; recebe do adaptador o esquema e as exceções de API/rede local.
-- `createPacScript(config, localExclusions)`: devolve `{ mode: 'pac_script', pacScript: { data } }`; valida o endpoint e serializa dados sem interpolá-los como código executável.
-- `usesVpn(url, policy)`: avalia o endereço para o indicador, sem consultar DNS nem acessar o navegador.
+Com um servidor na sessão, a inicialização pode instalar o endereço de espera `localhost:9` antes de recuperar a conexão. O trabalho de inicialização também possui guarda de geração. A restauração do estado acontece uma vez; foi removida a segunda recuperação baseada em um servidor salvo que poderia sobrepor uma desconexão durante o início.
 
-`tools/proxy.ts` delega as duas primeiras funções ao núcleo próprio. O controlador mantém o modo `fixed_servers` para exclusão e usa PAC para inclusão. O host carrega `vpn/engine/routing.js` antes do indicador; o bundle Proton incorpora o mesmo código na compilação. Não há um segundo controlador escrevendo configurações de proxy em paralelo.
+O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. A recuperação de sessão/credenciais, a rotação de servidor e alguns temporizadores auxiliares ainda são adaptados do Proton. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
 
-Inclusão mantém as exceções técnicas `.protonvpn.net` e `.protonvpn.com`; exclusões de API têm precedência. Domínio exato, subdomínio com prefixo `.`, porta e CIDR IPv4 têm regras explícitas. O PAC preserva o envio direto de nomes locais e faixas locais/reservadas; as exceções implícitas do Chromium para loopback/link-local também são consideradas. Seleção de servidor e controle de plano permanecem no adaptador.
-
-A função de decisão é autocontida para poder ser serializada no PAC. Há teste após Babel e minificação de produção, além do teste da fonte. O indicador não faz resolução DNS: regras CIDR aplicadas a nomes resolvidos pelo PAC podem não ser comprovadas apenas pela URL da aba. O indicador descreve a política, não mede pacotes nem certifica IP.
-
-## Recuperação mapeada
-
-1. A inicialização consulta o servidor salvo na sessão e, se existir, configura temporariamente o endereço de espera `localhost:9` antes de recuperar o estado.
-2. O controlador restaura sessão/usuário, renova credenciais e tenta reaplicar o servidor. Sem servidor salvo, considera a última escolha e a preferência de conexão automática.
-3. Mudanças de regras reaplicam a configuração à conexão ativa. Falhas de rede e verificações periódicas continuam sendo tratadas pelo motor atual.
-4. Perda de controle do proxy por outra extensão/política gera desconexão. O observador começava incorretamente marcado como registrado; em 1.6.5 ele passa a registrar o listener uma vez e permite remover/reinstalar.
-5. Desconexão/logout removem a configuração desta extensão e restauram o controle WebRTC pelo adaptador existente.
-
-Intervalos no worker não garantem execução enquanto ele está suspenso. Retomada do worker e reinício completo do navegador são cenários distintos. Esses fluxos foram mapeados no código; ainda exigem validação real antes da substituição do controlador.
-
-## Próximas partes, em ordem
-
-1. **Controlador próprio de proxy:** serializar conectar, atualizar regras e desconectar; validar endpoint também no modo fixo; confirmar `levelOfControl` e tratar erros de `settings.set/clear`. Reunir WebRTC e autenticação em adaptadores pequenos.
-2. **Estado e recuperação próprios:** distinguir conectado, conectando, desconectado e sessão ausente; invalidar operações atrasadas com um identificador de geração; recuperar com eventos/alarmes adequados à suspensão do worker.
-3. **Sessão própria:** encapsular fork, rotação de tokens, credenciais temporárias e persistência sem duplicar logins nem alterar as permissões da conta.
-4. **Transporte e seleção:** migrar requisições, cache e seleção mantendo autorização e compatibilidade do serviço.
-
-Cada substituição precisa de testes de contrato antes de retirar o caminho anterior e de teste real no Chromium antes de ser considerada validada. Esta etapa não implementa um protocolo VPN nem substitui a infraestrutura do Proton.
-
-## Reconstrução e evidência
+## Reconstrução e testes
 
 ```sh
 npm ci
 npm run setup:vpn
+npm run setup:newtab
+npm run setup:sync
 npm run build:vpn
 npm test
+npm run check:ui
+node vendor/proton-source/node_modules/typescript/bin/tsc --noEmit -p vendor/proton-source/tsconfig.json
 node vendor/proton-source/node_modules/typescript/bin/tsc --noEmit -p vpn/tsconfig.interface.json
 ```
 
-A compilação completa inclui o núcleo próprio no worker e preserva `vpn/engine`. Os arquivos compilados são versionados. Fontes e avisos GPL permanecem em `vendor/proton-source` e `vpn/LICENSE`.
+Os bundles compilados ficam versionados em `vpn/js`. A compilação preserva `vpn/engine`, a interface e os avisos GPL em `vendor/proton-source` e `vpn/LICENSE`.
 
-Os testes cobrem contratos de regras, precedência, inclusão vazia, CIDR, portas, origem técnica, geração segura de PAC, isolamento sem APIs do navegador, execução após minificação, delegação do adaptador, cores do indicador e registro do observador de controle. Eles usam simulação: login, IP, tráfego real e recuperação nativa continuam pendentes em [validacao.md](validacao.md).
+Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada por outra extensão, callbacks de erro, troca rápida, desconexão com escrita em andamento, credenciais tardias, estado real do adaptador, notificações após confirmação, desafios de autenticação e sessão/fork depois do logout. As demais suítes continuam cobrindo PAC minificado, permissões, autorização de plano, interface e indicador. São testes com APIs/transportes simulados; login real, IP, tráfego, WebRTC e recuperação nativa seguem pendentes em [validacao.md](validacao.md).
+
+## Trabalho restante
+
+1. Validar os novos fluxos com conta de teste no Chromium/Helium: login, IP, regras, erro de rede, logout durante conexão e retomada do worker.
+2. Extrair integralmente a máquina de estados e a recuperação de credenciais do adaptador, preservando os contratos agora testados.
+3. Migrar transporte, cache e seleção de servidores; manter a autorização do plano e a compatibilidade com o serviço.
+4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.

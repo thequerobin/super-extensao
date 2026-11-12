@@ -15,7 +15,10 @@ const keepCredentialsReady = () =>
 		return undefined; // not BlockingResponse
 	});
 
+let listenerGeneration = 0;
+
 export const clearAuthInterceptor = () => {
+	listenerGeneration++;
 	const webRequest = (browser as any as typeof chrome).webRequest;
 
 	if (!webRequest) {
@@ -62,9 +65,14 @@ export const initAuthInterceptor = () => {
 
 	initAuthInterceptorListeners(webRequest);
 
-	hasRefreshToken().then((valid) => {
-		if (!valid) {
-			clearAuthInterceptor();
-		}
-	});
+	const generation = listenerGeneration;
+	hasRefreshToken()
+		.then((valid) => {
+			if (!valid && generation === listenerGeneration) {
+				clearAuthInterceptor();
+			}
+		})
+		.catch(() => {
+			if (generation === listenerGeneration) clearAuthInterceptor();
+		});
 };

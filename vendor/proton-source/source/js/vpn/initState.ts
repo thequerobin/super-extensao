@@ -1,55 +1,33 @@
-import {connectedServer} from './connectedServer';
-import {
-	getCurrentState,
-	isCurrentStateConnected,
-	isLoggedIn,
-	waitForReadyState,
-} from '../state';
-import {milliSeconds} from '../tools/milliSeconds';
-import {debug as debug_, bind} from '../log/log';
-import {broadcastMessage} from '../tools/broadcastMessage';
-import type {ApiError} from '../api';
+import {getCurrentState, waitForReadyState} from '../state';
 import {updateLocation} from './updateLocation';
 import {updateLogicalLoad} from './updateLogicalLoad';
-import {recoverState} from './recoverState';
-import {watchWithSentry} from '../tools/sentry';
-import {clearProxy} from '../tools/proxy';
+import {handleError} from '../tools/sentry';
+import {RecoveryLoop} from '../../../../../vpn/engine/recovery';
 
-const debug = bind(debug_, '[initState]');
+const recoveryAlarm = 'superVpn:recovery';
+const recovery = new RecoveryLoop({
+	listen(wake) {
+		chrome.alarms.onAlarm.addListener((alarm) => {
+			if (alarm.name === recoveryAlarm) wake();
+		});
+	},
+	arm: async () => {
+		await chrome.alarms.create(recoveryAlarm, {periodInMinutes: 0.5});
+	},
+	async recover() {
+		await waitForReadyState();
+		await getCurrentState().refreshState?.();
+	},
+	failed: (error) => handleError(error),
+});
+// Register synchronously each time the service worker starts, before async boot.
+export const initStateRecovery = () => recovery.start();
 
 export const initState = async () => {
-	debug('Init state', new Error().stack);
-
+	// getCurrentState performs the one-time restore. A second recovery based on a
+	// saved server could otherwise override a disconnect issued during startup.
 	await waitForReadyState();
-	const server = (await connectedServer.get())?.value;
-	debug(server);
-
-	if (!(server ? isCurrentStateConnected() : isLoggedIn())) {
-		debug(server ? 'Not connected' : 'Not logged in');
-
-		try {
-			await recoverState(server);
-		} catch (e) {
-			broadcastMessage('changeState', {
-				state: 'disconnected',
-				server: undefined,
-				error: e as ApiError,
-			});
-		}
-	}
-
-	if (!isCurrentStateConnected()) {
-		await clearProxy();
-	}
-
-	setInterval(
-		() =>
-			watchWithSentry(() => {
-				getCurrentState().refreshState?.();
-			}),
-		milliSeconds.fromSeconds(1),
-	);
-
+	await recovery.wake();
 	updateLocation();
 	updateLogicalLoad();
 };

@@ -24,7 +24,11 @@ export const checkNetwork = (error: any, rethrow = false): void => {
 			const server = currentState.data.server;
 
 			broadcastMessage('changeState', {
-				state: server ? 'connected' : 'disconnected',
+				state: currentState.proxyEnabled
+					? 'connected'
+					: server
+						? 'connecting'
+						: 'disconnected',
 				server,
 				error: currentState.data.error,
 			});

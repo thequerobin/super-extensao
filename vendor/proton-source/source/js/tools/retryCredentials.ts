@@ -9,6 +9,8 @@ let lastRetry = 0;
 let lastTimeout: NodeJS.Timeout | undefined = undefined;
 
 export const retryCredentials = (disconnectOnFailure = false) => {
+	const state = getCurrentState();
+	if (state.name !== 'on') return;
 	if (lastTimeout) {
 		return;
 	}
@@ -23,10 +25,12 @@ export const retryCredentials = (disconnectOnFailure = false) => {
 				return;
 			}
 
+			if (state !== getCurrentState()) return;
 			checkingCredentials = true;
 
 			try {
 				const credentials = await getCredentials();
+				if (state !== getCurrentState()) return;
 
 				if (!credentials) {
 					throw new Error(
@@ -37,7 +41,7 @@ export const retryCredentials = (disconnectOnFailure = false) => {
 
 				await getCurrentState()?.connectCurrentServer?.();
 			} catch (e) {
-				if (disconnectOnFailure) {
+				if (disconnectOnFailure && state === getCurrentState()) {
 					disconnect(e as Error | ApiError);
 				}
 			} finally {

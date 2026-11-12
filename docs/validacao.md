@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 11 de novembro de 2026, referência **1.6.11**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.0**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Motor VPN 1.7.0
+
+A suíte completa passou **174 testes**, incluindo 20 novos contratos da VPN. A compilação de produção, as checagens TypeScript do worker/interface e `check:ui` passaram. Os novos contratos exercitam o controlador próprio, gerações, recuperação por alarmes e persistência/rotação de tokens. Incluem cancelamento enquanto credenciais ou `settings.set` estão pendentes, troca rápida de servidor, erro de `set/get/clear`, perda de controle, rollback, notificações somente após confirmação, desafios de host/porta incorretos e refresh/fork concluídos após logout. Há testes que executam o `state.ts` e o interceptor reais com portas simuladas. Não foi acessada uma conta Proton nem medido tráfego/IP nesta rodada. O restante da máquina de estados e do transporte continua no adaptador.
 
 ## Alinhamento e opacidade 1.6.11
 
@@ -52,11 +56,12 @@ Node.js 20 ou superior, na raiz:
 npm ci
 npm run setup:vpn
 npm run setup:newtab
+npm run setup:sync
 npm test
 npm run check:ui
 ```
 
-A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. As dependências Tabliss são necessárias aos testes React das imagens da Nova guia. Para reconstruir a sincronização, execute também `npm run setup:sync`, seguido de `npm run build:sync-engine` (worker) e `npm run build:sync` (interface).
+A instalação das dependências Proton é necessária ao teste CSS que usa PostCSS. As dependências Tabliss são necessárias aos testes React das imagens da Nova guia; as dependências Floccus são necessárias aos contratos Vue. Para reconstruir a sincronização, execute também `npm run setup:sync`, seguido de `npm run build:sync-engine` (worker) e `npm run build:sync` (interface).
 
 Ao alterar o motor Proton, execute `npm run build:vpn`. Para alterar somente sua interface, use `npm run build:vpn-ui`. Esses comandos exigem `setup:vpn`. Recompilações da Sincronização usam `setup:sync` e `setup:vpn`, pois também geram os estilos dos painéis.
 

@@ -8,7 +8,9 @@ export const preventLeak = async (protectionEnabled?: boolean) => {
 			? protectionEnabled
 			: (await (await PreventWebrtcLeak.create()).getConfig()).value;
 
-	await (protectedAgainstWebRtcLeak
+	const applied = await (protectedAgainstWebRtcLeak
 		? setWebRTCState(WebRTCState.DISABLED)
 		: setWebRTCState(WebRTCState.CLEAR));
+	if (protectedAgainstWebRtcLeak && !applied)
+		throw new Error('VpnWebRTCProtectionUnavailable');
 };

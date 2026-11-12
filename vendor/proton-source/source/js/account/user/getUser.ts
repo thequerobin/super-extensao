@@ -24,7 +24,10 @@ import {BackgroundData} from '../../messaging/MessageType';
 let tries: number[] = [];
 
 const fetchUser = async (): Promise<User | UserResult | undefined> => {
+	const session = await readSession();
 	const user = await fetchJson<User | UserResult | undefined>('vpn/v2');
+	if (!session.uid || session.uid !== (await readSession()).uid)
+		return undefined;
 
 	if (user) {
 		if (!isLoggedIn()) {

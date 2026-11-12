@@ -1,69 +1,62 @@
 import {milliSeconds} from '../tools/milliSeconds';
 import {requestMaxAge} from '../config';
-import {getAuthCredentials, isProxyKnownHost} from '../state';
+import {
+	getAuthCredentials,
+	getCurrentStateIfDefined,
+	isProxyKnownHost,
+} from '../state';
 import {isPending} from '../tools/proxyAuth';
-import {watchPromiseWithSentry, watchWithSentry} from '../tools/sentry';
 import {getCredentials} from '../account/credentials/getConnectionCredentials';
-import {bind, info as info_} from '../log/log';
-import {triggerPromise} from '../tools/triggerPromise';
 import BlockingResponse = chrome.webRequest.BlockingResponse;
 import OnAuthRequiredDetails = chrome.webRequest.OnAuthRequiredDetails;
 
-const info = bind(info_, '[authHandler]');
-
-const handleProxyAuthentication = async (
-	requestDetails: OnAuthRequiredDetails,
-): Promise<BlockingResponse> =>
-	watchPromiseWithSentry(async () => {
-		if (requestDetails.isProxy) {
-			if (isPending(requestDetails)) {
-				return {cancel: true};
-			}
-
-			if (isProxyKnownHost(requestDetails.challenger.host)) {
-				info('Auth required for ', requestDetails);
-				const credentials = await getCredentials();
-
-				return (
-					(credentials && getAuthCredentials(credentials, requestDetails)) || {
-						cancel: true,
-					}
-				);
-			}
-		}
-
-		return {};
-	});
-
 export const authHandler = (
-	requestDetails: OnAuthRequiredDetails,
+	request: OnAuthRequiredDetails,
 	callback?: (response: BlockingResponse) => void,
-) =>
-	watchWithSentry(() => {
-		if (!callback) {
-			throw new Error('asyncBlocking not supported');
-		}
-
-		const timeout = setTimeout(
-			() =>
-				watchWithSentry(() => {
-					callback({cancel: true});
-				}),
-			milliSeconds.fromSeconds(Math.min(20, requestMaxAge)),
-		);
-
-		triggerPromise(
-			handleProxyAuthentication(requestDetails).then((authentication) => {
-				clearTimeout(timeout);
-				callback(
-					authentication ||
-						(requestDetails.isProxy &&
-						isProxyKnownHost(requestDetails.challenger.host)
-							? {cancel: true}
-							: {}),
-				);
-			}),
-		);
-
-		return undefined; // not BlockingResponse
-	});
+): undefined => {
+	if (!callback) return undefined;
+	let completed = false;
+	const finish = (response: BlockingResponse) => {
+		if (completed) return;
+		completed = true;
+		clearTimeout(timeout);
+		callback(response);
+	};
+	const timeout = setTimeout(
+		() => finish({cancel: true}),
+		milliSeconds.fromSeconds(Math.min(20, requestMaxAge)),
+	);
+	const state = getCurrentStateIfDefined();
+	// Site authentication and a different proxy must never receive VPN credentials.
+	if (
+		!request.isProxy ||
+		!isProxyKnownHost(request.challenger.host) ||
+		request.challenger.port !== state?.data.server?.proxyPort
+	) {
+		finish({});
+		return undefined;
+	}
+	if (isPending(request)) {
+		finish({cancel: true});
+		return undefined;
+	}
+	void getCredentials().then(
+		(credentials) => {
+			if (completed) return;
+			if (
+				state !== getCurrentStateIfDefined() ||
+				!isProxyKnownHost(request.challenger.host)
+			) {
+				finish({cancel: true});
+				return;
+			}
+			finish(
+				(credentials && getAuthCredentials(credentials, request)) || {
+					cancel: true,
+				},
+			);
+		},
+		() => finish({cancel: true}),
+	);
+	return undefined;
+};

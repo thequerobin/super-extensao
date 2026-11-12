@@ -15,10 +15,13 @@ const userRequestsGroup = new GroupResponder<PmUser | undefined>();
 
 export const fetchPmUser = (): Promise<PmUser | undefined> =>
 	userRequestsGroup.handle(async () => {
+		const session = await readSession();
 		const user = await fetchJson<PmUser | PmUserResult | undefined>(
 			'core/v4/users?Locale=1',
 		);
 
+		if (!session.uid || session.uid !== (await readSession()).uid)
+			return undefined;
 		if (user) {
 			if (!isLoggedIn()) {
 				logIn();
