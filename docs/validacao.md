@@ -2,6 +2,10 @@
 
 Revisado em 12 de novembro de 2026, referência **1.7.17**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
+## Próxima execução no PC do usuário — pendente
+
+O usuário pediu para documentar a validação com tráfego real e informou que solicitará a execução quando estiver em casa. O [roteiro de retomada](vpn-validacao-pc.md) registra preparação, ordem dos testes, critérios e tabela de evidências ainda não preenchida. Abrange IP/DNS/WebRTC, queda/bloqueio/aviso, troca de servidor, suspensão/reinício e reconexão/liberação explícita. Nenhum teste real novo foi executado nesta atualização documental.
+
 ## Dependências da VPN 1.7.17
 
 O usuário informou que validou a navegação da 1.7.16. Nesta etapa foram atualizadas dependências compatíveis, removidos `decompress` e `archiver`, substituído o reempacotamento por ZIP em memória e corrigida a resolução AJV do Webpack. Instalação limpa (`npm ci --ignore-scripts --legacy-peer-deps`), build de produção, TypeScript do worker/interface, UI e whitespace passaram.

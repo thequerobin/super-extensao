@@ -149,3 +149,7 @@ Na 1.7.8, o cache do indicador inclui a geração da conexão e é invalidado po
 3. Concluído na 1.7.17: atualização compatível, revisão de licenças declaradas, instalação limpa e substituição do empacotador vulnerável. Restam 31 alertas baixos/moderados de ferramentas e migrações principais, detalhados em [vpn-dependencias.md](docs/vpn-dependencias.md).
 
 Os testes nativos de tráfego, IP/DNS, reinício e falhas reais precisam ser executados quando houver ambiente disponível. Nenhuma certificação de privacidade é declarada por testes simulados.
+
+
+4. **Próxima execução: validação real no PC do usuário**, a retomar quando ele pedir em casa. Seguir [vpn-validacao-pc.md](docs/vpn-validacao-pc.md): runner isolado, IP/DNS/WebRTC, queda e avisos, troca/suspensão/reinício, reconexão/liberação explícita e regras por site. Registrar ambiente, commit, resultado e evidência; nenhum desses testes está marcado como executado por este registro.
+5. Depois da validação e das correções necessárias, tratar os alertas baixos/moderados das ferramentas por grupos.

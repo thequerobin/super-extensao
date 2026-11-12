@@ -2,6 +2,10 @@
 
 Revisão de código em 12 de novembro de 2026. **Não certificada como “100%” ou livre de vazamentos.** Foram corrigidos riscos no código e preparados testes nativos; a execução com Chromium real foi impedida pelo ambiente. Este documento distingue implementação, simulação e evidência real.
 
+## Retomada planejada após a 1.7.17
+
+O [roteiro de execução no PC do usuário](vpn-validacao-pc.md) é a próxima etapa, pendente até ele solicitar a execução em casa. Esta auditoria preserva os achados e a evidência histórica da 1.7.13; as atualizações posteriores estão em [validacao.md](validacao.md). A validação real deve usar o commit instalado na retomada. Na implementação atual, a permissão de sessão tem prioridade 10003, há redirecionamento de navegação 880004 com prioridade 10002, e a cobertura de `main_frame` é explícita desde a 1.7.16.
+
 ## Resultado
 
 A extensão é um proxy do navegador, não uma VPN do sistema nem um firewall. A garantia exigida de nunca deixar passar tráfego, inclusive durante disputa de configurações, encerramento de sockets, desativação da extensão e falha do próprio navegador, precisa de controle no sistema operacional. Para esse requisito, use uma VPN do sistema com kill switch/firewall e valide o conjunto com captura de pacotes.
