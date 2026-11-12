@@ -1,6 +1,6 @@
-# Motor da VPN — estado e recuperação próprios, 1.7.4
+# Motor da VPN — núcleo próprio, 1.7.11
 
-Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, os cabeçalhos/contratos do serviço, a seleção/rotação de servidores e a proteção WebRTC ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
+Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, os cabeçalhos/contratos do serviço e a proteção WebRTC ainda usam adaptadores do código Proton. Catálogo, seleção e failover são próprios; formatos/endpoints do catálogo e status ficam em adaptadores. Esta entrega não conclui a independência de todo o motor.
 
 ## Responsabilidades ativas
 
@@ -17,7 +17,7 @@ Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gra
 | Credenciais temporárias | `vpn/engine/credentials.ts` + `credential-data.ts` | Cache e pedidos agrupados por UID/geração, validade, renovação e cancelamento próprios; adaptador fornece o endpoint |
 | Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
 | WebRTC | Adaptadores `webrtc/*` | Proteção antes do proxy; restauração depois da limpeza; erros da API são observados |
-| Protocolo e seleção | `state.ts` como fachada, `getLogicals.ts`, `pickServerInLogical.ts` | Autenticação, seleção/rotação e preferências de auto-conexão fornecidas ao núcleo por portas |
+| Catálogo e seleção | `vpn/engine/catalog.ts` + `selection.ts`, `vpn/serverCatalog.ts` como adaptador | Cache com identidade de conta, TTL, refresh agrupado, ranking estável e escolha manual/automática próprios; endpoints v1/v2 e decodificação de status preservados no adaptador |
 
 Os caminhos que não começam com `vpn/engine` são relativos a `vendor/proton-source/source/js/`. A interface própria permanece em `vpn/source`.
 
@@ -49,7 +49,7 @@ A preferência `persistent` é preservada como metadado; o armazenamento já era
 
 Com um servidor na sessão, a inicialização pode instalar o endereço de espera `localhost:9` antes de recuperar a conexão. O trabalho de inicialização também possui guarda de geração. A restauração do estado acontece uma vez; foi removida a segunda recuperação baseada em um servidor salvo que poderia sobrepor uma desconexão durante o início.
 
-O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. A seleção/rotação de servidor e a atualização de caches de localização/carga ainda usam adaptadores Proton. Obtenção/cache/renovação de credenciais são coordenados pelo núcleo próprio desde a 1.7.9, com a chamada HTTP mantida no adaptador. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
+O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. Catálogo e seleção usam políticas próprias desde a 1.7.11; localização, endpoints de catálogo e decodificação/cache binário de carga permanecem no adaptador Proton. Obtenção/cache/renovação de credenciais são coordenados pelo núcleo próprio desde a 1.7.9, com a chamada HTTP mantida no adaptador. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
 
 ## Máquina de estados própria — 1.7.4
 
@@ -91,8 +91,7 @@ Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada p
 ## Trabalho restante
 
 1. Validar os novos fluxos com conta de teste no Chromium/Helium: login, IP, regras, erro de rede, logout durante conexão e retomada do worker.
-2. Extrair a consulta/cache/seleção de servidores, preservando os contratos de autenticação e autorização.
-3. Migrar WebRTC e protocolo de login; manter a autorização do plano e a compatibilidade com o serviço.
+2. Migrar WebRTC e protocolo de login; manter a autorização do plano e a compatibilidade com o serviço.
 4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
 
 ## Indicador após trocar de servidor — 1.7.8
@@ -125,3 +124,15 @@ Os 27 testes de `tests/vpn-credentials.test.cjs` cobrem concorrência, cache leg
 - O cliente aceita somente HTTPS na origem configurada da API e usa redirect:error. Não encaminha automaticamente autorização para outra origem. Erros novos são normalizados antes de chegar aos chamadores; o bloqueio de atualização Code 5003 continua na fachada de compatibilidade.
 
 Os 29 contratos de `tests/vpn-http.test.cjs` cobrem o núcleo e os adaptadores reais com transporte/armazenamento simulados. Incluem retry seguro e limitado, refresh concorrente, cancelamento isolado, resultados de conta antiga, cooldown entre instâncias, erros 429/503, binário, 304, upgrade, bloqueador HTML e restrições de origem. O contrato adicional de credenciais cobre o orçamento de auth já consumido pelo transporte.
+
+## Catálogo e seleção próprios — 1.7.11
+
+`vpn/engine/catalog.ts` coordena cache durável, validade, atualização bloqueante ou em segundo plano e agrupamento de requisições concorrentes. Usa as chaves existentes; o campo `owner` identifica UID, plano e grupos, sem copiar tokens. Caches antigos sem identificação são refeitos. Contas diferentes, logout, descarte e alteração do plano invalidam respostas em andamento. Escritas e remoções passam por uma fila; lookups são inseridos por ID com uma guarda capturada antes da rede, sem duplicar registros ou rejuvenescer todo o catálogo.
+
+As respostas 304 preservam `Last-Modified` textual, `StatusID` e o horário da carga. Falhas transitórias podem reutilizar dados até o TTL bloqueante mais 24 horas; esse fallback não renova o horário. Erros de autenticação/upgrade não usam esse fallback. A atualização da carga aguarda persistência e grava `lastLoadUpdate` no objeto salvo; sua validade usa a diferença entre relógio e timestamp. Os adaptadores preservam endpoints v1/v2, IncludeID, cabeçalhos e status binários. A API do serviço continua autorizando a conta e o plano.
+
+`vpn/engine/selection.ts` implementa ranking por distância/capacidade/país, ordenação natural, filtro por escolha, sorteio de candidatos elegíveis, escolha de endpoint e alternativas. O ranking remove a variação aleatória e desempata por ID. Escolhas automáticas exigem saúde, tier e `AutoConnectable`. A recuperação de um ID manual dispensa `AutoConnectable`, mas mantém saúde e tier, e nunca substitui silenciosamente esse ID. Probes de uma escolha manual não fazem rotação; falhas/reinícios continuam restaurando o proxy salvo conforme a máquina de estados. Se o servidor manual estiver em manutenção, o usuário escolhe outro. Reabrir um recente manual preserva essa intenção, sem convertê-lo para modo mais rápido.
+
+A seleção física prioriza endpoints ativos, pode tentar status desconhecido no adaptador compatível e não recorre a endpoints confirmadamente indisponíveis. O failover automático conserva o tier e Secure Core, prioriza o mesmo país/recursos e só relaxa o país se necessário. A consulta de saúde e as guardas de geração existentes continuam impedindo trocas por metadados incompletos ou respostas atrasadas.
+
+`tests/vpn-catalog.test.cjs` cobre 28 contratos do núcleo, endpoints v1/v2 e adaptadores reais de estado com APIs simuladas; o teste da interface também cobre recente manual. Não foram medidos latência, IP ou tráfego real nesta rodada.

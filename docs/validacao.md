@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.10**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.11**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Catálogo e seleção próprios 1.7.11
+
+A suíte completa passou **307 testes**: 28 novos contratos de catálogo/seleção e ampliação do contrato de recente manual. Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. A suíte executa o núcleo e os adaptadores v1/v2/estado reais com rede e armazenamento simulados: cache por conta/plano, requisições concorrentes, 304, falhas transitórias, logout durante busca/escrita, descarte de respostas antigas, inserção por ID, persistência de carga, ranking estável, disponibilidade, tier, failover e restauração de uma escolha manual não automática.
+
+O usuário confirmou funcionamento da 1.7.10 antes de autorizar esta etapa. A conexão Proton real, manutenção de um servidor manual, failover automático e reinício do navegador ainda precisam ser conferidos na 1.7.11. Não foi realizado login real nem medido IP/tráfego nesta rodada.
 
 ## Transporte HTTP próprio 1.7.10
 

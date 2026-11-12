@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.10**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.11**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -9,7 +9,7 @@ Revisado em **12 de novembro de 2026**, referência **1.7.10**. Itens implementa
 | 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
 | 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; interface conferida parcialmente no Helium isolado | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
-| 4 | Motor próprio da VPN | 1.7.10: transporte HTTP próprio, além de credenciais, estado, recuperação, controlador e sessão | Validar chamadas reais; extrair seleção, WebRTC e login |
+| 4 | Motor próprio da VPN | 1.7.11: catálogo/seleção próprios, além de HTTP, credenciais, estado, recuperação, controlador e sessão | Validar chamadas reais; extrair WebRTC e login |
 | Contínua | Interface e manutenção | Catálogo e adaptadores compartilhados entregues em 1.6.8; 154 testes aprovados; fontes das páginas estáticas e estilos validados centralizados | Ampliar a conferência visual de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização
@@ -91,7 +91,8 @@ Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine
 - [x] Coordenar retries, atividade e verificações de saúde por despertares; impedir retomada de intenção antiga ao voltar do modo ocioso (1.7.4).
 - [x] Extrair obtenção, cache, expiração, renovação e descarte de credenciais temporárias para módulos próprios (1.7.9).
 - [x] Extrair transporte HTTP: prazo/cancelamento, JSON/binário, erros, Retry-After e repetição de leituras após refresh (1.7.10).
-- [ ] Separar seleção de servidores, proteção WebRTC e protocolo de login em módulos próprios.
+- [x] Extrair catálogo, cache, ranking, seleção manual/automática e failover para módulos próprios; preservar escolha manual na recuperação (1.7.11).
+- [ ] Separar proteção WebRTC e protocolo de login em módulos próprios.
 - [x] Criar testes de contrato para a primeira substituição, incluindo PAC após Babel/minificação.
 - [x] Estender contratos para o controlador, gerações, alarmes e persistência/rotação de tokens (1.7.0).
 - [x] Manter a chave/formato de sessão ao substituir persistência e renovação; invalidar fork/refresh após logout (1.7.0).
@@ -99,7 +100,7 @@ Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine
 - [ ] Validar em conta real a persistência e a recuperação depois dessas substituições.
 - [ ] Preservar a autorização do serviço e os avisos/licenças dos componentes ainda utilizados.
 
-A reescrita continua parcial: regras/PAC, controlador de proxy, máquina de estados, restauração, recuperação, gerações, alarmes, credenciais temporárias, transporte HTTP e persistência/rotação de tokens são próprios. O protocolo de login, a proteção WebRTC e a seleção/rotação de servidores ainda usam adaptadores Proton. O indicador descreve o roteamento do endereço da aba; não é medição de pacotes nem prova externa do IP.
+A reescrita continua parcial: regras/PAC, controlador de proxy, máquina de estados, restauração, recuperação, gerações, alarmes, credenciais temporárias, transporte HTTP, catálogo/seleção de servidores e persistência/rotação de tokens são próprios. O protocolo de login e a proteção WebRTC ainda usam adaptadores Proton; formatos/endpoints de catálogo e status permanecem na camada de compatibilidade. O indicador descreve o roteamento do endereço da aba; não é medição de pacotes nem prova externa do IP.
 
 ## 3. Interface e configurações gerais
 

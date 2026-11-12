@@ -55,8 +55,8 @@ import type { ProxyAuthentication } from "./vpn/ProxyAuthentication";
 import type { Logical } from "./vpn/Logical";
 import {
 	forgetLogicals,
-	getLogicalById,
 	getSortedLogicals,
+	isLogicalUp,
 	shouldStayOnLogical,
 } from "./vpn/getLogicals";
 import { c } from "./tools/translate";
@@ -69,16 +69,15 @@ import { getAlternativeServer } from "./vpn/getAlternatives";
 import { triggerPromise } from "./tools/triggerPromise";
 import { readSession } from "./account/readSession";
 import { sessionStore } from "./account/sessionStore";
-import {
-	forgetLastChoice,
-	getLastChoice,
-	getLogicalsFilteredByChoice,
-} from "./vpn/lastChoice";
+import { forgetLastChoice, getLastChoice } from "./vpn/lastChoice";
 import { getUser } from "./account/user/getUser";
 import { getUserMaxTier } from "./account/user/getUserMaxTier";
 import { forgetUser } from "./account/user/forgetUser";
 import { notifyStateChange } from "./tools/notifyStateChange";
-import { requireBestLogical } from "./vpn/getLogical";
+import {
+	restoreChoice,
+	permitsAutomaticSwitch,
+} from "../../../../vpn/engine/selection";
 import { getErrorAsString } from "./tools/getErrorMessage";
 import { connectedServer } from "./vpn/connectedServer";
 import type { Server } from "./vpn/Server";
@@ -242,12 +241,10 @@ async function probeServer(
 ): Promise<void> {
 	const { country, coordinates } = await getCountryAndCoordinates();
 	if (!current()) return;
-	const stay = await shouldStayOnLogical(
-		server.id,
-		country,
-		coordinates,
-	);
+	const stay = await shouldStayOnLogical(server.id, country, coordinates);
 	if (!current() || stay) return;
+	const choice = await getLastChoice();
+	if (!current() || !permitsAutomaticSwitch(choice)) return;
 	const credentials = await getCredentials(true);
 	if (!current() || !credentials) return;
 	const alternative = await getAlternativeServer(server.id, {
@@ -533,23 +530,13 @@ export async function checkAutoConnect(): Promise<void> {
 
 		const userTier = getUserMaxTier(user);
 		const userContext = { country, location: coordinates, tier: userTier };
-		const filteredList = getLogicalsFilteredByChoice(
-			logicals
-				.filter(getSecureCorePredicate(userTier, secureCore))
-				.filter((logical) => userTier >= logical.Tier),
+		const logical = restoreChoice(
+			logicals.filter(getSecureCorePredicate(userTier, secureCore)),
 			initialChoice,
-			(id) => {
-				const logical = getLogicalById(id);
-
-				return logical ? [logical] : [];
-			},
+			userContext.tier,
+			(item) => isLogicalUp(item, country, coordinates),
 		);
-
-		if (filteredList[0]) {
-			const logical =
-				(initialChoice.pick === "random"
-					? filteredList[Math.floor(Math.random() * filteredList.length)]
-					: requireBestLogical(filteredList, userContext)) || filteredList[0];
+		if (logical) {
 			const server = pickServerInLogical(logical);
 
 			if (server?.Domain) {

@@ -1,36 +1,28 @@
-import {isNotFoundError} from '../api';
-import {fetchWithUserInfo} from '../account/fetchWithUserInfo';
-import {getCountryAndCoordinates} from '../account/getLocation';
-import {warn} from '../log/log';
-import {triggerPromise} from '../tools/triggerPromise';
-import type {Coordinates} from '../tools/Coordinates';
-import type {Logical} from './Logical';
-import {logicalServers} from './logicalServers';
+import { isNotFoundError } from "../api";
+import { fetchWithUserInfo } from "../account/fetchWithUserInfo";
+import { getCountryAndCoordinates } from "../account/getLocation";
+import { warn } from "../log/log";
+import { triggerPromise } from "../tools/triggerPromise";
+import type { Coordinates } from "../tools/Coordinates";
+import type { Logical } from "./Logical";
+import { serverCatalog } from "./serverCatalog";
+import type { CatalogLease } from "../../../../../vpn/engine/catalog";
 import {
 	getSortedLogicals,
 	isLogicalUp,
 	lookups,
 	lookupsNotFound,
 	recordLogicalInMap,
-} from './getLogicals';
-import {Feature} from './Feature';
-import {getLatestCachedStatuses} from './getLatestCachedStatuses';
-import {calculateLogicalScoreAndUpStatus} from './calculateLogicalScoreAndUpStatus';
-import {useLogicalsV2} from './useLogicalsV2';
+} from "./getLogicals";
+import { Feature } from "./Feature";
+import { getLatestCachedStatuses } from "./getLatestCachedStatuses";
+import { calculateLogicalScoreAndUpStatus } from "./calculateLogicalScoreAndUpStatus";
+import { useLogicalsV2 } from "./useLogicalsV2";
 
 /**
  * Too much IDs stored would lead to longer loading and slower UI, so we cap it.
  */
 const maxLookupIdsStored = 1_000;
-
-/**
- * Should not happen because we called getSortedLogicals() before that builds the cache
- * But in rare case, storage permission can have been revoked, or it could be full
- * In such case we just skip.
- */
-const warnMissingCache = () => {
-	warn('Missing cache');
-};
 
 const recordOnLookupStorage = (
 	store: typeof lookupsNotFound | typeof lookups,
@@ -68,28 +60,15 @@ const recordOnLookupStorage = (
 	);
 };
 
-const pushLogicalToCache = (
+const pushLogicalToCache = async (
 	logical: Logical,
 	country: string,
 	coordinates: Partial<Coordinates>,
-): void => {
+	lease: CatalogLease,
+): Promise<void> => {
 	isLogicalUp(logical, country, coordinates); // Set _up status
+	await serverCatalog.remember(logical, (item) => String(item.ID), lease);
 	recordLogicalInMap(logical);
-
-	// Update cache asynchronously
-	triggerPromise(
-		logicalServers.transaction((cache) => {
-			if (!cache) {
-				warnMissingCache();
-
-				return cache;
-			}
-
-			cache.value.push(logical);
-
-			return cache;
-		}),
-	);
 	recordOnLookupStorage(lookups, `${logical.ID}`);
 };
 
@@ -101,16 +80,17 @@ const fetchLogicalLookup = async (name: string, init?: RequestInit) => {
 		return undefined;
 	}
 
+	const lease = await serverCatalog.capture();
 	try {
-		const {LogicalServer: logical} = await fetchWithUserInfo<{
-			LogicalServer: Logical & {Status?: number};
+		const { LogicalServer: logical } = await fetchWithUserInfo<{
+			LogicalServer: Logical & { Status?: number };
 		}>(`vpn/v1/logicals/lookup/${encodeURIComponent(name)}`, init);
 
 		if (!logical) {
 			return undefined;
 		}
 
-		const {country, coordinates} = await getCountryAndCoordinates();
+		const { country, coordinates } = await getCountryAndCoordinates();
 
 		if (await useLogicalsV2()) {
 			const enabled = Boolean(logical.Status);
@@ -124,7 +104,7 @@ const fetchLogicalLookup = async (name: string, init?: RequestInit) => {
 			});
 			const index = logical.StatusReference.Index;
 
-			if (typeof index === 'number') {
+			if (typeof index === "number") {
 				const loads = await getLatestCachedStatuses();
 
 				if (loads[index]) {
@@ -137,7 +117,7 @@ const fetchLogicalLookup = async (name: string, init?: RequestInit) => {
 			}
 		}
 
-		pushLogicalToCache(logical, country, coordinates);
+		await pushLogicalToCache(logical, country, coordinates, lease);
 
 		return logical;
 	} catch (error) {

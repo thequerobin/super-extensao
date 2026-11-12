@@ -164,8 +164,9 @@ export function createEngine(initialConnection?: () => Promise<any>) {
           features.secureCore.config,
         ),
       );
-      const logical = id
-        ? logicals.find((item) => String(item.ID) === id)
+      const manualId = id || (choice?.logicalId !== undefined && !choice.pick ? String(choice.logicalId) : undefined);
+      const logical = manualId
+        ? logicals.find((item) => String(item.ID) === manualId)
         : pick === "random"
           ? requireRandomLogical(candidates, context)
           : requireBestLogical(candidates, context);
@@ -192,7 +193,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
         requiredFeatures: logical.Features & 1,
         excludedFeatures: logical.Features & 1 ? 0 : 1,
         tier: logical.Tier,
-        ...(!id ? { pick } : {}),
+        ...(!manualId ? { pick } : {}),
       });
     },
     async connectRecent(choice: Choice) {

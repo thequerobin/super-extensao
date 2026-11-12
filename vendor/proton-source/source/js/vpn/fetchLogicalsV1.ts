@@ -1,8 +1,7 @@
-import {fetchWithUserInfo} from '../account/fetchWithUserInfo';
-import type {Logical} from './Logical';
-import {triggerPromise} from '../tools/triggerPromise';
-import {logicalServers, type LogicalServersCache} from './logicalServers';
-import {calculateLogicalUp} from './calculateLogicalUp';
+import { fetchWithUserInfo } from "../account/fetchWithUserInfo";
+import type { Logical } from "./Logical";
+import type { LogicalServersCache } from "./logicalServers";
+import { calculateLogicalUp } from "./calculateLogicalUp";
 
 export const fetchLogicalsV1 = async (
 	cache: LogicalServersCache | undefined,
@@ -10,31 +9,30 @@ export const fetchLogicalsV1 = async (
 ) => {
 	// Use last raw string obtained from Last-Modified header if available
 	const ifModifiedSince = cache?.lastModified;
-	const {logicals, lastModified} = await fetchWithUserInfo<
+	const { logicals, lastModified } = await fetchWithUserInfo<
 		{
 			logicals: Logical[]; // From LogicalServers in the JSON response
 			lastModified: string | null; // From Last-Modified response header
 		},
-		{LogicalServers: Logical[]}
+		{ LogicalServers: Logical[] }
 	>(
-		'vpn/v1/logicals' +
+		"vpn/v1/logicals" +
 			(lookupIds.length
-				? `?${lookupIds.map((id) => `IncludeID[]=${encodeURIComponent(id)}`).join('&')}`
-				: ''),
+				? `?${lookupIds.map((id) => `IncludeID[]=${encodeURIComponent(id)}`).join("&")}`
+				: ""),
 		{
 			headers: {
-				'If-Modified-Since': ifModifiedSince || 'Thu, 01 Jan 1970 00:00:00 GMT',
-				'x-pm-response-truncation-permitted': 'true',
+				"If-Modified-Since": ifModifiedSince || "Thu, 01 Jan 1970 00:00:00 GMT",
+				"x-pm-response-truncation-permitted": "true",
 			},
 		},
-		(response, data: {LogicalServers: Logical[]}) => ({
+		(response, data: { LogicalServers: Logical[] }) => ({
 			logicals: data?.LogicalServers,
-			lastModified: response.headers.get('Last-Modified'),
+			lastModified: response.headers.get("Last-Modified"),
 		}),
 	);
+	if (!Array.isArray(logicals)) throw new Error("VpnCatalogInvalidResponse");
 	logicals.forEach(calculateLogicalUp);
 
-	triggerPromise(logicalServers.setValue(logicals, {lastModified}));
-
-	return logicals;
+	return { value: logicals, time: Date.now(), lastModified };
 };

@@ -1,6 +1,6 @@
-# Proton VPN na Super Extensão — referência 1.7.0
+# Proton VPN na Super Extensão — referência 1.7.11
 
-A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, máquina de estados, restauração/recuperação, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. O gerenciamento de credenciais temporárias é próprio desde a 1.7.9 e o transporte HTTP desde a 1.7.10. Os contratos do serviço, WebRTC, o protocolo de login e a seleção de servidores continuam em adaptadores. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
+A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, máquina de estados, restauração/recuperação, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. O gerenciamento de credenciais temporárias é próprio desde a 1.7.9, o transporte HTTP desde a 1.7.10 e o catálogo/seleção de servidores desde a 1.7.11. Os contratos do serviço, WebRTC e o protocolo de login continuam em adaptadores. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 
 ## Usar
 
@@ -9,6 +9,8 @@ A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as 
 3. Entre na sua conta na página oficial do Proton. A senha é digitada no Proton; a Super Extensão recebe a sessão de autorização.
 4. Na tela **Conexão**, abaixo de **País mais rápido**, abra **Servidores gratuitos** para ver todos os servidores Free retornados pela API, com bandeira, ocupação e indicação de manutenção. Clique em um servidor disponível para conectar. Você também pode escolher um país e um servidor disponível para o seu plano. Em contas Free, o seletor completo permite escolher os servidores gratuitos retornados pela API. Servidores pagos continuam restritos.
 5. Em **Recursos → Tunelamento dividido**, escolha excluir sites da VPN ou usar a VPN apenas nos sites listados. As regras podem incluir subdomínios. Salvar uma alteração também atualiza a conexão ativa.
+
+Na 1.7.11, a recuperação de uma escolha manual mantém o ID escolhido, inclusive quando ele não participa das escolhas automáticas. A consulta de saúde não o substitui automaticamente; se estiver em manutenção, escolha outro. Os modos automáticos continuam podendo buscar uma alternativa compatível. O catálogo local é vinculado à conta/plano/grupos e é buscado novamente na primeira abertura após atualizar um cache antigo sem essa identificação.
 
 O proxy vale para o tráfego deste navegador. Não altera a rede dos demais aplicativos. A disponibilidade de servidores e a autorização de conexão continuam sob controle do Proton.
 
@@ -45,4 +47,4 @@ Os arquivos compilados são incluídos no repositório; instalar a extensão des
 
 ## Trabalho restante
 
-A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. A 1.7.4 extrai a máquina de estados, a restauração e a política de retries; a 1.7.9 extrai obtenção, cache, expiração e renovação de credenciais temporárias. A 1.7.10 extrai execução HTTP, leitura de respostas, prazos/cancelamento, limites e repetição segura após refresh. WebRTC, seleção de servidores e protocolo de login ainda precisam de extração. Veja [vpn-engine.md](../docs/vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. A 1.7.4 extrai a máquina de estados, a restauração e a política de retries; a 1.7.9 extrai obtenção, cache, expiração e renovação de credenciais temporárias. A 1.7.10 extrai execução HTTP, leitura de respostas, prazos/cancelamento, limites e repetição segura após refresh. A 1.7.11 extrai cache do catálogo, ranking, escolha manual/automática e failover. WebRTC e protocolo de login ainda precisam de extração. Veja [vpn-engine.md](../docs/vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).

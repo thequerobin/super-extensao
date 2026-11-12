@@ -602,6 +602,10 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
   const request = calls.find((call) => call[0] === "connect");
   assert.equal(request[1].logical.ID, "free");
   assert.equal(request[1].server.Domain, "proxy.test");
+  await engine.connectRecent({connected: true, logicalId: "free"});
+  const recentChoice = calls.filter(call => call[0] === "choice").at(-1)[1];
+  assert.equal(recentChoice.logicalId, "free");
+  assert.equal(recentChoice.pick, undefined);
   emit({
     channel: "super-sync",
     respondTo: "none",
