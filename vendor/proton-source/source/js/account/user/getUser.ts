@@ -62,7 +62,7 @@ export const loadUser = async (
 					await getAccessToken();
 					await fetchUser();
 				} catch (e) {
-					if (isUnauthorizedError(e)) {
+					if (isUnauthorizedError(e) && !e.authRetried) {
 						await refreshToken();
 						await Promise.all([fetchUser(), fetchPmUser()]);
 
@@ -125,7 +125,7 @@ const calculateUser = async (
 			return isUserResult(user) ? user.User : user;
 		}
 	} catch (e) {
-		if (!tryReAuthentication || !isUnauthorizedError(e)) {
+		if (!tryReAuthentication || !isUnauthorizedError(e) || e.authRetried) {
 			throw e;
 		}
 	}

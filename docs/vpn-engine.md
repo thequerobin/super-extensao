@@ -1,6 +1,6 @@
 # Motor da VPN — estado e recuperação próprios, 1.7.4
 
-Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, as chamadas HTTP, a chamada ao endpoint de credenciais, a seleção/rotação de servidores e a proteção WebRTC ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
+Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, os cabeçalhos/contratos do serviço, a seleção/rotação de servidores e a proteção WebRTC ainda usam adaptadores do código Proton. Esta entrega não conclui a independência de todo o motor.
 
 ## Responsabilidades ativas
 
@@ -12,7 +12,8 @@ Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gra
 | Estado e ciclo das operações | `vpn/engine/state.ts` + `lifecycle.ts` | Intenção de conexão invalidada antes dos awaits; resultado antigo não reconecta nem desconecta uma tentativa nova |
 | Recuperação | `vpn/engine/recovery.ts` + `vpn/initState.ts` | Listener síncrono, alarme `superVpn:recovery` a cada 30 s, verificações simultâneas agrupadas |
 | Persistência/rotação | `vpn/engine/session.ts` + `account/sessionStore.ts` | Escritas ordenadas, refresh agrupado, comparação de sessão antes do commit, logout invalida respostas pendentes |
-| Login e transporte Proton | `account/fork/*`, `messaging/forkSession.ts`, `api.ts` | Página oficial e formato do serviço preservados; fork atrasado não salva depois do logout |
+| Transporte HTTP | `vpn/engine/http.ts` + `httpClient.ts` adaptador | Deadline, abort, JSON/binário, erros, cooldown e auth retry próprios |
+| Protocolo de login Proton | `account/fork/*`, `messaging/forkSession.ts` | Página oficial e formato do serviço preservados; fork atrasado não salva depois do logout |
 | Credenciais temporárias | `vpn/engine/credentials.ts` + `credential-data.ts` | Cache e pedidos agrupados por UID/geração, validade, renovação e cancelamento próprios; adaptador fornece o endpoint |
 | Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
 | WebRTC | Adaptadores `webrtc/*` | Proteção antes do proxy; restauração depois da limpeza; erros da API são observados |
@@ -90,8 +91,8 @@ Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada p
 ## Trabalho restante
 
 1. Validar os novos fluxos com conta de teste no Chromium/Helium: login, IP, regras, erro de rede, logout durante conexão e retomada do worker.
-2. Extrair o transporte HTTP e a seleção de servidores, preservando os contratos de autenticação e autorização.
-3. Migrar transporte, cache e seleção de servidores; manter a autorização do plano e a compatibilidade com o serviço.
+2. Extrair a consulta/cache/seleção de servidores, preservando os contratos de autenticação e autorização.
+3. Migrar WebRTC e protocolo de login; manter a autorização do plano e a compatibilidade com o serviço.
 4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
 
 ## Indicador após trocar de servidor — 1.7.8
@@ -111,3 +112,16 @@ O leitor do host recebe a geração da conexão junto das regras e do estado con
 - Escritas e remoções são ordenadas; uma gravação atrasada não restaura credenciais após logout. O código de remoção usado pelo popup não importa o cliente do worker. A invalidação não espera uma leitura de sessão dentro da fila de armazenamento, evitando dependência circular durante logout.
 
 Os 27 testes de `tests/vpn-credentials.test.cjs` cobrem concorrência, cache legado, expiração do token novo, renovação após suspensão, falhas/limites/prazo máximo, troca de conta, callbacks atrasados, descarte durante escrita e renovação de sessão, falhas nativas de armazenamento e integração do adaptador com recuperação. São transportes e dados fictícios; nenhum segredo real foi colocado nos testes ou logs.
+
+## Transporte HTTP próprio — 1.7.10
+
+`vpn/engine/http.ts` controla execução, leitura e falhas HTTP sem importar código Proton ou APIs Chrome. `httpClient.ts` fornece fetch nativo, sessão, cabeçalhos e o armazenamento de cooldown; `api.ts` mantém os nomes públicos, os tipos/checagens do protocolo, o bloqueio de atualização obrigatória e as regras de exclusão/inclusão da API no proxy.
+
+- Prazo padrão de 20 s para preparar sessão/cabeçalhos, enviar, ler o corpo e concluir eventual repetição. O sinal do chamador cancela a operação sem cancelar o refresh compartilhado de outros chamadores. Streams parados são cancelados, e transportes que ignorem abort não podem entregar respostas atrasadas.
+- Cabeçalhos do chamador são copiados. Após refresh, a repetição usa Authorization novo; não reutiliza cabeçalhos modificados pela tentativa anterior. A sessão e sua geração são conferidas antes/depois dos awaits. Troca de UID por outra página da extensão também invalida resultados. O logout remoto explícito pode continuar usando somente o snapshot da sessão que acabou de ser removida localmente.
+- Uma única renovação/repetição automática para GET/HEAD com erro HTTP 401 e Code 401. POST e outras mutações, rotas de autenticação, cabeçalhos de autenticação manuais e chamadas raw não são repetidos automaticamente. Falhas de rede também não são repetidas pelo transporte. O marcador `authRetried` impede uma segunda renovação nos adaptadores de conta/credenciais, inclusive quando o próprio refresh falhar. Requisições concorrentes usam o SessionStore próprio para compartilhar refresh.
+- HTTP 429 e 503 respeitam Retry-After em segundos ou data HTTP, com fallback de 10 s e limite de sete dias. Não há sleep longo: novas chamadas no intervalo recebem erro imediatamente sem atingir a rede. A chave combina sessão UID, método, origem e rota; os templates removem parâmetros de lookup e o seletor de fork. Queries, tokens, cabeçalhos e corpos não são persistidos. Apenas prazo/status ficam em `superVpn:httpCooldown:*`, preferencialmente em storage.session, permitindo respeitar o limite após suspensão do worker.
+- JSON, dados binários (inclusive Content-Type com parâmetros), 204 e 304 mantêm contratos de leitura e builders. Erros preservam status HTTP, Code, mensagem do serviço e Details. Texto inesperado e falhas de fetch não expõem o corpo, a URL ou os tokens na mensagem. A detecção de software bloqueador usa o conteúdo apenas em memória, sem registrar HTML bruto.
+- O cliente aceita somente HTTPS na origem configurada da API e usa redirect:error. Não encaminha automaticamente autorização para outra origem. Erros novos são normalizados antes de chegar aos chamadores; o bloqueio de atualização Code 5003 continua na fachada de compatibilidade.
+
+Os 29 contratos de `tests/vpn-http.test.cjs` cobrem o núcleo e os adaptadores reais com transporte/armazenamento simulados. Incluem retry seguro e limitado, refresh concorrente, cancelamento isolado, resultados de conta antiga, cooldown entre instâncias, erros 429/503, binário, 304, upgrade, bloqueador HTML e restrições de origem. O contrato adicional de credenciais cobre o orçamento de auth já consumido pelo transporte.

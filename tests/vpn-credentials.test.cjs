@@ -197,3 +197,8 @@ test('account storage events from a different extension page invalidate old cred
  const old=f.manager.get();await tick();f.switchAccount('B');assert.equal((await f.manager.get()).Username,'B');
  first.resolve(token('old'));assert.equal(await old,undefined);assert.equal(f.cache.sessionUid,'B');assert.equal(f.cache.credentials.Username,'B');
 });
+
+test('a transport-consumed auth retry is not repeated again by the credential manager',async()=>{
+ const f=fixture();f.ports.request=async()=>{throw {kind:'invalid-token',authRetried:true};};
+ await assert.rejects(f.manager.get(true));assert.equal(f.events.filter(e=>e[0]==='refresh').length,0);
+});

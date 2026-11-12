@@ -295,6 +295,7 @@ export class CredentialManager<C extends TemporaryCredential> {
         credentials = await this.request(count, abort);
       } catch (error) {
         if (!current()) return undefined;
+        if ((error as { authRetried?: boolean })?.authRetried) throw error;
         const kind = this.ports.classify(error);
         if (
           kind !== "invalid-token" &&

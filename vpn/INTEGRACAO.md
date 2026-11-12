@@ -1,6 +1,6 @@
 # Proton VPN na Super Extensão — referência 1.7.0
 
-A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, máquina de estados, restauração/recuperação, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. O gerenciamento de credenciais temporárias também é próprio desde a 1.7.9. As chamadas ao serviço, o transporte, WebRTC e a seleção de servidores continuam em adaptadores. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
+A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, máquina de estados, restauração/recuperação, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. O gerenciamento de credenciais temporárias é próprio desde a 1.7.9 e o transporte HTTP desde a 1.7.10. Os contratos do serviço, WebRTC, o protocolo de login e a seleção de servidores continuam em adaptadores. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 
 ## Usar
 
@@ -45,4 +45,4 @@ Os arquivos compilados são incluídos no repositório; instalar a extensão des
 
 ## Trabalho restante
 
-A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. A 1.7.4 extrai a máquina de estados, a restauração e a política de retries; a 1.7.9 extrai obtenção, cache, expiração e renovação de credenciais temporárias. Transporte, WebRTC e seleção de servidores ainda precisam de extração. Veja [vpn-engine.md](../docs/vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. A 1.7.4 extrai a máquina de estados, a restauração e a política de retries; a 1.7.9 extrai obtenção, cache, expiração e renovação de credenciais temporárias. A 1.7.10 extrai execução HTTP, leitura de respostas, prazos/cancelamento, limites e repetição segura após refresh. WebRTC, seleção de servidores e protocolo de login ainda precisam de extração. Veja [vpn-engine.md](../docs/vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).

@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.9**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.10**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Transporte HTTP próprio 1.7.10
+
+A suíte completa passou **279 testes**, incluindo 29 contratos HTTP novos e um contrato adicional para integração com credenciais. Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. Foram executados o núcleo, a fachada API e o adaptador HTTP reais com rede e armazenamento simulados; o SessionStore próprio foi exercitado no refresh concorrente. Testes cobrem prazos e cancelamento durante envio/corpo/refresh, cabeçalhos sem mutação e com token renovado, preservação de erros/builders/304/binário, upgrade, bloqueio HTML sem exposição do corpo, Retry-After entre instâncias, isolamento entre contas/métodos e ausência de repetição automática de mutações.
+
+O usuário confirmou funcionamento da 1.7.9 antes de autorizar esta etapa. Essa confirmação é evidência manual relatada, sem logs específicos. A API Proton real e seus redirecionamentos/cabeçalhos/limites não foram acessados nesta rodada; login, troca de servidor e refresh reais precisam ser conferidos novamente na 1.7.10.
 
 ## Credenciais temporárias próprias 1.7.9
 

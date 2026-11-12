@@ -93,7 +93,7 @@ export const getPmUser = async (
 			return user;
 		}
 	} catch (e) {
-		if (!tryReAuthentication || !isUnauthorizedError(e)) {
+		if (!tryReAuthentication || !isUnauthorizedError(e) || e.authRetried) {
 			throw e;
 		}
 	}

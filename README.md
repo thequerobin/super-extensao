@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.9.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.10.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -13,7 +13,7 @@ Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincroniza�
 | Interface | Catálogo comum com adaptadores HTML/DOM, Vue e React; páginas estáticas separadas em seções; preferências e foco compartilhados | Ampliar a conferência visual para todos os diálogos e estados com contas reais |
 | Sincronização | Google Drive/favoritos pelo núcleo próprio; demais provedores e abas pelo motor legado | Dois navegadores reais, restauração de backups por interface e migração dos demais conectores |
 | Núcleo Google Drive | Reconciliação, escrita condicional, criptografia, backup e retomada pelo diário | Ampliar a validação real relatada pelo usuário, medir grandes importações e suportar pastas sobrepostas |
-| VPN | Interface, regras, controlador de proxy, estado/recuperação, credenciais temporárias e persistência/rotação de tokens próprios | Validar renovação/tráfego reais; extrair transporte, seleção de servidores e WebRTC |
+| VPN | Interface, regras, controlador de proxy, estado/recuperação, credenciais temporárias, transporte HTTP e sessão próprios | Validar tráfego real; extrair seleção de servidores, WebRTC e protocolo de login |
 | Limpeza, Autoplay e Abas | Controles locais e testes automatizados | Validar fechamento nativo e recuperação no Helium |
 | Nova guia | Tabliss adaptado, editor, widgets e importação/exportação | Regressão visual e teste dos provedores online utilizados |
 
@@ -57,7 +57,7 @@ Veja [a interface e a compatibilidade](docs/sync-interface.md) e [o escopo do no
 
 Abra **VPN** e entre na conta pela página oficial Proton. O proxy atende este navegador; a disponibilidade dos servidores e a autorização continuam sob controle do serviço e do plano da conta.
 
-**Motor 1.7.9:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. O login oficial e os adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
+**Motor 1.7.10:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias e transporte HTTP próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. O login oficial e os adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
 
 Servidores ficam agrupados por país, inicialmente recolhidos, com bandeiras locais, filtros, pesquisa e carregamento em lotes. Os controles locais aparecem antes da busca de servidores terminar. Conta e plano também podem consultar a rede. Em **Recursos → Tunelamento dividido**, escolha excluir sites ou incluir somente os sites listados, com subdomínios opcionais.
 
@@ -130,7 +130,7 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A execução da **1.7.9 passou 249 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
+A execução da **1.7.10 passou 279 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
 
 As fontes das páginas estáticas ficam em `ui/templates/`; `popup.html`, `spare-tab.html`, `newtab/index.html` e `ui.js` são gerados por `build:ui`. Consulte [os contratos e adaptadores](docs/ui-components.md) antes de alterar componentes. Incremente a versão conforme `AGENTS.md` ao entregar alterações instaláveis.
 
