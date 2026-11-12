@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.11**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.12**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Login e WebRTC próprios 1.7.12
+
+A suíte completa passou **329 testes**, com 22 novos testes de login/privacidade e ampliação da validação de origens. Compilação de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. Foram exercitados o núcleo e os adaptadores reais com rede/armazenamento/APIs simulados: nonce/URL do serviço, TTL, suspensão, consumo único, duplicatas, logout/novo login durante troca, dados inválidos, erros de armazenamento, confirmação pública sem segredos, escrita/restauração WebRTC ordenadas, propriedade efetiva, erros de callback e UI antiga após desconexão.
+
+O usuário relatou funcionamento aparente da 1.7.11 e pediu uma revisão minuciosa posterior. Essa revisão continua pendente. Na 1.7.12 ainda faltam login/MFA e sessão reais, teste de IP/WebRTC com tráfego, restauração da preferência no navegador, conflito com outra extensão, encerramento/reinício e cenários de falha nativa. Esta rodada não realizou login nem mediu vazamento real. Abas de autorização iniciadas antes da atualização devem ser reabertas pela extensão.
 
 ## Catálogo e seleção próprios 1.7.11
 

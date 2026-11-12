@@ -69,6 +69,7 @@ import { getAlternativeServer } from "./vpn/getAlternatives";
 import { triggerPromise } from "./tools/triggerPromise";
 import { readSession } from "./account/readSession";
 import { sessionStore } from "./account/sessionStore";
+import { loginFlow } from "./account/loginFlow";
 import { forgetLastChoice, getLastChoice } from "./vpn/lastChoice";
 import { getUser } from "./account/user/getUser";
 import { getUserMaxTier } from "./account/user/getUserMaxTier";
@@ -409,6 +410,7 @@ export function logIn(): void {
 }
 export function logOut(deleteSession: boolean) {
 	machine.logOut();
+	triggerPromise(loginFlow.invalidate());
 	// Invalidate refresh synchronously, before the next login can save a session.
 	const previousSession = sessionStore.clear();
 	forgetUser();

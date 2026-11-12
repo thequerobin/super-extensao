@@ -1,15 +1,16 @@
-import {routeMessage} from '../messaging/messaging';
-import {RefreshTokenError} from '../account/RefreshTokenError';
-import {logOut} from '../state';
-import {createSession} from '../account/createSession';
-import {BackgroundAction} from '../messaging/MessageType';
-import type {ForkMessage, MessageBase} from '../messaging/Message';
-import {forkSession} from '../messaging/forkSession';
-import {executeOnTab} from '../tools/executeOnTab';
-import {getPartnerById} from '../account/partner/partners';
-import {delay} from '../tools/delay';
-import {getRuntime} from '../tools/getRuntime';
-import {handleAccountFork} from './handleAccountFork';
+import { isAccountUrl } from "../../../../../vpn/engine/login";
+import { routeMessage } from "../messaging/messaging";
+import { RefreshTokenError } from "../account/RefreshTokenError";
+import { logOut } from "../state";
+import { createSession } from "../account/createSession";
+import { BackgroundAction } from "../messaging/MessageType";
+import type { ForkMessage, MessageBase } from "../messaging/Message";
+import { forkSession } from "../messaging/forkSession";
+import { executeOnTab } from "../tools/executeOnTab";
+import { getPartnerById } from "../account/partner/partners";
+import { delay } from "../tools/delay";
+import { getRuntime } from "../tools/getRuntime";
+import { handleAccountFork } from "./handleAccountFork";
 import Tab = browser.tabs.Tab;
 
 type WorkerExternalMessage = MessageBase &
@@ -23,7 +24,7 @@ type WorkerExternalMessage = MessageBase &
 const getMessageResponse = async (message: any) => {
 	try {
 		const result = await routeMessage(message);
-		return {received: true, success: !result?.error, result};
+		return { received: true, success: !result?.error, result };
 	} catch (error) {
 		if (error instanceof RefreshTokenError) {
 			logOut(false);
@@ -36,23 +37,31 @@ const getMessageResponse = async (message: any) => {
 const failedResponse = (error: unknown) => ({
 	received: true,
 	success: false,
-	result: {error: error instanceof Error ? {...error, message: error.message} : error},
+	result: {
+		error:
+			error instanceof Error ? { ...error, message: error.message } : error,
+	},
 });
 
 export const initMessaging = () => {
 	const runtime = getRuntime();
 
 	runtime?.onMessage.addListener((message: any, sender, sendResponse) => {
-		if (message?.channel !== 'super-vpn' || message.respondTo === 'none') return undefined;
-		const accountOrigins = ['https://account.proton.me', 'https://account.protonvpn.com'];
-		const senderUrl = sender.url || sender.tab?.url || '';
-		const fromAccount = accountOrigins.some(origin => senderUrl.startsWith(origin + '/'));
-		const internal = senderUrl.startsWith(runtime.getURL(''));
-		if (message.type === BackgroundAction.FORK ? !fromAccount : !internal) return undefined;
+		if (message?.channel !== "super-vpn" || message.respondTo === "none")
+			return undefined;
+		const senderUrl = sender.url || sender.tab?.url || "";
+		const fromAccount = isAccountUrl(senderUrl);
+		const internal = senderUrl.startsWith(runtime.getURL(""));
+		if (message.type === BackgroundAction.FORK ? !fromAccount : !internal)
+			return undefined;
 		if (message.type === BackgroundAction.FORK) {
-			void handleAccountFork(message).then(sendResponse, () => sendResponse({handled: false}));
+			void handleAccountFork(message).then(sendResponse, () =>
+				sendResponse({ handled: false }),
+			);
 		} else {
-			void getMessageResponse(message).then(sendResponse, error => sendResponse(failedResponse(error)));
+			void getMessageResponse(message).then(sendResponse, (error) =>
+				sendResponse(failedResponse(error)),
+			);
 		}
 
 		return true;
@@ -65,7 +74,10 @@ export const initMessaging = () => {
 	 */
 	runtime?.onMessageExternal.addListener(
 		async (request: WorkerExternalMessage, sender) => {
-			if (request.type === BackgroundAction.FORK) {
+			if (
+				request.type === BackgroundAction.FORK &&
+				isAccountUrl(sender.url || sender.tab?.url)
+			) {
 				const response = await forkSession(request);
 
 				const welcomePage = response?.partnerId

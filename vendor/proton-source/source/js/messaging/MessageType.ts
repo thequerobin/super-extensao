@@ -1,31 +1,33 @@
 export enum StateChange {
-	SIGN_OUT = 'signOut',
-	SWITCH_ACCOUNT = 'switchAccount',
-	DISCONNECT = 'disconnect',
-	CONNECT = 'connect',
-	CONNECTING = 'connecting',
+	SIGN_OUT = "signOut",
+	SWITCH_ACCOUNT = "switchAccount",
+	DISCONNECT = "disconnect",
+	CONNECT = "connect",
+	CONNECTING = "connecting",
 }
 
 export enum SettingChange {
-	BYPASS_LIST = 'bypassList',
+	BYPASS_LIST = "bypassList",
 }
 
 export enum PermissionGrant {
-	PROXY = 'proxy',
+	PROXY = "proxy",
 }
 
 export enum BackgroundAction {
-	FORK = 'fork',
-	FORGET_ERROR = 'forgetError',
-	LOG = 'log',
+	FORK = "fork",
+	BEGIN_LOGIN = "beginLogin",
+	SET_WEBRTC = "setWebRTC",
+	FORGET_ERROR = "forgetError",
+	LOG = "log",
 }
 
 export enum BackgroundData {
-	USER = 'user',
-	PM_USER = 'pmUser',
-	STATE = 'state',
-	CONNECTION_STATE = 'connectionState',
-	LOCALE = 'locale',
+	USER = "user",
+	PM_USER = "pmUser",
+	STATE = "state",
+	CONNECTION_STATE = "connectionState",
+	LOCALE = "locale",
 }
 
 export type BackgroundExtraData = {

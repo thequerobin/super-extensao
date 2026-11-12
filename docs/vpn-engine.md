@@ -1,6 +1,6 @@
-# Motor da VPN — núcleo próprio, 1.7.11
+# Motor da VPN — núcleo próprio, 1.7.12
 
-Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton; o protocolo de login, os cabeçalhos/contratos do serviço e a proteção WebRTC ainda usam adaptadores do código Proton. Catálogo, seleção e failover são próprios; formatos/endpoints do catálogo e status ficam em adaptadores. Esta entrega não conclui a independência de todo o motor.
+Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton. WebRTC e a coordenação do login foram extraídos na 1.7.12, completando as extrações funcionais previstas. A página oficial, os cabeçalhos/formatos/endpoints e utilitários de compatibilidade continuam em adaptadores. Isso não remove todo o código vendor nem substitui a revisão minuciosa em navegador.
 
 ## Responsabilidades ativas
 
@@ -13,10 +13,10 @@ Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gra
 | Recuperação | `vpn/engine/recovery.ts` + `vpn/initState.ts` | Listener síncrono, alarme `superVpn:recovery` a cada 30 s, verificações simultâneas agrupadas |
 | Persistência/rotação | `vpn/engine/session.ts` + `account/sessionStore.ts` | Escritas ordenadas, refresh agrupado, comparação de sessão antes do commit, logout invalida respostas pendentes |
 | Transporte HTTP | `vpn/engine/http.ts` + `httpClient.ts` adaptador | Deadline, abort, JSON/binário, erros, cooldown e auth retry próprios |
-| Protocolo de login Proton | `account/fork/*`, `messaging/forkSession.ts` | Página oficial e formato do serviço preservados; fork atrasado não salva depois do logout |
+| Login | `vpn/engine/login.ts` + `account/loginFlow.ts` adaptador | Estado forte/temporário, consumo único durável e commit por geração próprios; página e troca do fork usam contrato Proton |
 | Credenciais temporárias | `vpn/engine/credentials.ts` + `credential-data.ts` | Cache e pedidos agrupados por UID/geração, validade, renovação e cancelamento próprios; adaptador fornece o endpoint |
 | Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
-| WebRTC | Adaptadores `webrtc/*` | Proteção antes do proxy; restauração depois da limpeza; erros da API são observados |
+| WebRTC | `vpn/engine/webrtc.ts` + `chromium-privacy.ts` | Fila e política próprias, confirmação de propriedade/valor; leituras/escritas/clear regulares observam erros nativos |
 | Catálogo e seleção | `vpn/engine/catalog.ts` + `selection.ts`, `vpn/serverCatalog.ts` como adaptador | Cache com identidade de conta, TTL, refresh agrupado, ranking estável e escolha manual/automática próprios; endpoints v1/v2 e decodificação de status preservados no adaptador |
 
 Os caminhos que não começam com `vpn/engine` são relativos a `vendor/proton-source/source/js/`. A interface própria permanece em `vpn/source`.
@@ -91,8 +91,8 @@ Os testes de `tests/vpn-controller.test.cjs` exercitam fila e rollback, tomada p
 ## Trabalho restante
 
 1. Validar os novos fluxos com conta de teste no Chromium/Helium: login, IP, regras, erro de rede, logout durante conexão e retomada do worker.
-2. Migrar WebRTC e protocolo de login; manter a autorização do plano e a compatibilidade com o serviço.
-4. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
+2. Revisar contratos/adaptadores e utilitários restantes; manter a autorização do plano e a compatibilidade com o serviço.
+3. Reavaliar persistência opcional e temporizadores auxiliares somente com testes de migração e evidência real.
 
 ## Indicador após trocar de servidor — 1.7.8
 
@@ -136,3 +136,19 @@ As respostas 304 preservam `Last-Modified` textual, `StatusID` e o horário da c
 A seleção física prioriza endpoints ativos, pode tentar status desconhecido no adaptador compatível e não recorre a endpoints confirmadamente indisponíveis. O failover automático conserva o tier e Secure Core, prioriza o mesmo país/recursos e só relaxa o país se necessário. A consulta de saúde e as guardas de geração existentes continuam impedindo trocas por metadados incompletos ou respostas atrasadas.
 
 `tests/vpn-catalog.test.cjs` cobre 28 contratos do núcleo, endpoints v1/v2 e adaptadores reais de estado com APIs simuladas; o teste da interface também cobre recente manual. Não foram medidos latência, IP ou tráfego real nesta rodada.
+
+## WebRTC e coordenação do login — 1.7.12
+
+`vpn/engine/webrtc.ts` contém a política e a fila de proteção/restauração; `chromium-privacy.ts` encapsula `privacy.network.webRTCIPHandlingPolicy` em escopo regular. Aplicar proteção exige que a preferência possa ser controlada e, após a escrita, que o navegador reporte `controlled_by_this_extension` com o valor esperado. Um valor padrão igual, sem propriedade, não é tomado como sucesso. Limpar retira só a preferência da extensão, verifica que ela não continua no controle e não escreve o valor de outra extensão. Erros de callback são consumidos dentro do callback; falhas não inutilizam a fila. Sem API, o núcleo retorna indisponibilidade e a camada de proteção obrigatória recusa prosseguir.
+
+As páginas enviam pedidos ao worker. Ele revalida intenção de conexão e preferência, impedindo que um painel desatualizado limpe a proteção de uma conexão ativa. O controlador do proxy continua aplicando proteção antes do proxy e retirando-a depois da limpeza confirmada. A fila nativa não é liberada por timeout enquanto um callback de escrita ainda puder chegar. Isso não mede vazamento real de IP/WebRTC; requer validação com tráfego.
+
+`vpn/engine/login.ts` implementa `LoginFlow`, independente de DOM/Chromium. `account/loginFlow.ts` fornece armazenamento nativo, 32 bytes aleatórios, URL de autorização, endpoint de troca e commit no SessionStore próprio. O worker recebe `beginLogin` somente de páginas internas. A página oficial permanece responsável por senha/MFA; o núcleo recebe apenas o fork e nunca recebe a senha da conta.
+
+`superVpn:loginFlow` contém um estado aleatório de 43 caracteres, datas de criação/expiração e metadados de parceiro, sem tokens/selector. Validade de 15 minutos, origens HTTPS exatas e validação de payload são próprias. Uma nova tentativa substitui a anterior. Antes da troca HTTP, o worker persiste uma marca de consumo; callbacks duplicados e reinício após o consumo não repetem a troca. Uma falha exige iniciar novamente pelo botão Entrar. Logout invalida imediatamente a geração e enfileira a remoção durável. Commit de sessão valida geração e expiração, mantendo `persistent` e parceiro como metadados. Respostas ao site contêm somente a confirmação pública; erros de troca não expõem conteúdo de resposta ou credenciais.
+
+O adaptador mantém `app`, `appVersion`, `t`, `plan`, `partnerId` e `independent` exigidos pela página Proton e codifica o selector no endpoint. O relay e mensagens externas aceitam apenas as origens oficiais; mensagens de conta não podem iniciar login nem alterar WebRTC. A aba oficial usa prazo de relay de 30 segundos, compatível com o limite HTTP de 20 segundos. Falhas ao abrir a aba agora são aguardadas e propagadas. Estados `f...` de versões anteriores não são reutilizados: uma aba de autorização já aberta precisa ser iniciada novamente pela extensão.
+
+A extração funcional está implementada; permanecem adapters/formatos do serviço, mensagens e utilitários legados. O serviço, infraestrutura e autorização do plano continuam sendo Proton, e as fontes/licenças mantêm-se no repositório. Não se declara remoção de todas as dependências vendor. A revisão minuciosa solicitada pelo usuário permanece pendente.
+
+`tests/vpn-login-privacy.test.cjs` adiciona 22 testes do núcleo e dos adaptadores reais com APIs simuladas, incluindo duplicatas, suspensão, logout durante troca, expiração, erros nativos, propriedade da preferência e pedidos de UI antigos. As verificações de origem existentes também cobrem as novas ações internas.

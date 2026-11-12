@@ -13,7 +13,7 @@ function load(file, mocks = {}, globals = {}) {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}
   }).outputText;
   vm.runInNewContext(code, {
-    exports, ...globals,
+    exports, URL, ...globals,
     require(spec) {
       if (spec in mocks) return mocks[spec];
       return load(path.relative(source, path.resolve(path.dirname(filename), spec)), mocks, globals);
@@ -60,18 +60,18 @@ test('account relay accepts only session forks from exact account origins', () =
 });
 
 test('VPN background ignores other modules and page requests to connect', async () => {
-  let listener;
+  let listener, external;
   const calls = [];
   const runtime = {
     id: 'test', getURL: p => 'chrome-extension://test/' + p,
     onMessage: {addListener: fn => {listener = fn;}},
-    onMessageExternal: {addListener() {}}
+    onMessageExternal: {addListener: fn => {external = fn;}}
   };
   load('vpn/initMessaging', {
     '../messaging/messaging': {routeMessage: async m => {calls.push(m); return 'done';}},
     '../account/RefreshTokenError': {RefreshTokenError: class extends Error {}},
     '../state': {logOut() {}}, '../account/createSession': {createSession() {}},
-    '../messaging/forkSession': {forkSession() {}},
+    '../messaging/forkSession': {forkSession: async m => {calls.push(m); return {type: 'success'};}},
     '../tools/executeOnTab': {executeOnTab() {}},
     '../account/partner/partners': {getPartnerById() {}},
     '../tools/delay': {delay() {}},
@@ -90,6 +90,13 @@ test('VPN background ignores other modules and page requests to connect', async 
   });
   assert.equal(response.success, true);
   assert.equal(calls.length, 1);
+  assert.equal(listener({channel:'super-vpn',type:'beginLogin'}, {url:'https://account.proton.me/'}), undefined);
+  assert.equal(listener({channel:'super-vpn',type:'setWebRTC'}, {url:'https://account.proton.me/'}), undefined);
+  assert.equal(await external({type:'fork'}, {url:'https://account.proton.me.evil.test/'}), undefined);
+  assert.equal(await external({type:'fork'}, {url:'https://evil.test/'}), undefined);
+  assert.equal(calls.length,1);
+  assert.equal((await external({type:'fork'}, {url:'https://account.proton.me/authorize'})).type, 'success');
+  assert.equal(calls.length,2);
 });
 
 test('VPN popup uses a direct reply and rejects when the receiver disappears', async () => {
@@ -179,13 +186,14 @@ test('sign-in handles denied permissions, retries and failures without silently 
 test('account forks are consumed only when their state belongs to this extension', async () => {
   const calls = [];
   const {handleAccountFork} = load('vpn/handleAccountFork', {
-    '../tools/storage': {Storage: {LOCAL: 'local'}, storage: {getItem: async key => key === 'fowned' ? {} : undefined}},
+    '../account/loginFlow': {loginFlow: {owns: async state => state === 'A'.repeat(43)}},
+    '../config': {appId: 'ours'},
     '../messaging/forkSession': {forkSession: async message => {calls.push(message); return {type: 'success'};}}
   });
   assert.equal((await handleAccountFork({payload: {state: 'other', selector: 'selector'}})).handled, false);
-  assert.equal((await handleAccountFork({payload: {state: 'owned'}})).handled, false);
+  assert.equal((await handleAccountFork({payload: {state: 'A'.repeat(43)}})).handled, false);
   assert.equal(calls.length, 0);
-  const result = await handleAccountFork({payload: {state: 'owned', selector: 'selector'}});
+  const result = await handleAccountFork({payload: {state: 'A'.repeat(43), selector: 'selector'}});
   assert.equal(result.handled, true); assert.equal(result.response.type, 'success'); assert.equal(calls.length, 1);
 });
 
