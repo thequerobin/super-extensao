@@ -54,3 +54,6 @@ Os arquivos compilados são incluídos no repositório; instalar a extensão des
 ## Trabalho restante
 
 A reescrita parcial avançou na 1.7.0 com controlador próprio, invalidação de operações tardias, alarmes e persistência/renovação de sessão. A 1.7.4 extrai a máquina de estados, a restauração e a política de retries; a 1.7.9 extrai obtenção, cache, expiração e renovação de credenciais temporárias. A 1.7.10 extrai execução HTTP, leitura de respostas, prazos/cancelamento, limites e repetição segura após refresh. A 1.7.11 extrai cache do catálogo, ranking, escolha manual/automática e failover. A 1.7.12 extrai a coordenação de login e a proteção WebRTC. A extração funcional está implementada, mas a revisão minuciosa e a validação real continuam pendentes; remover toda a árvore vendor é outro trabalho. Veja [vpn-engine.md](../docs/vpn-engine.md) e [PROXIMOS-PASSOS.md](../PROXIMOS-PASSOS.md).
+
+
+A 1.7.14 adiciona prazos ao armazenamento e às mensagens do worker, mantendo escritas nativas em ordem e exibindo estado não confirmado em caso de falha de IO. Chaves e contratos do serviço foram preservados. [Detalhes e limites](vpn-engine.md#prazos-de-io--1714).

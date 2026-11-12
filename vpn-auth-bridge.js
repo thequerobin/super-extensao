@@ -21,7 +21,7 @@
     const callback = typeof args[args.length - 1] === 'function' ? args[args.length - 1] : undefined;
     const id = crypto.randomUUID();
     const attempt = new Promise(resolve => {
-      const timer = setTimeout(() => { pending.delete(id); resolve({handled: false}); }, 30000);
+      const timer = setTimeout(() => { pending.delete(id); resolve({handled: true,response:{type:'error',payload:{message:'VpnOperationPending'}}}); }, 45000);
       pending.set(id, result => {clearTimeout(timer); pending.delete(id); resolve(result);});
       // Forward only fields required to consume the fork. Never relay account passwords or keys.
       const {state, selector, persistent} = message.payload;

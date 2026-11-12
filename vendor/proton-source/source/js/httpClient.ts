@@ -1,3 +1,4 @@
+import { nativeStorage } from "./tools/nativeStorage";
 import {
 	HttpTransport,
 	HttpError,
@@ -35,22 +36,8 @@ chrome.storage.onChanged?.addListener((changes, area) => {
 	)
 		identityRevision++;
 });
-function storageCall<T>(
-	operation: (done: (result: T) => void) => void,
-): Promise<T> {
-	return new Promise((resolve, reject) => {
-		try {
-			operation((value) => {
-				if (chrome.runtime.lastError)
-					reject(new HttpError("VpnHttpCooldownStorageFailed"));
-				else resolve(value);
-			});
-		} catch {
-			reject(new HttpError("VpnHttpCooldownStorageFailed"));
-		}
-	});
-}
-const cooldownArea = () => chrome.storage.session || chrome.storage.local;
+const cooldownArea = () =>
+	chrome.storage.session ? ("session" as const) : ("local" as const);
 export const httpClient: HttpTransport<RequestSession> =
 	new HttpTransport<RequestSession>({
 		baseUrl: baseAPIURL,
@@ -90,19 +77,22 @@ export const httpClient: HttpTransport<RequestSession> =
 		cooldown: {
 			async get(route) {
 				const key = prefix + encodeURIComponent(route);
-				const data = await storageCall<Record<string, HttpCooldown>>((done) =>
-					cooldownArea().get(key, done),
-				);
-				return data[key];
+				return (
+					await nativeStorage.get<Record<string, HttpCooldown>>(
+						cooldownArea(),
+						key,
+					)
+				)[key];
 			},
 			async set(route, value) {
 				const key = prefix + encodeURIComponent(route),
 					area = cooldownArea();
-				const data = await storageCall<Record<string, HttpCooldown>>((done) =>
-					area.get(key, done),
+				const data = await nativeStorage.get<Record<string, HttpCooldown>>(
+					area,
+					key,
 				);
 				if ((data[key]?.until || 0) >= value.until) return;
-				await storageCall<void>((done) => area.set({ [key]: value }, done));
+				await nativeStorage.set(area, { [key]: value });
 			},
 		},
 		blocked(html) {

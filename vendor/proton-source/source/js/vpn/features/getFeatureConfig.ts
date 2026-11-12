@@ -1,6 +1,11 @@
-import {storage, Storage} from '../../tools/storage';
+import {
+	observe,
+	VpnIOError,
+	isVpnIOError,
+} from "../../../../../../vpn/engine/io";
+import { storage, Storage } from "../../tools/storage";
 
-const managedConfig = storage.selfItem('config', Storage.MANAGED);
+const managedConfig = storage.selfItem("config", Storage.MANAGED);
 
 export interface FeatureConfig<T extends object = object> {
 	controllable: boolean;
@@ -20,23 +25,49 @@ export const config = (() => {
 })();
 
 const loadConfig = async () => {
+	let managed: Record<string, FeatureConfig> | undefined;
 	try {
-		return (
-			(await managedConfig.get()) ||
-			(await (await fetch('/config.json')).json()) ||
-			{}
+		managed = (await managedConfig.get()) as
+			| Record<string, FeatureConfig>
+			| undefined;
+	} catch (error) {
+		if (!isVpnIOError(error) || error.code !== "VpnManagedStorageUnavailable")
+			throw error;
+	}
+	if (managed) return managed;
+	try {
+		return await observe(
+			(async () => {
+				const response = await fetch("/config.json");
+				return response.ok ? await response.json() : {};
+			})(),
+			5000,
+			new VpnIOError("VpnStorageReadTimedOut"),
 		);
-	} catch {
+	} catch (error) {
+		if (isVpnIOError(error)) throw error;
 		return {};
 	}
 };
-
+let pending: Promise<Record<string, FeatureConfig>> | undefined;
 const getConfig = async () => {
-	if (!config.get()) {
-		config.set(await loadConfig());
+	if (config.get()) return config.get()!;
+	if (!pending) {
+		const task = loadConfig().then((value) => {
+			config.set(value);
+			return value;
+		});
+		pending = task;
+		void task.then(
+			() => {
+				if (pending === task) pending = undefined;
+			},
+			() => {
+				if (pending === task) pending = undefined;
+			},
+		);
 	}
-
-	return config.get() as Record<string, FeatureConfig>;
+	return pending;
 };
 
 export const getFeatureConfig = async <T extends object = object>(

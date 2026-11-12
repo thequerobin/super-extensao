@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.13**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.14**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Prazos de armazenamento e mensagens 1.7.14
+
+A suíte completa passou **372 testes**. Os 15 contratos novos cobrem leitura sem resposta e nova tentativa, descarte de resposta tardia, escrita que vence o prazo sem liberar a fila, remoção após conclusão tardia, leitura vencida atrás de escrita pendente, recuperação após rejeição, cancelamento de consultas ao enviar comando, deduplicação de comandos pendentes, sanitização de erros, callbacks/Promises nativos, ausência de política versus timeout, logout após falha de leitura, política sem cache permissivo interface com estado não confirmado e nova consulta e compatibilidade com a Promise do módulo de sincronização (sem `finally`). Os testes anteriores foram adaptados para executar o novo adaptador compartilhado.
+
+Build de produção, TypeScript do worker/interface, `check:ui` e `git diff --check` passaram. Foram usados IO e APIs nativas simulados; não foram executados login, conexão Proton, captura de IP/DNS ou testes nativos de suspensão/reinício. A validação real permanece pendente, conforme a auditoria abaixo. Página de bloqueio e atualização de dependências ficam para etapas seguintes.
 
 ## Revisão de privacidade 1.7.13 — aprovação real pendente
 

@@ -1,31 +1,16 @@
-import {SessionStore} from '../../../../../vpn/engine/session';
-import type {Session} from './Session';
-import {removeCredentials} from './credentials/removeCredentials';
+import { SessionStore } from "../../../../../vpn/engine/session";
+import type { Session } from "./Session";
+import { removeCredentials } from "./credentials/removeCredentials";
 
-const key = 'superVpn:session';
-function call<T>(operation: (done: (value: T) => void) => void): Promise<T> {
-	return new Promise((resolve, reject) => {
-		try {
-			operation((value) => {
-				if (chrome.runtime.lastError)
-					reject(new Error('VpnSessionStorageFailed'));
-				else resolve(value);
-			});
-		} catch {
-			reject(new Error('VpnSessionStorageFailed'));
-		}
-	});
-}
+import { nativeStorage } from "../tools/nativeStorage";
+const key = "superVpn:session";
 // The existing session already lives in local storage. Do not copy tokens to new keys.
 export const sessionStore = new SessionStore<Session>({
 	async read() {
-		const data = await call<Record<string, Session>>((done) =>
-			chrome.storage.local.get(key, done),
-		);
+		const data = await nativeStorage.get<Record<string, Session>>("local", key);
 		return data[key] || {};
 	},
-	write: (value) =>
-		call<void>((done) => chrome.storage.local.set({[key]: value}, done)),
-	remove: () => call<void>((done) => chrome.storage.local.remove(key, done)),
+	write: (value) => nativeStorage.set("local", { [key]: value }),
+	remove: () => nativeStorage.remove("local", key),
 	changed: () => removeCredentials(),
 });

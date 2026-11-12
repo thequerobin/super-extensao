@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.13.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.14.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -57,7 +57,7 @@ Veja [a interface e a compatibilidade](docs/sync-interface.md) e [o escopo do no
 
 Abra **VPN** e entre na conta pela página oficial Proton. O proxy atende este navegador; a disponibilidade dos servidores e a autorização continuam sob controle do serviço e do plano da conta.
 
-**Motor 1.7.13:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias, transporte HTTP e catálogo/seleção próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. WebRTC e a coordenação de login também usam o núcleo próprio. A página oficial e os contratos/adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
+**Motor 1.7.14:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias, transporte HTTP e catálogo/seleção próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. WebRTC e a coordenação de login também usam o núcleo próprio. A página oficial e os contratos/adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
 
 Na **1.7.11**, a escolha manual é preservada ao recuperar a conexão; verificações de saúde não trocam automaticamente um servidor escolhido pelo ID. Se ele estiver indisponível, escolha outro manualmente. O modo mais rápido mantém o failover quando há indisponibilidade confirmada.
 
@@ -66,6 +66,8 @@ Na **1.7.12**, o worker coordena o login com estado aleatório de validade de 15
 Servidores ficam agrupados por país, inicialmente recolhidos, com bandeiras locais, filtros, pesquisa e carregamento em lotes. Os controles locais aparecem antes da busca de servidores terminar. Conta e plano também podem consultar a rede. Em **Recursos → Tunelamento dividido**, escolha excluir sites ou incluir somente os sites listados, com subdomínios opcionais.
 
 Na **1.7.2**, abrir o painel consulta primeiro o estado real do worker e do proxy. Se a conexão já estiver confirmada, o cartão abre como conectado, sem inferir “conectando” de um servidor salvo; conta e servidores carregam separadamente. Não é guardada uma tela conectada em disco.
+
+A **1.7.14** limita esperas de armazenamento e mensagens ao worker, mostra estado não confirmado e permite consultar novamente. Gravações nativas continuam ordenadas mesmo depois de expirar o prazo da interface; logout não é ultrapassado por uma gravação atrasada. Comandos de resultado desconhecido não são reenviados automaticamente. [Prazos e limites](docs/vpn-engine.md#prazos-de-io--1714).
 
 A **1.7.13** adiciona bloqueio de emergência: durante falhas detectadas, a rede dos sites é pausada, inclusive os excluídos, e aparecem aviso obrigatório de privacidade, ícone vermelho e ação para liberar explicitamente sem VPN. A página de conta Proton e chamadas da extensão ficam como exceções de recuperação. A nova permissão `declarativeNetRequest` é necessária. WebTransport fica bloqueado enquanto a proteção está armada.
 

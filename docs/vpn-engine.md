@@ -158,3 +158,28 @@ A extração funcional está implementada; permanecem adapters/formatos do servi
 A [auditoria](auditoria-vpn.md) registra achados, mudanças, evidências e limites. `network-guard.ts` mantém bloqueio declarativo dinâmico com liberação apenas em regra de sessão e preserva regras alheias. O estado nativo bloqueia antes das credenciais, não encerra silenciosamente a intenção em falhas e só libera após proxy confirmado/probe HTTPS sem credenciais. A limpeza do proxy arma o bloqueio antes de retirar configurações. Logout preserva bloqueio; desconectar explicitamente pode liberá-lo.
 
 PAC obrigatório, CIDR sem DNS, remoção do envio HTTP legado de credenciais, previsão de rede desativada, bloqueio de WebTransport, avisos de privacidade independentes de preferências e indicador vermelho compõem as correções. O campo `blocked` é intenção/estado de segurança, não prova de pacotes. Apenas readback confirma regras/configurações; tampouco isso prova ausência de vazamentos ou encerra sockets existentes. O teste Chromium real foi impedido por restrição de sockets; aprovação exige o roteiro de captura e falhas da auditoria.
+
+
+## Prazos de IO — 1.7.14
+
+O núcleo `vpn/engine/io.ts` limita a espera de quem chama; não cancela uma operação nativa já enviada. O adaptador compartilhado cobre sessão, estado de login, credenciais, cache/configuração e cooldown HTTP sem alterar chaves nem copiar tokens.
+
+| Operação | Prazo por chamada |
+| --- | --- |
+| Leitura de armazenamento | 5 s |
+| Política gerenciada | 1,5 s |
+| Gravação/remoção de armazenamento | 8 s |
+| Estado/idioma via worker | 5 s |
+| Conta via worker | 30 s |
+| Comando via worker | 15 s |
+| Consumo do fork de login | 40 s (ponte da página: 45 s) |
+
+Sequências de várias chamadas podem levar mais tempo. O carregamento da configuração empacotada também tem prazo de 5 s. Ausência explícita do esquema gerenciado permite a configuração empacotada; falha/timeout do serviço não equivale a ausência de política.
+
+Leituras vencidas são descartadas e podem ser repetidas. Gravações são ordenadas por área nativa dentro de cada contexto ativo: um timeout rejeita a promessa observada, mas a fila só avança depois da conclusão real da API. Remoções pendentes, inclusive logout, continuam enfileiradas. A fila não é um mecanismo transacional entre processos nem persiste após encerramento do contexto. APIs que nunca confirmam uma escrita mantêm a fila retida; não existe cancelamento nativo seguro que permita liberar essa fila.
+
+O logout invalida a geração imediatamente e tenta remover sessão e credenciais mesmo se a leitura anterior falhar. Não há fallback para memória/localStorage apresentando falha como persistência bem-sucedida. Falhas de armazenamento observadas pelo worker acionam a proteção de rede da intenção ativa. O prazo de uma mensagem não desarma o bloqueio nem cancela uma desconexão já em execução.
+
+Mensagens de leitura pendentes são invalidadas ao enviar um comando. Comandos de mesmo tipo não são reenviados nesse canal enquanto a resposta real estiver pendente, inclusive após timeout; outras ações, como desconectar, continuam disponíveis e usam as gerações do motor. Essa deduplicação vale por contexto ativo, não entre painéis/reinícios. O painel não apresenta uma confirmação de conexão antiga após erro de IO: mostra **Estado não confirmado**, oculta o IP anterior e permite **Tentar novamente** para consultar. Respostas antigas de carregamento não restauram uma conta após logout ou mudança de estado.
+
+Os prazos não liberam filas de proxy, DNR ou privacidade. A verificação real de reinício, falhas nativas e vazamento IP/DNS continua pendente; os testes simulados desta etapa não comprovam ausência de vazamentos.

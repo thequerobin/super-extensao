@@ -56,7 +56,13 @@ export const initMessaging = () => {
 			return undefined;
 		if (message.type === BackgroundAction.FORK) {
 			void handleAccountFork(message).then(sendResponse, () =>
-				sendResponse({ handled: false }),
+				sendResponse({
+					handled: true,
+					response: {
+						type: "error",
+						payload: { message: "VpnOperationPending" },
+					},
+				}),
 			);
 		} else {
 			void getMessageResponse(message).then(sendResponse, (error) =>

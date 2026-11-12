@@ -14,7 +14,7 @@ export interface SessionPorts<T extends SessionRecord> {
 export class SessionStore<T extends SessionRecord> {
   private generation = 0;
   private writes: Promise<unknown> = Promise.resolve();
-  private pending?: {generation: number; promise: Promise<T>};
+  private pending?: { generation: number; promise: Promise<T> };
   constructor(private readonly ports: SessionPorts<T>) {}
   private enqueue<R>(operation: () => Promise<R>): Promise<R> {
     const task = this.writes.then(operation);
@@ -37,7 +37,7 @@ export class SessionStore<T extends SessionRecord> {
   }
   save(value: T): Promise<void> {
     this.generation++;
-    const next = {...value};
+    const next = { ...value };
     return this.enqueue(async () => {
       const previous = await this.ports.read();
       await this.ports.write(next);
@@ -48,9 +48,13 @@ export class SessionStore<T extends SessionRecord> {
   clear(): Promise<T> {
     this.generation++;
     return this.enqueue(async () => {
-      const previous = await this.ports.read();
-      await this.ports.remove();
-      await this.ports.changed();
+      // A failed read must never suppress the queued logout removal.
+      const previous = await this.ports.read().catch(() => ({}) as T);
+      try {
+        await this.ports.remove();
+      } finally {
+        await this.ports.changed();
+      }
       return previous;
     });
   }
@@ -66,10 +70,10 @@ export class SessionStore<T extends SessionRecord> {
       if (generation !== this.generation || (expected && !matches(expected)))
         return this.read();
       if (!original.uid || !original.refreshToken)
-        throw new Error('VpnSessionUnavailable');
+        throw new Error("VpnSessionUnavailable");
       let next: T;
       try {
-        next = await request({...original});
+        next = await request({ ...original });
       } catch (error) {
         const latest = await this.read();
         if (generation !== this.generation || !matches(latest)) return latest;
@@ -83,13 +87,13 @@ export class SessionStore<T extends SessionRecord> {
           !next.accessToken ||
           !next.refreshToken
         )
-          throw new Error('VpnInvalidSessionResponse');
+          throw new Error("VpnInvalidSessionResponse");
         delete next.expiresAt;
         await this.ports.write(next);
         return next;
       });
     })();
-    const task = {generation, promise};
+    const task = { generation, promise };
     this.pending = task;
     // finally() creates another rejected promise; handle both outcomes explicitly.
     void promise.then(

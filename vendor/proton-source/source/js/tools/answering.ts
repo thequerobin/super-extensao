@@ -1,4 +1,4 @@
-import {getRuntime} from './getRuntime';
+import { getRuntime } from "./getRuntime";
 
 export const allWatchers: Record<string, (...args: any[]) => void>[] = [];
 
@@ -13,23 +13,24 @@ export const watchBroadcastMessages = (
 };
 
 export const messageListener = (request: any) => {
-	if (request?.channel !== 'super-vpn' || request.respondTo !== 'none') return false;
+	if (request?.channel !== "super-vpn" || request.respondTo !== "none")
+		return undefined;
 	allWatchers.forEach((watchers) => {
 		const type = request.type;
 		const watcher = type ? watchers[type] : undefined;
 
-		if (typeof watcher === 'function') {
+		if (typeof watcher === "function") {
 			watcher(request.data);
 
 			return;
 		}
 
-		if (watchers['error'] && (request as any).error) {
-			watchers['error']((request as any).error);
+		if (watchers["error"] && (request as any).error) {
+			watchers["error"]((request as any).error);
 		}
 	});
 
-	return false;
+	return undefined;
 };
 
 getRuntime()?.onMessage.addListener(messageListener);

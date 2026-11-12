@@ -1,34 +1,20 @@
+import { nativeStorage } from "../tools/nativeStorage";
 import { LoginFlow, type PendingLogin } from "../../../../../vpn/engine/login";
 import type { Session } from "./Session";
 import { sessionStore } from "./sessionStore";
 import { fetchJson } from "../api";
 import { getFullAppVersion } from "../config";
 const key = "superVpn:loginFlow";
-function call<T>(run: (done: (value: T) => void) => void): Promise<T> {
-	return new Promise((resolve, reject) => {
-		try {
-			run((value) => {
-				if (chrome.runtime.lastError)
-					reject(new Error("VpnSignInStorageFailed"));
-				else resolve(value);
-			});
-		} catch {
-			reject(new Error("VpnSignInStorageFailed"));
-		}
-	});
-}
 // Only the worker instantiates this adapter. No tokens or selectors are stored here.
 export const loginFlow = new LoginFlow<Session>({
 	async read() {
 		return (
-			await call<Record<string, PendingLogin>>((done) =>
-				chrome.storage.local.get(key, done),
-			)
+			await nativeStorage.get<Record<string, PendingLogin>>("local", key)
 		)[key];
 	},
-	write: (value) =>
-		call<void>((done) => chrome.storage.local.set({ [key]: value }, done)),
-	remove: () => call<void>((done) => chrome.storage.local.remove(key, done)),
+	write: (value) => nativeStorage.set("local", { [key]: value }),
+	remove: () => nativeStorage.remove("local", key),
+
 	nonce() {
 		const bytes = crypto.getRandomValues(new Uint8Array(32));
 		return btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""))

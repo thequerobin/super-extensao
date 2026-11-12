@@ -8,7 +8,8 @@ const { JSDOM } = require("jsdom");
 const root = path.resolve(__dirname, "..");
 const tick = () => new Promise((resolve) => setTimeout(resolve, 10));
 function load(file, mocks = {}, globals = {}, cache = new Map()) {
-  const filename = path.join(root, "vpn/source", file);
+  let filename = path.join(root, "vpn/source", file);
+  if (!fs.existsSync(filename) && filename.endsWith(".js")) filename=filename.slice(0,-3)+".ts";
   if (cache.has(filename)) return cache.get(filename);
   const exports = {};
   cache.set(filename, exports);
@@ -22,6 +23,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
     code,
     {
       exports,
+      setTimeout, clearTimeout,
       URL,
       ...globals,
       require(spec) {
@@ -925,4 +927,18 @@ test('blocked networking remains visible after logout and release requires expli
  const initial={...snapshot(),signedIn:false,state:{state:'logged-out',error:{message:'VpnTrafficBlocked'}}};const ui=await boot(initial);
  assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);assert.ok(ui.w.document.querySelector('[data-action="disconnect"]'));ui.w.confirm=()=>false;await ui.click('disconnect');assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);
  ui.w.confirm=()=>true;await ui.click('disconnect');assert.equal(ui.calls.filter(call=>call[0]==='disconnect').length,1);assert.ok(!ui.w.document.querySelector('[data-action="disconnect"]'));await ui.close();
+});
+
+test('an IO timeout removes the connected claim, offers state retry and recovers only after a new reply',async()=>{
+ const initial=snapshot();initial.state={state:'connected',server:{name:'MX#4',exitIp:'192.0.2.8'}};
+ const ui=await boot(initial);
+ try{
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'connected');
+  ui.engine.load=async()=>{throw new Error('VpnWorkerTimedOut');};await ui.app.refresh();
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'unconfirmed');
+  assert.equal(ui.w.document.querySelector('.vpn-ip'),null);
+  const retry=ui.w.document.querySelector('.vpn-status-card [data-action="refresh"]');assert.ok(retry);
+  ui.engine.load=async()=>initial;retry.click();await tick();
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'connected');
+ }finally{await ui.close();}
 });

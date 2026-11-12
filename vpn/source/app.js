@@ -20,6 +20,7 @@ export async function mountVpn(root, engine, preferences) {
     snapshot: { signedIn: false },
     loading: true,
     networkBlocked: false,
+    connectionUncertain: false,
     serversLoading: false,
     serversError: "",
     busy: false,
@@ -47,17 +48,22 @@ export async function mountVpn(root, engine, preferences) {
   const openCountries = new Set();
   const t = (key) => messages[key]?.[model.locale] || messages[key]?.en || key;
   const button = (label, action, extra = "", kind = "") =>
-    `<ui-button type="button" class="vpn-button ui-button ${kind} ${kind === "vpn-primary" ? "ui-button-primary" : kind === "vpn-danger" ? "ui-button-danger" : ""}" data-action="${action}" ${model.busy || (model.serversLoading || model.serversError) && ["fastest", "random", "connect", "recent"].includes(action) ? "disabled" : ""} ${extra}>${e(label)}</ui-button>`;
+    `<ui-button type="button" class="vpn-button ui-button ${kind} ${kind === "vpn-primary" ? "ui-button-primary" : kind === "vpn-danger" ? "ui-button-danger" : ""}" data-action="${action}" ${model.busy || ((model.serversLoading || model.serversError) && ["fastest", "random", "connect", "recent"].includes(action)) ? "disabled" : ""} ${extra}>${e(label)}</ui-button>`;
   const errorText = (error) =>
     messages[error?.message]
       ? t(error.message)
       : error?.Error || error?.message || t("requestFailed");
-  const blockedError = error => /^Vpn(Traffic(Blocked|Guard)|NetworkPrediction)/.test(error?.message || "");
+  const uncertainError = (error) =>
+    /^Vpn(Storage|Worker|OperationPending)/.test(error?.message || "");
+  const blockedError = (error) =>
+    /^Vpn(Traffic(Blocked|Guard)|NetworkPrediction)/.test(error?.message || "");
   const country = (code) => countryName(code, model.locale);
   const status = () =>
-    ["connected", "connecting"].includes(model.state.state)
-      ? model.state.state
-      : "disconnected";
+    model.connectionUncertain
+      ? "unconfirmed"
+      : ["connected", "connecting"].includes(model.state.state)
+        ? model.state.state
+        : "disconnected";
   const active = () => status() !== "disconnected";
   const saveView = () =>
     engine
@@ -112,9 +118,12 @@ export async function mountVpn(root, engine, preferences) {
       })
       .join("")}</div>`;
   }
-  const serversStatus = () => model.serversLoading
-    ? `<p class="vpn-empty" role="status">${e(t("loadingServers"))}</p>`
-    : model.serversError ? `<div class="vpn-empty ui-notice ui-notice-error" role="alert"><p>${e(model.serversError)}</p>${button(t("retry"), "refresh")}</div>` : "";
+  const serversStatus = () =>
+    model.serversLoading
+      ? `<p class="vpn-empty" role="status">${e(t("loadingServers"))}</p>`
+      : model.serversError
+        ? `<div class="vpn-empty ui-notice ui-notice-error" role="alert"><p>${e(model.serversError)}</p>${button(t("retry"), "refresh")}</div>`
+        : "";
   function connectionMarkup() {
     const server = model.state.server;
     const free = filterServers(
@@ -128,7 +137,7 @@ export async function mountVpn(root, engine, preferences) {
         ? model.snapshot.recents || []
         : []
     ).slice(0, 5);
-    return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${button(t("choose"), "servers")}</ui-actions></ui-card>
+    return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${model.connectionUncertain ? button(t("retry"), "refresh") : ""}${button(t("choose"), "servers")}</ui-actions></ui-card>
   ${!active() ? `<div class="vpn-quick">${button(t("random"), "random")}</div>` : ""}
   ${!active() ? serversStatus() : ""}
   ${!model.serversLoading && !model.serversError && free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count ui-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
@@ -207,7 +216,9 @@ export async function mountVpn(root, engine, preferences) {
         : null;
     const freeOpen = Boolean(root.querySelector("[data-free]")?.open);
     root.lang = model.locale;
-    root.innerHTML = renderUi(`<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}${model.networkBlocked ? `<ui-card as="section" class="vpn-card ui-card"><p>${e(t("blockedHelp"))}</p>${button(t("releaseNetwork"), "disconnect", "", "vpn-danger")}</ui-card>` : ""}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`);
+    root.innerHTML = renderUi(
+      `<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}${model.networkBlocked ? `<ui-card as="section" class="vpn-card ui-card"><p>${e(t("blockedHelp"))}</p>${button(t("releaseNetwork"), "disconnect", "", "vpn-danger")}</ui-card>` : ""}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`,
+    );
     if (hostNavigation) {
       hostNavigation.innerHTML = renderUi(navigationMarkup());
       if (focusedNavigation)
@@ -242,6 +253,7 @@ export async function mountVpn(root, engine, preferences) {
     attemptTime = Date.now();
     const check = () =>
       engine.checkConnection(attemptTime).catch((error) => {
+        model.connectionUncertain ||= uncertainError(error);
         model.error = errorText(error);
         render();
       });
@@ -258,13 +270,20 @@ export async function mountVpn(root, engine, preferences) {
     loadingPromise = (async () => {
       try {
         const snapshot = await engine.load((partial) => {
-          if (disposed || stateRevision !== revision && model.state.state === "logged-out") return;
+          if (
+            disposed ||
+            (stateRevision !== revision && model.state.state === "logged-out")
+          )
+            return;
           model.snapshot = { ...model.snapshot, ...partial };
           model.loading = false;
           if (stateRevision === revision && partial.state) {
             model.state = partial.state;
+            model.connectionUncertain = uncertainError(partial.state.error);
             model.networkBlocked = blockedError(partial.state.error);
-            model.error = partial.state.error ? errorText(partial.state.error) : "";
+            model.error = partial.state.error
+              ? errorText(partial.state.error)
+              : "";
           }
           if (!model.dirty) restoreRules();
           render();
@@ -278,12 +297,16 @@ export async function mountVpn(root, engine, preferences) {
         model.snapshot = snapshot;
         if (stateRevision === revision) {
           model.state = snapshot.state || { state: "disconnected" };
+          model.connectionUncertain = uncertainError(snapshot.state?.error);
           model.networkBlocked = blockedError(snapshot.state?.error);
-          model.error = snapshot.state?.error ? errorText(snapshot.state.error) : "";
+          model.error = snapshot.state?.error
+            ? errorText(snapshot.state.error)
+            : "";
         }
         if (!model.dirty) restoreRules();
         if (model.state.state === "connecting") startChecking();
       } catch (error) {
+        model.connectionUncertain ||= uncertainError(error);
         if (model.snapshot.signedIn) model.serversError = errorText(error);
         else model.error = errorText(error);
       } finally {
@@ -307,6 +330,7 @@ export async function mountVpn(root, engine, preferences) {
     try {
       await action();
     } catch (error) {
+      model.connectionUncertain ||= uncertainError(error);
       model.networkBlocked ||= blockedError(error);
       model.error = errorText(error);
     } finally {
@@ -401,8 +425,16 @@ export async function mountVpn(root, engine, preferences) {
       render();
       return;
     }
-    if (action === "refresh") { void refresh(); return; }
-    if (action === "disconnect" && model.networkBlocked && !window.confirm(t("confirmRelease"))) return;
+    if (action === "refresh") {
+      void refresh();
+      return;
+    }
+    if (
+      action === "disconnect" &&
+      model.networkBlocked &&
+      !window.confirm(t("confirmRelease"))
+    )
+      return;
     void run(async () => {
       if (action === "login") {
         await engine.signIn();
@@ -530,6 +562,7 @@ export async function mountVpn(root, engine, preferences) {
     ) {
       stateRevision++;
       model.state = { state: data.state, server: data.server };
+      model.connectionUncertain = uncertainError(data.error);
       model.networkBlocked = blockedError(data.error);
       model.error = data.error ? errorText(data.error) : "";
       if (data.state === "connecting") startChecking();
@@ -588,10 +621,11 @@ export async function mountVpn(root, engine, preferences) {
     model.page = restorePage(saved?.page);
     initialScroll = Math.max(0, Number(saved?.scrollTop) || 0);
     if (connection && initialRevision === stateRevision) {
-      model.snapshot = {...model.snapshot, ...connection};
+      model.snapshot = { ...model.snapshot, ...connection };
       model.state = connection.state;
       model.loading = false;
-      if (connection.state?.error) model.error = errorText(connection.state.error);
+      if (connection.state?.error)
+        model.error = errorText(connection.state.error);
     } else if (stateRevision !== initialRevision) {
       model.snapshot.signedIn = model.state.state !== "logged-out";
       model.loading = false;

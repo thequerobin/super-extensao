@@ -1,3 +1,4 @@
+import { VpnIOError } from "../engine/io";
 /* SPDX-License-Identifier: GPL-3.0-only */
 // Compatibility boundary with the existing Proton engine. No credentials are
 // exposed to the view; sign-in remains on the official Proton account page.
@@ -83,7 +84,8 @@ export function createEngine(initialConnection?: () => Promise<any>) {
             enabled: item.config.value,
             available: item.feature.isAvailable(),
             controllable:
-              Boolean(user) && item.feature.isControllable() &&
+              Boolean(user) &&
+              item.feature.isControllable() &&
               (key !== "secureCore" || getUserMaxTier(user) > 0),
             message: item.feature.getControlMessage(),
           },
@@ -95,27 +97,43 @@ export function createEngine(initialConnection?: () => Promise<any>) {
       const revision = connectionRevision;
       const initial = initialConnection;
       initialConnection = undefined;
-      const snapshot = (initial && await initial()) || await request<any>("connectionState");
-      if (revision !== connectionRevision && latestConnection) return latestConnection;
-      if (!snapshot || typeof snapshot.signedIn !== "boolean" ||
-          !["connected", "connecting", "disconnected", "logged-out"].includes(snapshot.state?.state))
+      const snapshot =
+        (initial && (await initial())) ||
+        (await request<any>("connectionState"));
+      if (revision !== connectionRevision && latestConnection)
+        return latestConnection;
+      if (
+        !snapshot ||
+        typeof snapshot.signedIn !== "boolean" ||
+        !["connected", "connecting", "disconnected", "logged-out"].includes(
+          snapshot.state?.state,
+        )
+      )
         throw new Error("The VPN background did not answer the request.");
       connected = snapshot.state.state === "connected";
       latestConnection = snapshot;
       return snapshot;
     },
     async load(onProgress?: (snapshot: any) => void) {
+      const revision = connectionRevision;
+      const current = () => {
+        if (revision !== connectionRevision)
+          throw new VpnIOError("VpnOperationCancelled");
+      };
       const connection = await this.readConnection();
+      current();
       if (!connection.signedIn) {
         user = undefined;
         logicals = [];
         connected = false;
-        return {signedIn: false, state: connection.state};
+        return { signedIn: false, state: connection.state };
       }
       onProgress?.(connection);
       const [loadedFeatures, recents] = await Promise.all([
-        loadAllFeatures(), getLastChoices(),
+        loadAllFeatures(),
+        getLastChoices(),
       ]);
+      current();
       features = loadedFeatures;
       const local = {
         signedIn: true,
@@ -126,23 +144,37 @@ export function createEngine(initialConnection?: () => Promise<any>) {
         recents,
       };
       onProgress?.(local);
-      user = await request<User>("user");
+      const loadedUser = await request<User>("user");
+      current();
+      user = loadedUser;
       if (!user?.VPN) throw new Error("Unable to load Proton account");
       const tier = getUserMaxTier(user);
       const ready = {
         ...local,
-        account: { name: user.VPN.Name, plan: user.VPN.PlanTitle || user.VPN.PlanName, tier },
+        account: {
+          name: user.VPN.Name,
+          plan: user.VPN.PlanTitle || user.VPN.PlanName,
+          tier,
+        },
         features: featureSummary(),
-        splitControllable: features.splitTunneling.feature.isControllable() &&
+        splitControllable:
+          features.splitTunneling.feature.isControllable() &&
           features.splitTunneling.feature.isAvailable(),
       };
       onProgress?.(ready);
       const [loadedContext, loadedLogicals] = await Promise.all([
-        getUserContext(tier), getSortedLogicals(),
+        getUserContext(tier),
+        getSortedLogicals(),
       ]);
+      current();
       context = loadedContext;
       logicals = loadedLogicals;
-      return { ...ready, servers: logicals.map(summary), features: featureSummary(), split: features.splitTunneling.config };
+      return {
+        ...ready,
+        servers: logicals.map(summary),
+        features: featureSummary(),
+        split: features.splitTunneling.config,
+      };
     },
     async signIn() {
       if (!(await browser.permissions.request({ permissions: ["proxy"] })))
@@ -164,7 +196,11 @@ export function createEngine(initialConnection?: () => Promise<any>) {
           features.secureCore.config,
         ),
       );
-      const manualId = id || (choice?.logicalId !== undefined && !choice.pick ? String(choice.logicalId) : undefined);
+      const manualId =
+        id ||
+        (choice?.logicalId !== undefined && !choice.pick
+          ? String(choice.logicalId)
+          : undefined);
       const logical = manualId
         ? logicals.find((item) => String(item.ID) === manualId)
         : pick === "random"
@@ -204,9 +240,12 @@ export function createEngine(initialConnection?: () => Promise<any>) {
       );
     },
     async disconnect() {
+      connectionRevision++;
       await request("disconnect");
     },
     async signOut() {
+      connectionRevision++;
+      user = undefined;
       await request("signOut");
       user = undefined;
       connected = false;
@@ -264,11 +303,18 @@ export function createEngine(initialConnection?: () => Promise<any>) {
           (sender?.id && sender.id !== runtime.id)
         )
           return;
-        if (message.type === "changeState" &&
-            ["connected", "connecting", "disconnected", "logged-out"].includes(message.data?.state)) {
+        if (
+          message.type === "changeState" &&
+          ["connected", "connecting", "disconnected", "logged-out"].includes(
+            message.data?.state,
+          )
+        ) {
           connectionRevision++;
           connected = message.data.state === "connected";
-          latestConnection = {signedIn: message.data.state !== "logged-out", state: message.data};
+          latestConnection = {
+            signedIn: message.data.state !== "logged-out",
+            state: message.data,
+          };
         }
         if (
           message.type === "logicalUpdate" &&

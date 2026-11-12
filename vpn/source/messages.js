@@ -1,23 +1,91 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
-  VpnNetworkPredictionFailed: {"pt-BR":"Não foi possível desativar a previsão de rede/DNS do navegador. A navegação foi pausada.",en:"Could not disable speculative browser networking/DNS. Browsing has been paused."},
-  VpnTrafficGuardProbeBypassed: {"pt-BR":"A verificação da VPN foi excluída do túnel. Remova protonvpn.com da lista de exclusões.",en:"The VPN verification is excluded from the tunnel. Remove protonvpn.com from the exclusion list."},
-  VpnTrafficBlocked: {"pt-BR":"VPN interrompida: rede dos sites bloqueada até reconectar ou liberar sem VPN.",en:"VPN interrupted: website networking is blocked until reconnection or explicit release without VPN."},
-  VpnTrafficGuardFailed: {"pt-BR":"Falha ao confirmar o bloqueio de rede. A proteção não está garantida. Interrompa a navegação e verifique as permissões.",en:"Network blocking could not be confirmed. Protection is not guaranteed. Stop browsing and check permissions."},
-  VpnTrafficGuardUnavailable: {"pt-BR":"A permissão de bloqueio de rede não está disponível. A VPN não pode iniciar com segurança.",en:"Network-blocking permission is unavailable. The VPN cannot start safely."},
-  blockedHelp: {"pt-BR":"Por segurança, durante falhas a pausa abrange todos os sites, inclusive os excluídos da VPN. A página de conta Proton e chamadas da extensão são exceções de recuperação.",en:"During failures the safety pause covers all websites, including VPN exclusions. The Proton account page and extension requests remain available for recovery."},
-  releaseNetwork: {"pt-BR":"Liberar rede sem VPN",en:"Release networking without VPN"},
-  confirmRelease: {"pt-BR":"Liberar a rede sem VPN? Os sites poderão usar seu IP real.",en:"Release networking without VPN? Websites may use your real IP."},
+  VpnStorageReadTimedOut: {
+    "pt-BR":
+      "O armazenamento da VPN não respondeu a tempo. Tente consultar novamente; o último estado exibido pode estar desatualizado.",
+    en: "VPN storage did not respond in time. Query again; the last displayed state may be outdated.",
+  },
+  VpnStorageWriteTimedOut: {
+    "pt-BR":
+      "A gravação não foi confirmada a tempo e ainda pode terminar. Consulte o estado antes de repetir; a fila de segurança foi preservada.",
+    en: "The write was not confirmed in time and may still finish. Check state before repeating; the safety queue was preserved.",
+  },
+  VpnStorageFailed: {
+    "pt-BR":
+      "O armazenamento da VPN está indisponível. Verifique o estado e tente consultar novamente.",
+    en: "VPN storage is unavailable. Check state and query again.",
+  },
+  VpnWorkerTimedOut: {
+    "pt-BR":
+      "O serviço da VPN não respondeu a tempo. O estado não está confirmado; tente consultar novamente.",
+    en: "The VPN worker did not respond in time. State is unconfirmed; query again.",
+  },
+  VpnWorkerUnavailable: {
+    "pt-BR":
+      "Não foi possível comunicar com o serviço da VPN. Uma ação enviada pode ainda terminar; consulte o estado antes de repetir.",
+    en: "Could not communicate with the VPN worker. A submitted action may still finish; check state before repeating.",
+  },
+  VpnOperationPending: {
+    "pt-BR":
+      "A ação ainda não foi confirmada e pode terminar depois. Consulte o estado antes de repetir; nenhuma repetição automática foi enviada.",
+    en: "The action is unconfirmed and may finish later. Check state before repeating; no automatic retry was sent.",
+  },
+  VpnOperationCancelled: {
+    "pt-BR":
+      "A consulta foi descartada porque o estado da VPN mudou. Consulte novamente.",
+    en: "The query was discarded because VPN state changed. Query again.",
+  },
+  unconfirmed: { "pt-BR": "Estado não confirmado", en: "State unconfirmed" },
+  VpnNetworkPredictionFailed: {
+    "pt-BR":
+      "Não foi possível desativar a previsão de rede/DNS do navegador. A navegação foi pausada.",
+    en: "Could not disable speculative browser networking/DNS. Browsing has been paused.",
+  },
+  VpnTrafficGuardProbeBypassed: {
+    "pt-BR":
+      "A verificação da VPN foi excluída do túnel. Remova protonvpn.com da lista de exclusões.",
+    en: "The VPN verification is excluded from the tunnel. Remove protonvpn.com from the exclusion list.",
+  },
+  VpnTrafficBlocked: {
+    "pt-BR":
+      "VPN interrompida: rede dos sites bloqueada até reconectar ou liberar sem VPN.",
+    en: "VPN interrupted: website networking is blocked until reconnection or explicit release without VPN.",
+  },
+  VpnTrafficGuardFailed: {
+    "pt-BR":
+      "Falha ao confirmar o bloqueio de rede. A proteção não está garantida. Interrompa a navegação e verifique as permissões.",
+    en: "Network blocking could not be confirmed. Protection is not guaranteed. Stop browsing and check permissions.",
+  },
+  VpnTrafficGuardUnavailable: {
+    "pt-BR":
+      "A permissão de bloqueio de rede não está disponível. A VPN não pode iniciar com segurança.",
+    en: "Network-blocking permission is unavailable. The VPN cannot start safely.",
+  },
+  blockedHelp: {
+    "pt-BR":
+      "Por segurança, durante falhas a pausa abrange todos os sites, inclusive os excluídos da VPN. A página de conta Proton e chamadas da extensão são exceções de recuperação.",
+    en: "During failures the safety pause covers all websites, including VPN exclusions. The Proton account page and extension requests remain available for recovery.",
+  },
+  releaseNetwork: {
+    "pt-BR": "Liberar rede sem VPN",
+    en: "Release networking without VPN",
+  },
+  confirmRelease: {
+    "pt-BR": "Liberar a rede sem VPN? Os sites poderão usar seu IP real.",
+    en: "Release networking without VPN? Websites may use your real IP.",
+  },
   VpnProxyControlledElsewhere: {
     "pt-BR": "Outra extensão ou uma política do navegador controla o proxy.",
     en: "Another extension or a browser policy controls the proxy.",
   },
   VpnProxyNotApplied: {
-    "pt-BR": "O navegador não confirmou a configuração da VPN. Tente conectar novamente.",
+    "pt-BR":
+      "O navegador não confirmou a configuração da VPN. Tente conectar novamente.",
     en: "The browser did not confirm the VPN configuration. Try connecting again.",
   },
   VpnProxyClearFailed: {
-    "pt-BR": "Não foi possível confirmar a remoção do proxy. Tente desconectar novamente.",
+    "pt-BR":
+      "Não foi possível confirmar a remoção do proxy. Tente desconectar novamente.",
     en: "Could not confirm removal of the proxy. Try disconnecting again.",
   },
   VpnProxyApiError: {
@@ -29,11 +97,13 @@ export const messages = {
     en: "Proxy access is unavailable in this browser.",
   },
   VpnInvalidProxyEndpoint: {
-    "pt-BR": "O endereço ou a porta do servidor é inválido. Atualize a lista de servidores.",
+    "pt-BR":
+      "O endereço ou a porta do servidor é inválido. Atualize a lista de servidores.",
     en: "The server address or port is invalid. Refresh the server list.",
   },
   VpnWebRTCProtectionUnavailable: {
-    "pt-BR": "Não foi possível ativar a proteção WebRTC. Verifique as permissões do navegador.",
+    "pt-BR":
+      "Não foi possível ativar a proteção WebRTC. Verifique as permissões do navegador.",
     en: "Could not enable WebRTC protection. Check browser permissions.",
   },
   VpnWebRTCSettingsFailed: {
@@ -41,11 +111,13 @@ export const messages = {
     en: "The browser could not update WebRTC protection.",
   },
   VpnSessionStorageFailed: {
-    "pt-BR": "Não foi possível salvar ou ler a sessão da VPN neste dispositivo.",
+    "pt-BR":
+      "Não foi possível salvar ou ler a sessão da VPN neste dispositivo.",
     en: "Could not save or read the VPN session on this device.",
   },
   VpnInvalidSessionResponse: {
-    "pt-BR": "O serviço retornou uma sessão inválida. Entre na conta novamente.",
+    "pt-BR":
+      "O serviço retornou uma sessão inválida. Entre na conta novamente.",
     en: "The service returned an invalid session. Sign in again.",
   },
   VpnSessionUnavailable: {
@@ -53,7 +125,8 @@ export const messages = {
     en: "Sign in to your Proton account to connect.",
   },
   VpnSignInSuperseded: {
-    "pt-BR": "Este pedido de login foi cancelado por outra ação. Inicie o login novamente.",
+    "pt-BR":
+      "Este pedido de login foi cancelado por outra ação. Inicie o login novamente.",
     en: "This sign-in request was superseded. Start signing in again.",
   },
   heading: {
@@ -216,7 +289,8 @@ export const messages = {
     en: "WebRTC protection",
   },
   preventWebrtcLeakHelp: {
-    "pt-BR": "Obrigatória enquanto a VPN está ativa. Impede UDP WebRTC fora do proxy.",
+    "pt-BR":
+      "Obrigatória enquanto a VPN está ativa. Impede UDP WebRTC fora do proxy.",
     en: "Required while VPN is active. Prevents non-proxied WebRTC UDP.",
   },
   notification: {

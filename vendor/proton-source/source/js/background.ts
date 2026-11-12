@@ -1,4 +1,5 @@
 "use background";
+import { nativeStorage } from "./tools/nativeStorage";
 import { networkGuard, networkBlocked } from "./vpn/networkGuard";
 import { initPrivacyWatchers } from "./vpn/initPrivacyWatchers";
 import { emitPrivacyWarning } from "./notifications/privacyWarning";
@@ -20,6 +21,7 @@ initSentry();
 initStateRecovery();
 initAuthInterceptor();
 initMessaging();
+nativeStorage.watchFailures(() => privacyFault());
 initPrivacyWatchers();
 triggerPromise(
 	(async () => {
@@ -46,6 +48,7 @@ initIdleWatcher();
 // Share only effective routing rules and confirmed state with the host icon.
 import {
 	getCurrentStateIfDefined,
+	privacyFault,
 	isCurrentStateConnected,
 	connectionLifecycle,
 } from "./state";

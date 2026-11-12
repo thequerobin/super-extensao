@@ -13,7 +13,7 @@ function load(file, mocks = {}, globals = {}) {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}
   }).outputText;
   vm.runInNewContext(code, {
-    exports, URL, ...globals,
+    exports, URL, setTimeout, clearTimeout, ...globals,
     require(spec) {
       if (spec in mocks) return mocks[spec];
       return load(path.relative(source, path.resolve(path.dirname(filename), spec)), mocks, globals);
@@ -110,9 +110,9 @@ test('VPN popup uses a direct reply and rejects when the receiver disappears', a
   assert.equal(await sendMessageTo('state'), 'connected');
 
   runtime.sendMessage = async () => {throw new Error('Receiving end does not exist.');};
-  await assert.rejects(sendMessageTo('state'), /Receiving end does not exist/);
+  await assert.rejects(sendMessageTo('state'), /VpnWorkerUnavailable/);
   runtime.sendMessage = async () => undefined;
-  await assert.rejects(sendMessageTo('state'), /did not answer/);
+  await assert.rejects(sendMessageTo('state'), /VpnWorkerUnavailable/);
 });
 
 test('VPN storage cannot overwrite or delete host settings', async () => {

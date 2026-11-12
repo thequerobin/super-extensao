@@ -145,7 +145,7 @@ function adapterFixture(){
   './account/user/getRegisteredLocale':{getRegisteredLocale:async()=> 'pt-BR'},'./tools/locale':{getLocale:()=> 'en'},'./tools/getBrowserSubType':{getBrowserSubType:async()=> 'chromium'},
   './config':{baseAPIURL:'https://api.test/api/',getFullAppVersion:()=> 'test-app',routes:[],incompatibleSoftware:['blocker'],apiDomainsExclusion:['api.test']},'./tools/translate':{c:translate},
  };
- const run=(file,localMocks,globals={})=>{const exports={},filename=path.resolve(__dirname,'../vendor/proton-source/source/js',file+'.ts');vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,URL,Headers,Response,...globals,require:id=>{if(!localMocks[id])throw Error('Unexpected '+id);return localMocks[id];}},{filename});return exports;};
+ const run=(file,localMocks,globals={})=>{const exports={},filename=path.resolve(__dirname,'../vendor/proton-source/source/js',file+'.ts');vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,URL,Headers,Response,...globals,require:id=>{if(!localMocks[id])return require('./helpers/load-ts.cjs')(path.resolve(path.dirname(filename),id+'.ts'),globals);return localMocks[id];}},{filename});return exports;};
  let request=async()=>json({Code:1000,ok:true});
  const client=run('httpClient',mocks,{chrome:{runtime:{},storage:{local:area,session:area,onChanged:{addListener:fn=>{onStorage=fn;}}}},fetch:async(url,init)=>{calls.push({url,init});return request();}});
  const api=run('api',{'./httpClient':client,'./config':mocks['./config'],'./tools/matchDomainList':{matchDomainList:()=>false},'./tools/broadcastMessage':{broadcastMessage:(...args)=>events.push(args)},'./tools/update':{getUpdateError:async()=>update,setUpdateError:value=>{update=value;}}});
@@ -191,7 +191,7 @@ test('account adapters respect a consumed transport auth retry but keep their le
    '../../messaging/MessageType':{BackgroundData:{USER:'user'}},
   };
   const exports={},filename=path.resolve(__dirname,'../vendor/proton-source/source/js/account/user',name+'.ts');
-  vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,Date,require:id=>{if(!mocks[id])throw Error('Unexpected '+id);return mocks[id];}},{filename});
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,Date,require:id=>{if(!mocks[id])return require('./helpers/load-ts.cjs')(path.resolve(path.dirname(filename),id+'.ts'));return mocks[id];}},{filename});
   if(consumed){await assert.rejects(exports[name](true));assert.equal(refreshes,0);assert.equal(calls,1);}
   else{assert.equal((await exports[name](true)).ID,'user');assert.equal(refreshes,1);assert.equal(calls,2);}
  }

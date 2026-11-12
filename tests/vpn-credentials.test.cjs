@@ -152,12 +152,12 @@ test('storage adapter preserves the legacy key and fails explicitly on native AP
  const area=(name,values)=>({get(k,done){events.push([name,'get',k]);done({[k]:values[k]});},set(value,done){Object.assign(values,value);events.push([name,'set',Object.keys(value)]);done();},remove(k,done){delete values[k];events.push([name,'remove',k]);done();}});
  const chrome={runtime,storage:{local:area('local',local),session:area('session',session)}},exports={};
  const file=path.resolve(__dirname,'../vendor/proton-source/source/js/account/credentials/storedCredentials.ts');
- vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,chrome,Promise});
+ Object.assign(exports,require('./helpers/load-ts.cjs')(file,{chrome}));
  const port=exports.storedCredentials;assert.equal((await port.load()).sessionUid,'A');
  await port.set({sessionUid:'A',time:1200000,credentials:token('new')});assert.equal(local[key].credentials.Username,'new');
  await port.remove();assert.equal(local[key],undefined);assert.equal(session[key],undefined);
  chrome.storage.local.get=(_,done)=>{runtime.lastError={message:'private native detail'};done({});delete runtime.lastError;};
- await assert.rejects(port.load(),/VpnCredentialStorageFailed/);
+ await assert.rejects(port.load(),/VpnStorageFailed/);
  assert.ok(events.every(event=>event[2]===key||Array.isArray(event[2])&&event[2][0]===key));
 });
 

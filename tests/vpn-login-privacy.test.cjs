@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
 function load(relative,mocks={},globals={}){
  const file=path.resolve(__dirname,'..',relative),exports={};
- vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,URL,URLSearchParams,Uint8Array,Promise,Date,crypto:require('node:crypto').webcrypto,btoa,chrome:globals.chrome,...globals,require:id=>mocks[id] || (id.startsWith('.')?load(path.relative(path.resolve(__dirname,'..'),path.resolve(path.dirname(file),id+'.ts')),mocks,globals):{})},{filename:file});return exports;
+ vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,setTimeout,clearTimeout,URL,URLSearchParams,Uint8Array,Promise,Date,crypto:require('node:crypto').webcrypto,btoa,chrome:globals.chrome,...globals,require:id=>mocks[id] || (id.startsWith('.')?load(path.relative(path.resolve(__dirname,'..'),path.resolve(path.dirname(file),id+'.ts')),mocks,globals):{})},{filename:file});return exports;
 }
 const {LoginFlow,forkPayload,isAccountUrl}=load('vpn/engine/login.ts');
 const {WebRTCProtection,WebRTCState}=load('vpn/engine/webrtc.ts');
@@ -97,7 +97,7 @@ test('real login adapter retains service URL contracts, strong nonce and encoded
  const next=new URL(await f.flow.begin({host:'https://account.proton.me'})).searchParams.get('state');assert.notEqual(next,state);await f.flow.complete({state:next,selector:'private/selector?x=#',persistent:true});assert.equal(f.requests[0],'auth/sessions/forks/private%2Fselector%3Fx%3D%23');assert.equal(f.saved[0].persistent,true);assert.ok(!JSON.stringify(f.values).includes('private'));assert.ok(!JSON.stringify(f.values).includes('AccessToken'));
 });
 test('real login adapter fails closed on native storage errors',async()=>{
- const f=nativeLoginFixture();f.chrome.runtime.lastError={message:'native private details'};await assert.rejects(f.flow.begin({host:'https://account.proton.me'}),e=>e.message==='VpnSignInStorageFailed');assert.equal(f.requests.length,0);
+ const f=nativeLoginFixture();f.chrome.runtime.lastError={message:'native private details'};await assert.rejects(f.flow.begin({host:'https://account.proton.me'}),e=>e.message==='VpnStorageFailed');assert.equal(f.requests.length,0);
 });
 test('real fork facade commits through the owned flow and returns only the public acknowledgment',async()=>{
  const f=nativeLoginFixture();const state=new URL(await f.flow.begin({host:'https://account.proton.me'})).searchParams.get('state');let refresh=0;

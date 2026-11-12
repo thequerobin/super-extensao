@@ -1,31 +1,32 @@
-import type {User, UserResult} from './User';
-import {isUserResult} from './User';
-import {fetchJson, isUnauthorizedError} from '../../api';
-import {readSession} from '../readSession';
-import {refreshToken} from '../refreshToken';
-import {getAccessToken} from '../getAccessToken';
-import {getCacheAge} from '../../tools/getCacheAge';
-import {getElapsedMillisecondsSinceLastActivity} from '../../tools/activity';
-import {getRuntime} from '../../tools/getRuntime';
-import {milliSeconds} from '../../tools/milliSeconds';
-import {isLoggedIn, logIn} from '../../state';
-import {fetchPmUser} from './getPmUser';
-import {catchPromise, triggerPromise} from '../../tools/triggerPromise';
-import {checkNetwork} from '../../vpn/checkNetwork';
-import {storedUser} from './storedUser';
-import {loadCachedUser} from './loadCachedUser';
+import { observe, VpnIOError } from "../../../../../../vpn/engine/io";
+import type { User, UserResult } from "./User";
+import { isUserResult } from "./User";
+import { fetchJson, isUnauthorizedError } from "../../api";
+import { readSession } from "../readSession";
+import { refreshToken } from "../refreshToken";
+import { getAccessToken } from "../getAccessToken";
+import { getCacheAge } from "../../tools/getCacheAge";
+import { getElapsedMillisecondsSinceLastActivity } from "../../tools/activity";
+import { getRuntime } from "../../tools/getRuntime";
+import { milliSeconds } from "../../tools/milliSeconds";
+import { isLoggedIn, logIn } from "../../state";
+import { fetchPmUser } from "./getPmUser";
+import { catchPromise, triggerPromise } from "../../tools/triggerPromise";
+import { checkNetwork } from "../../vpn/checkNetwork";
+import { storedUser } from "./storedUser";
+import { loadCachedUser } from "./loadCachedUser";
 import {
 	getIdleThreshold,
 	getUserBlockingUpdateTTL,
 	getUserTTL,
-} from '../../intervals';
-import {BackgroundData} from '../../messaging/MessageType';
+} from "../../intervals";
+import { BackgroundData } from "../../messaging/MessageType";
 
 let tries: number[] = [];
 
 const fetchUser = async (): Promise<User | UserResult | undefined> => {
 	const session = await readSession();
-	const user = await fetchJson<User | UserResult | undefined>('vpn/v2');
+	const user = await fetchJson<User | UserResult | undefined>("vpn/v2");
 	if (!session.uid || session.uid !== (await readSession()).uid)
 		return undefined;
 
@@ -144,10 +145,14 @@ export const getUser = async (
 	const user = await calculateUser(tryReAuthentication, fresh);
 
 	catchPromise(
-		getRuntime()?.sendMessage({
-			event: BackgroundData.USER,
-			user,
-		}),
+		observe(
+			getRuntime().sendMessage({
+				event: BackgroundData.USER,
+				user,
+			}),
+			5000,
+			new VpnIOError("VpnWorkerTimedOut"),
+		),
 	);
 
 	return user;
