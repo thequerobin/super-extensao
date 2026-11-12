@@ -63,3 +63,6 @@ A 1.7.15 adiciona `vpn-blocked.html`: novas navegações durante o bloqueio abre
 
 
 A 1.7.16 corrige o aviso abrindo mesmo com a VPN confirmada: bloqueio e permissão de sessão declaram `main_frame` e demais tipos DNR explicitamente, e a confirmação rejeita regras legadas sem essa cobertura. Atualize/recarregue a extensão antes de abrir os sites novamente. [Correção e validação](../docs/vpn-engine.md#correção-de-navegação-confirmada--1716).
+
+
+A 1.7.17 atualiza as dependências compatíveis da VPN, preserva o Sentry desativado e substitui o reempacotamento por processamento ZIP em memória, sem extração/shell. Para compilar a VPN, use Node >=24.11.0. A correção da 1.7.16 foi validada pelo usuário; esta versão ainda requer conferência no navegador. [Versões, licenças e alertas remanescentes](../docs/vpn-dependencias.md).

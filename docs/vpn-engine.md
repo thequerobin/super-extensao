@@ -207,3 +207,8 @@ A 1.7.15 podia mostrar conexão confirmada enquanto toda nova navegação abria 
 Bloqueio e permissão passam a enumerar os tipos DNR explicitamente, incluindo `main_frame`, subquadros e recursos em segundo plano. O readback exige a lista completa, independentemente da ordem, e rejeita exclusões vazias legadas ou uma permissão sem navegação principal. A regra WebTransport de prioridade 11000 continua bloqueando esse transporte. As regras duráveis antigas são substituídas pelo bootstrap já existente; a confirmação da conexão continua dependendo de proxy e guard válidos.
 
 Os testes de regressão avaliam a seleção por tipo e prioridade: bloqueado → redirecionar navegação; conectado → permitir navegação e recursos; nova falha → redirecionar novamente. Também reproduzem a regra legada vazia e a permissão sem `main_frame`, que devem ser consideradas bloqueadas. A [referência oficial das condições DNR](https://developer.chrome.com/docs/extensions/reference/api/declarativeNetRequest#type-RuleCondition) documenta a exclusão de `main_frame` da cobertura padrão. A reprodução/validação em navegador real permanece pendente.
+
+
+## Manutenção de dependências — 1.7.17
+
+A atualização compatível e os artefatos foram validados após instalação limpa. O empacotador deixa de extrair arquivos ou executar shell; a configuração desativada do Sentry foi testada com o cliente atualizado. Node mínimo da compilação VPN: 24.11.0. Versões, licenças declaradas e os alertas restantes das ferramentas estão em [vpn-dependencias.md](vpn-dependencias.md). A validação de IP/DNS/tráfego permanece separada da auditoria npm.

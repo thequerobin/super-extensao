@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.16**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.17**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Dependências da VPN 1.7.17
+
+O usuário informou que validou a navegação da 1.7.16. Nesta etapa foram atualizadas dependências compatíveis, removidos `decompress` e `archiver`, substituído o reempacotamento por ZIP em memória e corrigida a resolução AJV do Webpack. Instalação limpa (`npm ci --ignore-scripts --legacy-peer-deps`), build de produção, TypeScript do worker/interface, UI e whitespace passaram.
+
+A suíte completa passou **397 testes**. Os sete novos contratos cobrem nomes com espaços/metacaracteres, preservação de caminhos e conteúdo sem extração, ordenação/data determinísticas em fusos diferentes, rejeição de caminhos inválidos preservando a origem, erro CLI sem sobrescrever destino, limite antes de descompressão, data inválida configuração desativada do cliente Sentry real atualizado e avisos completos/reproduzíveis de licenças das dependências de produção. [Versões e snapshots de auditoria](vpn-dependencias.md): zero alertas críticos/altos, 31 baixos/moderados em ferramentas; zero na árvore npm de produção. Isso não constitui certificação de segurança dos bundles ou da VPN. Conexão e tráfego reais continuam pendentes nesta versão.
 
 ## Redirecionamento com VPN conectada 1.7.16
 
@@ -78,7 +84,7 @@ A suíte completa passou **207 testes**. Compilação de produção, checagens T
 
 ## Abertura da VPN 1.7.2
 
-A suíte completa passou **183 testes**. Os seis novos contratos cobrem a primeira renderização conectada com carregamento de rede pendente, estados realmente conectando/desconectados, logout durante a leitura inicial, ausência de segredos no resumo público e inicialização do painel antes da barreira de primeiro frame. O shell pré-consulta o worker e acompanha eventos durante o carregamento dos scripts; uma resposta inicial antiga não sobrepõe desconexão/logout. O adaptador não deduz conexão em andamento da mera presença de servidor salvo.
+A suíte completa passou **183 testes**. Os sete novos contratos cobrem a primeira renderização conectada com carregamento de rede pendente, estados realmente conectando/desconectados, logout durante a leitura inicial, ausência de segredos no resumo público e inicialização do painel antes da barreira de primeiro frame. O shell pré-consulta o worker e acompanha eventos durante o carregamento dos scripts; uma resposta inicial antiga não sobrepõe desconexão/logout. O adaptador não deduz conexão em andamento da mera presença de servidor salvo.
 
 A mensagem `connectionState` entrega somente resumo público do servidor, estado e erro de apresentação; confirma o proxy no navegador e não busca plano ou lista de servidores. Conta e servidores podem continuar carregando sem trocar o cartão conectado por um spinner. Abrir o painel não envia comando `connect`. O estado não é persistido como uma tela conectada para a próxima abertura. Quando o worker ainda está restaurando uma conexão, ela continua sendo apresentada como conectando.
 

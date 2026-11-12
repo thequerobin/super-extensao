@@ -20,3 +20,8 @@ Alterações locais:
 - Guarda temporária de tráfego na inicialização somente quando houver uma conexão VPN anterior a recuperar.
 
 O manifesto original é referência de compilação; o manifesto da Super Extensão controla permissões e identidade da extensão integrada. A identidade pública da extensão oficial não é copiada.
+
+
+## Manutenção local 1.7.17 — 12/11/2026
+
+Dependências estáveis compatíveis atualizadas e lockfile renovado. Sentry continua desativado. AJV 8 é explícito para o build Webpack; Node mínimo do módulo passa a 24.11.0. `decompress` foi substituído por `fflate` no reempacotador, que não extrai arquivos nem executa shell, preserva o destino em falhas e normaliza datas/ordem. `archiver`, sem uso nas fontes presentes, foi removido. Licença GPL-3.0 original e avisos preservados. Detalhes e alertas de ferramentas remanescentes em `../../docs/vpn-dependencias.md`.
