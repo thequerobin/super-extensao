@@ -2,6 +2,16 @@
 
 Revisado em 12 de novembro de 2026, referência **1.7.19**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
+## Proton real no Helium 1.7.19 — validação parcial
+
+Em 12 de novembro de 2026, com fontes do commit `4ae6b9b`, a página de detalhes do Helium confirmou a extensão 1.7.19 carregada da pasta principal. Depois de nova autenticação feita pelo usuário, o painel reconheceu a conta e conectou ao US-FREE#95, em Miami. O diagnóstico Cloudflare mudou da referência sem VPN (BR/GRU) para US/MIA, com outro IP. A troca manual para CA-FREE#30, Montreal, foi seguida por uma terceira medição com IP diferente e localização CA/YUL. O indicador mostrou destino externo usando VPN e páginas internas fora dela.
+
+No servidor dos EUA, o BrowserLeaks exibiu WebRTC “No Leak”, sem endereços WebRTC local/público, e oito resolvedores DNS de Datacamp/CDN77 em Miami. Não houve captura de pacotes, comparação DNS antes/depois nem referência IPv6 independente; esses resultados se limitam às páginas e ao estado saudável observados. Não comprovam proteção em todos os destinos, sockets existentes ou durante falhas.
+
+O agente recarregou a extensão pela página de detalhes para reiniciar seu worker. O controle do computador foi interrompido por não conseguir determinar a URL atual com confiança; o usuário então confirmou **“conectou”**. Essa é evidência relatada de reconexão após recarga, sem comprovação externa posterior do tráfego, do servidor restaurado ou da proteção durante a transição. Os testes de queda, suspensão, reinício completo do navegador, recuperação/liberação e regras por site continuam pendentes. [Registro por cenário e limites](vpn-validacao-pc.md#registro-dos-resultados).
+
+Não foram publicados IP residencial, identificador de conta, tokens ou capturas pessoais. Esta rodada registra evidências e mantém a versão 1.7.19; não altera a extensão.
+
 ## Execução no Windows 1.7.19
 
 Após pull do commit `573eedc`, foram executados **419 testes automatizados**, todos aprovados, build de produção da VPN, TypeScript do worker/interface VPN, núcleo/aplicação da Nova guia e `check:ui`. As dependências locais Proton foram reinstaladas conforme o lockfile. O arquivo de avisos de licenças passa a ter checkout LF explícito para manter sua comparação reproduzível no Windows.
