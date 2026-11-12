@@ -1,91 +1,9 @@
 import { DB, Storage } from "../lib";
 import { defaultLocale } from "../locales";
 
-/**
- * Database state
- */
-export interface State {
-  /** Background state */
-  background: BackgroundState;
-  /** Widget state */
-  [key: `widget/${string}`]: WidgetState | null;
-  /** Plugin data */
-  [key: `data/${string}`]: unknown;
-  /** Whether focus has been activated */
-  focus: boolean;
-  /** Locale selected */
-  locale: string;
-  /** Time zone selected, if any */
-  timeZone: string | null;
-}
-
-export interface BackgroundState {
-  id: string;
-  key: string;
-  display: BackgroundDisplay;
-}
-
-export interface BackgroundDisplay {
-  blur?: number;
-  luminosity?: number;
-}
-
-export interface WidgetState {
-  id: string;
-  key: string;
-  order: number;
-  display: WidgetDisplay;
-}
-
-export interface WidgetDisplay {
-  colour?: string;
-  fontFamily?: string;
-  fontSize?: number;
-  fontWeight?: number;
-  position: WidgetPosition;
-}
-
-export type WidgetPosition =
-  | "topLeft"
-  | "topCentre"
-  | "topRight"
-  | "middleLeft"
-  | "middleCentre"
-  | "middleRight"
-  | "bottomLeft"
-  | "bottomCentre"
-  | "bottomRight";
-
-// Init data for the store
-const initData: State = {
-  background: {
-    id: "default-gradient",
-    key: "background/gradient",
-    display: {
-      luminosity: -0.2,
-      blur: 0,
-    },
-  },
-  "widget/default-time": {
-    id: "default-time",
-    key: "widget/time",
-    order: 0,
-    display: {
-      position: "middleCentre",
-    },
-  },
-  "widget/default-greeting": {
-    id: "default-greeting",
-    key: "widget/greeting",
-    order: 1,
-    display: {
-      position: "middleCentre",
-    },
-  },
-  focus: false,
-  locale: defaultLocale,
-  timeZone: null,
-};
+import { defaults, State } from "../../../../newtab/engine/model";
+export * from "../../../../newtab/engine/model";
+const initData = defaults(defaultLocale);
 
 // Database storage
 export const db = DB.init<State>(initData);

@@ -47,14 +47,18 @@ const Root: React.FC = () => {
           Stream.subscribe(
             errors,
             handleError(
-              t("Cannot save your settings. You may have hit the maximum storage capacity."),
+              t(
+                "Cannot save your settings. You may have hit the maximum storage capacity.",
+              ),
               true,
             ),
           ),
         )
         .catch(
           handleError(
-            t("Cannot open settings storage. Your settings cannot be loaded or saved."),
+            t(
+              "Cannot open settings storage. Your settings cannot be loaded or saved.",
+            ),
             true,
           ),
         ),
@@ -78,10 +82,19 @@ const Root: React.FC = () => {
     ]);
 
     // Storage is ready
-    subscriptions.then(() => {
-      setReady(true);
-      migrate();
-    });
+    subscriptions
+      .then(async () => {
+        await migrate();
+        setReady(true);
+      })
+      .catch(
+        handleError(
+          t(
+            "Cannot open settings storage. Your settings cannot be loaded or saved.",
+          ),
+          true,
+        ),
+      );
 
     return () => {
       // Remove error subscriptions

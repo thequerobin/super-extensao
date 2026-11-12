@@ -51,7 +51,7 @@ const config = {
       },
       {
         test: /\.(ts|tsx)$/,
-        include: path.resolve("./src"),
+        include: [path.resolve("./src"),path.resolve("../../newtab/engine")],
         loader: "ts-loader",
       },
     ],

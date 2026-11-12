@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.17**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.18**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Nova guia: primeira extração do Tabliss 1.7.18
+
+A suíte completa passou **418 testes**, com 21 contratos novos do núcleo de estado/configuração/persistência, ações de widgets e importação/exportação. Eles cobrem importações inválidas sem apagar dados, v2/v3 e IDs, isolamento de namespace, filas e falhas de gravação, eco antigo, atualizações entre abas, imagens binárias reabertas em IndexedDB, migração com confirmação e inicialização do bundle de produção em DOM simulado. O núcleo não importa Tabliss/React; os componentes atuais usam suas fachadas.
+
+Build da Nova guia, TypeScript do núcleo isolado e da aplicação adaptada, `check:ui` e `git diff --check` passaram. São testes simulados; a conferência com dados existentes, imagens, editor, várias abas e reinício no navegador pessoal continua pendente. [Responsabilidades, limites e reprodução](newtab-engine.md).
 
 ## Próxima execução no PC do usuário — pendente
 

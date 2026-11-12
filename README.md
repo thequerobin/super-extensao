@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.17.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.18.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -15,7 +15,7 @@ Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincroniza�
 | Núcleo Google Drive | Reconciliação, escrita condicional, criptografia, backup e retomada pelo diário | Ampliar a validação real relatada pelo usuário, medir grandes importações e suportar pastas sobrepostas |
 | VPN | Interface, regras, controlador de proxy, estado/recuperação, credenciais temporárias, transporte HTTP, catálogo/seleção, WebRTC e coordenação de login próprios | Revisão minuciosa e validação real; contratos do serviço e adaptadores Chromium/Proton permanecem |
 | Limpeza, Autoplay e Abas | Controles locais e testes automatizados | Validar fechamento nativo e recuperação no Helium |
-| Nova guia | Tabliss adaptado, editor, widgets e importação/exportação | Regressão visual e teste dos provedores online utilizados |
+| Nova guia | Núcleo próprio de estado/configuração/persistência e importação/exportação; dashboard/editor/widgets adaptados do Tabliss | Extrair orquestração/editor/provedores e validar dados existentes no navegador real |
 
 O roteiro com prioridades e critérios de conclusão fica em [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md). A cobertura e as limitações dos testes ficam em [docs/validacao.md](docs/validacao.md).
 
@@ -90,7 +90,7 @@ O sinal fica no canto superior direito, preservando o badge de limpeza pausada. 
 
 ### Nova guia
 
-Tabliss 2.6.0 adaptado, com editor de fundos e widgets, PT-BR/inglês, importação/exportação e fundo inicial local. A engrenagem abre o editor; o botão **Super Extensão** abre os controles da extensão. A importação substitui a configuração do dashboard; imagens próprias precisam ser selecionadas novamente.
+A **1.7.18** extrai estado, configuração, persistência, ações de fundos/widgets e importação/exportação para `newtab/engine`. O dashboard, editor e componentes dos widgets continuam baseados no Tabliss 2.6.0 adaptado. Mantém PT-BR/inglês, os dados existentes e o fundo inicial local. [Escopo, compatibilidade e limites da extração](docs/newtab-engine.md). A engrenagem abre o editor; o botão **Super Extensão** abre os controles da extensão. A importação substitui a configuração do dashboard; imagens próprias precisam ser selecionadas novamente.
 
 Preferências usam `tabliss/config` em `storage.sync`; imagens e cache usam IndexedDB e não sincronizam pelo JSON. Unsplash/GIPHY permitem configurar a chave nas opções do fundo, salva apenas neste dispositivo; sem chave, exibem a orientação correspondente. [Carregamento de imagens e configuração](docs/newtab-images.md). Provedores online dependem dos serviços e de suas cotas. O envio de erros do Tabliss ao Sentry foi desativado. Veja [as modificações](newtab/MODIFICATIONS.md).
 

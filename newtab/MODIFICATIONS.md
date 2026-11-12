@@ -1,5 +1,9 @@
 # Tabliss 2.6.0 na Super Extensão
 
+## Primeira extração do núcleo — Super Extensão 1.7.18
+
+Estado reativo, defaults, ações de configuração, validação/conversão v2/v3, importação/exportação, fila de persistência e coordenação de migração usam `newtab/engine`. Os módulos nos caminhos antigos são fachadas para esse núcleo. O adaptador de plataforma preserva `tabliss/config`, IndexedDB/cache e preferências compartilhadas. Importação inválida não limpa mais o estado antes de ser validada; gravações são ordenadas e a origem legada só é removida após confirmação. Dashboard/editor e widgets/provedores ainda usam Tabliss. [Escopo e limites](../docs/newtab-engine.md).
+
 ## Alinhamento dos controles — Super Extensão 1.6.11
 
 A barra esquerda e o botão direito usam o mesmo recuo superior/lateral de 12 px e altura de 46 px, inclusive em telas estreitas. A barra esquerda tem opacidade de 50% em repouso, com 100% ao passar o mouse ou focar um controle pelo teclado. O movimento reduzido desativa a transição. Os comportamentos dos botões foram preservados.
@@ -18,7 +22,7 @@ O editor, as configurações dos fundos/widgets e seus controles auxiliares usam
 
 Para reconstruir, use a raiz completa do projeto e `npm run build:newtab`; o catálogo compartilhado fica fora da pasta de origem Tabliss. [Arquitetura e comandos](../docs/ui-components.md). Fontes, licenças e atribuições da origem permanecem preservadas.
 
-Este diretório contém a página completa do Tabliss 2.6.0, um componente GPL-3.0. O texto da licença está em [LICENSE.txt](LICENSE.txt), os avisos das dependências em [main.js.LICENSE.txt](main.js.LICENSE.txt) e o código-fonte correspondente em [vendor/tabliss-source](../vendor/tabliss-source/).
+Este diretório contém a Nova guia baseada no Tabliss 2.6.0, com núcleo próprio de configuração/persistência desde a 1.7.18 e componentes de interface/provedores ainda adaptados do original GPL-3.0. O texto da licença está em [LICENSE.txt](LICENSE.txt), os avisos das dependências em [main.js.LICENSE.txt](main.js.LICENSE.txt) e o código-fonte correspondente em [vendor/tabliss-source](../vendor/tabliss-source/).
 
 Origem: [joelshepherd/tabliss, tag 2.6.0](https://github.com/joelshepherd/tabliss/tree/2.6.0), commit `a273d6329cec1f0813e04fde907111e648821946`. O bundle de produção foi obtido da instalação 2.6.0 do Tabliss, ID `hipekcciheckooncpjeljhnekcoolahp`. A atribuição, os avisos e a licença do componente permanecem neste diretório e no código-fonte correspondente.
 

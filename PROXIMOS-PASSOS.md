@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.17**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.18**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -117,6 +117,18 @@ A extração dos módulos funcionais está implementada: regras/PAC, controlador
 - [ ] Fazer os próximos controles adotarem `ui-components.css` e seus tokens.
 
 ## 4. Limpeza, abas e Nova guia
+
+### Extração da Nova guia
+
+- [x] Etapa 1 na 1.7.18: banco reativo, modelo/defaults, ações, importação/exportação, fila de persistência e migração passam ao núcleo próprio `newtab/engine`. Caminhos de armazenamento e imagens existentes são preservados.
+- [x] Validar importação antes de limpar o estado; ordenar escritas e preservar a origem legada até confirmar a persistência.
+- [ ] Conferir os dados existentes, editor, importação/exportação, imagens e várias abas no navegador real.
+- [ ] Extrair a orquestração do dashboard e o ciclo de vida dos widgets.
+- [ ] Extrair o editor, o catálogo e os provedores restantes, mantendo formatos, dados e licenças.
+
+O Tabliss ainda fornece interface e componentes funcionais de widgets/provedores; não foi removido integralmente. [Arquitetura e limites](docs/newtab-engine.md).
+
+### Validação dos módulos locais
 
 - [x] Adicionar exceções independentes de cache e localStorage, importação de favoritos por destino e ações manuais somente em O que apagar (1.7.6).
 

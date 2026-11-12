@@ -41,3 +41,6 @@ npm test
 `build:newtab` recompila a fonte Tabliss e copia os arquivos de execução para `newtab/`, preservando o HTML de integração, seus estilos/scripts e o manifesto principal. A configuração de chaves pela interface dispensa variáveis de ambiente para uso local.
 
 Testes de API e React simulam chave ausente, 401/403/429, resposta inválida, GIPHY sem `original`, imagem válida, falha de bytes, manutenção do cache, revisão das chaves, ausência de repetição por renderização e descarte de respostas antigas. O pacote foi recompilado sem as strings de credenciais `undefined` anteriores. As chamadas reais com chaves de conta e o carregamento visual no navegador ainda precisam de validação.
+
+
+Na 1.7.18, o estado/configuração e a persistência/cache usados por esses componentes passaram ao núcleo próprio. As chaves e a base de imagens foram preservadas; editor e provedores continuam na camada adaptada. [Escopo da extração](newtab-engine.md).
