@@ -159,7 +159,7 @@ test('session save/remove ordering and failed writes do not poison future work',
 function vendorLoad(file, mocks = {}, globals = {}) {
   const filename=path.resolve(__dirname,'../vendor/proton-source/source/js',file+'.ts'),exports={};
   const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
-  vm.runInNewContext(code,{exports,Promise,setTimeout,clearTimeout,setInterval:()=>{},...globals,require:id=>mocks[id]||{}},{filename});return exports;
+  vm.runInNewContext(code,{exports,Promise,fetch,setTimeout,clearTimeout,setInterval:()=>{},...globals,require:id=>mocks[id]||{}},{filename});return exports;
 }
 function stateFixture() {
   const events=[],errors=[],credentials=deferred();let saved;
@@ -171,7 +171,12 @@ function stateFixture() {
     './log/log':{bind:()=>noop},
     './intervals':{getActivityCheckInterval:()=>10000,getLogicalCheckUpRefreshInterval:()=>60000},
     './tools/triggerPromise':{triggerPromise:p=>{if(p?.catch)p.catch(e=>errors.push(e));}},
-    './tools/proxy':{invalidateProxyOperations:noop,hasProxy:async()=>false,clearProxy:async()=>true,proxyToServer:async(server,split,guard)=>{if(guard())events.push(['apply',server.name]);return guard();}},
+    './vpn/networkGuard':{networkGuard:{block:async()=>{},open:async valid=>valid(),disarm:async()=>{},status:async()=>({armed:false,blocked:false})}},
+    '../../../../vpn/engine/tunnel-probe':{verifyTunnel:async()=>true},
+    '../../../../vpn/engine/routing':{usesVpn:()=>true},
+    './notifications/privacyWarning':{emitPrivacyWarning:noop},
+    './tools/sentry':{handleError:e=>errors.push(e)},
+    './tools/proxy':{getFixedServerConfig:()=>({rules:{}}),invalidateProxyOperations:noop,hasProxy:async()=>events.some(([kind])=>kind==='apply'),clearProxy:async()=>true,proxyToServer:async(server,split,guard)=>{if(guard())events.push(['apply',server.name]);return guard();}},
     './account/credentials/getConnectionCredentials':{cancelNextCredentialFetch:noop,loadCredentials:async()=>c,getCredentials:()=>credentials.promise,loadCachedCredentials:async()=>({time:Date.now()+60000})},
     './vpn/connectedServer':{connectedServer:{get:async()=>({value:saved}),setValue:async value=>{saved=value;}}},
     './tools/notifyStateChange':{notifyStateChange:(name)=>events.push(['status',name])},

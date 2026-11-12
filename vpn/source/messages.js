@@ -1,5 +1,13 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
+  VpnNetworkPredictionFailed: {"pt-BR":"Não foi possível desativar a previsão de rede/DNS do navegador. A navegação foi pausada.",en:"Could not disable speculative browser networking/DNS. Browsing has been paused."},
+  VpnTrafficGuardProbeBypassed: {"pt-BR":"A verificação da VPN foi excluída do túnel. Remova protonvpn.com da lista de exclusões.",en:"The VPN verification is excluded from the tunnel. Remove protonvpn.com from the exclusion list."},
+  VpnTrafficBlocked: {"pt-BR":"VPN interrompida: rede dos sites bloqueada até reconectar ou liberar sem VPN.",en:"VPN interrupted: website networking is blocked until reconnection or explicit release without VPN."},
+  VpnTrafficGuardFailed: {"pt-BR":"Falha ao confirmar o bloqueio de rede. A proteção não está garantida. Interrompa a navegação e verifique as permissões.",en:"Network blocking could not be confirmed. Protection is not guaranteed. Stop browsing and check permissions."},
+  VpnTrafficGuardUnavailable: {"pt-BR":"A permissão de bloqueio de rede não está disponível. A VPN não pode iniciar com segurança.",en:"Network-blocking permission is unavailable. The VPN cannot start safely."},
+  blockedHelp: {"pt-BR":"Por segurança, durante falhas a pausa abrange todos os sites, inclusive os excluídos da VPN. A página de conta Proton e chamadas da extensão são exceções de recuperação.",en:"During failures the safety pause covers all websites, including VPN exclusions. The Proton account page and extension requests remain available for recovery."},
+  releaseNetwork: {"pt-BR":"Liberar rede sem VPN",en:"Release networking without VPN"},
+  confirmRelease: {"pt-BR":"Liberar a rede sem VPN? Os sites poderão usar seu IP real.",en:"Release networking without VPN? Websites may use your real IP."},
   VpnProxyControlledElsewhere: {
     "pt-BR": "Outra extensão ou uma política do navegador controla o proxy.",
     en: "Another extension or a browser policy controls the proxy.",
@@ -208,8 +216,8 @@ export const messages = {
     en: "WebRTC protection",
   },
   preventWebrtcLeakHelp: {
-    "pt-BR": "Reduzir a exposição do IP por WebRTC durante a conexão.",
-    en: "Reduce IP exposure through WebRTC while connected.",
+    "pt-BR": "Obrigatória enquanto a VPN está ativa. Impede UDP WebRTC fora do proxy.",
+    en: "Required while VPN is active. Prevents non-proxied WebRTC UDP.",
   },
   notification: {
     "pt-BR": "Notificações de conexão",

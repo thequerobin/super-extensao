@@ -11,6 +11,7 @@ export interface ProxyConfig {
     };
     pacScript?: {
         data: string;
+        mandatory?: boolean;
     };
 }
 export interface ProxyDetails {

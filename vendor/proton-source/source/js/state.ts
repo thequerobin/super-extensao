@@ -1,3 +1,7 @@
+import { verifyTunnel } from "../../../../vpn/engine/tunnel-probe";
+import { usesVpn } from "../../../../vpn/engine/routing";
+import { networkGuard } from "./vpn/networkGuard";
+import { emitPrivacyWarning } from "./notifications/privacyWarning";
 import { assertServerAccess } from "./vpn/assertServerAccess";
 // TODO: Remove this when VPNBEX-238 is done.
 /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -31,6 +35,7 @@ import {
 	clearProxy,
 	hasProxy,
 	proxyToServer,
+	getFixedServerConfig,
 	invalidateProxyOperations,
 } from "./tools/proxy";
 import {
@@ -99,7 +104,7 @@ import { updateLastActivityTime } from "./tools/activity";
 import { guessTierFromCredentials } from "./account/credentials/guessTierFromCredentials";
 import { mayReplaceCredentials } from "./account/credentials/mayReplaceCredentials";
 import { forgetClientConfig } from "./account/user/clientconfig/forgetClientConfig";
-import { transmitCredentialsToProxy } from "./vpn/transmitCredentialsToProxy";
+
 import {
 	setReviewInfoStateLastSeenConnected,
 	setReviewInfoStateOnFailedConnection,
@@ -223,9 +228,30 @@ function present(
 	phase: ConnectionPhase,
 	state: MachineState<ProxyServer>,
 ): void {
-	const error = state.data.error as ApiError | Error | ErrorDump | undefined;
+	const error = (
+		state.data.blocked &&
+		!(state.data.error as Error)?.message?.startsWith("VpnTrafficGuard")
+			? new Error("VpnTrafficBlocked")
+			: state.data.error
+	) as ApiError | Error | ErrorDump | undefined;
 	const server = state.data.server;
 	notifyStateChange(phase, { server, error });
+	const revision = connectionLifecycle.capture();
+	if (phase !== "connected" && !state.data.blocked)
+		void networkGuard
+			.status()
+			.then((safety) => {
+				if (
+					safety.blocked &&
+					machine.peek() === state &&
+					connectionLifecycle.isCurrent(revision)
+				)
+					notifyStateChange(phase, {
+						server,
+						error: { message: "VpnTrafficBlocked" },
+					});
+			})
+			.catch(() => {});
 	if (phase === "logged-out") setButton("loggedOut");
 	else if (phase === "disconnected")
 		setButton(error ? "error" : "off", error && getErrorAsString(error));
@@ -275,6 +301,24 @@ const machine = new ConnectionMachine<ProxyServer, Credentials>({
 	mayReplace: (previous, next) => mayReplaceCredentials(previous, next),
 	apply: (server, current) =>
 		proxyToServer(server, server.splitTunneling || {}, current),
+	hold: () => networkGuard.block(),
+	resume: async (current) => {
+		if (!current() || !(await hasProxy())) return false;
+		const server = machine.peek()?.data.server;
+		if (!server) return false;
+		const policy = getFixedServerConfig(
+			server.proxyHost,
+			server.proxyPort,
+			server.splitTunneling,
+		).rules;
+		if (!usesVpn("https://protonvpn.com/", policy))
+			throw new Error("VpnTrafficGuardProbeBypassed");
+		if (!(await verifyTunnel(fetch, current))) return false;
+		return networkGuard.open(
+			async () => current() && (await hasProxy()) && current(),
+		);
+	},
+	privacyWarning: () => emitPrivacyWarning(),
 	hasProxy: () => hasProxy(),
 	clearProxy: () => clearProxy(),
 	probe: probeServer,
@@ -335,12 +379,6 @@ const machine = new ConnectionMachine<ProxyServer, Credentials>({
 					: c("Info").t`Connected to ${name}`,
 			);
 		}
-		const credentials = currentState.data.credsData;
-		transmitCredentialsToProxy(
-			server.proxyHost,
-			credentials?.Username,
-			credentials?.Password,
-		);
 	},
 	disconnected(error) {
 		if (error) setReviewInfoStateOnFailedConnection();
@@ -409,6 +447,10 @@ export function logIn(): void {
 	machine.logIn();
 }
 export function logOut(deleteSession: boolean) {
+	if (machine.peek()?.name === "on") {
+		triggerPromise(networkGuard.block());
+		emitPrivacyWarning();
+	}
 	machine.logOut();
 	triggerPromise(loginFlow.invalidate());
 	// Invalidate refresh synchronously, before the next login can save a session.
@@ -430,9 +472,29 @@ export function logOut(deleteSession: boolean) {
 	info("Logged out");
 }
 
-export function disconnect(error?: ApiError | Error | ErrorDump): void {
+export function disconnect(
+	error?: ApiError | Error | ErrorDump,
+): Promise<void> {
+	if (error && machine.peek()?.name === "on") {
+		machine.networkFailed(error, error);
+		return Promise.resolve();
+	}
 	machine.disconnect(error);
+	const current = connectionLifecycle.guard();
+	return clearProxy()
+		.then(() => networkGuard.disarm(current))
+		.then(() => {
+			if (current()) notifyStateChange("disconnected");
+		});
 }
+export function privacyFault(): void {
+	if (machine.peek()?.name === "on")
+		machine.networkFailed(
+			new Error("VpnTrafficBlocked"),
+			new Error("VpnTrafficBlocked"),
+		);
+}
+
 export function connect(data: ConnectionState["data"]): Promise<void> {
 	return machine.connect(data);
 }
@@ -559,12 +621,22 @@ export async function getConnectionSnapshot() {
 	const generation = connectionLifecycle.capture();
 	const applied =
 		initial.name === "on" && !!initial.proxyEnabled && (await hasProxy());
+	const safety = await networkGuard.status();
 	const current = getCurrentState();
 	const confirmed =
-		initial === current && connectionLifecycle.isCurrent(generation) && applied;
+		initial === current &&
+		connectionLifecycle.isCurrent(generation) &&
+		applied &&
+		!safety.blocked &&
+		!current.data.blocked;
 	return connectionView(
 		current as unknown as Parameters<typeof connectionView>[0],
 		confirmed,
-		current.data.error ? getErrorAsString(current.data.error) : undefined,
+		safety.blocked &&
+			!(current.data.error as Error)?.message?.startsWith("VpnTrafficGuard")
+			? "VpnTrafficBlocked"
+			: current.data.error
+				? getErrorAsString(current.data.error)
+				: undefined,
 	);
 }

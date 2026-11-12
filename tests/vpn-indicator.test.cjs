@@ -71,11 +71,11 @@ test("confirmed VPN state sets per-tab overlays, updates navigation/rules and pr
   assert.equal(icons.get(1).imageData[16].color, "#18a568");
   ui.loseProxy();
   icons = await ui.latest();
-  assert.ok(icons.get(1).path);
+  assert.equal(icons.get(1).imageData[16].color,"#d64b5b");
   ui.setLocale("en");
   ui.listeners.storage({ "tabliss/config/locale": {} });
   await ui.latest();
-  assert.equal(ui.calls.filter(([type]) => type === "title").at(-1)[1].title, "Super Extensão");
+  assert.match(ui.calls.filter(([type]) => type === "title").at(-1)[1].title, /interrupted/);
   ui.setState({ connected: false });
   icons = await ui.latest();
   assert.ok(icons.get(1).path);
@@ -167,5 +167,8 @@ test("a proxy settings event invalidates applied icons even without a state or c
   ui.listeners.proxy(); await ui.latest();
   assert.equal(ui.actionState.get(1).imageData[16].color, "#18a568");
   ui.resetAction(1); ui.loseProxy(); ui.listeners.proxy(); await ui.latest();
-  assert.ok(ui.actionState.get(1).path);
+  assert.equal(ui.actionState.get(1).imageData[16].color,"#d64b5b");
+});
+test('privacy blocking shows a persistent red overlay even after logout, without overwriting the pause badge',async()=>{
+ const ui=boot();ui.setState({connected:false,blocked:true});const icons=await ui.latest();assert.equal(icons.get(1).imageData[16].color,'#d64b5b');assert.match(ui.calls.filter(([type])=>type==='title').at(-1)[1].title,/bloqueio/);
 });

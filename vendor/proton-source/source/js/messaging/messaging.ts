@@ -50,9 +50,8 @@ export const routeMessage = async <T extends BackgroundMessage>(message: {
 			const current = connectionLifecycle.guard();
 			let target = data as WebRTCState;
 			if (getCurrentState().name === "on") {
-				const enabled = (await (await PreventWebrtcLeak.create()).getConfig())
-					.value;
-				target = enabled ? WebRTCState.DISABLED : WebRTCState.CLEAR;
+				await (await PreventWebrtcLeak.create()).getConfig();
+				target = WebRTCState.DISABLED;
 			} else target = WebRTCState.CLEAR;
 			if (!current()) return false;
 			return privacyController.apply(target);
@@ -98,7 +97,7 @@ export const routeMessage = async <T extends BackgroundMessage>(message: {
 			return getCurrentState().data;
 
 		case StateChange.DISCONNECT:
-			disconnect();
+			await disconnect();
 			break;
 
 		case StateChange.CONNECTING:

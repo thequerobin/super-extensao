@@ -139,7 +139,7 @@ test('worker privacy route follows current connection and preference, rejecting 
  const file=path.resolve(__dirname,'../vendor/proton-source/source/js/messaging/messaging.ts'),exports={};
  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,require:id=>mocks[id]||{}},{filename:file});
  await exports.routeMessage({type:'beginLogin',data:{host:'https://account.proton.me'}});assert.equal(calls[0][0],'begin');
- await exports.routeMessage({type:'setWebRTC',data:'clear'});assert.equal(calls.at(-1)[1],WebRTCState.DISABLED);enabled=false;await exports.routeMessage({type:'setWebRTC',data:'disable_non_proxied_udp'});assert.equal(calls.at(-1)[1],'clear');
+ await exports.routeMessage({type:'setWebRTC',data:'clear'});assert.equal(calls.at(-1)[1],WebRTCState.DISABLED);enabled=false;await exports.routeMessage({type:'setWebRTC',data:'disable_non_proxied_udp'});assert.equal(calls.at(-1)[1],WebRTCState.DISABLED);
  state='off';await exports.routeMessage({type:'setWebRTC',data:'disable_non_proxied_udp'});assert.equal(calls.at(-1)[1],'clear');
  await assert.rejects(exports.routeMessage({type:'setWebRTC',data:'invalid'}),/InvalidState/);
  state='on';configGate=deferred();const count=calls.length,task=exports.routeMessage({type:'setWebRTC',data:'clear'});await tick();current=false;state='off';configGate.resolve();assert.equal(await task,false);assert.equal(calls.length,count);

@@ -14,6 +14,7 @@ declare const api: Readonly<{
     createPacScript: (config: any, excludedLocal?: string[]) => {
         mode: string;
         pacScript: {
+            mandatory: boolean;
             data: string;
         };
     };

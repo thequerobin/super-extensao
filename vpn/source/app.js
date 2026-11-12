@@ -19,6 +19,7 @@ export async function mountVpn(root, engine, preferences) {
     locale: await preferences.locale.get(),
     snapshot: { signedIn: false },
     loading: true,
+    networkBlocked: false,
     serversLoading: false,
     serversError: "",
     busy: false,
@@ -51,6 +52,7 @@ export async function mountVpn(root, engine, preferences) {
     messages[error?.message]
       ? t(error.message)
       : error?.Error || error?.message || t("requestFailed");
+  const blockedError = error => /^Vpn(Traffic(Blocked|Guard)|NetworkPrediction)/.test(error?.message || "");
   const country = (code) => countryName(code, model.locale);
   const status = () =>
     ["connected", "connecting"].includes(model.state.state)
@@ -205,7 +207,7 @@ export async function mountVpn(root, engine, preferences) {
         : null;
     const freeOpen = Boolean(root.querySelector("[data-free]")?.open);
     root.lang = model.locale;
-    root.innerHTML = renderUi(`<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`);
+    root.innerHTML = renderUi(`<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}${model.networkBlocked ? `<ui-card as="section" class="vpn-card ui-card"><p>${e(t("blockedHelp"))}</p>${button(t("releaseNetwork"), "disconnect", "", "vpn-danger")}</ui-card>` : ""}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`);
     if (hostNavigation) {
       hostNavigation.innerHTML = renderUi(navigationMarkup());
       if (focusedNavigation)
@@ -261,6 +263,7 @@ export async function mountVpn(root, engine, preferences) {
           model.loading = false;
           if (stateRevision === revision && partial.state) {
             model.state = partial.state;
+            model.networkBlocked = blockedError(partial.state.error);
             model.error = partial.state.error ? errorText(partial.state.error) : "";
           }
           if (!model.dirty) restoreRules();
@@ -275,6 +278,7 @@ export async function mountVpn(root, engine, preferences) {
         model.snapshot = snapshot;
         if (stateRevision === revision) {
           model.state = snapshot.state || { state: "disconnected" };
+          model.networkBlocked = blockedError(snapshot.state?.error);
           model.error = snapshot.state?.error ? errorText(snapshot.state.error) : "";
         }
         if (!model.dirty) restoreRules();
@@ -303,6 +307,7 @@ export async function mountVpn(root, engine, preferences) {
     try {
       await action();
     } catch (error) {
+      model.networkBlocked ||= blockedError(error);
       model.error = errorText(error);
     } finally {
       model.busy = false;
@@ -397,6 +402,7 @@ export async function mountVpn(root, engine, preferences) {
       return;
     }
     if (action === "refresh") { void refresh(); return; }
+    if (action === "disconnect" && model.networkBlocked && !window.confirm(t("confirmRelease"))) return;
     void run(async () => {
       if (action === "login") {
         await engine.signIn();
@@ -423,6 +429,8 @@ export async function mountVpn(root, engine, preferences) {
       }
       if (action === "disconnect") {
         await engine.disconnect();
+        model.networkBlocked = false;
+        model.error = "";
       }
       if (action === "signout") {
         await engine.signOut();
@@ -522,6 +530,7 @@ export async function mountVpn(root, engine, preferences) {
     ) {
       stateRevision++;
       model.state = { state: data.state, server: data.server };
+      model.networkBlocked = blockedError(data.error);
       model.error = data.error ? errorText(data.error) : "";
       if (data.state === "connecting") startChecking();
       else stopChecking();

@@ -5,7 +5,7 @@ export interface ProxyConfig {
     singleProxy: {scheme: string; host: string; port: number};
     bypassList: string[];
   };
-  pacScript?: {data: string};
+  pacScript?: {data: string; mandatory?: boolean};
 }
 export interface ProxyDetails {
   levelOfControl?: string;
@@ -36,7 +36,7 @@ function equalConfig(
 ): boolean {
   if (actual?.mode !== expected.mode) return false;
   if (expected.mode === 'pac_script')
-    return actual.pacScript?.data === expected.pacScript?.data;
+    return actual.pacScript?.data === expected.pacScript?.data && actual.pacScript?.mandatory === expected.pacScript?.mandatory;
   const a = actual.rules?.singleProxy,
     b = expected.rules?.singleProxy;
   return (

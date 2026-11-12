@@ -921,3 +921,8 @@ test("logout during a delayed bootstrap wins over its older connected snapshot",
     assert.equal(loads,1);
   }finally{app.dispose();w.close();}
 });
+test('blocked networking remains visible after logout and release requires explicit confirmation before clearing the alert',async()=>{
+ const initial={...snapshot(),signedIn:false,state:{state:'logged-out',error:{message:'VpnTrafficBlocked'}}};const ui=await boot(initial);
+ assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);assert.ok(ui.w.document.querySelector('[data-action="disconnect"]'));ui.w.confirm=()=>false;await ui.click('disconnect');assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);
+ ui.w.confirm=()=>true;await ui.click('disconnect');assert.equal(ui.calls.filter(call=>call[0]==='disconnect').length,1);assert.ok(!ui.w.document.querySelector('[data-action="disconnect"]'));await ui.close();
+});

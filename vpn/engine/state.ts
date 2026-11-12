@@ -13,6 +13,7 @@ export interface ConnectionData<S> {
   credsData?: CredentialPair;
   credsTry?: number;
   starting?: boolean;
+  blocked?: boolean;
 }
 export interface MachineState<S> {
   name: "on" | "off" | "loggedout";
@@ -37,6 +38,9 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
   credentialsValid(): Promise<boolean>;
   mayReplace(previous: CredentialPair | undefined, next: C): boolean;
   apply(server: S, current: () => boolean): Promise<boolean>;
+  hold?(): Promise<void>;
+  resume?(current: () => boolean): Promise<boolean>;
+  privacyWarning?(error: unknown): void;
   hasProxy(): Promise<boolean>;
   clearProxy(): Promise<unknown>;
   probe(server: S, current: () => boolean): Promise<void>;
@@ -193,6 +197,10 @@ export class ConnectionMachine<
     this.transition("loggedout", {});
   }
   disconnect(error?: unknown): void {
+    if (error && this.ports.hold && this.state?.name === "on") {
+      this.networkFailed(error, error);
+      return;
+    }
     this.transition("off", error ? { error } : {});
     this.ports.disconnected(error);
   }
@@ -262,6 +270,11 @@ export class ConnectionMachine<
   ): Promise<boolean> {
     const current = () => this.valid(state, generation);
     try {
+      if (this.ports.hold) {
+        state.data.blocked = true;
+        await this.ports.hold();
+        if (!current()) return false;
+      }
       const credentials = await this.ports.getCredentials();
       if (!current()) return false;
       const validCredentials = await this.ports.credentialsValid();
@@ -274,7 +287,11 @@ export class ConnectionMachine<
       };
       if (!(await this.ports.apply(state.data.server!, current)) || !current())
         return false;
+      if (this.ports.resume && !(await this.ports.resume(current)))
+        throw this.ports.error("proxy-unavailable");
+      if (!current()) return false;
       state.proxyEnabled = true;
+      delete state.data.blocked;
       delete state.data.starting;
       delete state.data.error;
       this.ports.present("connected", state);
@@ -317,8 +334,14 @@ export class ConnectionMachine<
         this.lastRetry = this.now();
         state.data.starting = true;
       }
-      state.proxyEnabled = applied && !state.data.starting;
+      state.proxyEnabled =
+        applied && !state.data.starting && !state.data.blocked;
       if (!state.proxyEnabled) {
+        if (this.ports.hold) {
+          state.data.blocked = true;
+          await this.ports.hold();
+          if (!current()) return;
+        }
         this.ports.present("connecting", state);
         let credentials = await this.ports.loadCredentials();
         if (!current()) return;
@@ -326,7 +349,7 @@ export class ConnectionMachine<
         if (!current()) return;
         if (!credentials?.Username || !credentials.Password) {
           if (this.ports.isNetworkError(state.data.error)) return;
-          this.disconnect(this.ports.error("proxy-unavailable"));
+          this.connectionFailed(this.ports.error("proxy-unavailable"));
           return;
         }
         if (this.ports.mayReplace(state.data.credsData, credentials)) {
@@ -340,7 +363,7 @@ export class ConnectionMachine<
         if (!current()) return;
         if (!confirmed) {
           if (!this.ports.isNetworkError(state.data.error))
-            this.disconnect(this.ports.error("proxy-unavailable"));
+            this.connectionFailed(this.ports.error("proxy-unavailable"));
           return;
         }
       } else if (state.data.error) {
@@ -360,6 +383,10 @@ export class ConnectionMachine<
       if (!current()) return;
       await this.probe(state, generation).catch((error) => {
         if (!current()) return;
+        if (this.ports.hold && this.state?.name === "on") {
+          this.networkFailed(error, error);
+          return;
+        }
         if (this.ports.isNetworkError(error)) this.networkFailed(error);
         else this.ports.failed(error);
       });
@@ -389,6 +416,10 @@ export class ConnectionMachine<
     }
   }
   private connectionFailed(error: unknown): void {
+    if (this.ports.hold && this.state?.name === "on") {
+      this.networkFailed(error, error);
+      return;
+    }
     if (this.ports.isNetworkError(error)) this.networkFailed(error);
     else {
       this.disconnect(error);
@@ -399,6 +430,20 @@ export class ConnectionMachine<
     const state = this.state;
     if (state?.name === "on") {
       state.data.error = warning ?? this.ports.networkWarning();
+      if (this.ports.hold) {
+        this.invalidate();
+        state.proxyEnabled = false;
+        state.data.blocked = true;
+        void this.ports.hold().catch((failure) => {
+          if (this.state === state) {
+            state.data.error = failure;
+            this.ports.present("connecting", state);
+            this.ports.privacyWarning?.(failure);
+          }
+          this.ports.failed(failure);
+        });
+        this.ports.privacyWarning?.(error);
+      }
       this.ports.present(
         state.proxyEnabled ? "connected" : "connecting",
         state,
@@ -420,7 +465,7 @@ export class ConnectionMachine<
     ) {
       // A transient network failure retains the connection intent for the next alarm.
       if (!state.data.error || !this.ports.isNetworkError(state.data.error))
-        this.disconnect(state.data.error || this.ports.error("timeout"));
+        this.connectionFailed(state.data.error || this.ports.error("timeout"));
     }
   }
 }

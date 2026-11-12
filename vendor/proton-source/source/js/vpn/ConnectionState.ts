@@ -64,6 +64,7 @@ export interface ConnectionState extends StateDefinition {
 			Password: string;
 		};
 		starting?: boolean;
+    blocked?: boolean;
 	};
 }
 

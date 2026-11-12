@@ -308,7 +308,8 @@ test('free section follows fastest country only in the main non Secure Core list
 test('proxy ownership watcher registers exactly once and reacts when another extension takes control', async () => {
   const listeners = new Set(), disconnected = [];
   const watcher = load('vpn/initProxySettingsWatcher', {
-    '../state': { isCurrentStateConnected: () => true, disconnect: error => disconnected.push(error.message) },
+    '../state': {getCurrentStateIfDefined:()=>({name:'on',proxyEnabled:true}),connectionLifecycle:{guard:()=>()=>true},privacyFault:()=>disconnected.push('network blocked')},
+    '../tools/proxy': {hasProxy:async()=>true},
     './connectedServer': { isConnected: async () => true },
     '../tools/translate': { c: () => ({ t: (parts, ...values) => parts.reduce((text, part, i) => text + part + (values[i] || ''), '') }) },
   }, { browser: { proxy: { settings: { onChange: { addListener: fn => listeners.add(fn), removeListener: fn => listeners.delete(fn) } } } } });
@@ -319,7 +320,7 @@ test('proxy ownership watcher registers exactly once and reacts when another ext
   assert.equal(disconnected.length, 0);
   await listener({ levelOfControl: 'controlled_by_other_extensions', value: { rules: { singleProxy: { host: 'other.proxy', port: 8888 } } } });
   assert.equal(disconnected.length, 1);
-  assert.match(disconnected[0], /another extension/);
+  assert.match(disconnected[0], /blocked/);
   watcher.removeProxySettingsWatcher(); assert.equal(listeners.size, 0);
   watcher.initProxySettingsWatcher(); assert.equal(listeners.size, 1);
 });

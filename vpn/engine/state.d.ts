@@ -12,6 +12,7 @@ export interface ConnectionData<S> {
     credsData?: CredentialPair;
     credsTry?: number;
     starting?: boolean;
+    blocked?: boolean;
 }
 export interface MachineState<S> {
     name: "on" | "off" | "loggedout";
@@ -32,6 +33,9 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
     credentialsValid(): Promise<boolean>;
     mayReplace(previous: CredentialPair | undefined, next: C): boolean;
     apply(server: S, current: () => boolean): Promise<boolean>;
+    hold?(): Promise<void>;
+    resume?(current: () => boolean): Promise<boolean>;
+    privacyWarning?(error: unknown): void;
     hasProxy(): Promise<boolean>;
     clearProxy(): Promise<unknown>;
     probe(server: S, current: () => boolean): Promise<void>;

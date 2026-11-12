@@ -1,55 +1,25 @@
-import {disconnect, isCurrentStateConnected} from '../state';
-import {c} from '../tools/translate';
-import LevelOfControl = browser.types.LevelOfControl;
+import {
+	privacyFault,
+	getCurrentStateIfDefined,
+	connectionLifecycle,
+} from "../state";
+import { hasProxy } from "../tools/proxy";
 import OnChangeDetails = browser.types._OnChangeDetails;
 
-const getDisconnectionMessage = (
-	levelOfControl: LevelOfControl,
-	newProxy: any,
-): string => {
-	const host = newProxy?.host || '';
-	const port = newProxy?.port || '';
-	const hasProxyInfo = Boolean(host || port);
-	const newProxyName = hasProxyInfo ? `${host}:${port}` : '';
-
-	if (levelOfControl === 'controlled_by_other_extensions') {
-		if (hasProxyInfo) {
-			return c('Info')
-				.t`Disconnected by another extension, it connected to ${newProxyName}`;
-		}
-
-		return c('Info').t`Disconnected by another extension`;
-	}
-
-	if (hasProxyInfo) {
-		return c('Info')
-			.t`Disconnected, settings were overridden to ${newProxyName}`;
-	}
-
-	return c('Info').t`Disconnected, settings were overridden`;
-};
-
 const proxySettingsWatcher = async (event: OnChangeDetails) => {
-	const connected = isCurrentStateConnected();
-
-	if (!connected) {
-		// Don't bother if Proton VPN is not currently connected
+	const state = getCurrentStateIfDefined();
+	if (state?.name !== "on") return;
+	if (event.levelOfControl !== "controlled_by_this_extension") {
+		privacyFault();
 		return;
 	}
-
-	if (event.levelOfControl === 'controlled_by_this_extension') {
-		// Action from the user or auto-reconnection
-		return;
+	if (!state.proxyEnabled) return; // Our pending write is not confirmed yet.
+	const current = connectionLifecycle.guard();
+	try {
+		if (!(await hasProxy()) && current()) privacyFault();
+	} catch {
+		if (current()) privacyFault();
 	}
-
-	disconnect(
-		new Error(
-			getDisconnectionMessage(
-				event.levelOfControl,
-				event.value?.rules?.singleProxy,
-			),
-		),
-	);
 };
 
 let proxySettingsWatcherInitialized = false;

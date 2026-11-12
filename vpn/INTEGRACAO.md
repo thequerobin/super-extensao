@@ -1,4 +1,4 @@
-# Proton VPN na Super Extensão — referência 1.7.12
+# Proton VPN na Super Extensão — referência 1.7.13
 
 A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as telas Conexão, Servidores, Recursos e Conta. O serviço e o protocolo de login permanecem Proton; regras/PAC, controlador de proxy, máquina de estados, restauração/recuperação, gerações, alarmes e persistência/rotação de tokens usam o núcleo próprio de `vpn/engine`. O gerenciamento de credenciais temporárias é próprio desde a 1.7.9, o transporte HTTP desde a 1.7.10 e o catálogo/seleção de servidores desde a 1.7.11. WebRTC e a coordenação de login foram extraídos na 1.7.12. A página de conta oficial, endpoints e formatos do serviço continuam em adaptadores; código de compatibilidade ainda é distribuído. Veja [arquitetura, reconstrução e validação](../docs/vpn-interface.md).
 
@@ -13,6 +13,10 @@ A interface ativa agora é própria da Super Extensão, em `vpn/source`, com as 
 Na 1.7.11, a recuperação de uma escolha manual mantém o ID escolhido, inclusive quando ele não participa das escolhas automáticas. A consulta de saúde não o substitui automaticamente; se estiver em manutenção, escolha outro. Os modos automáticos continuam podendo buscar uma alternativa compatível. O catálogo local é vinculado à conta/plano/grupos e é buscado novamente na primeira abertura após atualizar um cache antigo sem essa identificação.
 
 Na 1.7.12, entre novamente pelo botão da extensão se já havia uma aba de autorização aberta antes da atualização. O novo estado de login vale por 15 minutos, é consumido uma vez e fica no worker; novas tentativas substituem as anteriores. A página oficial e os campos exigidos pelo serviço são preservados. WebRTC é aplicado/retirado em uma fila própria, com confirmação de propriedade da configuração.
+
+Na 1.7.13, falhas detectadas acionam bloqueio persistente de requisições dos sites, alerta de privacidade independente das notificações comuns e ícone vermelho. A pausa abrange todos os sites; conta Proton e pedidos da própria extensão são exceções de recuperação. WebTransport fica bloqueado enquanto a proteção está armada. Para voltar sem VPN, use a liberação explícita do painel. A permissão `declarativeNetRequest` é necessária.
+
+A revisão de código corrigiu riscos, mas não certificou ausência de vazamentos. [Auditoria e limites](../docs/auditoria-vpn.md). O teste nativo foi impedido pelo ambiente; detecção assíncrona e sockets existentes impedem prometer proteção absoluta de uma extensão.
 
 O proxy vale para o tráfego deste navegador. Não altera a rede dos demais aplicativos. A disponibilidade de servidores e a autorização de conexão continuam sob controle do Proton.
 

@@ -1,4 +1,4 @@
-# Motor da VPN — núcleo próprio, 1.7.12
+# Motor da VPN — núcleo próprio, 1.7.13
 
 Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton. WebRTC e a coordenação do login foram extraídos na 1.7.12, completando as extrações funcionais previstas. A página oficial, os cabeçalhos/formatos/endpoints e utilitários de compatibilidade continuam em adaptadores. Isso não remove todo o código vendor nem substitui a revisão minuciosa em navegador.
 
@@ -49,7 +49,7 @@ A preferência `persistent` é preservada como metadado; o armazenamento já era
 
 Com um servidor na sessão, a inicialização pode instalar o endereço de espera `localhost:9` antes de recuperar a conexão. O trabalho de inicialização também possui guarda de geração. A restauração do estado acontece uma vez; foi removida a segunda recuperação baseada em um servidor salvo que poderia sobrepor uma desconexão durante o início.
 
-O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo de 30 s respeita o mínimo do Chromium 116 declarado no manifest. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. Catálogo e seleção usam políticas próprias desde a 1.7.11; localização, endpoints de catálogo e decodificação/cache binário de carga permanecem no adaptador Proton. Obtenção/cache/renovação de credenciais são coordenados pelo núcleo próprio desde a 1.7.9, com a chamada HTTP mantida no adaptador. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
+O alarme é registrado a cada inicialização do worker e pode acordá-lo para verificar o estado. Eventos simultâneos compartilham uma verificação. O intervalo solicitado é de 30 s; versões do Chromium e condições de suspensão podem impor atraso ou intervalo maior. A segurança não deve depender de um despertar pontual. Não é garantia de execução pontual, conexão contínua ou de um bloqueio de rede absoluto. Catálogo e seleção usam políticas próprias desde a 1.7.11; localização, endpoints de catálogo e decodificação/cache binário de carga permanecem no adaptador Proton. Obtenção/cache/renovação de credenciais são coordenados pelo núcleo próprio desde a 1.7.9, com a chamada HTTP mantida no adaptador. As decisões de estado e a repetição das tentativas pertencem ao núcleo próprio. Reinício completo usa a preferência de conexão automática e a última escolha; é diferente da retomada de um worker suspenso.
 
 ## Máquina de estados própria — 1.7.4
 
@@ -152,3 +152,9 @@ O adaptador mantém `app`, `appVersion`, `t`, `plan`, `partnerId` e `independent
 A extração funcional está implementada; permanecem adapters/formatos do serviço, mensagens e utilitários legados. O serviço, infraestrutura e autorização do plano continuam sendo Proton, e as fontes/licenças mantêm-se no repositório. Não se declara remoção de todas as dependências vendor. A revisão minuciosa solicitada pelo usuário permanece pendente.
 
 `tests/vpn-login-privacy.test.cjs` adiciona 22 testes do núcleo e dos adaptadores reais com APIs simuladas, incluindo duplicatas, suspensão, logout durante troca, expiração, erros nativos, propriedade da preferência e pedidos de UI antigos. As verificações de origem existentes também cobrem as novas ações internas.
+
+## Revisão de privacidade — 1.7.13
+
+A [auditoria](auditoria-vpn.md) registra achados, mudanças, evidências e limites. `network-guard.ts` mantém bloqueio declarativo dinâmico com liberação apenas em regra de sessão e preserva regras alheias. O estado nativo bloqueia antes das credenciais, não encerra silenciosamente a intenção em falhas e só libera após proxy confirmado/probe HTTPS sem credenciais. A limpeza do proxy arma o bloqueio antes de retirar configurações. Logout preserva bloqueio; desconectar explicitamente pode liberá-lo.
+
+PAC obrigatório, CIDR sem DNS, remoção do envio HTTP legado de credenciais, previsão de rede desativada, bloqueio de WebTransport, avisos de privacidade independentes de preferências e indicador vermelho compõem as correções. O campo `blocked` é intenção/estado de segurança, não prova de pacotes. Apenas readback confirma regras/configurações; tampouco isso prova ausência de vazamentos ou encerra sockets existentes. O teste Chromium real foi impedido por restrição de sockets; aprovação exige o roteiro de captura e falhas da auditoria.

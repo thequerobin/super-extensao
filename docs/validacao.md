@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.12**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.13**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Revisão de privacidade 1.7.13 — aprovação real pendente
+
+A suíte completa passou **357 testes**, além de build, TypeScript do worker/interface, UI e whitespace. Foram adicionados testes de bloqueio durável/liberação por sessão, falhas/readback, cancelamento de autenticação, probe HTTPS sem credenciais, PAC obrigatório sem DNS, previsão de rede, alertas de privacidade, ícone vermelho e liberação explícita no painel.
+
+A tentativa de execução nativa com Chromium foi bloqueada por `socket() failed: Operation not permitted`. Nenhum resultado de IP, DNS, tráfego Proton ou ausência de vazamentos é declarado. O runner isolado está em `scripts/check-vpn-native.cjs`. [Achados, correções, riscos residuais e roteiro de aprovação](auditoria-vpn.md). A extensão não substitui um kill switch/firewall do sistema operacional.
 
 ## Login e WebRTC próprios 1.7.12
 

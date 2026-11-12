@@ -212,3 +212,15 @@ test('automatic server switches do not immediately probe the next server and osc
   assert.equal(f.machine.peek().data.server.name,'b');
   assert.deepEqual(f.events.filter(([kind])=>kind==='apply'),[['apply','a'],['apply','b']]);
 });
+test('privacy mode blocks before credentials and verifies release before reporting connected',async()=>{
+ const f=fixture(),order=[];f.ports.hold=async()=>order.push('block');const get=f.ports.getCredentials;f.ports.getCredentials=async()=>{order.push('credentials');return get();};f.ports.resume=async current=>{order.push('verify-release');return current();};await connect(f);assert.equal(order[0],'block');assert.ok(order.indexOf('block')<order.indexOf('credentials'));assert.equal(order.at(-1),'verify-release');assert.equal(f.machine.peek().proxyEnabled,true);assert.equal(f.machine.peek().data.blocked,undefined);
+});
+test('privacy mode retains blocked intent on fatal failures instead of clearing the proxy silently',async()=>{
+ const f=fixture();let blocks=0,warnings=0;f.ports.hold=async()=>{blocks++;};f.ports.resume=async()=>true;f.ports.privacyWarning=()=>warnings++;f.ports.apply=async()=>{throw Error('WebRTC lost');};await connect(f);await tick();assert.equal(f.machine.peek().name,'on');assert.equal(f.machine.peek().data.blocked,true);assert.equal(f.machine.peek().proxyEnabled,false);assert.ok(blocks>0);assert.ok(warnings>0);assert.ok(!f.events.some(([type])=>type==='clear'));
+});
+test('privacy failure cancels in-flight connect and cannot mark blocked traffic as connected',async()=>{
+ const f=fixture(),gate=deferred();f.ports.hold=async()=>{};f.ports.resume=async()=>gate.promise;await f.machine.connect({server:server('a')});await tick();f.machine.networkFailed(Error('proxy failed'));gate.resolve(true);await tick();assert.equal(f.machine.peek().proxyEnabled,false);assert.equal(f.machine.peek().data.blocked,true);assert.ok(!f.events.some(([type])=>type==='connected'));
+});
+test('a still-configured proxy does not bypass blocked recovery and revalidation',async()=>{
+ const f=fixture();let releases=0;f.ports.hold=async()=>{};f.ports.resume=async()=>{releases++;return true;};await connect(f);f.machine.networkFailed(Error('transport interrupted'));assert.equal(f.machine.peek().data.blocked,true);await f.machine.refresh();assert.equal(releases,2);assert.equal(f.machine.peek().proxyEnabled,true);
+});

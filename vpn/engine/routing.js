@@ -3,10 +3,10 @@
 (function () {
   "use strict";
   const localExclusions = ["localhost", "127.0.0.1", "127.0.0.0/8", "127.0.0.1:80", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "[::1]", "<local>"];
-  const serviceInclusions = [".protonvpn.net", ".protonvpn.com"];
+  const serviceInclusions = [".protonvpn.net", ".protonvpn.com", "protonvpn.com"];
 
   // Self-contained on purpose: the PAC and the icon execute this same function.
-  // PAC may supply isInNet for DNS-based CIDR rules; the icon never resolves DNS.
+  // CIDR rules match IP literals only; never resolve protected hostnames outside the proxy.
   function routeHost(host, port, policy, isInNetFn) {
     host = host.toLowerCase();
     function ipv4(value) {
@@ -23,10 +23,6 @@
         const bits = Number(cidr[2]), network = ipv4(cidr[1]);
         if (bits > 32 || network === undefined) return false;
         const mask = bits ? (0xffffffff << (32 - bits)) >>> 0 : 0;
-        if (isInNetFn) {
-          const dottedMask = [24, 16, 8, 0].map(shift => (mask >>> shift) & 255).join(".");
-          return isInNetFn(host, cidr[1], dottedMask);
-        }
         const ip = ipv4(host);
         return ip !== undefined && (ip & mask) === (network & mask);
       }
@@ -66,15 +62,15 @@
         !/^(?:[a-z0-9._-]+|\[[a-f0-9:]+\])$/i.test(proxy.host) ||
         !Number.isInteger(proxy.port) || proxy.port < 1 || proxy.port > 65535)
       throw new Error("VpnInvalidProxyEndpoint");
-    const policy = { bypassList: rulesList(config.rules.bypassList).filter(rule => !excludedLocal.includes(rule)) };
+    const policy = { bypassList: rulesList(config.rules.bypassList) };
     if (config.rules.includeOnly !== undefined) policy.includeOnly = rulesList(config.rules.includeOnly);
     const result = proxy.scheme.toUpperCase() + " " + proxy.host + ":" + proxy.port;
-    return { mode: "pac_script", pacScript: { data:
+    return { mode: "pac_script", pacScript: { mandatory: true, data:
       "var superRoute = " + routeHost.toString() + ";\n" +
       "function FindProxyForURL(url, host) {\n" +
       "var match = url.match(/^[a-z]+:\\/\\/[^/]*:(\\d+)(?:\\/|$)/i);\n" +
       "var port = match ? match[1] : (/^(https|wss):/i.test(url) ? '443' : '80');\n" +
-      "return superRoute(host, port, " + JSON.stringify(policy) + ", isInNet) ? " + JSON.stringify(result) + " : 'DIRECT';\n}" } };
+      "return superRoute(host, port, " + JSON.stringify(policy) + ") ? " + JSON.stringify(result) + " : 'DIRECT';\n}" } };
   }
   function usesVpn(url, policy) {
     let target;

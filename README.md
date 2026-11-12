@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.12.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.13.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -57,7 +57,7 @@ Veja [a interface e a compatibilidade](docs/sync-interface.md) e [o escopo do no
 
 Abra **VPN** e entre na conta pela página oficial Proton. O proxy atende este navegador; a disponibilidade dos servidores e a autorização continuam sob controle do serviço e do plano da conta.
 
-**Motor 1.7.12:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias, transporte HTTP e catálogo/seleção próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. WebRTC e a coordenação de login também usam o núcleo próprio. A página oficial e os contratos/adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
+**Motor 1.7.13:** máquina de estados, restauração, novas tentativas e gerenciamento de credenciais temporárias, transporte HTTP e catálogo/seleção próprios; operações de proxy ordenadas e confirmadas no navegador, descarte de conexões tardias após desconectar, recuperação por alarmes e persistência/rotação de tokens próprias. WebRTC e a coordenação de login também usam o núcleo próprio. A página oficial e os contratos/adaptadores do serviço permanecem. [Arquitetura e limites](docs/vpn-engine.md).
 
 Na **1.7.11**, a escolha manual é preservada ao recuperar a conexão; verificações de saúde não trocam automaticamente um servidor escolhido pelo ID. Se ele estiver indisponível, escolha outro manualmente. O modo mais rápido mantém o failover quando há indisponibilidade confirmada.
 
@@ -67,11 +67,16 @@ Servidores ficam agrupados por país, inicialmente recolhidos, com bandeiras loc
 
 Na **1.7.2**, abrir o painel consulta primeiro o estado real do worker e do proxy. Se a conexão já estiver confirmada, o cartão abre como conectado, sem inferir “conectando” de um servidor salvo; conta e servidores carregam separadamente. Não é guardada uma tela conectada em disco.
 
+A **1.7.13** adiciona bloqueio de emergência: durante falhas detectadas, a rede dos sites é pausada, inclusive os excluídos, e aparecem aviso obrigatório de privacidade, ícone vermelho e ação para liberar explicitamente sem VPN. A página de conta Proton e chamadas da extensão ficam como exceções de recuperação. A nova permissão `declarativeNetRequest` é necessária. WebTransport fica bloqueado enquanto a proteção está armada.
+
+**A revisão encontrou e corrigiu riscos, mas não certificou ausência de vazamentos.** O ambiente impediu os testes nativos com Chromium; há limites na detecção assíncrona e no encerramento de sockets. Para exigir um kill switch de rede no sistema, use VPN/firewall do sistema operacional. Veja a [auditoria e validação pendente](docs/auditoria-vpn.md).
+
 O ícone acompanha a aba:
 
 - **Verde com visto:** conexão confirmada e endereço da aba roteado para a VPN.
 - **Azul com traço:** conexão confirmada e endereço fora do túnel.
-- **Ícone original:** sem conexão confirmada.
+- **Vermelho:** VPN interrompida ou bloqueio de segurança acionado; abra o painel antes de continuar.
+- **Ícone original:** sem conexão confirmada e sem bloqueio sinalizado.
 
 O sinal fica no canto superior direito, preservando o badge de limpeza pausada. Na 1.7.1, ele é reaplicado após navegação/recarregamento e ativação da aba, mesmo quando a cor continua igual; perda de controle do proxy restaura o ícone normal. Ele representa o roteamento configurado, sem medir tráfego ou verificar externamente o IP. Páginas internas não usam o túnel. Veja [uso e integração](docs/proton-vpn.md) e [interface, indicador e limites](docs/vpn-interface.md).
 
@@ -134,7 +139,7 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A execução da **1.7.12 passou 307 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
+A execução da **1.7.13 passou 357 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
 
 As fontes das páginas estáticas ficam em `ui/templates/`; `popup.html`, `spare-tab.html`, `newtab/index.html` e `ui.js` são gerados por `build:ui`. Consulte [os contratos e adaptadores](docs/ui-components.md) antes de alterar componentes. Incremente a versão conforme `AGENTS.md` ao entregar alterações instaláveis.
 

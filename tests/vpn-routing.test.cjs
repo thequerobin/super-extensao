@@ -25,7 +25,7 @@ test('own routing preserves effective exclusion/include lists, service exception
   });
   const include = fixed({ mode: 'include', filteredDomains: ['only.test', '.only.test'] });
   assert.deepEqual(include.rules.bypassList, ['account.proton.me', ...locals]);
-  assert.deepEqual(include.rules.includeOnly, ['only.test', '.only.test', '.protonvpn.net', '.protonvpn.com']);
+  assert.deepEqual(include.rules.includeOnly, ['only.test', '.only.test', '.protonvpn.net', '.protonvpn.com', 'protonvpn.com']);
   assert.equal(fixed().rules.includeOnly, undefined);
   assert.equal(routing.createFixedConfig('', 0, {}, options).rules.singleProxy.host, '');
 });

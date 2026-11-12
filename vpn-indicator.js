@@ -2,7 +2,7 @@
 // Host-owned icon overlay. Reads only confirmed connection state and effective
 // routing rules, never session tokens, proxy passwords or browsing traffic.
 (() => {
-  const COLORS = { direct: "#287de0", protected: "#18a568" };
+  const COLORS = { direct: "#287de0", protected: "#18a568", blocked: "#d64b5b" };
   const BASE = { 16: "icons/icon16.png", 32: "icons/icon32.png" };
   const rendered = new Map(), applied = new Map();
   let reader = () => ({ connected: false }), revision = 0, queue = Promise.resolve();
@@ -24,6 +24,7 @@
         ctx.lineCap = "round"; ctx.lineJoin = "round";
         ctx.beginPath();
         if (mode === "protected") { ctx.moveTo(x - radius * .45, y); ctx.lineTo(x - radius * .1, y + radius * .3); ctx.lineTo(x + radius * .45, y - radius * .35); }
+        else if (mode === "blocked") { ctx.moveTo(x, y - radius * .5); ctx.lineTo(x, y + radius * .1); ctx.moveTo(x, y + radius * .48); ctx.lineTo(x, y + radius * .5); }
         else { ctx.moveTo(x - radius * .35, y); ctx.lineTo(x + radius * .35, y); }
         ctx.stroke();
         result[size] = ctx.getImageData(0, 0, size, size);
@@ -70,10 +71,10 @@
       for (const tab of tabs) {
         if (!Number.isInteger(tab.id)) continue;
         const controlled = tab.incognito ? privateProxy : regularProxy;
-        const mode = !snapshot.connected || !controlled ? "off" : usesVpn(tab.url, snapshot) ? "protected" : "direct";
+        const mode = snapshot.blocked || snapshot.connected && !controlled ? "blocked" : !snapshot.connected || !controlled ? "off" : usesVpn(tab.url, snapshot) ? "protected" : "direct";
         const key = `${mode}:${locale}:${snapshot.connectionRevision ?? 0}`;
         if (applied.get(tab.id) === key) continue;
-        const title = mode === "off" ? "Super Extensão" : locale === "pt-BR"
+        const title = mode === "blocked" ? (locale === "pt-BR" ? "Super Extensão · VPN interrompida: bloqueio de segurança acionado" : "Super Extensão · VPN interrupted: safety blocking triggered") : mode === "off" ? "Super Extensão" : locale === "pt-BR"
           ? `Super Extensão · VPN ativa: ${mode === "protected" ? "este site usa a VPN" : "este site não usa a VPN"}`
           : `Super Extensão · VPN connected: ${mode === "protected" ? "this site uses the VPN" : "this site bypasses the VPN"}`;
         const payload = mode === "off" ? { path: BASE } : { imageData: await icon(mode) };
