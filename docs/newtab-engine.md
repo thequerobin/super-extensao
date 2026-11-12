@@ -4,6 +4,8 @@ A primeira extração do Tabliss está integrada ao fluxo normal da Nova guia. N
 
 ## Responsabilidades
 
+Na rodada Windows da **1.7.19**, o bundle real passou pelo editor, widgets, imagem local, duas abas, importação/exportação e reinício no Edge 157.0.4341.46, com dados fictícios e perfil temporário. Reprodução em `scripts/check-newtab-native.cjs`; resultados e limites em [validacao.md](validacao.md#execução-no-windows-1719). A conferência dos dados existentes no perfil pessoal continua pendente. O checklist histórico abaixo registra a situação anterior à execução.
+
 | Parte | Implementação ativa |
 | --- | --- |
 | Estado reativo, defaults e transações em memória | `newtab/engine/database.ts` e `events.ts` |

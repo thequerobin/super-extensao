@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.18**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.19**. A rodada Windows passou 419 testes automatizados e os cenários nativos isolados da VPN e da Nova guia no Edge. Evidências, limites, confirmações anteriores do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -9,7 +9,7 @@ Revisado em **12 de novembro de 2026**, referência **1.7.18**. Itens implementa
 | 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
 | 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; interface conferida parcialmente no Helium isolado | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
-| 4 | Motor próprio da VPN | 1.7.17: dependências compatíveis atualizadas e empacotador substituído; navegação da 1.7.16 validada pelo usuário; página local de bloqueio/recuperação da 1.7.15; prazos e filas da 1.7.14; bloqueio/avisos da 1.7.13 | Não certificado: teste nativo e captura IP/DNS/tráfego bloqueados neste ambiente; ver docs/auditoria-vpn.md |
+| 4 | Motor próprio da VPN | 1.7.19: seis cenários do runner nativo aprovados no Edge/Windows após corrigir PAC do proxy HTTP local; HTTPS Proton preservado | Validar conta Proton e IP/DNS/WebRTC, falhas, suspensão, troca e regras com tráfego real; ver docs/vpn-validacao-pc.md |
 | Contínua | Interface e manutenção | Catálogo e adaptadores compartilhados entregues em 1.6.8; 154 testes aprovados; fontes das páginas estáticas e estilos validados centralizados | Ampliar a conferência visual de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização

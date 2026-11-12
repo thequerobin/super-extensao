@@ -1,6 +1,6 @@
 # Próxima etapa: validar a VPN no PC do usuário
 
-Registrado em 12 de novembro de 2026, após a 1.7.17. **Estado: pendente de execução.** O usuário informou que pedirá a execução quando estiver em casa. Este registro não inicia testes, não agenda execução automática e não considera a revisão de privacidade aprovada.
+Registrado em 12 de novembro de 2026, após a 1.7.17. **Atualizado na 1.7.19: runner local aprovado; etapas com Proton real pendentes.** A execução isolada ocorreu após pull de `573eedc`, no Microsoft Edge 157.0.4341.46, Windows, headless, com perfil temporário. Não considera a revisão de privacidade aprovada.
 
 O objetivo é observar o navegador e o tráfego reais, complementando os 397 testes automatizados já aprovados. A validação de uso da 1.7.16 relatada pelo usuário fica preservada; não substitui medições de IP/DNS ou de falhas.
 
@@ -27,11 +27,11 @@ Se um cenário revelar tráfego direto indevido, estado conectado incorreto ou l
 
 ## Registro dos resultados
 
-Preencher durante a execução; todos os cenários estão pendentes neste registro.
+Evidência da rodada isolada de 12 de novembro de 2026; as etapas autenticadas permanecem pendentes.
 
 | Cenário | Ambiente/commit | Esperado | Observado | Evidência sanitizada | Resultado |
 | --- | --- | --- | --- | --- | --- |
-| Runner local | A preencher | Conforme etapa 1 | Não executado | Pendente | Pendente |
+| Runner local | Windows / Edge 157.0.4341.46 / fontes 1.7.19 | Conforme etapa 1 | Seis cenários passaram após corrigir a diretiva PAC HTTP para PROXY | `native:true`, `directRequestsBeforeRelease:0`; detalhes em validacao.md | Aprovado no cenário observado |
 | IP/DNS/WebRTC | A preencher | Conforme etapa 2 | Não executado | Pendente | Pendente |
 | Queda/bloqueio/aviso | A preencher | Conforme etapa 3 | Não executado | Pendente | Pendente |
 | Troca/suspensão/reinício | A preencher | Conforme etapa 4 | Não executado | Pendente | Pendente |

@@ -59,6 +59,15 @@ test('port-aware rules, CIDR boundaries and internal pages cannot give a false p
   assert.equal(pac(config)('https://port.test:8443'), 'HTTPS node.protonvpn.net:4443');
   assert.equal(pac(config)('https://port.test'), 'DIRECT');
 });
+test('HTTP proxy endpoints use the PAC PROXY directive without a direct fallback', () => {
+  const config = routing.createFixedConfig('127.0.0.1', 8080,
+    { mode: 'include', filteredDomains: ['site.audit.test'] },
+    { scheme: 'http', localExclusions: [], apiExclusions: [] });
+  assert.equal(pac(config)('http://site.audit.test:8081/audit'), 'PROXY 127.0.0.1:8080');
+  assert.equal(pac(config)('https://site.audit.test/audit'), 'PROXY 127.0.0.1:8080');
+  assert.equal(pac(config)('http://excluded.test'), 'DIRECT');
+});
+
 test('PAC is injection-safe and rejects invalid endpoints before a browser write', () => {
   const config = fixed({ mode: 'include', filteredDomains: ['evil.test\"); throw Error("injected");//'] });
   assert.equal(pac(config)('https://safe.test'), 'DIRECT');

@@ -1,6 +1,24 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.18**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.19**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Execução no Windows 1.7.19
+
+Após pull do commit `573eedc`, foram executados **419 testes automatizados**, todos aprovados, build de produção da VPN, TypeScript do worker/interface VPN, núcleo/aplicação da Nova guia e `check:ui`. As dependências locais Proton foram reinstaladas conforme o lockfile. O arquivo de avisos de licenças passa a ter checkout LF explícito para manter sua comparação reproduzível no Windows.
+
+O runner nativo da VPN foi executado no **Microsoft Edge 157.0.4341.46, Windows**, headless, com perfil temporário, sem conta. Ele revelou que o proxy HTTP local gerava a diretiva PAC inválida `HTTP`, recebendo `DIRECT` na etapa saudável. A 1.7.19 usa `PROXY` para HTTP e mantém `HTTPS` para os servidores Proton; há um contrato de regressão. Após a correção passaram: bloqueio antes de conectar, passagem pelo proxy local, queda do proxy sem fallback direto, bloqueio após perda da configuração, persistência do bloqueio após reinício e liberação explícita. O destino recebeu zero pedidos diretos antes da liberação.
+
+O bundle distribuído da Nova guia foi carregado em uma extensão mínima com armazenamento nativo e perfil temporário no mesmo Edge. Passaram: abertura de configuração preexistente fictícia com nota; adicionar/reordenar/reposicionar/remover widget pelo editor; upload de imagem local e recarga; idioma propagado entre duas abas; exportação v3; rejeição de importação futura preservando configuração e imagem; importação válida; notas, configuração e imagem após reiniciar o navegador. Não houve exceção de página nos documentos acompanhados. O runner reproduzível está em `scripts/check-newtab-native.cjs` e requer Playwright e `CHROMIUM_PATH`, assim como o runner da VPN.
+
+Esses resultados cobrem o núcleo e os cenários isolados descritos, sem conferir dados pessoais existentes, o popup completo ou aparência de todos os temas. Permanecem pendentes login Proton, IP/DNS/WebRTC com túnel real, suspensão do PC, troca de servidor e regras por site no serviço, além da sincronização Google Drive entre instalações autenticadas. O teste HTTP local não comprova ausência de vazamentos no serviço Proton.
+
+Exemplo no PowerShell, com Playwright disponível na resolução de módulos:
+
+```powershell
+$env:CHROMIUM_PATH = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+node scripts/check-vpn-native.cjs
+node scripts/check-newtab-native.cjs
+```
 
 ## Nova guia: validação pelo usuário em casa — pendente
 

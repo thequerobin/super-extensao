@@ -64,7 +64,7 @@
       throw new Error("VpnInvalidProxyEndpoint");
     const policy = { bypassList: rulesList(config.rules.bypassList) };
     if (config.rules.includeOnly !== undefined) policy.includeOnly = rulesList(config.rules.includeOnly);
-    const result = proxy.scheme.toUpperCase() + " " + proxy.host + ":" + proxy.port;
+    const result = (proxy.scheme === "http" ? "PROXY" : "HTTPS") + " " + proxy.host + ":" + proxy.port;
     return { mode: "pac_script", pacScript: { mandatory: true, data:
       "var superRoute = " + routeHost.toString() + ";\n" +
       "function FindProxyForURL(url, host) {\n" +
