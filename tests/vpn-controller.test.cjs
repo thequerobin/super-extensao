@@ -225,3 +225,15 @@ test('a consumed sign-in fork cannot save its session after logout', async () =>
   assert.equal(await f.store.saveIfCurrent({uid:'old',accessToken:'a',refreshToken:'r'},generation),false);
   assert.deepEqual(JSON.parse(JSON.stringify(await f.store.read())),{});
 });
+
+test('public connection snapshots use confirmed proxy state and exclude all secrets', () => {
+  const {connectionView}=load('presentation');
+  const state={name:'on',data:{server:{id:'mx',name:'MX-FREE#4',exitCountry:'MX',exitIp:'192.0.2.8',proxyHost:'private-endpoint',proxyPort:443,splitTunneling:{filteredDomains:['private-site']}},credsData:{Username:'secret-user',Password:'secret-password'}}};
+  const connected=connectionView(state,true);
+  assert.equal(connected.state.state,'connected');assert.equal(connected.state.server.name,'MX-FREE#4');
+  assert.ok(!JSON.stringify(connected).includes('secret'));assert.ok(!JSON.stringify(connected).includes('private'));
+  assert.equal(connectionView(state,false).state.state,'connecting');
+  assert.equal(connectionView({name:'off',data:state.data},true).state.state,'disconnected');
+  const out=connectionView({name:'loggedout',data:state.data},true);
+  assert.equal(out.signedIn,false);assert.equal(out.state.state,'logged-out');assert.equal(out.state.server,undefined);
+});

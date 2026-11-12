@@ -1,6 +1,14 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.1**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.2**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Abertura da VPN 1.7.2
+
+A suíte completa passou **183 testes**. Os seis novos contratos cobrem a primeira renderização conectada com carregamento de rede pendente, estados realmente conectando/desconectados, logout durante a leitura inicial, ausência de segredos no resumo público e inicialização do painel antes da barreira de primeiro frame. O shell pré-consulta o worker e acompanha eventos durante o carregamento dos scripts; uma resposta inicial antiga não sobrepõe desconexão/logout. O adaptador não deduz conexão em andamento da mera presença de servidor salvo.
+
+A mensagem `connectionState` entrega somente resumo público do servidor, estado e erro de apresentação; confirma o proxy no navegador e não busca plano ou lista de servidores. Conta e servidores podem continuar carregando sem trocar o cartão conectado por um spinner. Abrir o painel não envia comando `connect`. O estado não é persistido como uma tela conectada para a próxima abertura. Quando o worker ainda está restaurando uma conexão, ela continua sendo apresentada como conectando.
+
+Compilação de produção, checagens TypeScript e `check:ui` passaram. A evidência desta rodada usa APIs simuladas/JSDOM; não foi medida a primeira pintura de um popup nativo com conta Proton. A limitação de inicialização nativa registrada na rodada 1.7.1 permanece.
 
 ## Indicador VPN 1.7.1
 

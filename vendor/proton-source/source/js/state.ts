@@ -35,6 +35,7 @@ import {
 	invalidateProxyOperations,
 } from './tools/proxy';
 import {ConnectionLifecycle} from '../../../../vpn/engine/lifecycle';
+import {connectionView} from '../../../../vpn/engine/presentation';
 import {
 	authCheck,
 	excludeApiFromProxy,
@@ -963,3 +964,20 @@ setInterval(() => {
 		triggerPromise(updateLastActivityTime());
 	}
 }, getActivityCheckInterval());
+
+/** Live presentation state; reading it never reconnects or reloads the server list. */
+export async function getConnectionSnapshot() {
+	await waitForReadyState();
+	const initial = getCurrentState();
+	const generation = connectionLifecycle.capture();
+	const applied =
+		initial.name === 'on' && !!initial.proxyEnabled && (await hasProxy());
+	const current = getCurrentState();
+	const confirmed =
+		initial === current && connectionLifecycle.isCurrent(generation) && applied;
+	return connectionView(
+		current as unknown as Parameters<typeof connectionView>[0],
+		confirmed,
+		current.data.error ? getErrorAsString(current.data.error) : undefined,
+	);
+}

@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.1**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.2**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -63,6 +63,7 @@ Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine
 
 - [x] Integração do motor Proton e interface própria em `vpn/source`.
 - [x] Login pela página oficial e separação de sessão, mensagens e armazenamento.
+- [x] Consulta leve de estado confirmado e abertura do painel sem estado falso de conexão; carregar conta/servidores em segundo plano (1.7.2).
 - [x] Países recolhidos, bandeiras SVG locais, filtros de plano/manutenção e carregamento em lotes.
 - [x] Carregamento progressivo, sem bloquear todo o painel enquanto os servidores chegam.
 - [x] Inclusão/exclusão de sites, subdomínios e aplicação de regras na conexão ativa.

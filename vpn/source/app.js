@@ -34,6 +34,7 @@ export async function mountVpn(root, engine, preferences) {
     saved: false,
     confirmSignOut: false,
   };
+  let hydrated = false;
   let disposed = false,
     started = false,
     loadingPromise,
@@ -127,7 +128,7 @@ export async function mountVpn(root, engine, preferences) {
     ).slice(0, 5);
     return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${button(t("choose"), "servers")}</ui-actions></ui-card>
   ${!active() ? `<div class="vpn-quick">${button(t("random"), "random")}</div>` : ""}
-  ${serversStatus()}
+  ${!active() ? serversStatus() : ""}
   ${!model.serversLoading && !model.serversError && free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count ui-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
   ${
     recent.length
@@ -184,6 +185,7 @@ export async function mountVpn(root, engine, preferences) {
     return `<nav class="${hostNavigation ? "sub-nav ui-submenu" : "vpn-navigation"}" aria-label="VPN">${pages.map((page) => `<ui-button type="button" data-action="navigate" data-page="${page}" class="${hostNavigation ? "tab " : ""}${model.page === page ? "active" : ""}" ${model.page === page ? 'aria-current="page"' : ""}>${e(t(page))}</ui-button>`).join("")}</nav>`;
   }
   function render() {
+    if (!hydrated || disposed) return;
     if (disposed) return;
     const oldScroll = root.scrollTop;
     const focusedNavigation = hostNavigation?.contains(document.activeElement)
@@ -250,7 +252,6 @@ export async function mountVpn(root, engine, preferences) {
     model.loading = !model.snapshot.signedIn;
     model.serversLoading = true;
     model.serversError = "";
-    model.error = "";
     render();
     loadingPromise = (async () => {
       try {
@@ -258,7 +259,10 @@ export async function mountVpn(root, engine, preferences) {
           if (disposed || stateRevision !== revision && model.state.state === "logged-out") return;
           model.snapshot = { ...model.snapshot, ...partial };
           model.loading = false;
-          if (stateRevision === revision) model.state = partial.state || model.state;
+          if (stateRevision === revision && partial.state) {
+            model.state = partial.state;
+            model.error = partial.state.error ? errorText(partial.state.error) : "";
+          }
           if (!model.dirty) restoreRules();
           render();
         });
@@ -271,8 +275,7 @@ export async function mountVpn(root, engine, preferences) {
         model.snapshot = snapshot;
         if (stateRevision === revision) {
           model.state = snapshot.state || { state: "disconnected" };
-          if (snapshot.state?.error)
-            model.error = errorText(snapshot.state.error);
+          model.error = snapshot.state?.error ? errorText(snapshot.state.error) : "";
         }
         if (!model.dirty) restoreRules();
         if (model.state.state === "connecting") startChecking();
@@ -567,13 +570,26 @@ export async function mountVpn(root, engine, preferences) {
     }
   };
   root.addEventListener("super-vpn:show", show);
-  try {
-    const saved = await engine.readView();
+  const initialRevision = stateRevision;
+  const [saved, connection] = await Promise.all([
+    engine.readView().catch(() => undefined),
+    engine.readConnection?.().catch(() => undefined),
+  ]);
+  if (!disposed) {
     model.page = restorePage(saved?.page);
     initialScroll = Math.max(0, Number(saved?.scrollTop) || 0);
+    if (connection && initialRevision === stateRevision) {
+      model.snapshot = {...model.snapshot, ...connection};
+      model.state = connection.state;
+      model.loading = false;
+      if (connection.state?.error) model.error = errorText(connection.state.error);
+    } else if (stateRevision !== initialRevision) {
+      model.snapshot.signedIn = model.state.state !== "logged-out";
+      model.loading = false;
+    }
+    hydrated = true;
     render();
-  } catch {
-    render();
+    if (model.state.state === "connecting") startChecking();
   }
   if (!root.closest("[hidden]")) show();
   const dispose = () => {

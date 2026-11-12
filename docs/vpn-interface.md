@@ -57,3 +57,9 @@ Tema e foco usam a [base compartilhada](ui-components.md), revisada em 1.6.3. Co
 ### Correção do indicador 1.7.1
 
 A navegação e a recarga invalidam o cache de action da aba, permitindo reaplicar azul/verde mesmo quando a política de roteamento permanece igual. Ativação e substituição da aba também forçam a atualização. Sem controle confirmado do proxy, o ícone fica normal. A alteração não muda quais sites usam a VPN nem modifica o badge da limpeza.
+
+### Abertura com estado real 1.7.2
+
+O shell pré-consulta `connectionState`, ouvindo eventos enquanto carrega os scripts. O painel selecionado pode iniciar antes da barreira de primeiro frame; `SuperVpnReady` sinaliza que preferências de navegação e o estado leve já foram lidos. A primeira renderização da seção usa o resumo confirmado do worker, sem tratar servidor salvo como “conectando” e sem esperar conta/plano ou servidores. A aba Conexão mantém o cartão estável enquanto as consultas secundárias terminam; carregamento/erro da lista fica na seção Servidores quando já há conexão ativa.
+
+O bootstrap existe apenas na memória deste popup, sem cache persistente de conexão. A consulta usa estado atual e propriedade/configuração efetiva do proxy; eventos mais recentes têm prioridade sobre respostas pendentes. Sem confirmação, a interface mantém um estado neutro, desconectado ou conectando conforme a situação real. Desconectar permanece disponível durante o carregamento dos servidores. A reabertura não envia comandos de conexão.

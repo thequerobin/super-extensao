@@ -2,7 +2,13 @@
 import {readSession} from '../account/readSession';
 import {getFreshUser} from '../account/user/getUser';
 import {getPmUser} from '../account/user/getPmUser';
-import {connectLogical, disconnect, getCurrentState, logOut} from '../state';
+import {
+	connectLogical,
+	disconnect,
+	getCurrentState,
+	getConnectionSnapshot,
+	logOut,
+} from '../state';
 import {createSession} from '../account/createSession';
 import {
 	BackgroundAction,
@@ -62,6 +68,9 @@ export const routeMessage = async <T extends BackgroundMessage>(message: {
 			logOut(false);
 			await createSession();
 			break;
+
+		case BackgroundData.CONNECTION_STATE:
+			return await getConnectionSnapshot();
 
 		case BackgroundData.STATE:
 			return getCurrentState().data;

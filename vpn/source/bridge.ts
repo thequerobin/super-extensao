@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 // Compatibility boundary with the existing Proton engine. No credentials are
 // exposed to the view; sign-in remains on the official Proton account page.
-import { readSession } from "@vpn-engine/account/readSession";
 import { openForkTab } from "@vpn-engine/account/openForkTab";
 import { sendMessageToBackground as request } from "@vpn-engine/tools/sendMessageToBackground";
 import { getSortedLogicals, isLogicalUp } from "@vpn-engine/vpn/getLogicals";
@@ -41,12 +40,14 @@ type ToggleName =
   | "notification"
   | "preventWebrtcLeak"
   | "recents";
-export function createEngine() {
+export function createEngine(initialConnection?: () => Promise<any>) {
   let user: User | undefined;
   let features: AllFeatures;
   let context: Awaited<ReturnType<typeof getUserContext>>;
   let logicals: Logical[] = [];
   let connected = false;
+  let connectionRevision = 0;
+  let latestConnection: any;
   const runtime = getRuntime();
   const checkAccess = () => {
     if (!user) throw new Error("No Proton session");
@@ -90,16 +91,30 @@ export function createEngine() {
       }),
     );
   return {
+    async readConnection() {
+      const revision = connectionRevision;
+      const initial = initialConnection;
+      initialConnection = undefined;
+      const snapshot = (initial && await initial()) || await request<any>("connectionState");
+      if (revision !== connectionRevision && latestConnection) return latestConnection;
+      if (!snapshot || typeof snapshot.signedIn !== "boolean" ||
+          !["connected", "connecting", "disconnected", "logged-out"].includes(snapshot.state?.state))
+        throw new Error("The VPN background did not answer the request.");
+      connected = snapshot.state.state === "connected";
+      latestConnection = snapshot;
+      return snapshot;
+    },
     async load(onProgress?: (snapshot: any) => void) {
-      const session = await readSession();
-      if (!session?.uid || !session.refreshToken) {
+      const connection = await this.readConnection();
+      if (!connection.signedIn) {
         user = undefined;
         logicals = [];
         connected = false;
-        return { signedIn: false };
+        return {signedIn: false, state: connection.state};
       }
-      const [state, loadedFeatures, recents] = await Promise.all([
-        request<any>("state"), loadAllFeatures(), getLastChoices(),
+      onProgress?.(connection);
+      const [loadedFeatures, recents] = await Promise.all([
+        loadAllFeatures(), getLastChoices(),
       ]);
       features = loadedFeatures;
       const local = {
@@ -107,11 +122,7 @@ export function createEngine() {
         features: featureSummary(),
         split: features.splitTunneling.config,
         splitControllable: false,
-        state: {
-          state: state?.server ? "connecting" : "disconnected",
-          server: state?.server,
-          error: state?.error,
-        },
+        state: connection.state,
         recents,
       };
       onProgress?.(local);
@@ -252,8 +263,12 @@ export function createEngine() {
           (sender?.id && sender.id !== runtime.id)
         )
           return;
-        if (message.type === "changeState")
-          connected = message.data?.state === "connected";
+        if (message.type === "changeState" &&
+            ["connected", "connecting", "disconnected", "logged-out"].includes(message.data?.state)) {
+          connectionRevision++;
+          connected = message.data.state === "connected";
+          latestConnection = {signedIn: message.data.state !== "logged-out", state: message.data};
+        }
         if (
           message.type === "logicalUpdate" &&
           Array.isArray(message.data) &&

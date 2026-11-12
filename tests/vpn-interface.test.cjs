@@ -120,6 +120,14 @@ async function boot(initial = snapshot(), options = {}) {
   );
   const w = dom.window,
     calls = [];
+  if (options.renders) {
+    const panel = w.document.getElementById("vpnPanel");
+    const property = Object.getOwnPropertyDescriptor(w.Element.prototype, "innerHTML");
+    Object.defineProperty(panel, "innerHTML", {
+      get() {return property.get.call(this);},
+      set(value) {options.renders.push(value);property.set.call(this, value);},
+    });
+  }
   let broadcast, localeWatcher;
   const preferences = {
     locale: {
@@ -144,7 +152,8 @@ async function boot(initial = snapshot(), options = {}) {
     },
   };
   const engine = {
-    load: async () => initial,
+    load: options.load || (async () => initial),
+    ...(options.readConnection ? {readConnection: options.readConnection} : {}),
     readView: async () => options.savedView,
     saveView: async (value) => calls.push(["view", value]),
     subscribe(fn) {
@@ -505,8 +514,8 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
           return {
             VPN: { Name: "name", MaxTier: tier, Password: "never-render-this" },
           };
-        if (type === "state")
-          return { credsData: { Password: "never-expose" }, starting: false };
+        if (type === "connectionState")
+          return { signedIn: true, state: {state: "connected", server: {name:"JP#1", exitCountry:"JP"}} };
       },
     },
     "@vpn-engine/vpn/getLogicals": {
@@ -572,13 +581,15 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
   const unsubscribe = engine.subscribe(() => events++);
   const progress = [];
   const state = await engine.load((partial) => progress.push(plain(partial)));
-  assert.equal(progress.length, 2);
+  assert.equal(progress.length, 3);
   assert.equal(progress[0].signedIn, true);
-  assert.ok(progress[0].features);
-  assert.equal(progress[0].account, undefined);
-  assert.equal(progress[0].servers, undefined);
-  assert.ok(progress[1].account);
+  assert.equal(progress[0].state.state, "connected");
+  assert.equal(progress[0].features, undefined);
+  assert.ok(progress[1].features);
+  assert.equal(progress[1].account, undefined);
   assert.equal(progress[1].servers, undefined);
+  assert.ok(progress[2].account);
+  assert.equal(progress[2].servers, undefined);
   assert.ok(!JSON.stringify(state).includes("never-expose"));
   assert.ok(!JSON.stringify(state).includes("never-render-this"));
   await engine.signIn();
@@ -679,7 +690,7 @@ test("production bundle mounts on a fresh profile without the original Proton ma
       id: "extension",
       onMessage: event,
       getURL: (path) => "https://extension.test/" + path,
-      sendMessage: async () => ({ received: true, result: {} }),
+      sendMessage: async () => ({ received: true, result: {signedIn:false,state:{state:"logged-out"}} }),
     },
     storage: {
       local: area,
@@ -835,4 +846,72 @@ test("server loading keeps navigation, settings and disconnect available and sco
     assert.match(ui.w.document.body.textContent, /Server network failed/);
     assert.ok(ui.w.document.querySelector('[data-action="refresh"]'));
   } finally { await ui.close(); }
+});
+
+
+test("opening an already connected VPN paints connected before account/server requests finish", async () => {
+  const initial = snapshot();
+  initial.state = {state:"connected", server:{name:"MX-FREE#4", exitCountry:"MX", exitCity:"Mexico City", exitIp:"192.0.2.8"}, error:{message:"Aviso atual da VPN"}};
+  let finishLoad;
+  const renders = [];
+  const ui = await boot(initial, {
+    renders,
+    readConnection: async () => ({signedIn:true, state:initial.state}),
+    load: () => new Promise(resolve => {finishLoad = resolve;}),
+  });
+  try {
+    assert.ok(renders.length > 0);
+    assert.ok(renders.every(html => html.includes('data-status="connected"')));
+    assert.ok(renders.every(html => !html.includes("Conectando") && !html.includes("Carregando")));
+    assert.match(ui.w.document.body.textContent, /MX-FREE#4/);
+    assert.ok(renders.every(html => html.includes("Aviso atual da VPN")));
+    assert.equal(ui.w.document.querySelector('[data-action="disconnect"]').disabled, false);
+    assert.equal(ui.calls.some(call => call[0] === "connect" || call[0] === "check"), false);
+    const pending = ui.app.refresh();
+    ui.broadcast("changeState", {state:"disconnected"});
+    finishLoad(initial);
+    await pending;
+    assert.equal(ui.w.document.querySelector(".vpn-status-card").dataset.status, "disconnected");
+  } finally {await ui.close();}
+});
+
+test("bootstrap cannot turn a real connecting/disconnected state into a cached connected screen", async () => {
+  for (const state of ["connecting", "disconnected"]) {
+    const initial = snapshot();
+    initial.state = {state, ...(state === "connecting" ? {server:{name:"MX-FREE#4"}} : {})};
+    let finish;
+    const ui = await boot(initial, {
+      readConnection: async () => ({signedIn:true,state:initial.state}),
+      load: () => new Promise(resolve => {finish=resolve;}),
+    });
+    try {
+      assert.equal(ui.w.document.querySelector(".vpn-status-card").dataset.status, state);
+      const pending=ui.app.refresh();finish(initial);await pending;
+    }finally{await ui.close();}
+  }
+});
+
+test("logout during a delayed bootstrap wins over its older connected snapshot", async () => {
+  const w = new JSDOM('<div id="vpnPanel"></div>',{url:'https://extension.test/popup.html'}).window;
+  let emit,resolveConnection;
+  const {mountVpn} = load("app.js",{}, {window:w,document:w.document,setTimeout,clearTimeout,setInterval,clearInterval});
+  const preferences={locale:{get:async()=>"pt-BR",watch:()=>()=>{}},bindTheme:()=>()=>{}};
+  let loads=0;
+  const engine={
+    subscribe(fn){emit=fn;return()=>{};},readView:async()=>undefined,
+    readConnection:()=>new Promise(resolve=>{resolveConnection=resolve;}),
+    load:async()=>{loads++;return {signedIn:false};},
+    checkConnection:async()=>{},saveView:async()=>{},
+  };
+  const pending=mountVpn(w.document.getElementById('vpnPanel'),engine,preferences);
+  await tick();
+  emit('changeState',{state:'logged-out'});
+  resolveConnection({signedIn:true,state:{state:'connected',server:{name:'OLD'}}});
+  const app=await pending;await tick();
+  try{
+    assert.equal(w.document.querySelector('.vpn-status-card'),null);
+    assert.match(w.document.body.textContent,/Entre com sua conta Proton/);
+    assert.ok(!w.document.body.textContent.includes('OLD'));
+    assert.equal(loads,1);
+  }finally{app.dispose();w.close();}
 });

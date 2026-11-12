@@ -24,6 +24,7 @@ export enum BackgroundData {
 	USER = 'user',
 	PM_USER = 'pmUser',
 	STATE = 'state',
+	CONNECTION_STATE = 'connectionState',
 	LOCALE = 'locale',
 }
 
