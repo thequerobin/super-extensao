@@ -43,6 +43,7 @@ function activateTab(tab, persist = true) {
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
   $("cleanupActions").hidden = tab !== "cleanup";
+  $("cleanupFooter").hidden = tab !== "cleanup";
   $("syncSubmenu").hidden = tab !== "sync";
   $("vpnSubmenu").hidden = tab !== "vpn";
   $("section-cleanup").classList.toggle("active", isCleanup);

@@ -398,7 +398,7 @@
       "message": "Sync"
    },
    "uiWhattoclear08caf": {
-      "message": "What to clear"
+      "message": "General"
    },
    "uiBookmarks33b33": {
       "message": "Bookmarks"
@@ -473,7 +473,7 @@
       "message": "No domains in this list."
    },
    "uiAddinganexceptiondoesnot95152": {
-      "message": "Adding an exception does not enable cookie deletion. Control it under What to clear."
+      "message": "Adding an exception does not enable cookie deletion. Control it under General."
    },
    "uiImportfrombookmarksab35d": {
       "message": "Import from bookmarks"
@@ -887,12 +887,15 @@
       "message": "The exception covers the entered address over HTTP and HTTPS. Add other subdomains and ports separately."
    },
    "uiCleanupExceptionDoesNotEnable": {
-      "message": "Adding an exception does not enable deletion for this data type. Control it under What to clear."
+      "message": "Adding an exception does not enable deletion for this data type. Control it under General."
    },
    "uiCleanupImportTarget": {
       "message": "Destination list"
    },
    "uiDomainAddedToExceptions": {
       "message": "Domain added to exceptions."
+   },
+   "uiLocalStorageShort": {
+      "message": "Local stor."
    }
 }

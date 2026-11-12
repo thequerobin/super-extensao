@@ -20,10 +20,10 @@
       <button class="ui-tab tab" id="tab-vpn" data-tab="vpn" aria-pressed="false" type="button">VPN</button>
     </nav>
     <nav id="cleanupSubmenu" class="ui-nav sub-nav ui-submenu" aria-label="Opções de limpeza" data-i18n-aria-label="uiCleanupoptions18c23">
-      <button class="ui-tab tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true" data-i18n="uiWhattoclear08caf" type="button">O que apagar</button>
+      <button class="ui-tab tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true" data-i18n="uiWhattoclear08caf" type="button">Geral</button>
       <button class="ui-tab tab" id="tab-exceptions" data-tab="exceptions" aria-pressed="false" type="button">Cookies</button>
       <button class="ui-tab tab" id="tab-cache" data-tab="cache" aria-pressed="false" data-i18n="cache" type="button">Cache</button>
-      <button class="ui-tab tab" id="tab-local-storage" data-tab="local-storage" aria-pressed="false" data-i18n="uiLocalstorage3d640" type="button">Armazenamento local</button>
+      <button class="ui-tab tab" id="tab-local-storage" data-tab="local-storage" aria-pressed="false" data-i18n="uiLocalStorageShort" title="Armazenamento local" data-i18n-title="uiLocalstorage3d640" type="button">Arm. Local</button>
       <button class="ui-tab tab" id="tab-bookmarks" data-tab="bookmarks" aria-pressed="false" data-i18n="uiBookmarks33b33" type="button">Favoritos</button>
     </nav>
     <div id="syncSubmenu" class="module-submenu" hidden=""></div>
@@ -32,7 +32,7 @@
   <main>
     <div id="error" class="ui-notice message error ui-notice-error" role="alert" hidden=""></div>
     <section id="panel-cleanup" aria-labelledby="tab-cleanup">
-      <div class="ui-section-heading section-heading"><h2 data-i18n="uiWhattoclear08caf">O que apagar</h2><span data-i18n="uiSavedautomatically299aa">Salvo automaticamente</span></div>
+      <div class="ui-section-heading section-heading"><h2 data-i18n="uiWhattoclear08caf">Geral</h2><span data-i18n="uiSavedautomatically299aa">Salvo automaticamente</span></div>
       <div class="presets" aria-label="Modos de limpeza" data-i18n-aria-label="uiCleanupmodeseebda"><button class="ui-button ui-button-secondary" data-preset="safe" type="submit"><strong data-i18n="uiSafe39c09">Seguro</strong><small data-i18n="uiHistorybea29">Histórico</small></button><button class="ui-button ui-button-secondary" data-preset="standard" type="submit"><strong data-i18n="uiStandardd8e00">Padrão</strong><small>+ cache</small></button><button class="ui-button ui-button-secondary" data-preset="strong" type="submit"><strong data-i18n="uiStronga88f9">Forte</strong><small data-i18n="uiAlldatatypes067ff">Todos os tipos</small></button></div>
       <div class="ui-card options">
         <label class="ui-toggle toggle-line"><span data-i18n="uiBrowsinghistory8c5ab">Histórico de navegação</span><input id="clearHistory" type="checkbox" role="switch" class="ui-switch"></label>
@@ -52,7 +52,7 @@
       <form id="domainForm"><label class="ui-field field" for="domainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="domainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
       <div class="list-heading"><span id="listCount" data-i18n="ui0domains890d3">0 domínios</span><button id="goImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="submit">Importar de favoritos →</button></div>
       <ul id="domainList" class="domain-list"></ul><p id="emptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
-      <p class="ui-note note" data-i18n="uiAddinganexceptiondoesnot95152">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar.</p>
+      <p class="ui-note note" data-i18n="uiAddinganexceptiondoesnot95152">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em Geral.</p>
     </section>
 
     <section id="panel-cache" aria-labelledby="tab-cache" hidden="">
@@ -62,7 +62,7 @@
   <form id="cacheDomainForm"><label class="ui-field field" for="cacheDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="cacheDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
   <div class="list-heading"><span id="cacheListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="cacheGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
   <ul id="cacheDomainList" class="domain-list"></ul><p id="cacheEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
-  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.</p>
+  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em Geral.</p>
 </section>
 
     <section id="panel-local-storage" aria-labelledby="tab-local-storage" hidden="">
@@ -72,7 +72,7 @@
   <form id="localStorageDomainForm"><label class="ui-field field" for="localStorageDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="localStorageDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
   <div class="list-heading"><span id="localStorageListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="localStorageGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
   <ul id="localStorageDomainList" class="domain-list"></ul><p id="localStorageEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
-  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.</p>
+  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em Geral.</p>
 </section>
 
     <section id="panel-bookmarks" aria-labelledby="tab-bookmarks" hidden="">
@@ -121,7 +121,7 @@
     </section>
 
     <p id="popupStatus" class="ui-notice ui-notice-success" role="status" aria-live="polite"></p>
-    <footer>
+    <footer id="cleanupFooter">
       <div class="automation"><label class="ui-toggle toggle-line" for="enabled"><span data-i18n="uiClearwhenthelastwindow0250c">Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch" class="ui-switch"></label><button id="pauseToggle" class="ui-button quiet ui-button-secondary ui-button-compact" aria-expanded="false" aria-controls="pauseMenu" data-i18n="uiPause8e0f5" type="submit">Pausar</button></div>
       <div id="pauseMenu" class="ui-actions pause-menu" hidden=""><button data-duration="30" data-i18n="ui30minutes75eae" class="ui-button ui-button-compact" type="submit">30 minutos</button><button data-duration="60" data-i18n="ui1houreed75" class="ui-button ui-button-compact" type="submit">1 hora</button><button data-duration="today" data-i18n="uiUntiltomorrow7286d" class="ui-button ui-button-compact" type="submit">Até amanhã</button><button data-duration="0" data-i18n="uiUntilresumedd56d7" class="ui-button ui-button-compact" type="submit">Até retomar</button></div>
       <div id="pauseRow" class="ui-notice message pause ui-notice-warning" hidden="" role="status"><span id="pauseStatus"></span><button id="resume" data-i18n="uiResumedaaa7" class="ui-button ui-button-compact" type="submit">Retomar</button></div>

@@ -163,5 +163,7 @@
   "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar.": "uiAddinganexceptiondoesnot95152",
   "Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.": "uiImportdomainsfromafolder684b6",
   "Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?": "uiDeletingcookiesmaysignyoudaaf9",
-  "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?": "uiStrongmodeclearsallselectable60bf4"
+  "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?": "uiStrongmodeclearsallselectable60bf4",
+  "Geral": "uiWhattoclear08caf",
+  "Arm. Local": "uiLocalStorageShort"
 }

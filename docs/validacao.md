@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.6**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.7**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Limpeza Geral 1.7.7
+
+Rótulos Geral e Arm. Local, submenu com cinco colunas e automação/pausa restritas a Geral. Os contratos existentes de navegação e idioma verificam a visibilidade do rodapé e as novas traduções. Conferência visual nativa continua limitada pelo ambiente já documentado.
 
 ## Abas e exceções de limpeza 1.7.6
 

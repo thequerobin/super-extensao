@@ -30,6 +30,7 @@ test('novas abas salvam e removem exceções isoladamente, com ações de limpez
       f.d.getElementById('tab-'+tab).click();
       assert.equal(f.d.getElementById('panel-'+tab).hidden,false);
       assert.equal(f.d.getElementById('cleanupActions').hidden,true);
+      assert.equal(f.w.getComputedStyle(f.d.getElementById('cleanupFooter')).display,'none');
       assert.equal(f.w.getComputedStyle(f.d.getElementById('cleanupActions')).display,'none');
       await add(f,prefix,'https://keep.example/path');assert.deepEqual(f.local[key],['keep.example']);
       assert.deepEqual(f.local.excludedSites,['cookie.example']);
@@ -38,7 +39,9 @@ test('novas abas salvam e removem exceções isoladamente, com ações de limpez
     f.d.querySelector('#cacheDomainList button').click();await tick();
     assert.deepEqual(f.local.excludedCacheSites,[]);assert.deepEqual(f.local.excludedLocalStorageSites,['keep.example']);
     f.d.getElementById('tab-cleanup').click();assert.equal(f.d.getElementById('cleanupActions').hidden,false);
-    for(const tab of ['exceptions','bookmarks','autoplay','tabs','sync','vpn']){f.d.getElementById('tab-'+tab).click();assert.equal(f.d.getElementById('cleanupActions').hidden,true);}
+    assert.notEqual(f.w.getComputedStyle(f.d.getElementById('cleanupFooter')).display,'none');
+    for(const tab of ['exceptions','bookmarks','autoplay','tabs','sync','vpn']){f.d.getElementById('tab-'+tab).click();assert.equal(f.d.getElementById('cleanupActions').hidden,true);
+      assert.equal(f.w.getComputedStyle(f.d.getElementById('cleanupFooter')).display,'none');}
     assert.equal(f.d.getElementById('error').hidden,true);
   }finally{f.close();}
 });
@@ -60,7 +63,8 @@ test('nova aba é restaurada e traduções não descartam rascunhos nem listas',
     assert.equal(f.d.getElementById('panel-local-storage').hidden,false);
     f.d.getElementById('localStorageDomainInput').value='draft.example';
     await f.w.SuperPreferences.locale.set('en');await tick();
-    assert.equal(f.d.getElementById('tab-local-storage').textContent,'Local storage');
+    assert.equal(f.d.getElementById('tab-local-storage').textContent,'Local stor.');
+    assert.equal(f.d.getElementById('tab-cleanup').textContent,'General');
     assert.equal(f.d.querySelector('#panel-cache h2').textContent,'Keep cache by website');
     assert.equal(f.d.getElementById('localStorageDomainInput').value,'draft.example');
     f.d.getElementById('tab-autoplay').click();f.d.getElementById('section-cleanup').click();

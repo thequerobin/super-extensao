@@ -398,7 +398,7 @@
       "message": "Sincronização"
    },
    "uiWhattoclear08caf": {
-      "message": "O que apagar"
+      "message": "Geral"
    },
    "uiBookmarks33b33": {
       "message": "Favoritos"
@@ -473,7 +473,7 @@
       "message": "Nenhum domínio nesta lista."
    },
    "uiAddinganexceptiondoesnot95152": {
-      "message": "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar."
+      "message": "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em Geral."
    },
    "uiImportfrombookmarksab35d": {
       "message": "Importar dos favoritos"
@@ -887,12 +887,15 @@
       "message": "A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente."
    },
    "uiCleanupExceptionDoesNotEnable": {
-      "message": "Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar."
+      "message": "Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em Geral."
    },
    "uiCleanupImportTarget": {
       "message": "Lista de destino"
    },
    "uiDomainAddedToExceptions": {
       "message": "Domínio adicionado às exceções."
+   },
+   "uiLocalStorageShort": {
+      "message": "Arm. Local"
    }
 }
