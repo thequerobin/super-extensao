@@ -126,12 +126,15 @@ test('concurrent alarm wakeups share a recovery; proxy loss is re-applied and ac
   assert.equal(f.events.filter(([kind])=>kind==='activity').length,1);
   f.ports.hasProxy=async()=>true;f.advance(30000);await f.machine.refresh();
   assert.equal(f.events.filter(([kind])=>kind==='activity').length,2);
+  assert.equal(f.events.filter(([kind])=>kind==='probe').length,0);
+  f.advance(30000);await f.machine.refresh();
   assert.equal(f.events.filter(([kind])=>kind==='probe').length,1);
 });
 test('a delayed health probe cannot act after a server change or disconnect', async () => {
   const f=fixture(), result=deferred();let staleGuard;
   f.ports.probe=async(value,current)=>{staleGuard=current;await result.promise;if(current())f.events.push(['rotate',value.name]);};
   await f.machine.connect({server:server('a')});await tick();
+  f.advance(60000);void f.machine.refresh();await tick();
   f.machine.disconnect();result.resolve();await tick();
   assert.equal(staleGuard(),false);assert.ok(!f.events.some(([kind])=>kind==='rotate'));
 });
@@ -145,7 +148,8 @@ test('retry intents are rate limited and the next alarm continues a deferred ret
 });
 test('health metadata failures do not disconnect an installed proxy', async () => {
   const f=fixture();f.ports.probe=async()=>{throw Error('server list unavailable');};
-  await connect(f);assert.equal(f.machine.peek().name,'on');assert.equal(f.machine.peek().proxyEnabled,true);
+  await connect(f);f.advance(60000);await f.machine.refresh();
+  assert.equal(f.machine.peek().name,'on');assert.equal(f.machine.peek().proxyEnabled,true);
   assert.equal(f.errors.length,1);
 });
 test('queued server persistence finishes with the latest disconnect and survives a failed write', async () => {
@@ -192,4 +196,19 @@ test('failed proxy cleanup is retried by a wake without restoring a disconnected
   await f.machine.refresh();assert.equal(f.machine.peek().name,'off');
   assert.equal(f.events.filter(([kind])=>kind==='apply').length,applies);
   assert.equal(f.events.filter(([kind])=>kind==='clear').length,1);
+});
+
+
+test('automatic server switches do not immediately probe the next server and oscillate', async () => {
+  const f=fixture();
+  f.ports.probe=async(value,current)=>{
+    if(current()) await f.machine.connect({server:server(value.name==='a'?'b':'a')});
+  };
+  await connect(f,'a');await tick();
+  assert.equal(f.machine.peek().data.server.name,'a');
+  f.advance(60000);await f.machine.refresh();await tick();
+  assert.equal(f.machine.peek().data.server.name,'b');
+  await f.machine.refresh();f.advance(30000);await f.machine.refresh();await tick();
+  assert.equal(f.machine.peek().data.server.name,'b');
+  assert.deepEqual(f.events.filter(([kind])=>kind==='apply'),[['apply','a'],['apply','b']]);
 });

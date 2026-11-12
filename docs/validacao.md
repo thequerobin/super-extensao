@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.4**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.5**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Alternância de servidores 1.7.5
+
+A suíte completa passou **214 testes**. Os sete contratos novos cobrem intervalo após troca automática (impedindo verificação imediata do próximo servidor), respostas v2 sem status, integração com os status binários já decodificados, dados ausentes, cache `_up` obsoleto, visibilidade independente da disponibilidade, IDs numéricos/textuais, falha ao buscar cargas e detecção de indisponibilidade v1. O helper de saúde e os adaptadores reais são executados com IO simulado. Compilação de produção, TypeScript do worker/interface e `check:ui` passaram. Não foi acessada uma conta Proton nem observada uma conexão real durante esta correção.
 
 ## Estado e recuperação da VPN 1.7.4
 

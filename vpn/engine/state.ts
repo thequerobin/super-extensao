@@ -144,7 +144,9 @@ export class ConnectionMachine<
       data,
     });
     this.notified = false;
-    this.lastProbe = -Infinity;
+    // A newly selected/restored server gets a full health interval. Resetting
+    // this to -Infinity made each automatic switch immediately trigger another.
+    this.lastProbe = this.now();
     this.retryRequested = false;
     this.ports.changed(state);
     this.persistence = this.persistence

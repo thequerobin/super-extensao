@@ -243,14 +243,14 @@ async function probeServer(
 	const { country, coordinates } = await getCountryAndCoordinates();
 	if (!current()) return;
 	const stay = await shouldStayOnLogical(
-		String(server.id),
+		server.id,
 		country,
 		coordinates,
 	);
 	if (!current() || stay) return;
 	const credentials = await getCredentials(true);
 	if (!current() || !credentials) return;
-	const alternative = await getAlternativeServer(String(server.id), {
+	const alternative = await getAlternativeServer(server.id, {
 		country,
 		location: coordinates,
 		tier: guessTierFromCredentials(credentials),

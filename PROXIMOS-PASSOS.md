@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.4**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.5**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -87,6 +87,7 @@ Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine
 - [x] Corrigir o registro do observador de controle do proxy e cobrir a tomada por outra extensão.
 - [x] Substituir a aplicação do proxy por um controlador próprio com serialização, confirmação e tratamento de erros (1.7.0).
 - [x] Extrair máquina de estados, restauração e recuperação para `vpn/engine/state.ts`, preservando comandos e armazenamento (1.7.4).
+- [x] Evitar alternância automática de servidores: intervalo após conexão/restauração e status incompleto tratado como desconhecido (1.7.5).
 - [x] Coordenar retries, atividade e verificações de saúde por despertares; impedir retomada de intenção antiga ao voltar do modo ocioso (1.7.4).
 - [ ] Separar obtenção de credenciais temporárias, transporte e proteção WebRTC em módulos próprios.
 - [x] Criar testes de contrato para a primeira substituição, incluindo PAC após Babel/minificação.

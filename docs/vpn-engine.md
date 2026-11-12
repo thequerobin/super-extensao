@@ -63,6 +63,12 @@ O alarme é registrado a cada inicialização do worker e pode acordá-lo para v
 
 As chaves de sessão, credenciais, último servidor e preferências permanecem iguais; não há migração ou novo login obrigatório. Não há garantia de temporização exata de alarmes nem de túnel ativo baseada somente no estado salvo.
 
+## Estabilidade do servidor — 1.7.5
+
+A 1.7.4 reiniciava `lastProbe` como imediatamente vencido em cada transição. Uma seleção automática podia causar nova verificação assim que o próximo servidor conectasse. Agora conectar, restaurar ou reconfigurar dá ao servidor um intervalo completo antes de consultar novamente sua saúde; perda de proxy e recuperação de credenciais continuam sendo verificadas nos despertares.
+
+`vpn/engine/health.ts` classifica os dados como disponível, indisponível ou desconhecido. Visibilidade na lista, ausência de campos, ausência do servidor na resposta e o `_up` calculado anteriormente não provam indisponibilidade. O adaptador combina a resposta v2 com os status indicados por `StatusID` antes de decidir, encontra o ID solicitado independentemente de representação numérica/textual e só solicita alternativa com evidência explícita de indisponibilidade. Uma falha nessa consulta mantém o servidor e é tratada como falha de metadados; não inicia uma troca.
+
 ## Reconstrução e testes
 
 ```sh
