@@ -452,7 +452,7 @@
       "message": "Preservar cookies por site"
    },
    "uiCookiesforthewebsitesin80c36": {
-      "message": "Os cookies dos sites desta lista serão preservados durante a limpeza. Esta proteção não inclui cache nem armazenamento local, e não garante a preservação de todos os logins."
+      "message": "Esta lista protege somente cookies. Para cache e armazenamento local, use as abas correspondentes. Preservar cookies não garante todos os logins."
    },
    "uiCookiesareprotectedforthe852f6": {
       "message": "Cookies são protegidos para o domínio registrável inteiro: uma exceção para accounts.exemplo.com também preserva cookies de exemplo.com e seus subdomínios."
@@ -473,13 +473,13 @@
       "message": "Nenhum domínio nesta lista."
    },
    "uiAddinganexceptiondoesnot95152": {
-      "message": "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada na aba Limpeza."
+      "message": "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar."
    },
    "uiImportfrombookmarksab35d": {
       "message": "Importar dos favoritos"
    },
    "uiImportdomainsfromafolder684b6": {
-      "message": "Importe os domínios de uma pasta para a lista de exceções de cookies. Os favoritos não serão modificados."
+      "message": "Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados."
    },
    "uiChooseabookmarksfolder55714": {
       "message": "Escolher pasta de favoritos"
@@ -716,10 +716,10 @@
       "message": "Nenhuma pasta de favoritos disponível."
    },
    "uiDeletingcookiesmaysignyoudaaf9": {
-      "message": "Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?"
+      "message": "Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?"
    },
    "uiStrongmodeclearsallselectable60bf4": {
-      "message": "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. Exceções preservam somente cookies. Aplicar?"
+      "message": "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?"
    },
    "uiCleanupmodesaved0c164": {
       "message": "Modo de limpeza salvo."
@@ -870,5 +870,29 @@
    },
    "uiRulesImported": {
       "message": "{count} regras importadas. Regras existentes foram mescladas."
+   },
+   "uiKeepCacheBySite": {
+      "message": "Preservar cache por site"
+   },
+   "uiKeepCacheBySiteDescription": {
+      "message": "Os sites desta lista terão o cache preservado durante a limpeza. Esta lista não protege cookies nem armazenamento local."
+   },
+   "uiKeepLocalStorageBySite": {
+      "message": "Preservar armazenamento local por site"
+   },
+   "uiKeepLocalStorageBySiteDescription": {
+      "message": "Os sites desta lista terão o localStorage preservado durante a limpeza. Esta lista não protege cookies nem cache."
+   },
+   "uiExactCleanupScope": {
+      "message": "A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente."
+   },
+   "uiCleanupExceptionDoesNotEnable": {
+      "message": "Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar."
+   },
+   "uiCleanupImportTarget": {
+      "message": "Lista de destino"
+   },
+   "uiDomainAddedToExceptions": {
+      "message": "Domínio adicionado às exceções."
    }
 }

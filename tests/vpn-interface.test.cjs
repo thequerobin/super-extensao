@@ -220,14 +220,16 @@ async function openCountry(ui, key) {
   details.open = true;
   await tick();
 }
-test("cleanup controls follow all panels and sit directly above the last cleanup report; VPN shares header gutters", () => {
+test("shared automation precedes the cleanup-only actions; VPN shares header gutters", () => {
   const html = fs.readFileSync(path.join(root, "popup.html"), "utf8");
   const css = fs.readFileSync(path.join(root, "popup.css"), "utf8");
   const dom = new JSDOM(html, { url: "https://extension.test/popup.html" });
   const document = dom.window.document;
   assert.ok(document.querySelector("main > footer > .automation"));
   assert.equal(document.querySelectorAll("#enabled").length, 1);
-  assert.ok(document.querySelector("#pauseRow").nextElementSibling.classList.contains("report"));
+  assert.equal(document.querySelector("#pauseRow").nextElementSibling.id, "cleanupActions");
+  assert.ok(document.querySelector("#cleanupActions > .report"));
+  assert.ok(document.querySelector("#cleanupActions > #clearNow"));
   assert.ok(!document.querySelector("main > .automation"));
   const style = document.createElement("style");
   style.textContent = css;

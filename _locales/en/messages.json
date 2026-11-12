@@ -452,7 +452,7 @@
       "message": "Keep cookies by website"
    },
    "uiCookiesforthewebsitesin80c36": {
-      "message": "Cookies for the websites in this list are kept during cleanup. This protection does not include cache or local storage and does not guarantee that every login will be preserved."
+      "message": "This list protects cookies only. Use the respective tabs for cache and local storage. Keeping cookies does not guarantee every login."
    },
    "uiCookiesareprotectedforthe852f6": {
       "message": "Cookies are protected for the entire registrable domain: an exception for accounts.example.com also keeps cookies for example.com and its subdomains."
@@ -473,13 +473,13 @@
       "message": "No domains in this list."
    },
    "uiAddinganexceptiondoesnot95152": {
-      "message": "Adding an exception does not enable cookie deletion. This option is controlled in the Cleanup tab."
+      "message": "Adding an exception does not enable cookie deletion. Control it under What to clear."
    },
    "uiImportfrombookmarksab35d": {
       "message": "Import from bookmarks"
    },
    "uiImportdomainsfromafolder684b6": {
-      "message": "Import domains from a folder into the cookie exceptions list. Bookmarks will not be changed."
+      "message": "Import domains from a folder into the exception list selected below. Bookmarks are not modified."
    },
    "uiChooseabookmarksfolder55714": {
       "message": "Choose a bookmarks folder"
@@ -716,10 +716,10 @@
       "message": "No bookmarks folders available."
    },
    "uiDeletingcookiesmaysignyoudaaf9": {
-      "message": "Deleting cookies may sign you out of accounts. Exceptions protect cookies only. Enable cookie deletion?"
+      "message": "Deleting cookies may sign you out. Each exception list protects only its respective data type. Enable cookie deletion?"
    },
    "uiStrongmodeclearsallselectable60bf4": {
-      "message": "Strong mode clears all selectable data types, including cookies and local storage. Exceptions preserve cookies only. Apply?"
+      "message": "Strong mode clears all selectable data types, including cookies and local storage. Each data type’s exceptions will be respected. Apply?"
    },
    "uiCleanupmodesaved0c164": {
       "message": "Cleanup mode saved."
@@ -870,5 +870,29 @@
    },
    "uiRulesImported": {
       "message": "{count} rules imported. Existing rules were merged."
+   },
+   "uiKeepCacheBySite": {
+      "message": "Keep cache by website"
+   },
+   "uiKeepCacheBySiteDescription": {
+      "message": "Cache for websites in this list is preserved during cleanup. This list does not protect cookies or local storage."
+   },
+   "uiKeepLocalStorageBySite": {
+      "message": "Keep local storage by website"
+   },
+   "uiKeepLocalStorageBySiteDescription": {
+      "message": "localStorage for websites in this list is preserved during cleanup. This list does not protect cookies or cache."
+   },
+   "uiExactCleanupScope": {
+      "message": "The exception covers the entered address over HTTP and HTTPS. Add other subdomains and ports separately."
+   },
+   "uiCleanupExceptionDoesNotEnable": {
+      "message": "Adding an exception does not enable deletion for this data type. Control it under What to clear."
+   },
+   "uiCleanupImportTarget": {
+      "message": "Destination list"
+   },
+   "uiDomainAddedToExceptions": {
+      "message": "Domain added to exceptions."
    }
 }

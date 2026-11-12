@@ -24,13 +24,20 @@
     return origins.length ? {since: 0, excludeOrigins: origins} : {since: 0};
   }
   function removalPlan(settings) {
-    // Validate the cookie exceptions before deleting anything.
+    // Validate every exception list before deleting any data.
     const cookieOptions = removalOptions(settings.excludedSites === undefined ? [] : settings.excludedSites);
+    const scoped = [
+      {key:"clearCache", type:"cache", options:removalOptions(settings.excludedCacheSites === undefined ? [] : settings.excludedCacheSites)},
+      {key:"clearLocalStorage", type:"localStorage", options:removalOptions(settings.excludedLocalStorageSites === undefined ? [] : settings.excludedLocalStorageSites)}
+    ];
     const globalData = {};
-    for (const [key, type] of [["clearHistory", "history"], ["clearDownloads", "downloads"], ["clearFormData", "formData"], ["clearCache", "cache"], ["clearLocalStorage", "localStorage"]]) {
+    for (const [key, type] of [["clearHistory", "history"], ["clearDownloads", "downloads"], ["clearFormData", "formData"]]) {
       if (settings[key] === true) globalData[type] = true;
     }
-    const plan = Object.keys(globalData).length ? [{method: "remove", options: {since: 0}, data: globalData}] : [];
+    for (const item of scoped) if (settings[item.key] === true && !item.options.excludeOrigins) globalData[item.type] = true;
+    const plan = Object.keys(globalData).length ? [{method:"remove", options:{since:0}, data:globalData}] : [];
+    for (const item of scoped) if (settings[item.key] === true && item.options.excludeOrigins)
+      plan.push({method:"remove", options:item.options, data:{[item.type]:true}});
     // Cookies run last, preserving the original worker's dedicated cookie API.
     if (settings.clearCookies === true) plan.push({method: "removeCookies", options: cookieOptions});
     return plan;

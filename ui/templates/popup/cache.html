@@ -1,0 +1,9 @@
+<section id="panel-cache" aria-labelledby="tab-cache" hidden="">
+  <ui-heading class="section-heading"><h2 data-i18n="uiKeepCacheBySite">Preservar cache por site</h2></ui-heading>
+  <ui-note class="note" data-i18n="uiKeepCacheBySiteDescription">Os sites desta lista terão o cache preservado durante a limpeza. Esta lista não protege cookies nem armazenamento local.</ui-note>
+  <ui-notice class="scope ui-notice-warning" data-i18n="uiExactCleanupScope">A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.</ui-notice>
+  <form id="cacheDomainForm"><ui-field class="field" for="cacheDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</ui-field><ui-actions class="input-row"><ui-control id="cacheDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e" /><ui-button type="submit" data-i18n="uiAddfadcf">Adicionar</ui-button></ui-actions></form>
+  <div class="list-heading"><span id="cacheListCount" data-i18n="ui0domains890d3">0 domínios</span><ui-button id="cacheGoImport" class="link-button" data-i18n="uiImportfrombookmarksa9c2c">Importar de favoritos →</ui-button></div>
+  <ul id="cacheDomainList" class="domain-list"></ul><ui-empty id="cacheEmptyList" class="empty" data-i18n="uiNodomainsinthislist5b710" as="p">Nenhum domínio nesta lista.</ui-empty>
+  <ui-note class="note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.</ui-note>
+</section>

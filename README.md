@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.5.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.6.** Documentação revisada em 12 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -81,7 +81,7 @@ Preferências usam `tabliss/config` em `storage.sync`; imagens e cache usam Inde
 
 Por padrão, apenas o histórico é selecionado para limpeza. A limpeza é tentada ao fechar a última janela; se interrompida, há recuperação na próxima abertura. O resultado só é registrado após as APIs terminarem com sucesso. **Limpar agora** funciona mesmo com a automação pausada.
 
-Exceções protegem **somente cookies**, no domínio registrável e seus subdomínios. Elas não preservam cache nem localStorage e não garantem todos os logins. Importar domínios de favoritos é uma ação manual, sem alterar os favoritos. Arquivos baixados, senhas salvas e histórico da Conta Google não são apagados.
+As abas **Cookies**, **Cache** e **Armazenamento local** possuem listas de exceções independentes. Cookies preservam o domínio registrável e seus subdomínios; cache e localStorage preservam o endereço informado em HTTP/HTTPS, exigindo entradas separadas para outros subdomínios e portas. As listas não garantem todos os logins. A aba Favoritos permite escolher a lista de destino e importar domínios sem alterar os favoritos. **Última limpeza** e **Limpar agora** aparecem somente em **O que apagar**. Arquivos baixados, senhas salvas e histórico da Conta Google não são apagados.
 
 Autoplay inicia com padrão **Bloquear**, com regras por domínio/subdomínio. Interação real libera mídia naquele quadro até a próxima navegação. Permitir na extensão continua sujeito às restrições nativas do navegador; páginas internas e protegidas não aceitam os scripts.
 
@@ -130,7 +130,7 @@ npm test
 
 `build:sync` recompila somente a interface; o worker próprio usa `build:sync-engine`. `build:vpn` preserva `vpn/source` e recompila o motor e a interface. Os dois módulos usam dependências da origem; consulte [a documentação da interface Sync](docs/sync-interface.md) e [da VPN](docs/vpn-interface.md) antes de alterar o processo.
 
-A execução da **1.7.5 passou 214 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
+A execução da **1.7.6 passou 220 testes**, incluindo contratos dos adaptadores e APIs simuladas. A interface foi conferida na rodada 1.6.8 no Helium com perfil temporário, sem contas pessoais; isso não comprova tráfego VPN nem sincronização com os serviços reais. O usuário confirmou a sincronização real com Google Drive na versão 1.6.2; os cenários avançados permanecem pendentes. [Cobertura e checklist manual](docs/validacao.md).
 
 As fontes das páginas estáticas ficam em `ui/templates/`; `popup.html`, `spare-tab.html`, `newtab/index.html` e `ui.js` são gerados por `build:ui`. Consulte [os contratos e adaptadores](docs/ui-components.md) antes de alterar componentes. Incremente a versão conforme `AGENTS.md` ao entregar alterações instaláveis.
 

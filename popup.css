@@ -142,3 +142,11 @@ h2, .report h2 { font: var(--weight-title) var(--font-title)/1.5 var(--ui-font);
 
 /* Flex/grid children must shrink within the popup instead of growing its scroll width. */
 body > main, #panel-vpn, #panel-sync { min-width: 0; max-width: 100%; overflow-x: hidden; }
+
+/* Five cleanup tabs remain readable within the fixed popup width. */
+#cleanupSubmenu { flex-wrap: wrap; }
+#cleanupSubmenu .tab { flex: 1 1 90px; min-width: 0; white-space: normal; }
+#cleanupActions { display: grid; gap: var(--space-3); }
+#cleanupActions[hidden] { display: none; }
+#cleanupSubmenu #tab-local-storage { flex-basis: 140px; }
+#cleanupActions .report { margin-bottom: 0; }

@@ -1,7 +1,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const TOGGLES = ["enabled", "clearHistory", "clearCache", "clearCookies", "clearDownloads", "clearFormData", "clearLocalStorage"];
-const DEFAULTS = {enabled:true, clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false, excludedSites:[], paused:false, pauseUntil:null};
+const DEFAULTS = {enabled:true, clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false, excludedSites:[], excludedCacheSites:[], excludedLocalStorageSites:[], paused:false, pauseUntil:null};
 const PRESETS = {
   safe: {clearHistory:true, clearCache:false, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false},
   standard: {clearHistory:true, clearCache:true, clearCookies:false, clearDownloads:false, clearFormData:false, clearLocalStorage:false},
@@ -26,14 +26,23 @@ function serializeMutation(action) {
   mutationQueue = result.catch(() => {});
   return result;
 }
-const NAV_TABS = ["cleanup", "exceptions", "bookmarks", "autoplay", "tabs", "sync", "vpn"];
+const EXCEPTION_LISTS = {
+  cookies: {key:"excludedSites", tab:"exceptions", prefix:""},
+  cache: {key:"excludedCacheSites", tab:"cache", prefix:"cache"},
+  localStorage: {key:"excludedLocalStorageSites", tab:"local-storage", prefix:"localStorage"}
+};
+const listElement = (type, name) => $(EXCEPTION_LISTS[type].prefix ? EXCEPTION_LISTS[type].prefix + name[0].toUpperCase() + name.slice(1) : name);
+const importType = () => Object.hasOwn(EXCEPTION_LISTS, $("importTarget").value) ? $("importTarget").value : "cookies";
+const CLEANUP_TABS = ["cleanup", "exceptions", "cache", "local-storage", "bookmarks"];
+const NAV_TABS = [...CLEANUP_TABS, "autoplay", "tabs", "sync", "vpn"];
 let lastCleanupTab = "cleanup";
 function activateTab(tab, persist = true) {
   if (!NAV_TABS.includes(tab)) tab = "cleanup";
   document.body.dataset.activeTab = tab;
-  const isCleanup = ["cleanup", "exceptions", "bookmarks"].includes(tab);
+  const isCleanup = CLEANUP_TABS.includes(tab);
   if (isCleanup) lastCleanupTab = tab;
   $("cleanupSubmenu").hidden = !isCleanup;
+  $("cleanupActions").hidden = tab !== "cleanup";
   $("syncSubmenu").hidden = tab !== "sync";
   $("vpnSubmenu").hidden = tab !== "vpn";
   $("section-cleanup").classList.toggle("active", isCleanup);
@@ -79,10 +88,13 @@ async function message(payload) {
   if (!response?.ok) throw new Error(response?.error || SuperI18n.text("O serviço de limpeza não respondeu."));
   return response;
 }
-async function refreshList() {
-  const {excludedSites} = await chrome.storage.local.get({excludedSites:[]});
-  const sites = ClearRules.normalizeList(excludedSites);
-  $("domainList").replaceChildren();
+async function refreshList(type) {
+  if (!type) { await Promise.all(Object.keys(EXCEPTION_LISTS).map(refreshList)); return; }
+  const {key} = EXCEPTION_LISTS[type];
+  const data = await chrome.storage.local.get({[key]:[]});
+  const sites = ClearRules.normalizeList(data[key]);
+  const list = listElement(type, "domainList");
+  list.replaceChildren();
   for (const domain of sites) {
     const li = document.createElement("li");
     const text = document.createElement("span");
@@ -93,25 +105,24 @@ async function refreshList() {
     remove.addEventListener("click", handle(async () => {
       remove.disabled = true;
       await serializeMutation(async () => {
-        const data = await chrome.storage.local.get({excludedSites:[]});
-        await chrome.storage.local.set({excludedSites: ClearRules.normalizeList(data.excludedSites).filter(site => site !== domain)});
+        const latest = await chrome.storage.local.get({[key]:[]});
+        await chrome.storage.local.set({[key]:ClearRules.normalizeList(latest[key]).filter(site => site !== domain)});
       });
-      await refreshList();
-      await refreshPreview();
+      await refreshList(type); await refreshPreview();
       notify(SuperI18n.text("Exceção removida."));
     }));
-    li.append(text, remove);
-    $("domainList").append(li);
+    li.append(text, remove); list.append(li);
   }
-  $("listCount").textContent = SuperI18n.t(sites.length===1?"uiDomainsOne":"uiDomainsMany",{count:sites.length});
-  $("emptyList").hidden = sites.length > 0;
+  listElement(type,"listCount").textContent = SuperI18n.t(sites.length===1?"uiDomainsOne":"uiDomainsMany",{count:sites.length});
+  listElement(type,"emptyList").hidden = sites.length > 0;
 }
-async function addDomains(values) {
+async function addDomains(values, type = "cookies") {
+  const {key} = EXCEPTION_LISTS[type];
   return serializeMutation(async () => {
-    const data = await chrome.storage.local.get({excludedSites:[]});
-    const before = ClearRules.normalizeList(data.excludedSites);
+    const data = await chrome.storage.local.get({[key]:[]});
+    const before = ClearRules.normalizeList(data[key]);
     const after = ClearRules.normalizeList([...before, ...values]);
-    await chrome.storage.local.set({excludedSites:after});
+    await chrome.storage.local.set({[key]:after});
     return after.length - before.length;
   });
 }
@@ -119,8 +130,9 @@ async function refreshPreview() {
   const folder = folders.get($("bookmarkFolder").value);
   if (!folder) { $("importBookmarks").disabled = true; return; }
   preview = ClearRules.bookmarkDomains(folder, $("includeSubfolders").checked);
-  const {excludedSites} = await chrome.storage.local.get({excludedSites:[]});
-  const existing = new Set(ClearRules.normalizeList(excludedSites));
+  const {key} = EXCEPTION_LISTS[importType()];
+  const data = await chrome.storage.local.get({[key]:[]});
+  const existing = new Set(ClearRules.normalizeList(data[key]));
   const fresh = preview.domains.filter(domain => !existing.has(domain));
   $("previewCount").textContent = SuperI18n.t(fresh.length===1?"uiNewDomainsOne":"uiNewDomainsMany",{count:fresh.length});
   $("previewDetail").textContent = SuperI18n.t("uiPreview",{total:preview.domains.length,existing:preview.domains.length-fresh.length,skipped:preview.skipped});
@@ -171,14 +183,14 @@ async function init() {
   });
   window.addEventListener("unload", stopTheme, { once: true });
   const savedView = settings.popupView;
-  if (["cleanup", "exceptions", "bookmarks"].includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
+  if (CLEANUP_TABS.includes(savedView?.lastCleanupTab)) lastCleanupTab = savedView.lastCleanupTab;
   activateTab(savedView?.tab, false);
   refreshPresets();
   $("theme").addEventListener("change", handle(() => SuperPreferences.theme.set($("theme").value)));
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
   $("section-cleanup").addEventListener("click", () => activateTab(lastCleanupTab));
   for (const key of TOGGLES) $(key).addEventListener("change", handle(async () => {
-    if (key === "clearCookies" && $(key).checked && !confirm(SuperI18n.text("Apagar cookies pode desconectar suas contas. As exceções protegem somente cookies. Ativar exclusão de cookies?"))) {
+    if (key === "clearCookies" && $(key).checked && !confirm(SuperI18n.text("Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?"))) {
       $(key).checked = false; return;
     }
     await serializeMutation(() => chrome.storage.local.set({[key]:$(key).checked}));
@@ -186,7 +198,7 @@ async function init() {
   }));
   document.querySelectorAll("[data-preset]").forEach(button => button.addEventListener("click", handle(async () => {
     const preset = PRESETS[button.dataset.preset];
-    if (preset.clearCookies && !confirm(SuperI18n.text("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. Exceções preservam somente cookies. Aplicar?"))) return;
+    if (preset.clearCookies && !confirm(SuperI18n.text("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?"))) return;
     await serializeMutation(() => chrome.storage.local.set(preset));
     Object.entries(preset).forEach(([key, value]) => { $(key).checked = value; });
     refreshPresets(); notify(SuperI18n.text("Modo de limpeza salvo."));
@@ -206,17 +218,25 @@ async function init() {
     await refreshPause();
   })));
   $("resume").addEventListener("click", handle(async () => { await message({action:"resume"}); await refreshPause(); }));
-  $("domainForm").addEventListener("submit", event => {
-    event.preventDefault();
-    handle(async () => {
-      const domain = ClearRules.normalizeDomain($("domainInput").value);
-      const count = await addDomains([domain]);
-      $("domainInput").value = "";
-      await refreshList(); await refreshPreview();
-      notify(count ? SuperI18n.text("Domínio adicionado às exceções de cookies.") : SuperI18n.text("Esse domínio já está na lista."));
-    })();
-  });
-  $("goImport").addEventListener("click", () => activateTab("bookmarks"));
+  for (const type of Object.keys(EXCEPTION_LISTS)) {
+    listElement(type,"domainForm").addEventListener("submit", event => {
+      event.preventDefault();
+      handle(async () => {
+        const input = listElement(type,"domainInput");
+        const domain = ClearRules.normalizeDomain(input.value);
+        const count = await addDomains([domain], type);
+        input.value = "";
+        await refreshList(type); await refreshPreview();
+        notify(SuperI18n.text(count ? "Domínio adicionado às exceções." : "Esse domínio já está na lista."));
+      })();
+    });
+    listElement(type,"goImport").addEventListener("click", handle(async () => {
+      $("importTarget").value = type;
+      activateTab("bookmarks");
+      await refreshPreview();
+    }));
+  }
+  $("importTarget").addEventListener("change", handle(refreshPreview));
   $("loadFolders").addEventListener("click", () => { loadBookmarks().catch(showError); });
   $("bookmarkFolder").addEventListener("change", handle(refreshPreview));
   $("includeSubfolders").addEventListener("change", handle(refreshPreview));
@@ -226,7 +246,7 @@ async function init() {
       const folder = folders.get($("bookmarkFolder").value);
       if (!folder) throw new Error(SuperI18n.text("Escolha uma pasta de favoritos."));
       const selected = ClearRules.bookmarkDomains(folder, $("includeSubfolders").checked);
-      const count = await addDomains(selected.domains);
+      const count = await addDomains(selected.domains, importType());
       await refreshList(); await refreshPreview();
       notifyMessage(count===1?"uiImportedOne":"uiImportedMany",{count});
     } finally { await refreshPreview(); }
@@ -248,6 +268,9 @@ async function init() {
   }));
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
+    for (const [type, {key}] of Object.entries(EXCEPTION_LISTS)) if (changes[key]) {
+      refreshList(type).catch(showError); refreshPreview().catch(showError);
+    }
     if (changes.lastClearTime || changes.lastClearErrorAt) refreshReport().catch(showError);
     if (changes.paused || changes.pauseUntil) refreshPause().catch(showError);
   });

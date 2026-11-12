@@ -22,6 +22,8 @@
     <nav id="cleanupSubmenu" class="ui-nav sub-nav ui-submenu" aria-label="Opções de limpeza" data-i18n-aria-label="uiCleanupoptions18c23">
       <button class="ui-tab tab active" id="tab-cleanup" data-tab="cleanup" aria-pressed="true" data-i18n="uiWhattoclear08caf" type="button">O que apagar</button>
       <button class="ui-tab tab" id="tab-exceptions" data-tab="exceptions" aria-pressed="false" type="button">Cookies</button>
+      <button class="ui-tab tab" id="tab-cache" data-tab="cache" aria-pressed="false" data-i18n="cache" type="button">Cache</button>
+      <button class="ui-tab tab" id="tab-local-storage" data-tab="local-storage" aria-pressed="false" data-i18n="uiLocalstorage3d640" type="button">Armazenamento local</button>
       <button class="ui-tab tab" id="tab-bookmarks" data-tab="bookmarks" aria-pressed="false" data-i18n="uiBookmarks33b33" type="button">Favoritos</button>
     </nav>
     <div id="syncSubmenu" class="module-submenu" hidden=""></div>
@@ -45,17 +47,38 @@
 
     <section id="panel-exceptions" aria-labelledby="tab-exceptions" hidden="">
       <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepcookiesbywebsite78b44">Preservar cookies por site</h2></div>
-      <p class="ui-note note" data-i18n="uiCookiesforthewebsitesin80c36">Os cookies dos sites desta lista serão preservados durante a limpeza. Esta proteção não inclui cache nem armazenamento local, e não garante a preservação de todos os logins.</p>
+      <p class="ui-note note" data-i18n="uiCookiesforthewebsitesin80c36">Esta lista protege somente cookies. Para cache e armazenamento local, use as abas correspondentes. Preservar cookies não garante todos os logins.</p>
       <p class="ui-notice scope ui-notice-warning" data-i18n="uiCookiesareprotectedforthe852f6" role="status">Cookies são protegidos para o domínio registrável inteiro: uma exceção para accounts.exemplo.com também preserva cookies de exemplo.com e seus subdomínios.</p>
       <form id="domainForm"><label class="ui-field field" for="domainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="domainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
       <div class="list-heading"><span id="listCount" data-i18n="ui0domains890d3">0 domínios</span><button id="goImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="submit">Importar de favoritos →</button></div>
       <ul id="domainList" class="domain-list"></ul><p id="emptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
-      <p class="ui-note note" data-i18n="uiAddinganexceptiondoesnot95152">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada na aba Limpeza.</p>
+      <p class="ui-note note" data-i18n="uiAddinganexceptiondoesnot95152">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar.</p>
     </section>
+
+    <section id="panel-cache" aria-labelledby="tab-cache" hidden="">
+  <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepCacheBySite">Preservar cache por site</h2></div>
+  <p class="ui-note note" data-i18n="uiKeepCacheBySiteDescription">Os sites desta lista terão o cache preservado durante a limpeza. Esta lista não protege cookies nem armazenamento local.</p>
+  <p class="ui-notice scope ui-notice-warning" data-i18n="uiExactCleanupScope" role="status">A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.</p>
+  <form id="cacheDomainForm"><label class="ui-field field" for="cacheDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="cacheDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
+  <div class="list-heading"><span id="cacheListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="cacheGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
+  <ul id="cacheDomainList" class="domain-list"></ul><p id="cacheEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.</p>
+</section>
+
+    <section id="panel-local-storage" aria-labelledby="tab-local-storage" hidden="">
+  <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepLocalStorageBySite">Preservar armazenamento local por site</h2></div>
+  <p class="ui-note note" data-i18n="uiKeepLocalStorageBySiteDescription">Os sites desta lista terão o localStorage preservado durante a limpeza. Esta lista não protege cookies nem cache.</p>
+  <p class="ui-notice scope ui-notice-warning" data-i18n="uiExactCleanupScope" role="status">A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.</p>
+  <form id="localStorageDomainForm"><label class="ui-field field" for="localStorageDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="localStorageDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
+  <div class="list-heading"><span id="localStorageListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="localStorageGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
+  <ul id="localStorageDomainList" class="domain-list"></ul><p id="localStorageEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+  <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.</p>
+</section>
 
     <section id="panel-bookmarks" aria-labelledby="tab-bookmarks" hidden="">
       <div class="ui-section-heading section-heading"><h2 data-i18n="uiImportfrombookmarksab35d">Importar dos favoritos</h2></div>
-      <p class="ui-note note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções de cookies. Os favoritos não serão modificados.</p>
+      <p class="ui-note note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.</p>
+      <label class="ui-field field" for="importTarget"><span data-i18n="uiCleanupImportTarget">Lista de destino</span><select id="importTarget" class="ui-control"><option value="cookies">Cookies</option><option value="cache" data-i18n="cache">Cache</option><option value="localStorage" data-i18n="uiLocalstorage3d640">Armazenamento local</option></select></label>
       <button id="loadFolders" class="ui-button full secondary ui-button-secondary" data-i18n="uiChooseabookmarksfolder55714" type="submit">Escolher pasta de favoritos</button>
       <div id="bookmarkControls" hidden="">
         <label class="ui-field field"><span data-i18n="uiFolderea675">Pasta</span><select id="bookmarkFolder" class="ui-control"></select></label>
@@ -102,8 +125,10 @@
       <div class="automation"><label class="ui-toggle toggle-line" for="enabled"><span data-i18n="uiClearwhenthelastwindow0250c">Limpar ao fechar a última janela</span><input id="enabled" type="checkbox" role="switch" class="ui-switch"></label><button id="pauseToggle" class="ui-button quiet ui-button-secondary ui-button-compact" aria-expanded="false" aria-controls="pauseMenu" data-i18n="uiPause8e0f5" type="submit">Pausar</button></div>
       <div id="pauseMenu" class="ui-actions pause-menu" hidden=""><button data-duration="30" data-i18n="ui30minutes75eae" class="ui-button ui-button-compact" type="submit">30 minutos</button><button data-duration="60" data-i18n="ui1houreed75" class="ui-button ui-button-compact" type="submit">1 hora</button><button data-duration="today" data-i18n="uiUntiltomorrow7286d" class="ui-button ui-button-compact" type="submit">Até amanhã</button><button data-duration="0" data-i18n="uiUntilresumedd56d7" class="ui-button ui-button-compact" type="submit">Até retomar</button></div>
       <div id="pauseRow" class="ui-notice message pause ui-notice-warning" hidden="" role="status"><span id="pauseStatus"></span><button id="resume" data-i18n="uiResumedaaa7" class="ui-button ui-button-compact" type="submit">Retomar</button></div>
+      <div id="cleanupActions">
       <section class="ui-card report" aria-labelledby="reportTitle"><div class="eyebrow" data-i18n="uiLASTCLEANUP21453">ÚLTIMA LIMPEZA</div><h2 id="reportTitle" data-i18n="uiLoadingbca48">Carregando…</h2><p id="reportDetail"></p></section>
       <button id="clearNow" class="ui-button full danger ui-button-primary" data-i18n="uiClearnow139b3" type="submit">Limpar agora</button>
+      </div>
       <p class="footer-note ui-footer-note" data-i18n="uiLocalcleanupandcontrolsOptional7d8a0">Limpeza e controles locais · Nova guia e sincronização opcionais</p>
     </footer>
 

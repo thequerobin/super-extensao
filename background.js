@@ -10,6 +10,8 @@ const DEFAULT_SETTINGS = {
   clearFormData: false,
   clearLocalStorage: false,
   excludedSites: [],
+  excludedCacheSites: [],
+  excludedLocalStorageSites: [],
   theme: SuperPreferences.theme.defaultValue,
   pendingSession: null,
   pendingClearNotification: null,
@@ -65,7 +67,9 @@ function normalizeManualSettings(snapshot) {
     clearDownloads: snapshot.clearDownloads === true,
     clearFormData: snapshot.clearFormData === true,
     clearLocalStorage: snapshot.clearLocalStorage === true,
-    excludedSites: ClearRules.normalizeList(snapshot.excludedSites === undefined ? [] : snapshot.excludedSites)
+    excludedSites: ClearRules.normalizeList(snapshot.excludedSites === undefined ? [] : snapshot.excludedSites),
+    ...(snapshot.excludedCacheSites === undefined ? {} : {excludedCacheSites:ClearRules.normalizeList(snapshot.excludedCacheSites)}),
+    ...(snapshot.excludedLocalStorageSites === undefined ? {} : {excludedLocalStorageSites:ClearRules.normalizeList(snapshot.excludedLocalStorageSites)})
   };
 }
 

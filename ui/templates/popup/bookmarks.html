@@ -1,6 +1,7 @@
 <section id="panel-bookmarks" aria-labelledby="tab-bookmarks" hidden="">
       <ui-heading class="section-heading"><h2 data-i18n="uiImportfrombookmarksab35d">Importar dos favoritos</h2></ui-heading>
-      <ui-note class="note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções de cookies. Os favoritos não serão modificados.</ui-note>
+      <ui-note class="note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.</ui-note>
+      <ui-field class="field" for="importTarget"><span data-i18n="uiCleanupImportTarget">Lista de destino</span><ui-control id="importTarget" as="select"><option value="cookies">Cookies</option><option value="cache" data-i18n="cache">Cache</option><option value="localStorage" data-i18n="uiLocalstorage3d640">Armazenamento local</option></ui-control></ui-field>
       <ui-button id="loadFolders" class="full secondary ui-button-secondary" data-i18n="uiChooseabookmarksfolder55714" type="submit">Escolher pasta de favoritos</ui-button>
       <div id="bookmarkControls" hidden="">
         <ui-field class="field"><span data-i18n="uiFolderea675">Pasta</span><ui-control id="bookmarkFolder" as="select"></ui-control></ui-field>

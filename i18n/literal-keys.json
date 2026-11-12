@@ -150,5 +150,18 @@
   "cookies": "uicookiesd2bd3",
   "histórico de downloads": "uidownloadhistory2429d",
   "formulários": "uiformdata457a1",
-  "armazenamento local": "uilocalstorageabedc"
+  "armazenamento local": "uilocalstorageabedc",
+  "Preservar cache por site": "uiKeepCacheBySite",
+  "Os sites desta lista terão o cache preservado durante a limpeza. Esta lista não protege cookies nem armazenamento local.": "uiKeepCacheBySiteDescription",
+  "Preservar armazenamento local por site": "uiKeepLocalStorageBySite",
+  "Os sites desta lista terão o localStorage preservado durante a limpeza. Esta lista não protege cookies nem cache.": "uiKeepLocalStorageBySiteDescription",
+  "A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.": "uiExactCleanupScope",
+  "Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em O que apagar.": "uiCleanupExceptionDoesNotEnable",
+  "Lista de destino": "uiCleanupImportTarget",
+  "Domínio adicionado às exceções.": "uiDomainAddedToExceptions",
+  "Esta lista protege somente cookies. Para cache e armazenamento local, use as abas correspondentes. Preservar cookies não garante todos os logins.": "uiCookiesforthewebsitesin80c36",
+  "Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em O que apagar.": "uiAddinganexceptiondoesnot95152",
+  "Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.": "uiImportdomainsfromafolder684b6",
+  "Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?": "uiDeletingcookiesmaysignyoudaaf9",
+  "O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?": "uiStrongmodeclearsallselectable60bf4"
 }

@@ -1,6 +1,12 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.5**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.6**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Abas e exceções de limpeza 1.7.6
+
+A suíte completa passou **220 testes**. As novas verificações executam o popup em JSDOM e o worker com APIs simuladas: listas independentes, inclusão/remoção, importação de favoritos com destino e contagem de duplicados por lista, restauração da aba, troca de idioma sem perda de rascunhos, ações manuais visíveis somente em O que apagar, exclusão global de histórico independente das exceções, origem com porta e cancelamento antes de qualquer remoção se houver lista inválida. Snapshots manuais antigos preservam as novas listas armazenadas quando os campos forem omitidos. `build:ui`, `build:i18n`, `check:ui` e `git diff --check` passaram.
+
+A tentativa de conferência visual no Chromium local foi bloqueada por `socket() failed: Operation not permitted`. Não houve exclusão real de dados do navegador nesta rodada. Conferir geometria e preservação real de cache/localStorage em perfil de teste permanece pendente. O escopo por origem segue [browsingData](https://developer.chrome.com/docs/extensions/reference/api/browsingData).
 
 ## Alternância de servidores 1.7.5
 

@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.5**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.6**. Itens implementados foram testados com APIs simuladas; a conferência da interface no Helium isolado, a confirmação de sincronização real relatada pelo usuário e as validações ainda pendentes estão separadas em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -114,6 +114,8 @@ A reescrita continua parcial: regras/PAC, controlador de proxy, máquina de esta
 - [ ] Fazer os próximos controles adotarem `ui-components.css` e seus tokens.
 
 ## 4. Limpeza, abas e Nova guia
+
+- [x] Adicionar exceções independentes de cache e localStorage, importação de favoritos por destino e ações manuais somente em O que apagar (1.7.6).
 
 - [ ] Validar fechamento pelo X no Helium e recuperação após encerrar o processo com limpeza pendente.
 - [ ] Conferir pausa/retomada, relatório e notificação após falha parcial.
