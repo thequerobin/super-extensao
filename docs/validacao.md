@@ -1,6 +1,10 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.2**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.4**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Estado e recuperação da VPN 1.7.4
+
+A suíte completa passou **207 testes**. Compilação de produção, checagens TypeScript do worker/interface e `check:ui` passaram. Máquina de estados extraída para `vpn/engine/state.ts`, com dependências de IO/protocolo injetadas. A suíte cobre restauração única, comandos durante a inicialização, prontidão sem esperar rede, credenciais tardias após desconexão/logout, alteração de servidor/regras, avisos de rede e retomada por wake, perda de proxy, falhas de permissão, throttling e retomada de retry adiado, verificações de saúde atrasadas, limpeza repetida após falha e persistência ordenada. Os contratos do adaptador executam a nova máquina real com transporte simulado. Não foi acessada uma conta Proton nem validado tráfego/IP real; esse limite permanece.
 
 ## Abertura da VPN 1.7.2
 

@@ -1,27 +1,14 @@
-import {connect, getCurrentState} from '../state';
-import {connectedServer} from './connectedServer';
-import {setCurrentIdleState} from '../tools/idle';
-import {getGlobalBrowser} from '../tools/getGlobalBrowser';
+import { getCurrentState, waitForReadyState } from "../state";
+import { setCurrentIdleState } from "../tools/idle";
+import { getGlobalBrowser } from "../tools/getGlobalBrowser";
+import { triggerPromise } from "../tools/triggerPromise";
 
 export const initIdleWatcher = (): void => {
-	getGlobalBrowser().idle.onStateChanged.addListener(async (newState) => {
+	getGlobalBrowser().idle.onStateChanged.addListener((newState) => {
 		setCurrentIdleState(newState);
-
-		if (newState !== 'active') {
-			return;
-		}
-
-		const state = getCurrentState();
-
-		if (
-			state?.name !== 'on' &&
-			(state?.data?.error as any)?.httpStatus === -1
-		) {
-			const server = (await connectedServer.get())?.value;
-
-			if (server) {
-				await connect({server});
-			}
-		}
+		if (newState !== "active") return;
+		triggerPromise(
+			waitForReadyState().then(() => getCurrentState().refreshState?.()),
+		);
 	});
 };

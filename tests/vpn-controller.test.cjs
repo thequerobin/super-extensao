@@ -166,7 +166,7 @@ function stateFixture() {
   const c={Username:'u',Password:'private',Expire:3600};
   const noop=()=>{};
   const state=vendorLoad('state',{
-    '../../../../vpn/engine/lifecycle':{ConnectionLifecycle},
+    '../../../../vpn/engine/state':load('state'),
     './vpn/ConnectionState':{asConnectionStateSwitch:x=>x},
     './log/log':{bind:()=>noop},
     './intervals':{getActivityCheckInterval:()=>10000,getLogicalCheckUpRefreshInterval:()=>60000},
@@ -183,10 +183,13 @@ function stateFixture() {
     './account/credentials/mayReplaceCredentials':{mayReplaceCredentials:()=>true},
     './vpn/reviewInfo':{setReviewInfoStateLastSeenConnected:noop,setReviewInfoStateOnFailedConnection:noop},
     './vpn/transmitCredentialsToProxy':{transmitCredentialsToProxy:noop},
+    './tools/activity':{updateLastActivityTime:async()=>{}},
+    './account/getLocation':{getCountryAndCoordinates:async()=>({country:'BR',coordinates:[]})},
+    './vpn/getLogicals':{shouldStayOnLogical:async()=>true},
     './messaging/MessageType':{SettingChange:{BYPASS_LIST:'rules'}},
     './tools/getErrorMessage':{getErrorAsString:e=>e.message},
   });
-  state.switchState({name:'off'});
+  state.logIn();
   return {state,credentials,events,errors,c};
 }
 const server=name=>({id:name,name,proxyHost:name+'.test',proxyPort:443});
@@ -236,4 +239,17 @@ test('public connection snapshots use confirmed proxy state and exclude all secr
   assert.equal(connectionView({name:'off',data:state.data},true).state.state,'disconnected');
   const out=connectionView({name:'loggedout',data:state.data},true);
   assert.equal(out.signedIn,false);assert.equal(out.state.state,'logged-out');assert.equal(out.state.server,undefined);
+});
+
+test('idle wake uses the current engine state after readiness and never restores a saved server', async () => {
+  const ready=deferred(),events=[];let wake;
+  const idle=vendorLoad('vpn/initIdleWatcher',{
+    '../state':{waitForReadyState:()=>ready.promise,getCurrentState:()=>({refreshState:async()=>events.push('refresh-current')}),connect:()=>{throw Error('must not restore a server');}},
+    '../tools/idle':{setCurrentIdleState:value=>events.push(value)},
+    '../tools/getGlobalBrowser':{getGlobalBrowser:()=>({idle:{onStateChanged:{addListener:fn=>{wake=fn;}}}})},
+    '../tools/triggerPromise':{triggerPromise:p=>p.catch(error=>events.push(error.message))},
+  });
+  idle.initIdleWatcher();wake('idle');wake('active');
+  assert.deepEqual(events,['idle','active']);ready.resolve();await tick();
+  assert.deepEqual(events,['idle','active','refresh-current']);
 });
