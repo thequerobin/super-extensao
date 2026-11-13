@@ -8,8 +8,8 @@ const PRESETS = {
   strong: {clearHistory:true, clearCache:true, clearCookies:true, clearDownloads:true, clearFormData:true, clearLocalStorage:true}
 };
 const LABELS = {history:SuperI18n.text("histórico"), cache:SuperI18n.text("cache"), cookies:SuperI18n.text("cookies"), downloads:SuperI18n.text("histórico de downloads"), formData:SuperI18n.text("formulários"), localStorage:SuperI18n.text("armazenamento local")};
-let folders = new Map();
-let preview = {domains:[], skipped:0};
+let bookmarkImporter;
+const domainEditors = [];
 let mutationQueue = Promise.resolve();
 
 function showError(error) {
@@ -121,42 +121,12 @@ async function addDomains(values, type = "cookies") {
   });
 }
 async function refreshPreview() {
-  const folder = folders.get($("bookmarkFolder").value);
-  if (!folder) { $("importBookmarks").disabled = true; return; }
-  preview = ClearRules.bookmarkDomains(folder, $("includeSubfolders").checked);
-  const {key} = EXCEPTION_LISTS[importType()];
-  const data = await chrome.storage.local.get({[key]:[]});
-  const existing = new Set(ClearRules.normalizeList(data[key]));
-  const fresh = preview.domains.filter(domain => !existing.has(domain));
-  SuperBookmarkPreview.renderBookmarkPreview($("previewCount").parentElement,
-    {domains: preview.domains, fresh, skipped: preview.skipped}, SuperI18n.locale,
-    {count: "previewCount", detail: "previewDetail", domains: "previewDomains"});
-  $("importBookmarks").disabled = fresh.length === 0;
-}
-async function loadBookmarks() {
-  // Must be called directly from the click listener to retain the user gesture.
-  const granted = await chrome.permissions.request({permissions:["bookmarks"]});
-  if (!granted) { notify(SuperI18n.text("Acesso aos favoritos não concedido. Você ainda pode adicionar domínios manualmente.")); return; }
-  const tree = await chrome.bookmarks.getTree();
-  folders = new Map();
-  function index(nodes) { for (const node of nodes) { if (!node.url) { folders.set(node.id, node); index(node.children || []); } } }
-  index(tree);
-  $("bookmarkFolder").replaceChildren();
-  for (const folder of ClearRules.bookmarkFolders(tree)) {
-    const option = document.createElement("option");
-    option.value = folder.id;
-    option.textContent = folder.label;
-    $("bookmarkFolder").append(option);
-  }
-  $("bookmarkControls").hidden = false;
-  $("loadFolders").dataset.i18n="uiRefreshbookmarksfolderse7161";
-  $("loadFolders").textContent = SuperI18n.text("Atualizar pastas de favoritos");
-  if (!$("bookmarkFolder").options.length) notify(SuperI18n.text("Nenhuma pasta de favoritos disponível."));
-  await refreshPreview();
+  if (bookmarkImporter) await bookmarkImporter.refresh();
 }
 async function refreshLanguage(){
   $("language").value=SuperI18n.locale;
   SuperI18n.apply();renderNotice();
+  bookmarkImporter?.render();
   if(!$("error").hidden)$("error").textContent=SuperI18n.text($("error").textContent);
   await Promise.all([refreshReport(),refreshPause(),refreshList(),refreshPreview()]);
 }
@@ -179,7 +149,7 @@ async function init() {
   document.querySelectorAll("[data-tab]").forEach(button => button.addEventListener("click", () => activateTab(button.dataset.tab)));
   $("section-cleanup").addEventListener("click", () => activateTab(lastCleanupTab));
   for (const key of TOGGLES) $(key).addEventListener("change", handle(async () => {
-    if (key === "clearCookies" && $(key).checked && !confirm(SuperI18n.text("Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?"))) {
+    if (key === "clearCookies" && $(key).checked && !await SuperConfirmation.confirmAction(document, SuperI18n.text("Apagar cookies pode desconectar suas contas. Cada lista de exceções protege apenas o tipo correspondente. Ativar exclusão de cookies?"))) {
       $(key).checked = false; return;
     }
     await serializeMutation(() => chrome.storage.local.set({[key]:$(key).checked}));
@@ -187,7 +157,7 @@ async function init() {
   }));
   document.querySelectorAll("[data-preset]").forEach(button => button.addEventListener("click", handle(async () => {
     const preset = PRESETS[button.dataset.preset];
-    if (preset.clearCookies && !confirm(SuperI18n.text("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?"))) return;
+    if (preset.clearCookies && !await SuperConfirmation.confirmAction(document, SuperI18n.text("O modo Forte apaga todos os tipos selecionáveis, inclusive cookies e armazenamento local. As exceções de cada tipo serão respeitadas. Aplicar?"))) return;
     await serializeMutation(() => chrome.storage.local.set(preset));
     Object.entries(preset).forEach(([key, value]) => { $(key).checked = value; });
     refreshPresets(); notify(SuperI18n.text("Modo de limpeza salvo."));
@@ -208,45 +178,44 @@ async function init() {
   })));
   $("resume").addEventListener("click", handle(async () => { await message({action:"resume"}); await refreshPause(); }));
   for (const type of Object.keys(EXCEPTION_LISTS)) {
-    listElement(type,"domainForm").addEventListener("submit", event => {
-      event.preventDefault();
-      handle(async () => {
-        const input = listElement(type,"domainInput");
-        const domain = ClearRules.normalizeDomain(input.value);
+    domainEditors.push(SuperDomainEditor.bindDomainEditor(listElement(type,"domainForm"), {
+      normalize: ClearRules.normalizeDomain,
+      onError: showError,
+      async onAdd(domain) {
         const count = await addDomains([domain], type);
-        input.value = "";
         await refreshList(type); await refreshPreview();
         notify(SuperI18n.text(count ? "Domínio adicionado às exceções." : "Esse domínio já está na lista."));
-      })();
-    });
+      },
+    }));
     listElement(type,"goImport").addEventListener("click", handle(async () => {
       $("importTarget").value = type;
       activateTab("bookmarks");
       await refreshPreview();
     }));
   }
+  bookmarkImporter = SuperBookmarkImporter.createBookmarkImporter({
+    browser: chrome, locale: () => SuperI18n.locale, normalize: ClearRules.normalizeDomain,
+    scope: importType,
+    async existing(type) {
+      const {key} = EXCEPTION_LISTS[type];
+      return ClearRules.normalizeList((await chrome.storage.local.get({[key]:[]}))[key]);
+    },
+    async import(domains, type) {
+      const count = await addDomains(domains, type);
+      await refreshList();
+      notifyMessage(count === 1 ? "uiImportedOne" : "uiImportedMany", {count});
+    },
+  });
+  bookmarkImporter.attach(document.querySelector("#panel-bookmarks [data-bookmark-importer]"));
   $("importTarget").addEventListener("change", handle(refreshPreview));
-  $("loadFolders").addEventListener("click", () => { loadBookmarks().catch(showError); });
-  $("bookmarkFolder").addEventListener("change", handle(refreshPreview));
-  $("includeSubfolders").addEventListener("change", handle(refreshPreview));
-  $("importBookmarks").addEventListener("click", handle(async () => {
-    $("importBookmarks").disabled = true;
-    try {
-      const folder = folders.get($("bookmarkFolder").value);
-      if (!folder) throw new Error(SuperI18n.text("Escolha uma pasta de favoritos."));
-      const selected = ClearRules.bookmarkDomains(folder, $("includeSubfolders").checked);
-      const count = await addDomains(selected.domains, importType());
-      await refreshList(); await refreshPreview();
-      notifyMessage(count===1?"uiImportedOne":"uiImportedMany",{count});
-    } finally { await refreshPreview(); }
-  }));
+  window.addEventListener("unload", () => {bookmarkImporter.dispose(); domainEditors.forEach(dispose => dispose());}, {once: true});
   $("clearNow").addEventListener("click", handle(async () => {
     await mutationQueue;
     const snapshot = await chrome.storage.local.get(DEFAULTS);
     if (!Object.keys(LABELS).some(type => snapshot[{history:"clearHistory", cache:"clearCache", cookies:"clearCookies", downloads:"clearDownloads", formData:"clearFormData", localStorage:"clearLocalStorage"}[type]])) {
       notify(SuperI18n.text("Escolha pelo menos um tipo de dado na aba Limpeza.")); return;
     }
-    if (snapshot.clearCookies && !confirm(SuperI18n.text("Limpar os dados selecionados agora? Cookies fora das exceções serão apagados e isso pode desconectar contas."))) return;
+    if (snapshot.clearCookies && !await SuperConfirmation.confirmAction(document, SuperI18n.text("Limpar os dados selecionados agora? Cookies fora das exceções serão apagados e isso pode desconectar contas."))) return;
     $("clearNow").disabled = true;
     notify(SuperI18n.text("Limpando…"));
     try {

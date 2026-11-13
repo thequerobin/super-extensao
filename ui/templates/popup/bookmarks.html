@@ -2,12 +2,6 @@
       <ui-heading class="section-heading"><h2 data-i18n="uiImportfrombookmarksab35d">Importar dos favoritos</h2></ui-heading>
       <ui-note class="note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.</ui-note>
       <ui-field class="field" for="importTarget"><span data-i18n="uiCleanupImportTarget">Lista de destino</span><ui-control id="importTarget" as="select"><option value="cookies">Cookies</option><option value="cache" data-i18n="cache">Cache</option><option value="localStorage" data-i18n="uiLocalstorage3d640">Armazenamento local</option></ui-control></ui-field>
-      <ui-button id="loadFolders" class="full secondary ui-button-secondary" data-i18n="uiChooseabookmarksfolder55714" type="submit">Escolher pasta de favoritos</ui-button>
-      <div id="bookmarkControls" hidden="">
-        <ui-field class="field"><span data-i18n="uiFolderea675">Pasta</span><ui-control id="bookmarkFolder" as="select"></ui-control></ui-field>
-        <ui-check class="check-line"><input id="includeSubfolders" type="checkbox" checked=""><span data-i18n="uiIncludesubfolders6a3bc">Incluir subpastas</span></ui-check>
-        <ui-card class="import-preview"><strong id="previewCount"></strong><p id="previewDetail"></p><ul id="previewDomains"></ul></ui-card>
-        <ui-button id="importBookmarks" class="full" disabled="" data-i18n="uiImportdomainsdd303" type="submit">Importar domínios</ui-button>
-      </div>
+      <!-- bookmark-importer -->
       <ui-note class="note" data-i18n="uiBookmarkaccessalsoallowsfoldere6e7f">O acesso aos favoritos também permite sincronizar pastas no painel de sincronização. A importação é uma cópia: mudanças futuras na pasta não atualizam as exceções. Links HTTP/HTTPS são aceitos e duplicados são ignorados.</ui-note>
     </section>

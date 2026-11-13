@@ -56,7 +56,7 @@ test('installed static pages match their templates and contain only native eleme
     if (file === 'popup.html') {
       for (const id of ['clearNow', 'enabled', 'theme', 'language', 'vpnPanel', 'syncApp', 'domainForm', 'autoplayForm']) assert.ok(d.getElementById(id), id);
       assert.equal(d.getElementById('domainInput').form.id, 'domainForm');
-      assert.equal(d.querySelector('#domainForm button').type, 'submit');
+      assert.equal(d.querySelector('#domainForm [data-domain-add]').type, 'button');
       assert.equal(d.querySelector('#cleanupSubmenu button').type, 'button');
     }
     d.defaultView.close();

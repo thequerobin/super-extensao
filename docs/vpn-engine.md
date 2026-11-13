@@ -232,3 +232,8 @@ FeatureConfigStore e ConfiguredFeature, em vpn/engine/features.ts, resolvem pol�
 A restrição de servidores Free/pagos usa accountTier/hasPaidAccess/canAccessServer; tiers inválidos não elevam o plano. Endpoints, modelos de resposta, página de login, catálogo/status binário, mensagens, traduções, utilitários e a estrutura de build ainda têm componentes Proton. Esta etapa extrai decisões de conta/configuração e não equivale à remoção integral do fornecedor.
 
 O runner reproduzível scripts/check-vpn-account-native.cjs usa o worker de produção em Edge/Chromium com perfil temporário, respostas fictícias e resolução externa bloqueada. Requer Node com WebSocket global (a execução registrada usou Node 24.20.0); CHROMIUM_PATH pode indicar outro executável compatível. Execute node scripts/check-vpn-account-native.cjs. Verifica inicialização, leitura do cache legado, atualização Free para pago, normalização da conta principal e persistência do owner. Não usa conta pessoal, não conecta à Proton e não mede tráfego ou privacidade. Resultados em [validacao.md](validacao.md).
+
+
+### Autenticação durante restauração inicial — 1.7.31
+
+`vpn/engine/proxy-auth.ts` reconhece o endpoint exato do proxy fixo ou PAC inline controlado por esta extensão. O adaptador `vpn/authHandler.ts` consulta essa propriedade quando o estado da conexão ainda não reconhece o desafio; cancela o pedido próprio sem buscar credenciais, evitando entregar esse caso ao diálogo de senha do navegador. A autorização de envio de credenciais continua exigindo o servidor e a porta ativos. O teste nativo de proxy 407 e seus limites estão em [vpn-validacao-pc.md](vpn-validacao-pc.md).

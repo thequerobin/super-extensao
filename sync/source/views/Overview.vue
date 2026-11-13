@@ -19,18 +19,8 @@
       >{{ t("LabelSyncall") }}
     </UiButton>
   </UiHeading>
-  <UiNotice
-    v-if="error"
-    role="alert"
-    class="ui-notice sync-notice sync-error ui-notice-error"
-  >
-    {{ error }}
-  </UiNotice>
-  <div v-if="loading && !accounts.length" class="sync-empty" role="status">
-    <SyncSpinner indeterminate size="24" />
-    <p>{{ t("UiWorking") }}</p>
-  </div>
-  <template v-else-if="accounts.length">
+  <UiAsyncState :kind="error ? 'error' : loading && !accounts.length ? 'loading' : ''" :text="error || t('UiWorking')" />
+  <template v-if="accounts.length">
     <UiField class="sync-search ui-focus-within ui-search"
       ><span class="ui-icon ui-icon-search" aria-hidden="true"></span
       ><span class="sr-only">{{ t("UiSearch") }}</span
@@ -49,7 +39,7 @@
       >{{ t("UiNew") }}</router-link
     >
   </template>
-  <UiCard v-else class="sync-empty sync-welcome ui-card">
+  <UiCard v-else-if="!loading" class="sync-empty sync-welcome ui-card">
     <div class="sync-empty-icon">
       <SyncIcon large aria-hidden="true">mdi-bookmark-multiple-outline</SyncIcon>
     </div>

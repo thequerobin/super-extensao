@@ -3,6 +3,8 @@ const path = require('node:path');
 const { renderUi } = require('../ui/render.cjs');
 const { catalog } = require('../ui/render.cjs');
 const { createUi } = require('../ui/dom.cjs');
+const { cleanupEditor } = require('../ui/cleanup-editors.cjs');
+const { bookmarkImporterMarkup } = require('../ui/bookmark-importer.js');
 const root = path.resolve(__dirname, '..');
 const templates = path.join(root, 'ui/templates');
 const entries = { 'popup.html': 'popup.html', 'spare-tab.html': 'spare-tab.html', 'newtab/index.html': 'newtab.html' };
@@ -10,7 +12,10 @@ const entries = { 'popup.html': 'popup.html', 'spare-tab.html': 'spare-tab.html'
 function readTemplate(file, parents = []) {
   const absolute = path.resolve(templates, file);
   if (!absolute.startsWith(templates + path.sep) || parents.includes(absolute)) throw new Error(`Invalid template include: ${file}`);
-  return fs.readFileSync(absolute, 'utf8').replace(/<!-- include:([\w/.-]+) -->/g,
+  return fs.readFileSync(absolute, 'utf8')
+    .replace(/<!-- domain-editor:(cookies|cache|localStorage) -->/g, (_, type) => cleanupEditor(type))
+    .replace('<!-- bookmark-importer -->', bookmarkImporterMarkup({ids:{load:'loadFolders', controls:'bookmarkControls', folder:'bookmarkFolder', recursive:'includeSubfolders', count:'previewCount', detail:'previewDetail', domains:'previewDomains', apply:'importBookmarks'}}))
+    .replace(/<!-- include:([\w/.-]+) -->/g,
     (_, include) => readTemplate(include, [...parents, absolute]));
 }
 

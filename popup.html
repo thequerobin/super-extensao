@@ -49,9 +49,12 @@
       <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepcookiesbywebsite78b44">Preservar cookies por site</h2></div>
       <p class="ui-note note" data-i18n="uiCookiesforthewebsitesin80c36">Esta lista protege somente cookies. Para cache e armazenamento local, use as abas correspondentes. Preservar cookies não garante todos os logins.</p>
       <p class="ui-notice scope ui-notice-warning" data-i18n="uiCookiesareprotectedforthe852f6" role="status">Cookies são protegidos para o domínio registrável inteiro: uma exceção para accounts.exemplo.com também preserva cookies de exemplo.com e seus subdomínios.</p>
-      <form id="domainForm"><label class="ui-field field" for="domainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="domainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
-      <div class="list-heading"><span id="listCount" data-i18n="ui0domains890d3">0 domínios</span><button id="goImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="submit">Importar de favoritos →</button></div>
-      <ul id="domainList" class="domain-list"></ul><p id="emptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+      <form id="domainForm" class="ui-domain-editor" data-domain-editor>
+      <label class="ui-field" for="domainInput"><span data-i18n="uiDomainorURL10cc7">Domínio ou URL</span><span class="ui-actions ui-domain-entry"><input id="domainInput" class="ui-control" data-domain-input data-field="domain" value="" placeholder="example.com" autocomplete="off" spellcheck="false" required><button type="button" class="ui-button" data-domain-add data-action="add-domain" data-i18n="uiAddfadcf">Adicionar</button></span></label>
+
+      <div class="ui-domain-heading"><span id="listCount" data-domain-count>0 domínios</span><button type="button" id="goImport" class="ui-button ui-domain-import" data-i18n="uiImportfrombookmarksa9c2c">Importar de favoritos →</button></div>
+      <ul id="domainList" data-domain-list class="domain-list"></ul><p id="emptyList" class="ui-empty" data-domain-empty data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+    </form>
       <p class="ui-note note" data-i18n="uiAddinganexceptiondoesnot95152">Adicionar uma exceção não ativa a exclusão de cookies. Essa opção é controlada em Geral.</p>
     </section>
 
@@ -59,9 +62,12 @@
   <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepCacheBySite">Preservar cache por site</h2></div>
   <p class="ui-note note" data-i18n="uiKeepCacheBySiteDescription">Os sites desta lista terão o cache preservado durante a limpeza. Esta lista não protege cookies nem armazenamento local.</p>
   <p class="ui-notice scope ui-notice-warning" data-i18n="uiExactCleanupScope" role="status">A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.</p>
-  <form id="cacheDomainForm"><label class="ui-field field" for="cacheDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="cacheDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
-  <div class="list-heading"><span id="cacheListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="cacheGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
-  <ul id="cacheDomainList" class="domain-list"></ul><p id="cacheEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+  <form id="cacheDomainForm" class="ui-domain-editor" data-domain-editor>
+      <label class="ui-field" for="cacheDomainInput"><span data-i18n="uiDomainorURL10cc7">Domínio ou URL</span><span class="ui-actions ui-domain-entry"><input id="cacheDomainInput" class="ui-control" data-domain-input data-field="domain" value="" placeholder="example.com" autocomplete="off" spellcheck="false" required><button type="button" class="ui-button" data-domain-add data-action="add-domain" data-i18n="uiAddfadcf">Adicionar</button></span></label>
+
+      <div class="ui-domain-heading"><span id="cacheListCount" data-domain-count>0 domínios</span><button type="button" id="cacheGoImport" class="ui-button ui-domain-import" data-i18n="uiImportfrombookmarksa9c2c">Importar de favoritos →</button></div>
+      <ul id="cacheDomainList" data-domain-list class="domain-list"></ul><p id="cacheEmptyList" class="ui-empty" data-domain-empty data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+    </form>
   <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em Geral.</p>
 </section>
 
@@ -69,9 +75,12 @@
   <div class="ui-section-heading section-heading"><h2 data-i18n="uiKeepLocalStorageBySite">Preservar armazenamento local por site</h2></div>
   <p class="ui-note note" data-i18n="uiKeepLocalStorageBySiteDescription">Os sites desta lista terão o localStorage preservado durante a limpeza. Esta lista não protege cookies nem cache.</p>
   <p class="ui-notice scope ui-notice-warning" data-i18n="uiExactCleanupScope" role="status">A exceção vale para o endereço informado em HTTP e HTTPS. Outros subdomínios e portas precisam ser adicionados separadamente.</p>
-  <form id="localStorageDomainForm"><label class="ui-field field" for="localStorageDomainInput" data-i18n="uiDomainorURL10cc7">Domínio ou URL</label><div class="ui-actions input-row"><input id="localStorageDomainInput" type="text" placeholder="ex.: accounts.exemplo.com" autocomplete="off" spellcheck="false" required="" data-i18n-placeholder="uiegaccountsexamplecomf1f8e"  class="ui-control"><button type="submit" data-i18n="uiAddfadcf" class="ui-button">Adicionar</button></div></form>
-  <div class="list-heading"><span id="localStorageListCount" data-i18n="ui0domains890d3">0 domínios</span><button id="localStorageGoImport" class="ui-button link-button" data-i18n="uiImportfrombookmarksa9c2c" type="button">Importar de favoritos →</button></div>
-  <ul id="localStorageDomainList" class="domain-list"></ul><p id="localStorageEmptyList" class="ui-empty empty" data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+  <form id="localStorageDomainForm" class="ui-domain-editor" data-domain-editor>
+      <label class="ui-field" for="localStorageDomainInput"><span data-i18n="uiDomainorURL10cc7">Domínio ou URL</span><span class="ui-actions ui-domain-entry"><input id="localStorageDomainInput" class="ui-control" data-domain-input data-field="domain" value="" placeholder="example.com" autocomplete="off" spellcheck="false" required><button type="button" class="ui-button" data-domain-add data-action="add-domain" data-i18n="uiAddfadcf">Adicionar</button></span></label>
+
+      <div class="ui-domain-heading"><span id="localStorageListCount" data-domain-count>0 domínios</span><button type="button" id="localStorageGoImport" class="ui-button ui-domain-import" data-i18n="uiImportfrombookmarksa9c2c">Importar de favoritos →</button></div>
+      <ul id="localStorageDomainList" data-domain-list class="domain-list"></ul><p id="localStorageEmptyList" class="ui-empty" data-domain-empty data-i18n="uiNodomainsinthislist5b710">Nenhum domínio nesta lista.</p>
+    </form>
   <p class="ui-note note" data-i18n="uiCleanupExceptionDoesNotEnable">Adicionar uma exceção não ativa a exclusão desse tipo de dado. Essa opção é controlada em Geral.</p>
 </section>
 
@@ -79,13 +88,7 @@
       <div class="ui-section-heading section-heading"><h2 data-i18n="uiImportfrombookmarksab35d">Importar dos favoritos</h2></div>
       <p class="ui-note note" data-i18n="uiImportdomainsfromafolder684b6">Importe os domínios de uma pasta para a lista de exceções escolhida abaixo. Os favoritos não serão modificados.</p>
       <label class="ui-field field" for="importTarget"><span data-i18n="uiCleanupImportTarget">Lista de destino</span><select id="importTarget" class="ui-control"><option value="cookies">Cookies</option><option value="cache" data-i18n="cache">Cache</option><option value="localStorage" data-i18n="uiLocalstorage3d640">Armazenamento local</option></select></label>
-      <button id="loadFolders" class="ui-button full secondary ui-button-secondary" data-i18n="uiChooseabookmarksfolder55714" type="submit">Escolher pasta de favoritos</button>
-      <div id="bookmarkControls" hidden="">
-        <label class="ui-field field"><span data-i18n="uiFolderea675">Pasta</span><select id="bookmarkFolder" class="ui-control"></select></label>
-        <label class="ui-check check-line"><input id="includeSubfolders" type="checkbox" checked=""><span data-i18n="uiIncludesubfolders6a3bc">Incluir subpastas</span></label>
-        <div class="ui-card import-preview"><strong id="previewCount"></strong><p id="previewDetail"></p><ul id="previewDomains"></ul></div>
-        <button id="importBookmarks" class="ui-button full" disabled="" data-i18n="uiImportdomainsdd303" type="submit">Importar domínios</button>
-      </div>
+      <div class="ui-bookmark-importer" data-bookmark-importer><button type="button" class="ui-button ui-button-secondary" data-bookmark-load data-action="load-bookmarks" id="loadFolders">Escolher pasta de favoritos</button><div data-bookmark-status></div><div data-bookmark-controls id="bookmarkControls" hidden><label class="ui-field"><span data-bookmark-folder-label>Pasta</span><select class="ui-control" data-bookmark-folder data-field="bookmark-folder" id="bookmarkFolder"></select></label><label class="ui-check"><input type="checkbox" data-bookmark-recursive data-field="bookmark-recursive" id="includeSubfolders" checked><span data-bookmark-recursive-label>Incluir subpastas</span></label><div class="ui-card import-preview" data-bookmark-preview><strong id="previewCount"></strong><p id="previewDetail"></p><ul id="previewDomains"></ul></div><button type="button" class="ui-button" data-bookmark-apply data-action="import-bookmarks" id="importBookmarks" disabled>Importar domínios</button></div></div>
       <p class="ui-note note" data-i18n="uiBookmarkaccessalsoallowsfoldere6e7f">O acesso aos favoritos também permite sincronizar pastas no painel de sincronização. A importação é uma cópia: mudanças futuras na pasta não atualizam as exceções. Links HTTP/HTTPS são aceitos e duplicados são ignorados.</p>
     </section>
 
@@ -137,7 +140,7 @@
   <script src="ui.js"></script><script src="preferences.js"></script><script src="i18n.js"></script>
   <script src="popup-resize.js"></script>
   <script src="popup-panels.js"></script>
-  <script src="rules.js"></script><script src="ui/bookmark-preview.js"></script><script src="ui/domain-list.js"></script><script src="navigation-rules.js"></script><script src="popup.js"></script><script src="tools-popup.js"></script>
+  <script src="rules.js"></script><script src="ui/bookmark-preview.js"></script><script src="ui/domain-list.js"></script><script src="ui/async-state.js"></script><script src="ui/confirmation.js"></script><script src="ui/domain-editor.js"></script><script src="ui/bookmark-importer.js"></script><script src="navigation-rules.js"></script><script src="popup.js"></script><script src="tools-popup.js"></script>
 
 
 

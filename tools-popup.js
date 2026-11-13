@@ -24,20 +24,16 @@
     }
     const filter = $("autoplaySearch").value.trim().toLowerCase();
     const entries = Object.entries(currentAutoplay.siteSettings).filter(([domain]) => domain.includes(filter)).sort(([a],[b]) => a.localeCompare(b));
-    $("autoplayRules").replaceChildren();
-    for (const [domain, permission] of entries) {
-      const li = document.createElement("li");
-      const text = document.createElement("span"); text.className="rule-domain"; text.textContent=domain;
-      const select = SuperUi.create("control", {as:"select"}); select.setAttribute("aria-label",SuperI18n.t("uiAutoplayLabel",{domain}));
-      for (const [value,label] of [["allow",SuperI18n.text("Permitir")],["block",SuperI18n.text("Bloquear")]]) {
-        const option=document.createElement("option");option.value=value;option.textContent=label;select.append(option);
-      }
-      select.value=permission;
-      select.addEventListener("change",handle(() => changeAutoplay(next => {next.siteSettings[domain]=select.value;})));
-      const remove=SuperUi.create("button", {className:"ui-button-compact ui-button-danger"});remove.textContent="×";remove.setAttribute("aria-label",SuperI18n.t("uiRemoveRule",{domain}));
-      remove.addEventListener("click",handle(() => changeAutoplay(next => {delete next.siteSettings[domain];})));
-      li.append(text,select,remove);$("autoplayRules").append(li);
-    }
+    SuperDomainList.renderDomainList($("autoplayRules"), entries.map(([domain, permission]) => ({
+      domain, value: permission, choices: [
+        {value: "allow", label: SuperI18n.text("Permitir")}, {value: "block", label: SuperI18n.text("Bloquear")},
+      ],
+    })), {
+      removeLabel: domain => SuperI18n.t("uiRemoveRule", {domain}),
+      choiceLabel: domain => SuperI18n.t("uiAutoplayLabel", {domain}),
+      onChoice: handle((domain, value) => changeAutoplay(next => {next.siteSettings[domain] = value;})),
+      onRemove: handle(domain => changeAutoplay(next => {delete next.siteSettings[domain];})),
+    });
     $("autoplayEmpty").hidden=entries.length>0;
     $("autoplayEmpty").textContent=filter?SuperI18n.text("Nenhuma regra corresponde à busca."):SuperI18n.text("Nenhuma regra por site.");
   }

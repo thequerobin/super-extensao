@@ -1,3 +1,4 @@
+import {confirmAction} from "../../../../../ui/confirmation";
 import { t } from "../../locales/ui";
 import React from "react";
 import { UiContext } from "../../contexts/ui";
@@ -12,9 +13,9 @@ import Widgets from "./Widgets";
 const Settings: React.FC = () => {
   const { toggleSettings } = React.useContext(UiContext);
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (
-      confirm(
+      await confirmAction(document,
         t("Are you sure you want to delete all of your Tabliss settings? This cannot be undone."),
       )
     )

@@ -45,9 +45,7 @@
           class="ui-control"
       /></UiField>
     </UiFieldset>
-    <UiNotice v-if="error" role="alert" class="sync-error ui-notice-error ui-notice">
-      {{ error }}
-    </UiNotice>
+    <UiAsyncState :kind="error ? 'error' : loading ? 'loading' : ''" :text="error || t('UiWorking')" />
     <UiActions class="sync-save-row">
       <span role="status" class="ui-inline-status">{{
         saved ? t("UiSaved") : ""

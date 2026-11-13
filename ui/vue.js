@@ -1,7 +1,21 @@
+import {asyncStateMarkup} from "./async-state.js";
 import catalog from './catalog.json';
 
 // Native Vue 2 adapter. The rendered node is the control itself: no extra wrapper.
 export function installUi(Vue) {
+  Vue.component('UiAsyncState', {
+    functional: true,
+    props: {kind: String, text: String, detail: String, retry: String, disabled: Boolean},
+    render(h, context) {
+      return h('div', {
+        ...context.data,
+        domProps: {innerHTML: asyncStateMarkup(context.props)},
+        on: {click(event) {
+          if (event.target.closest('button') && !context.props.disabled) context.listeners.retry?.();
+        }},
+      });
+    },
+  });
   for (const [key, spec] of Object.entries(catalog)) {
     const name = 'Ui' + key[0].toUpperCase() + key.slice(1);
     Vue.component(name, {

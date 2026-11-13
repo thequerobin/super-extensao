@@ -160,6 +160,7 @@ test("global header locale updates all local tabs, dynamic messages and both emb
       "rules.js",
       "ui/bookmark-preview.js",
       "ui/domain-list.js",
+      "ui/async-state.js", "ui/confirmation.js", "ui/domain-editor.js", "ui/bookmark-importer.js",
       "navigation-rules.js",
       "ui.js",
       "popup.js",

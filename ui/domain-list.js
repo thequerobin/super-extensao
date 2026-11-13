@@ -26,7 +26,18 @@
         remove.dataset.domain = item.domain;
       }
       if (options.onRemove) remove.addEventListener("click", () => options.onRemove(item.domain, remove));
-      row.append(text, remove);
+      row.append(text);
+      if (item.choices) {
+        const select = doc.createElement("select"); select.className = "ui-control ui-domain-choice";
+        select.setAttribute("aria-label", options.choiceLabel(item.domain));
+        for (const choice of item.choices) {
+          const option = doc.createElement("option"); option.value = choice.value; option.textContent = choice.label; select.append(option);
+        }
+        select.value = item.value; select.disabled = Boolean(options.disabled);
+        select.addEventListener("change", () => options.onChoice(item.domain, select.value));
+        row.append(select);
+      }
+      row.append(remove);
       list.append(row);
     }
     list.scrollTop = scroll;

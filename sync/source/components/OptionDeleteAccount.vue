@@ -14,11 +14,12 @@
 </template>
 
 <script>
+import {confirmAction} from "../../../ui/confirmation.js";
 export default {
   name: "OptionDeleteAccount",
   methods: {
-    onClick() {
-      if (window.confirm(this.t("SuperRemoveConfirm"))) {
+    async onClick() {
+      if (await confirmAction(document, this.t("SuperRemoveConfirm"))) {
         this.$emit("click");
       }
     },

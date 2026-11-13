@@ -1,4 +1,34 @@
-# Componentes da interface — 1.6.8
+# Componentes da interface — referência 1.7.31
+
+
+## Fluxos compartilhados — 1.7.31
+
+Além das primitivas visuais, os seguintes fluxos têm uma fonte comum:
+
+| Fonte | Consumidores e contrato |
+| --- | --- |
+| `ui/bookmark-importer.js` | Limpeza e VPN: montagem dos controles, solicitação síncrona de permissão no clique, carregamento de pastas, seleção, subpastas, prévia, duplicados, importação, erro e nova tentativa. O adaptador injeta normalização, destino e persistência. Respostas tardias não importam em outro destino nem após descarte. |
+| `ui/domain-editor.js` | Entrada, botão Adicionar, Enter, validação pelo adaptador, prevenção de adições concorrentes, contagem e estado vazio. Não limpa texto inválido nem descarta texto digitado durante uma gravação pendente. |
+| `ui/cleanup-editors.cjs` | Gera os três formulários de exceções da limpeza a partir do mesmo editor, preservando IDs, traduções e chaves independentes. Os templates incluem apenas a configuração de cada destino. |
+| `ui/domain-list.js` | Listas da limpeza, VPN e autoplay. A linha pode ter descrição e seletor de ação; conserva rolagem, limite de altura e remoção acessível. O autoplay injeta Permitir/Bloquear e suas gravações. |
+| `ui/bookmark-preview.js` | Cartão de prévia com todos os domínios e marcação dos já existentes. |
+| `ui/async-state.js` | Carregamento, erro, estado vazio e nova tentativa. Usado pelo importador, recursos/servidores da VPN e, via `UiAsyncState`, pelas telas de perfis e conexões da sincronização. |
+| `ui/confirmation.js` | Confirmações explícitas da limpeza, saída/liberação/abandono de rascunho da VPN, exclusão de perfil/sincronização forçada e redefinição da nova guia. Usa diálogo modal nativo com textos seguros, foco inicial em Cancelar, Escape, circulação de foco, restauração do foco e cancelamento ao encerrar a página. |
+| `vpn/source/screens/` | Conexão, servidores, recursos e conta em módulos próprios. `app.js` conserva estado, eventos, integração com o motor e ciclo de vida. |
+
+O editor da limpeza continua gravando automaticamente. Importar na VPN altera apenas o rascunho do modo selecionado; Salvar aplica as regras. A interface não concede controles bloqueados por política nem altera o estado de proteção por conta própria. Uma confirmação de liberação da VPN fica inválida se o estado da conexão mudar enquanto o diálogo estiver aberto.
+
+Na compilação da sincronização, os módulos UMD compartilhados não passam pelo injetor de polyfills do Babel: a injeção de imports ESM nesses arquivos descartava os exports CommonJS. Os demais arquivos continuam usando o pipeline existente. O requisito mínimo da extensão é Chromium 116.
+
+Validação da entrega: **483 testes aprovados**, interfaces de VPN/sincronização/nova guia compiladas, TypeScript do worker e da interface VPN aprovado e `check:ui` aprovado. O cenário adicional de autenticação do proxy passou no teste nativo local descrito em `vpn-validacao-pc.md`.
+
+### O que ainda não foi unificado
+
+- A árvore hierárquica de pastas e os assistentes/formulários validados dos provedores de sincronização ainda usam componentes `Sync*`/Vuetify. O importador comum copia domínios de favoritos; a seleção de escopo de sincronização tem outro contrato e não foi trocada por um seletor simples.
+- Editores de widgets, fundos e opções específicas da nova guia continuam como composições React próprias, sobre as primitivas compartilhadas.
+- A página de bloqueio da VPN conserva a confirmação local de liberação e seus estados de recuperação, com o fluxo de segurança e testes existentes. Não foi convertida para o diálogo comum nesta alteração.
+- Outros feedbacks específicos (progresso de operações, relatórios da limpeza e erros de importação da nova guia) ainda não usam todos o componente genérico de estado.
+- Falta a conferência visual manual dos novos fluxos no navegador pessoal, em temas claro/escuro, com teclado e textos longos. Testes DOM e compilações não substituem essa conferência.
 
 Ajuste visual 1.6.11: a barra da esquerda e o botão Super Extensão compartilham `--newtab-controls-inset` (12 px) e `--newtab-controls-height` (46 px). A barra esquerda usa 50% de opacidade em repouso e 100% em hover ou foco interno de teclado. A transição é desativada quando o sistema solicita movimento reduzido.
 

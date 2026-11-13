@@ -155,6 +155,7 @@
 </UiCard>
 </template>
 <script>
+import {confirmAction} from "../../../ui/confirmation.js";
 import PathHelper from "@sync-engine/PathHelper";
 import humanizeDuration from "humanize-duration";
 import { actions } from "../store/definitions";
@@ -404,8 +405,8 @@ export default {
     onGetLogs() {
       this.perform(actions.DOWNLOAD_LOGS, false);
     },
-    onForceSync() {
-      if (confirm(this.t("DescriptionScheduledforcesync"))) {
+    async onForceSync() {
+      if (await confirmAction(document, this.t("DescriptionScheduledforcesync"))) {
         this.perform(actions.FORCE_SYNC);
       }
     },

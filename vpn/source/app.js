@@ -1,15 +1,19 @@
+import {normalizeBookmarkDomain} from "./bookmarks";
+import {confirmAction, cancelConfirmation} from "../../ui/confirmation.js";
+import {createServerViews} from "./screens/servers";
+import {createConnectionView} from "./screens/connection";
+import {createFeaturesView} from "./screens/features";
+import {createAccountView} from "./screens/account";
 import { renderUi } from "../../ui/render.cjs";
 /* SPDX-License-Identifier: GPL-3.0-only */
-import { renderBookmarkPreview } from "../../ui/bookmark-preview.js";
+import { createBookmarkImporter } from "../../ui/bookmark-importer.js";
+import { bindDomainEditor } from "../../ui/domain-editor.js";
 import { renderDomainList } from "../../ui/domain-list.js";
 import { messages } from "./messages";
-import { bookmarkFolders, bookmarkPreview } from "./bookmarks";
 import {
   pages,
   restorePage,
   countryName,
-  flag,
-  filterServers,
   normalizeDomain,
   domainRules,
   escapeHtml as e,
@@ -37,10 +41,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     domain: "",
     subdomains: true,
     saved: false,
-    confirmSignOut: false,
-    bookmarkFolders: null,
-    bookmarkFolder: "",
-    bookmarkRecursive: true,
   };
   let hydrated = false;
   let disposed = false,
@@ -52,6 +52,8 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     attemptTime = 0,
     initialScroll;
   const openCountries = new Set();
+  let disposeDomainEditor;
+  let bookmarkImporter;
   const t = (key) => messages[key]?.[model.locale] || messages[key]?.en || key;
   const button = (label, action, extra = "", kind = "") =>
     `<ui-button type="button" class="vpn-button ui-button ${kind} ${kind === "vpn-primary" ? "ui-button-primary" : kind === "vpn-danger" ? "ui-button-danger" : ""}" data-action="${action}" ${model.busy || ((model.serversLoading || model.serversError) && ["fastest", "random", "connect", "recent"].includes(action)) ? "disabled" : ""} ${extra}>${e(label)}</ui-button>`;
@@ -86,130 +88,22 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     model.dirty = false;
     model.saved = false;
   };
-  function countryFlag(code) {
-    const src = flag(code);
-    return src
-      ? `<img class="vpn-flag" src="${e(src)}" alt="" width="24" height="18" loading="lazy">`
-      : "";
-  }
-  function serverRows(servers, key) {
-    const limit = model.limits[key] || 50;
-    return (
-      servers
-        .slice(0, limit)
-        .map((server) => {
-          const label = server.name + (server.city ? " · " + server.city : "");
-          const unavailable = !server.available || !server.allowed;
-          return `<ui-button type="button" class="vpn-server" data-action="connect" data-server="${e(server.id)}" ${model.busy || unavailable ? "disabled" : ""} aria-label="${e(t("connect") + " " + label)}"><span><strong>${e(server.name)}</strong><small>${e(server.city || country(server.country))}${server.secureCore ? " · Secure Core" : ""}</small></span><span class="vpn-server-meta">${e(!server.allowed ? t("paid") : !server.available ? t("maintenance") : Number.isFinite(server.load) ? `${Math.round(server.load)}% ${t("load")}` : t("connect"))}</span></ui-button>`;
-        })
-        .join("") +
-      (servers.length > limit
-        ? button(t("more"), "more", `data-list="${e(key)}"`)
-        : "")
-    );
-  }
-  function listMarkup(servers, list) {
-    const groups = new Map();
-    for (const server of servers) {
-      const code = server.country || "";
-      if (!groups.has(code)) groups.set(code, []);
-      groups.get(code).push(server);
-    }
-    if (!groups.size) return `<p class="vpn-empty">${e(t("empty"))}</p>`;
-    return `<div class="vpn-countries">${[...groups]
-      .map(([code, items]) => {
-        const key = list + ":" + code;
-        const open = openCountries.has(key);
-        return `<details class="vpn-country-group" data-country-group="${e(key)}" ${open ? "open" : ""}><summary>${countryFlag(code)}<span>${e(country(code))}</span><span class="vpn-count ui-count">${items.length}</span></summary>${open ? `<div class="vpn-country-servers">${serverRows(items, key)}</div>` : ""}</details>`;
-      })
-      .join("")}</div>`;
-  }
-  const serversStatus = () =>
-    model.serversLoading
-      ? `<p class="vpn-empty" role="status">${e(t("loadingServers"))}</p>`
-      : model.serversError
-        ? `<div class="vpn-empty ui-notice ui-notice-error" role="alert"><p>${e(model.serversError)}</p>${button(t("retry"), "refresh")}</div>`
-        : "";
-  function connectionMarkup() {
-    const server = model.state.server;
-    const free = filterServers(
-      model.snapshot.servers || [],
-      "",
-      "free",
-      model.locale,
-    );
-    const recent = (
-      model.snapshot.features?.recents?.enabled
-        ? model.snapshot.recents || []
-        : []
-    ).slice(0, 5);
-    return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${status() === "blocked" ? button(t("retry"), "retry-connection") : model.connectionUncertain ? button(t("retry"), "refresh") : ""}${button(t("choose"), "servers")}</ui-actions></ui-card>
-  ${!active() ? `<div class="vpn-quick">${button(t("random"), "random")}</div>` : ""}
-  ${!active() ? serversStatus() : ""}
-  ${!model.serversLoading && !model.serversError && free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count ui-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
-  ${
-    recent.length
-      ? `<ui-card as="section" class="vpn-card ui-card"><h2>${e(t("recent"))}</h2><ui-actions class="vpn-recents">${recent
-          .map((choice, index) => {
-            const server = (model.snapshot.servers || []).find(
-              (s) => String(s.id) === String(choice.logicalId),
-            );
-            return button(
-              server?.name || country(choice.exitCountry) || t("fastest"),
-              "recent",
-              `data-index="${index}"`,
-            );
-          })
-          .join("")}</ui-actions></ui-card>`
-      : ""
-  }`;
-  }
-  function serverMarkup() {
-    const servers = filterServers(
-      model.snapshot.servers || [],
-      model.query,
-      model.filter,
-      model.locale,
-    );
-    return `<section><div class="vpn-section-heading"><h2>${e(t("servers"))} <span class="vpn-count ui-count">${servers.length}</span></h2>${button(t("refresh"), "refresh")}</div><ui-field class="vpn-field vpn-search ui-search ui-focus-within"><span class="vpn-sr-only">${e(t("search"))}</span><ui-control type="search" data-field="search" placeholder="${e(t("search"))}" value="${e(model.query)}" class="ui-control" /></ui-field><ui-field class="vpn-field"><span class="vpn-sr-only">${e(t("servers"))}</span><ui-control as="select" data-field="server-filter" class="ui-control">${["available", "free", "all", "secureCore"].map((filter) => `<option value="${filter}" ${model.filter === filter ? "selected" : ""}>${e(t(filter))}</option>`).join("")}</ui-control></ui-field>${serversStatus() || listMarkup(servers, "servers")}</section>`;
-  }
-  const importPreview = () => bookmarkPreview(
-    model.bookmarkFolders?.find(folder => folder.id === model.bookmarkFolder),
-    model.bookmarkRecursive,
-    domainRules(model.draft, model.draft.mode),
-  );
-  function bookmarkMarkup() {
-    const preview = importPreview();
-    return `<ui-actions>${button(t("chooseBookmarks"), "load-bookmarks")}</ui-actions>${model.bookmarkFolders ? `<section aria-label="${e(t("importBookmarks"))}"><ui-field class="vpn-field">${e(t("bookmarkFolder"))}<ui-control as="select" data-field="bookmark-folder">${model.bookmarkFolders.map(folder => `<option value="${e(folder.id)}" ${folder.id === model.bookmarkFolder ? "selected" : ""}>${e(folder.label)}</option>`).join("")}</ui-control></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="bookmark-recursive" ${model.bookmarkRecursive ? "checked" : ""}> ${e(t("bookmarkRecursive"))}</ui-check><ui-card class="import-preview" data-bookmark-preview></ui-card>${button(t("importBookmarks"), "import-bookmarks", preview.fresh.length ? "" : "disabled")}</section>` : ""}<p class="vpn-note">${e(t("bookmarkHelp"))} ${e(t(model.draft.mode === "exclude" ? "bookmarkExclude" : "bookmarkInclude"))}</p>`;
-  }
-  function featuresMarkup() {
-    const features = model.snapshot.features || {};
-    const pending = model.snapshot.featuresReady === false || !model.snapshot.features;
-    const resourceStatus = pending
-      ? `<div class="vpn-notice ui-notice ui-notice-warning" role="status"><p>${e(t(model.serversError ? "featuresLoadFailed" : "featuresLoading"))}</p>${model.serversError ? `<p>${e(model.serversError)}</p>${button(t("retry"), "refresh")}` : ""}</div>`
-      : "";
-    const toggles = [
-      "autoConnect",
-      "preventWebrtcLeak",
-      "notification",
-      "secureCore",
-      "recents",
-    ]
-      .filter((key) => features[key]?.available)
-      .map((key) => {
-        const config = features[key];
-        return `<ui-toggle class="vpn-toggle"><span><strong>${e(t(key))}</strong><small>${e(pending ? t("featuresLoading") : !config.controllable ? (key === "secureCore" && model.snapshot.account?.tier === 0 ? t("paid") : t("managed")) : t(key + "Help"))}</small></span><input type="checkbox" role="switch" data-feature="${key}" ${config.enabled ? "checked" : ""} ${pending || model.busy || !config.controllable ? "disabled" : ""} class="ui-switch"></ui-toggle>`;
-      })
-      .join("");
-    const config = model.draft;
-    const rules = domainRules(config, config.mode);
-    const disabled = pending || model.busy || !model.snapshot.splitControllable;
-    return `${resourceStatus}<ui-card as="section" class="vpn-card ui-card vpn-toggles"><h2>${e(t("features"))}</h2>${toggles}</ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("split"))}</h2><p class="vpn-note">${e(t("splitHelp"))}</p><form data-split><fieldset ${disabled ? "disabled" : ""}><ui-toggle class="vpn-toggle"><span>${e(t("enableSplit"))}</span><input type="checkbox" role="switch" data-field="split-enabled" ${config.enabled ? "checked" : ""} class="ui-switch"></ui-toggle><ui-field class="vpn-field"><ui-control as="select" data-field="split-mode" aria-label="${e(t("split"))}" class="ui-control"><option value="exclude" ${config.mode === "exclude" ? "selected" : ""}>${e(t("exclude"))}</option><option value="include" ${config.mode === "include" ? "selected" : ""}>${e(t("include"))}</option></ui-control></ui-field><ui-field class="vpn-field">${e(t("domain"))}<ui-actions class="vpn-domain-row"><ui-control type="text" data-field="domain" value="${e(model.domain)}" placeholder="example.com" autocomplete="off" spellcheck="false" class="ui-control" /><ui-button type="button" class="vpn-button ui-button" data-action="add-domain">${e(t("add"))}</ui-button></ui-actions></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="subdomains" ${model.subdomains ? "checked" : ""}> ${e(t("subdomains"))}</ui-check>${bookmarkMarkup()}<ul data-domain-list></ul>${!rules.length ? `<p class="vpn-note">${e(t("noDomains"))}</p>` : ""}${config.mode === "include" && config.enabled && !rules.length ? `<p class="vpn-notice ui-notice ui-notice-warning">${e(t("includeEmpty"))}</p>` : ""}<ui-actions class="vpn-save-row"><span role="status" class="ui-inline-status" data-pending="${model.dirty}">${e(model.saved ? t("saved") : model.dirty ? t("unsaved") : "")}</span><ui-button type="submit" class="vpn-button vpn-primary ui-button ui-button-primary" ${!model.dirty ? "disabled" : ""}>${e(t("save"))}</ui-button></ui-actions></fieldset></form>${!pending && !model.snapshot.splitControllable ? `<p class="vpn-note">${e(t("managed"))}</p>` : ""}</ui-card>`;
-  }
-  function accountMarkup() {
-    const account = model.snapshot.account || {};
-    return `<ui-card as="section" class="vpn-card ui-card"><p class="vpn-eyebrow">PROTON</p><h2>${e(account.name || t("account"))}</h2><p class="vpn-note">${e(t("plan"))}: ${e(account.plan || t("loadingAccount"))}</p>${document.getElementById("language") ? "" : `<ui-field class="vpn-field">${e(t("language"))}<ui-control as="select" data-field="locale" class="ui-control"><option value="pt-BR" ${model.locale === "pt-BR" ? "selected" : ""}>Português do Brasil</option><option value="en" ${model.locale === "en" ? "selected" : ""}>English</option></ui-control></ui-field>`}<div class="vpn-account-links"><a href="https://account.proton.me/vpn/dashboard" target="_blank" rel="noopener noreferrer">${e(t("manage"))} <span class="ui-icon ui-icon-external" aria-hidden="true"></span></a><a href="https://protonvpn.com/support/browser-extensions" target="_blank" rel="noopener noreferrer">${e(t("help"))} <span class="ui-icon ui-icon-external" aria-hidden="true"></span></a></div></ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("signOut"))}</h2><p class="vpn-note">${e(t("signOutHelp"))}</p>${model.confirmSignOut ? `<div class="vpn-signout-confirm" role="alertdialog" aria-labelledby="vpnSignoutTitle"><p id="vpnSignoutTitle">${e(t("confirmSignOut"))}</p><ui-actions class="vpn-action-row">${button(t("keepAccount"), "cancel-signout")}${button(t("signOut"), "signout", "", "vpn-danger")}</ui-actions></div>` : button(t("signOut"), "confirm-signout", "", "vpn-danger")}</ui-card>`;
-  }
+  const createImporter = () => createBookmarkImporter({
+    browser, locale: () => model.locale, scope: () => model.draft.mode,
+    disabled: () => disposed || model.busy || !model.snapshot.signedIn || !model.snapshot.splitControllable || model.snapshot.featuresReady === false,
+    normalize: normalizeBookmarkDomain,
+    existing: mode => domainRules(model.draft, mode).map(rule => rule.domain),
+    import(domains, mode) {
+      model.draft.value.push(...domains.map(domain => ({domain, withSubDomains: model.subdomains, mode})));
+      model.dirty = true; model.saved = false; model.error = ""; render();
+    },
+  });
+  bookmarkImporter = createImporter();
+  const resetImporter = () => {bookmarkImporter.dispose(); bookmarkImporter = createImporter();};
+  const {serverMarkup, serversStatus, listMarkup} = createServerViews({model, t, country, button, openCountries});
+  const connectionMarkup = createConnectionView({model, t, status, active, country, button, serversStatus, listMarkup});
+  const featuresMarkup = createFeaturesView({model, t});
+  const accountMarkup = createAccountView({model, t, button, hasLanguage: () => Boolean(document.getElementById("language"))});
   function navigationMarkup() {
     if (!model.snapshot.signedIn) return "";
     return `<nav class="${hostNavigation ? "sub-nav ui-submenu" : "vpn-navigation"}" aria-label="VPN">${pages.map((page) => `<ui-button type="button" data-action="navigate" data-page="${page}" class="${hostNavigation ? "tab " : ""}${model.page === page ? "active" : ""}" ${model.page === page ? 'aria-current="page"' : ""}>${e(t(page))}</ui-button>`).join("")}</nav>`;
@@ -250,11 +144,18 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       });
       domainList.scrollTop = domainListScroll;
     }
-    const previewCard = root.querySelector("[data-bookmark-preview]");
-    if (previewCard) {
-      const preview = importPreview();
-      renderBookmarkPreview(previewCard, {domains: preview.all, fresh: preview.fresh, skipped: preview.skipped}, model.locale);
+    const editor = root.querySelector("[data-domain-editor]");
+    disposeDomainEditor?.();
+    if (editor) {
+      editor.querySelector("[data-domain-empty]").hidden = Boolean(domainRules(model.draft, model.draft.mode).length);
+      disposeDomainEditor = bindDomainEditor(editor, {
+        normalize: normalizeDomain,
+        onAdd: domain => addDomain(domain),
+        onError() {model.error = t("invalidDomain"); render();},
+      });
     }
+    const importerHost = root.querySelector("[data-bookmark-importer]");
+    if (importerHost) { bookmarkImporter.attach(importerHost); void bookmarkImporter.refresh().catch(() => {}); }
     if (hostNavigation) {
       hostNavigation.innerHTML = renderUi(navigationMarkup());
       if (focusedNavigation)
@@ -379,20 +280,19 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     if (
       model.dirty &&
       page !== "features" &&
-      !window.confirm(t("confirmLeave"))
+      !await confirmAction(root.ownerDocument, t("confirmLeave"), {locale: model.locale})
     )
       return;
+    if (disposed) return;
     if (model.dirty && page !== "features") restoreRules();
     initialScroll = undefined;
     model.page = page;
-    model.confirmSignOut = false;
     root.scrollTop = 0;
     render();
     await saveView();
   }
-  function addDomain() {
+  function addDomain(domain = normalizeDomain(model.domain)) {
     try {
-      const domain = normalizeDomain(model.domain);
       const rules = model.draft.value;
       const existing = rules.find(
         (rule) =>
@@ -416,7 +316,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       render();
     }
   }
-  const click = (event) => {
+  const click = async (event) => {
     const button = event.target.closest("[data-action]");
     if (
       !button ||
@@ -439,39 +339,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       render();
       return;
     }
-    if (action === "load-bookmarks") {
-      if (model.busy || !model.snapshot.splitControllable) return;
-      // Call request before any await to preserve the click's user gesture.
-      let permission;
-      try { permission = browser.permissions.request({permissions: ["bookmarks"]}); }
-      catch { model.error = t("bookmarkFailed"); render(); return; }
-      void run(async () => {
-        if (!await permission) throw new Error("bookmarkDenied");
-        let tree;
-        try { tree = await browser.bookmarks.getTree(); }
-        catch { throw new Error("bookmarkFailed"); }
-        if (disposed || !model.snapshot.signedIn) return;
-        model.bookmarkFolders = bookmarkFolders(tree);
-        if (!model.bookmarkFolders.some(folder => folder.id === model.bookmarkFolder))
-          model.bookmarkFolder = model.bookmarkFolders[0]?.id || "";
-      });
-      return;
-    }
-    if (action === "import-bookmarks") {
-      if (model.busy || !model.snapshot.splitControllable) return;
-      const {fresh} = importPreview();
-      if (!fresh.length) return;
-      model.draft.value.push(...fresh.map(domain => ({domain, withSubDomains: model.subdomains, mode: model.draft.mode})));
-      model.dirty = true;
-      model.saved = false;
-      model.error = "";
-      render();
-      return;
-    }
-    if (action === "add-domain") {
-      addDomain();
-      return;
-    }
     if (action === "remove-domain") {
       model.draft.value = model.draft.value.filter(
         (rule) =>
@@ -485,21 +352,28 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       render();
       return;
     }
-    if (action === "confirm-signout" || action === "cancel-signout") {
-      model.confirmSignOut = action === "confirm-signout";
-      render();
+    if (action === "confirm-signout") {
+      const revision = stateRevision;
+      if (model.busy || !await confirmAction(root.ownerDocument, t("confirmSignOut"), {
+        locale: model.locale, confirmLabel: t("signOut"), cancelLabel: t("keepAccount"),
+        confirmAction: "signout", cancelAction: "cancel-signout",
+      }) || disposed || revision !== stateRevision) return;
+      void run(async () => {
+        await engine.signOut();
+        if (disposed) return;
+        model.snapshot = {signedIn: false}; resetImporter(); model.state = {state: "disconnected"}; model.dirty = false; stopChecking();
+      });
       return;
     }
     if (action === "refresh") {
       void refresh();
       return;
     }
-    if (
-      action === "disconnect" &&
-      model.networkBlocked &&
-      !window.confirm(t("confirmRelease"))
-    )
-      return;
+    if (action === "disconnect" && model.networkBlocked) {
+      const revision = stateRevision;
+      if (!await confirmAction(root.ownerDocument, t("confirmRelease"), {locale: model.locale}) || revision !== stateRevision) return;
+    }
+    if (disposed) return;
     void run(async () => {
       if (action === "retry-connection") {
         await engine.retryConnection();
@@ -532,15 +406,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
         model.networkBlocked = false;
         model.error = "";
       }
-      if (action === "signout") {
-        await engine.signOut();
-        model.snapshot = { signedIn: false };
-        model.bookmarkFolders = null;
-        model.state = { state: "disconnected" };
-        model.dirty = false;
-        model.confirmSignOut = false;
-        stopChecking();
-      }
     });
   };
   const input = (event) => {
@@ -554,11 +419,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
   };
   const change = (event) => {
     const field = event.target.dataset.field;
-    if (field === "bookmark-folder" || field === "bookmark-recursive") {
-      if (field === "bookmark-folder") model.bookmarkFolder = event.target.value;
-      else model.bookmarkRecursive = event.target.checked;
-      render();
-    }
     if (field === "server-filter") {
       model.filter = event.target.value;
       model.limits.servers = 50;
@@ -609,12 +469,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       model.saved = true;
     });
   };
-  const keydown = (event) => {
-    if (event.key === "Enter" && event.target.dataset.field === "domain") {
-      event.preventDefault();
-      addDomain();
-    }
-  };
   const scroll = () => {
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
@@ -643,7 +497,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
       else stopChecking();
       if (data.state === "logged-out") {
         model.snapshot = { signedIn: false };
-        model.bookmarkFolders = null;
+        resetImporter();
         model.dirty = false;
       } else if (!model.snapshot.signedIn && started) {
         void refresh();
@@ -678,7 +532,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
   root.addEventListener("input", input);
   root.addEventListener("change", change);
   root.addEventListener("submit", submit);
-  root.addEventListener("keydown", keydown);
   root.addEventListener("scroll", scroll, { passive: true });
   const show = () => {
     if (!started) {
@@ -714,6 +567,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
   if (!root.closest("[hidden]")) show();
   const dispose = () => {
     disposed = true;
+    bookmarkImporter.dispose(); disposeDomainEditor?.(); cancelConfirmation(root.ownerDocument);
     stopChecking();
     clearTimeout(scrollTimer);
     unsubscribe();
@@ -726,7 +580,6 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     root.removeEventListener("input", input);
     root.removeEventListener("change", change);
     root.removeEventListener("submit", submit);
-    root.removeEventListener("keydown", keydown);
     root.removeEventListener("scroll", scroll);
     root.removeEventListener("super-vpn:show", show);
   };

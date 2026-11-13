@@ -28,6 +28,7 @@ const config = {
       if (String(rule.test) === String(/\.js$/))
         return {
           ...rule,
+          exclude: /node_modules|[\\/]ui[\\/](?:async-state|confirmation|domain-list|domain-editor|bookmark-importer|bookmark-preview)\.js$/,
           use: {
             ...rule.use,
             options: {

@@ -269,3 +269,39 @@ test('public snapshot distinguishes a failed guarded attempt from an active atte
  delete state.data.error;
  assert.equal(connectionView(state,false).state.state,'connecting');
 });
+
+
+test('startup proxy authentication cancels only an endpoint owned by this extension without requesting credentials', async () => {
+  const {ownsAuthEndpoint} = load('proxy-auth');
+  const {chromiumProxy} = load('chromium');
+  const routing = require('../vpn/engine/routing.js');
+  const challenge = {isProxy:true, challenger:{host:'node-us-275.protonvpn.net',port:4443}};
+  for (const mode of ['fixed_servers','pac_script']) {
+    const fixed = {mode:'fixed_servers',rules:{singleProxy:{scheme:'https',host:challenge.challenger.host,port:4443},bypassList:[]}};
+    let details = {levelOfControl:'controlled_by_this_extension',value:mode === 'fixed_servers' ? fixed : routing.createPacScript(fixed)};
+    let credentials = 0, faults = 0;
+    const {authHandler} = vendorLoad('vpn/authHandler', {
+      '../state':{getCurrentStateIfDefined:()=>undefined,isProxyKnownHost:()=>false,privacyFault:()=>faults++},
+      '../tools/proxyAuth':{isPending:()=>false},'../tools/milliSeconds':{milliSeconds:{fromSeconds:x=>x*1000}},'../config':{requestMaxAge:20},
+      '../account/credentials/getConnectionCredentials':{getCredentials:()=>{credentials++;return Promise.resolve({});}},
+      '../../../../../vpn/engine/proxy-auth':{ownsAuthEndpoint},'../../../../../vpn/engine/chromium':{chromiumProxy},
+    },{chrome:{runtime:{},proxy:{settings:{get:(_,done)=>done(details)}}}});
+    const response = request => new Promise(resolve=>authHandler(request,resolve));
+    assert.equal((await response(challenge)).cancel,true);
+    assert.equal(credentials,0);assert.equal(faults,1);
+    for(const request of [{...challenge,isProxy:false},{...challenge,challenger:{host:'node-us-275.protonvpn.net.attacker.test',port:4443}},{...challenge,challenger:{host:challenge.challenger.host,port:443}}]) {
+      assert.deepEqual(JSON.parse(JSON.stringify(await response(request))),{});
+    }
+    details={...details,levelOfControl:'controlled_by_other_extensions'};
+    assert.deepEqual(JSON.parse(JSON.stringify(await response(challenge))),{});
+    assert.equal(credentials,0);assert.equal(faults,1);
+  }
+});
+
+test('startup endpoint recognition requires exact inline PAC tokens and never trusts provider names alone', () => {
+  const {ownsAuthEndpoint} = load('proxy-auth');
+  const challenger = {host:'node-us-275.protonvpn.net',port:4443};
+  for(const value of [{mode:'system'},{mode:'pac_script',pacScript:{data:'return "HTTPS other.test:4443";'}},{mode:'pac_script',pacScript:{url:'https://node-us-275.protonvpn.net/config.pac'}},{mode:'fixed_servers',rules:{singleProxy:{scheme:'https',host:challenger.host,port:443},bypassList:[]}}]) {
+    assert.equal(ownsAuthEndpoint({levelOfControl:'controlled_by_this_extension',value},challenger),false);
+  }
+});

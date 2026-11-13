@@ -1,4 +1,4 @@
-# Interface própria da VPN — referência 1.6.8
+# Interface própria da VPN — referência 1.7.31
 
 ## Componentização 1.6.8
 
@@ -93,3 +93,10 @@ Validação da unificação: 472 testes aprovados, compilação da interface e d
 Na **1.7.30**, limpeza e VPN usam a mesma lista editável de domínios (`ui/domain-list.js`), com estilos compartilhados, altura máxima de 210 px, rolagem interna e remoção compacta por × com rótulo acessível. A VPN mantém a indicação de subdomínios e o salvamento explícito; a limpeza mantém a gravação automática e listas independentes. Listas pequenas ocupam apenas a altura necessária.
 
 Validação da lista compartilhada: 474 testes aprovados, incluindo remoção por modo sem salvamento automático na VPN, segurança de texto e altura/rolagem do componente; compilação, TypeScript e checagem dos componentes aprovados.
+
+
+### Fluxos completos compartilhados e telas separadas (1.7.31)
+
+A VPN usa o importador completo e o editor de domínios comuns à limpeza, com normalização de hostname no adaptador. A seleção de pasta, a permissão, a prévia, os erros e a nova tentativa saíram de `app.js`. As telas estão em `vpn/source/screens/{connection,servers,features,account}.js`; os eventos e a ponte com o motor ficam no app. O botão Salvar continua obrigatório e os modos de inclusão/exclusão continuam separados.
+
+Carregamento e falhas dos recursos e servidores usam o componente genérico de estado. As confirmações de saída, abandono de rascunho e liberação de rede usam o diálogo comum; a liberação é descartada caso a conexão mude durante a confirmação. A página de bloqueio independente conserva seu fluxo local de confirmação. A lista de pendências de unificação está em [ui-components.md](ui-components.md).

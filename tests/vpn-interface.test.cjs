@@ -28,6 +28,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
       ...globals,
       require(spec) {
         if (spec in mocks) return mocks[spec];
+        if (spec.endsWith(".js") && path.resolve(path.dirname(filename), spec).startsWith(path.join(root, "ui"))) return require(path.resolve(path.dirname(filename), spec));
         if (spec === "../../ui/domain-list.js") return require(path.join(root, "ui/domain-list.js"));
         if (spec === "../../ui/bookmark-preview.js") return require(path.join(root, "ui/bookmark-preview.js"));
         if (spec === "../../rules.js") return require(path.join(root, "rules.js"));
@@ -934,8 +935,8 @@ test("logout during a delayed bootstrap wins over its older connected snapshot",
 });
 test('blocked networking remains visible after logout and release requires explicit confirmation before clearing the alert',async()=>{
  const initial={...snapshot(),signedIn:false,state:{state:'logged-out',error:{message:'VpnTrafficBlocked'}}};const ui=await boot(initial);
- assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);assert.ok(ui.w.document.querySelector('[data-action="disconnect"]'));ui.w.confirm=()=>false;await ui.click('disconnect');assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);
- ui.w.confirm=()=>true;await ui.click('disconnect');assert.equal(ui.calls.filter(call=>call[0]==='disconnect').length,1);assert.ok(!ui.w.document.querySelector('[data-action="disconnect"]'));await ui.close();
+ assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);assert.ok(ui.w.document.querySelector('[data-action="disconnect"]'));await ui.click('disconnect');ui.w.document.querySelector('[data-confirm=cancel]').click();await tick();assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));assert.match(ui.w.document.body.textContent,/rede dos sites bloqueada/);
+ await ui.click('disconnect');ui.w.document.querySelector('[data-confirm=accept]').click();await tick();assert.equal(ui.calls.filter(call=>call[0]==='disconnect').length,1);assert.ok(!ui.w.document.querySelector('[data-action="disconnect"]'));await ui.close();
 });
 
 test('an IO timeout removes the connected claim, offers state retry and recovers only after a new reply',async()=>{
@@ -976,7 +977,7 @@ test('opening a failed connection restores the blocked state and requires confir
  const ui=await boot(initial,{readConnection:async()=>({signedIn:true,state:initial.state})});
  try{
   assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'blocked');
-  ui.w.confirm=()=>false;await ui.click('disconnect');
+  await ui.click('disconnect');ui.w.document.querySelector('[data-confirm=cancel]').click();await tick();
   assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));
   assert.ok(ui.w.document.querySelector('[data-action="retry-connection"]'));
  }finally{await ui.close();}
@@ -1002,6 +1003,7 @@ test("VPN imports bookmark domains into the draft and selected mode only, then s
     assert.doesNotMatch(ui.w.document.body.textContent, /private|secret.example/);
     const recursive = ui.w.document.querySelector('[data-field="bookmark-recursive"]');
     recursive.checked = false; recursive.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
+    await tick();
     assert.match(ui.w.document.body.textContent, /1 novo domínio/);
     const subdomains = ui.w.document.querySelector('[data-field="subdomains"]');
     subdomains.checked = false; subdomains.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
@@ -1015,6 +1017,7 @@ test("VPN imports bookmark domains into the draft and selected mode only, then s
     assert.equal(preview.classList.contains("ui-bookmark-preview"), true);
     const mode = ui.w.document.querySelector('[data-field="split-mode"]');
     mode.value = "include"; mode.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
+    await tick();
     await ui.click("import-bookmarks");
     ui.w.document.querySelector('[data-split]').dispatchEvent(new ui.w.Event("submit", {bubbles: true, cancelable: true}));
     await tick();
@@ -1035,8 +1038,8 @@ test("VPN bookmark permission denial and read failures keep the draft untouched"
     }});
     try {
       await ui.app.navigate("features"); await ui.click("load-bookmarks");
-      assert.match(ui.w.document.querySelector('[role="alert"]').textContent, denied ? /não concedido/ : /Não foi possível acessar/);
-      assert.equal(ui.w.document.querySelector('[data-action="import-bookmarks"]'), null);
+      assert.match(ui.w.document.querySelector('[data-bookmark-status] [role="alert"]').textContent, denied ? /não concedido/ : /Não foi possível acessar/);
+      assert.equal(ui.w.document.querySelector('[data-action="import-bookmarks"]').disabled, true);
       assert.equal(ui.calls.some(call => call[0] === "split"), false);
     } finally { await ui.close(); }
   }
@@ -1044,14 +1047,11 @@ test("VPN bookmark permission denial and read failures keep the draft untouched"
 
 test("VPN bookmark preview reuses cleanup traversal with hostname routing semantics", () => {
   const shared = require(path.join(root, "rules.js"));
-  const {bookmarkFolders, bookmarkPreview} = load("bookmarks.js");
-  const folders = bookmarkFolders(bookmarkTree);
+  const {normalizeBookmarkDomain} = load("bookmarks.js");
+  const folders = shared.bookmarkFolders(bookmarkTree, true);
   assert.equal(folders[1].label, "Sites / Subpasta");
   assert.deepEqual(plain(shared.bookmarkDomains(bookmarkTree[0].children[0], false)), {domains: ["new.example", "new.example:8443"], skipped: 2});
-  assert.deepEqual(plain(bookmarkPreview(folders[0], true, [{domain: "new.example"}])), {
-    all: ["nested.example", "new.example"], fresh: ["nested.example"], skipped: 2, duplicates: 1,
-  });
-  assert.deepEqual(plain(bookmarkPreview(undefined, true, [])), {all: [], fresh: [], skipped: 0, duplicates: 0});
+  assert.deepEqual(plain(shared.bookmarkDomains(folders[0].node, true, normalizeBookmarkDomain)), {domains: ["nested.example", "new.example"], skipped: 2});
 });
 
 test("managed VPN split rules cannot request bookmark access", async () => {
@@ -1121,5 +1121,19 @@ test("VPN shared domain list removes only the selected mode and keeps saving exp
     ui.w.document.querySelector('[data-split]').dispatchEvent(new ui.w.Event('submit', {bubbles: true, cancelable: true}));
     await tick();
     assert.deepEqual(ui.calls.find(call => call[0] === 'split')[1].value, [{domain: "old.example", withSubDomains: false, mode: "include"}]);
+  } finally {await ui.close();}
+});
+
+
+test('VPN cannot release networking after the connection changes during confirmation', async () => {
+  const initial = snapshot(); initial.state = {state:'blocked', error:{message:'VpnTrafficBlocked'}};
+  const ui = await boot(initial);
+  try {
+    await ui.click('disconnect');
+    assert.ok(ui.w.document.querySelector('dialog'));
+    ui.broadcast('changeState', {state:'connected', server:{name:'JP#1'}});
+    ui.w.document.querySelector('[data-confirm=accept]').click(); await tick();
+    assert.equal(ui.calls.some(call => call[0] === 'disconnect'), false);
+    assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status, 'connected');
   } finally {await ui.close();}
 });

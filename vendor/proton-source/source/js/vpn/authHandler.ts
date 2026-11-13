@@ -8,6 +8,8 @@ import {
 } from "../state";
 import { isPending } from "../tools/proxyAuth";
 import { getCredentials } from "../account/credentials/getConnectionCredentials";
+import { chromiumProxy } from "../../../../../vpn/engine/chromium";
+import { ownsAuthEndpoint } from "../../../../../vpn/engine/proxy-auth";
 import BlockingResponse = chrome.webRequest.BlockingResponse;
 import OnAuthRequiredDetails = chrome.webRequest.OnAuthRequiredDetails;
 
@@ -18,6 +20,7 @@ export const authHandler = (
 	if (!callback) return undefined;
 	const state = getCurrentStateIfDefined();
 	let completed = false;
+	let ownedStartupEndpoint = false;
 	const finish = (response: BlockingResponse) => {
 		if (completed) return;
 		completed = true;
@@ -26,8 +29,9 @@ export const authHandler = (
 			response.cancel &&
 			state === getCurrentStateIfDefined() &&
 			request.isProxy &&
-			isProxyKnownHost(request.challenger.host) &&
-			request.challenger.port === state?.data.server?.proxyPort
+			(ownedStartupEndpoint ||
+				(isProxyKnownHost(request.challenger.host) &&
+					request.challenger.port === state?.data.server?.proxyPort))
 		)
 			privacyFault();
 		callback(response);
@@ -36,13 +40,30 @@ export const authHandler = (
 		() => finish({ cancel: true }),
 		milliSeconds.fromSeconds(Math.min(20, requestMaxAge)),
 	);
-	// Site authentication and a different proxy must never receive VPN credentials.
+	// Website authentication remains the website's responsibility.
+	if (!request.isProxy) {
+		finish({});
+		return undefined;
+	}
 	if (
-		!request.isProxy ||
 		!isProxyKnownHost(request.challenger.host) ||
 		request.challenger.port !== state?.data.server?.proxyPort
 	) {
-		finish({});
+		// A persisted proxy can challenge before startup restores currentState.
+		// Cancel our exact configured endpoint instead of opening a password dialog.
+		// Other extensions' proxies keep their normal authentication behavior.
+		try {
+			void chromiumProxy(chrome).read().then(
+				(details) => {
+					if (completed) return;
+					ownedStartupEndpoint = ownsAuthEndpoint(details, request.challenger);
+					finish(ownedStartupEndpoint ? {cancel: true} : {});
+				},
+				() => finish({}),
+			);
+		} catch {
+			finish({});
+		}
 		return undefined;
 	}
 	if (isPending(request)) {

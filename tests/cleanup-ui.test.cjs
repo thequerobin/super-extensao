@@ -17,7 +17,7 @@ async function fixture(initial={}) {
     runtime:{sendMessage:async payload=>{requests.push(payload);return {ok:true,cleared:true};}},
     permissions:{request:async()=>true},bookmarks:{getTree:async()=>[{id:'0',title:'',children:[{id:'1',title:'Sites',children:[{url:'https://cookie.example/path'},{url:'https://new.example'}]}]}]}};
   w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});w.confirm=()=>true;
-  for(const file of ['ui.js','preferences.js','i18n.js','rules.js','ui/bookmark-preview.js','ui/domain-list.js','popup.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
+  for(const file of ['ui.js','preferences.js','i18n.js','rules.js','ui/bookmark-preview.js','ui/domain-list.js','ui/async-state.js','ui/confirmation.js','ui/domain-editor.js','ui/bookmark-importer.js','popup.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
   const style=w.document.createElement('style');style.textContent=fs.readFileSync(path.join(root,'popup.css'),'utf8').replace(/@import[^;]+;/g,'');w.document.head.append(style);
   await tick();
   return {w,d:w.document,local,requests,errors,close:()=>w.close()};
