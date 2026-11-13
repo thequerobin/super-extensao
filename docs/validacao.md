@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 13 de novembro de 2026, referência **1.7.23**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.24**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Previsão de rede já desativada por outra extensão — 1.7.24
+
+O usuário forneceu o diagnóstico `stage: proxy-apply`, `reason: VpnNetworkPredictionFailed` e a leitura nativa de `networkPredictionEnabled`: `{value: false, levelOfControl: "controlled_by_other_extensions"}`. O código exigia propriedade exclusiva da configuração, rejeitando o valor efetivo já desativado. Essa exigência explica a falha observada na etapa de aplicação do proxy; a conexão Proton completa ainda precisa ser repetida após atualizar.
+
+A proteção agora aceita a previsão comprovadamente desativada por esta extensão, por outra extensão ou por política do navegador. Se a opção estiver disponível para controle, continua aplicando `false` e conferindo a leitura. O observador usa o mesmo critério e dispara a falha de privacidade se a previsão for ativada ou o estado deixar de ser confirmado. Valores ativos, ausentes e estados sem controle não são aceitos como proteção. A restauração não tenta alterar uma opção bloqueada por política e continua removendo somente a preferência desta extensão, sem habilitar a previsão ou alterar outra extensão.
+
+A semântica de `value` e `levelOfControl` foi conferida na [documentação oficial de ChromeSetting/privacy](https://developer.chrome.com/docs/extensions/reference/api/privacy). O teste nativo em Edge com duas extensões temporárias reproduziu exatamente `false` com `controlled_by_other_extensions`: a proteção foi aceita e a reativação pela outra extensão disparou o observador de falha. As regressões também cobrem política que mantém a opção desativada, valores não protegidos e restauração. Nenhuma configuração pessoal ou de outra extensão foi alterada no Helium.
+
+Validação final: **436 testes aprovados**, build de produção, TypeScript do worker/interface, `check:ui`, versões de manifest/projeto/lockfile iguais a 1.7.24 e whitespace sem erros.
 
 ## Diagnóstico local da conexão — 1.7.23
 

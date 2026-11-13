@@ -28,6 +28,44 @@ test('speculative networking protection verifies control, disables prediction an
  let details={value:true,levelOfControl:'controllable_by_this_extension'},cleared=0;const api={runtime:{},privacy:{network:{networkPredictionEnabled:{get:(_,done)=>done(details),set:(value,done)=>{assert.equal(value.scope,'regular');assert.equal(value.value,false);details={value:false,levelOfControl:'controlled_by_this_extension'};done();},clear:(options,done)=>{assert.equal(options.scope,'regular');cleared++;done();}}}}};
  const {chromiumPrediction}=load('vpn/engine/chromium-prediction.ts');await chromiumPrediction(api).protect();await chromiumPrediction(api).restore();assert.equal(cleared,1);details={value:true,levelOfControl:'controlled_by_other_extensions'};await assert.rejects(chromiumPrediction(api).protect(),/PredictionFailed/);api.runtime.lastError={message:'API error'};await assert.rejects(chromiumPrediction(api).restore(),/PredictionFailed/);
 });
+
+test('prediction already disabled by browser policy is protected without attempting a forbidden write or clear',async()=>{
+ const details={value:false,levelOfControl:'not_controllable'};let writes=0,clears=0;
+ const api={runtime:{},privacy:{network:{networkPredictionEnabled:{get:(_,done)=>done(details),set:()=>{writes++;throw Error('managed');},clear:()=>{clears++;throw Error('managed');}}}}};
+ const {chromiumPrediction,predictionIsProtected}=load('vpn/engine/chromium-prediction.ts');
+ await chromiumPrediction(api).protect();await chromiumPrediction(api).restore();
+ assert.equal(writes,0);assert.equal(clears,0);assert.equal(predictionIsProtected(details),true);
+ for(const value of [true,undefined,'false']) {
+  details.value=value;
+  await assert.rejects(chromiumPrediction(api).protect(),/PredictionFailed/);
+  assert.equal(predictionIsProtected(details),false);
+ }
+ assert.equal(predictionIsProtected({value:false,levelOfControl:'controlled_by_other_extensions'}),true);
+ assert.equal(predictionIsProtected({value:false,levelOfControl:'controllable_by_this_extension'}),false);
+});
+
+test('privacy watcher accepts managed-off prediction and still blocks when policy enables it',()=>{
+ let prediction,faults=0;
+ const {initPrivacyWatchers}=load('vendor/proton-source/source/js/vpn/initPrivacyWatchers.ts',{
+  '../state':{getCurrentStateIfDefined:()=>({name:'on'}),privacyFault:()=>faults++},
+  '../webrtc/state':{WebRTCState:{DISABLED:'disable_non_proxied_udp'}},
+ },{chrome:{privacy:{network:{networkPredictionEnabled:{onChange:{addListener:fn=>prediction=fn}}}}}});
+ initPrivacyWatchers();prediction({value:false,levelOfControl:'not_controllable'});assert.equal(faults,0);
+ prediction({value:true,levelOfControl:'not_controllable'});assert.equal(faults,1);
+ prediction({value:false,levelOfControl:'controlled_by_other_extensions'});assert.equal(faults,1);
+ prediction({value:true,levelOfControl:'controlled_by_other_extensions'});assert.equal(faults,2);
+});
+
+test('prediction disabled by another extension needs no write and restore never enables it',async()=>{
+ let details={value:false,levelOfControl:'controlled_by_other_extensions'},writes=0,clears=0;
+ const api={runtime:{},privacy:{network:{networkPredictionEnabled:{get:(_,done)=>done(details),set:()=>{writes++;throw Error('another extension owns it');},clear:({scope},done)=>{assert.equal(scope,'regular');clears++;done();}}}}};
+ const {chromiumPrediction}=load('vpn/engine/chromium-prediction.ts');
+ await chromiumPrediction(api).protect();assert.equal(writes,0);
+ await chromiumPrediction(api).restore();assert.equal(clears,1);assert.equal(details.value,false);
+ details={value:true,levelOfControl:'controlled_by_other_extensions'};
+ await assert.rejects(chromiumPrediction(api).protect(),/PredictionFailed/);
+ assert.equal(writes,0);
+});
 test('a canceled current-proxy authentication challenge triggers blocking and warning, not silent continuation',async()=>{
  let warnings=0;const state={name:'on',data:{server:{proxyHost:'proxy.test',proxyPort:443}}};const {authHandler}=load('vendor/proton-source/source/js/vpn/authHandler.ts',{'../state':{privacyFault:()=>warnings++,getCurrentStateIfDefined:()=>state,isProxyKnownHost:host=>host==='proxy.test',getAuthCredentials:()=>undefined},'../tools/proxyAuth':{isPending:()=>false},'../config':{requestMaxAge:20},'../account/credentials/getConnectionCredentials':{getCredentials:async()=>undefined}});
  const response=await new Promise(resolve=>authHandler({isProxy:true,challenger:{host:'proxy.test',port:443}},resolve));assert.equal(response.cancel,true);assert.equal(warnings,1);

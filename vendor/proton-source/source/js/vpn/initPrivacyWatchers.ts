@@ -1,5 +1,6 @@
 import { privacyFault, getCurrentStateIfDefined } from "../state";
 import { WebRTCState } from "../webrtc/state";
+import { predictionIsProtected } from "../../../../../vpn/engine/chromium-prediction";
 let initialized = false;
 export function initPrivacyWatchers(): void {
 	if (initialized) return;
@@ -20,8 +21,7 @@ export function initPrivacyWatchers(): void {
 		(details) => {
 			if (
 				getCurrentStateIfDefined()?.name === "on" &&
-				(details.value !== false ||
-					details.levelOfControl !== "controlled_by_this_extension")
+				!predictionIsProtected(details)
 			)
 				privacyFault();
 		},

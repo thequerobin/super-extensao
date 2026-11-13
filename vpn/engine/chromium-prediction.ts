@@ -1,4 +1,10 @@
 /** Disable speculative DNS/preconnect while the browser proxy is armed. */
+export function predictionIsProtected(details: { value?: unknown; levelOfControl?: string }): boolean {
+  return details.value === false &&
+    (details.levelOfControl === "controlled_by_this_extension" ||
+      details.levelOfControl === "controlled_by_other_extensions" ||
+      details.levelOfControl === "not_controllable");
+}
 export function chromiumPrediction(api: typeof chrome) {
   const setting = () => api.privacy?.network?.networkPredictionEnabled;
   function call<T>(run: (done: (value: T) => void) => void): Promise<T> {
@@ -20,6 +26,10 @@ export function chromiumPrediction(api: typeof chrome) {
       const before = await call<chrome.types.ChromeSettingGetResult<boolean>>(
         (done) => setting()!.get({ incognito: false }, done),
       );
+      // Another extension or browser policy can already enforce OFF. Check the
+      // effective value rather than demanding ownership; onChange still blocks
+      // the connection if that protection is removed.
+      if (predictionIsProtected(before)) return;
       if (
         ![
           "controllable_by_this_extension",
@@ -33,14 +43,15 @@ export function chromiumPrediction(api: typeof chrome) {
       const after = await call<chrome.types.ChromeSettingGetResult<boolean>>(
         (done) => setting()!.get({ incognito: false }, done),
       );
-      if (
-        after.value !== false ||
-        after.levelOfControl !== "controlled_by_this_extension"
-      )
+      if (!predictionIsProtected(after))
         throw new Error("VpnNetworkPredictionFailed");
     },
     async restore(): Promise<void> {
       if (!setting()) return;
+      const current = await call<chrome.types.ChromeSettingGetResult<boolean>>(
+        (done) => setting()!.get({ incognito: false }, done),
+      );
+      if (current.levelOfControl === "not_controllable") return;
       await call<void>((done) => setting()!.clear({ scope: "regular" }, done));
     },
   };
