@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **13 de novembro de 2026**, referência **1.7.21**. O fluxo de conexão agora tem prazo e estado de falha com bloqueio preservado; a recuperação na sessão Proton pessoal ainda precisa ser conferida. A validação anterior da resposta de login Proton passou 423 testes automatizados e verificação nativa isolada sem rede; as rodadas anteriores cobrem regras reais no Helium e cenários isolados da VPN/Nova guia no Edge. Evidências, limites, confirmações do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
+Revisado em **13 de novembro de 2026**, referência **1.7.22**. A instalação das dependências de sincronização agora remove as chaves de teste que geravam avisos no Chromium. O fluxo de conexão agora tem prazo e estado de falha com bloqueio preservado; a recuperação na sessão Proton pessoal ainda precisa ser conferida. A validação anterior da resposta de login Proton passou 423 testes automatizados e verificação nativa isolada sem rede; as rodadas anteriores cobrem regras reais no Helium e cenários isolados da VPN/Nova guia no Edge. Evidências, limites, confirmações do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 

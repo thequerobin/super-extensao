@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.21.** Documentação revisada em 13 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.22.** Documentação revisada em 13 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 ## Estado atual
 
@@ -130,7 +130,7 @@ npm run setup:sync
 npm test
 ```
 
-`setup:vpn` também fornece o PostCSS usado nos testes da base visual. Para editar e compilar a Sincronização, instale adicionalmente `npm run setup:sync`.
+`setup:vpn` também fornece o PostCSS usado nos testes da base visual. Para editar e compilar a Sincronização, instale adicionalmente `npm run setup:sync`. Esse comando também remove cinco chaves/certificados de teste de `public-encrypt`, desnecessários para a extensão e sinalizados pelo Chromium ao carregar a pasta do projeto. Se as dependências já estiverem instaladas, execute `node scripts/clean-dependency-fixtures.cjs` para aplicar somente essa limpeza.
 
 | Alteração | Comando |
 | --- | --- |

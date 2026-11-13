@@ -1,6 +1,6 @@
 {
   "name": "super-extensao",
-  "version": "1.7.21",
+  "version": "1.7.22",
   "private": true,
   "description": "Extensão Chromium com limpeza ao sair, controle de autoplay e proteção da última aba.",
   "scripts": {
@@ -8,7 +8,7 @@
     "build:vpn": "node scripts/build-vpn.cjs && npm run build:vpn-ui",
     "build:panels": "node scripts/build-popup-panels.cjs",
     "setup:vpn": "npm ci --prefix vendor/proton-source --ignore-scripts --legacy-peer-deps",
-    "setup:sync": "npm ci --prefix vendor/floccus-source --ignore-scripts --legacy-peer-deps",
+    "setup:sync": "npm ci --prefix vendor/floccus-source --ignore-scripts --legacy-peer-deps && node scripts/clean-dependency-fixtures.cjs",
     "build:sync": "node scripts/build-sync.cjs && npm run build:panels",
     "build:vpn-ui": "node scripts/build-vpn-interface.cjs && npm run build:panels",
     "build:i18n": "node scripts/build-i18n.cjs",

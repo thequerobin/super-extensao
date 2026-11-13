@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 13 de novembro de 2026, referência **1.7.21**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.22**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Chaves de teste nas dependências — 1.7.22
+
+O Chromium sinalizou arquivos PEM dentro de `vendor/floccus-source/node_modules/public-encrypt/test`, pois a pasta principal do projeto também é usada para carregar a extensão sem compactação. Foram identificadas cinco fixtures públicas de testes do pacote: certificado, chave, par RSA e chave privada RSA criptografada. Nenhum desses arquivos é necessário aos pontos de entrada do pacote ou à extensão compilada.
+
+O script `scripts/clean-dependency-fixtures.cjs` remove somente esses cinco arquivos locais conhecidos, sem percorrer ou remover outras chaves. `npm run setup:sync` agora executa essa limpeza após instalar as dependências. A execução local removeu cinco arquivos; a repetição removeu zero. Uma operação RSA de cifrar/decifrar usando `public-encrypt/browser.js` e chaves temporárias geradas em memória passou após a limpeza. A varredura completa da pasta não encontrou mais arquivos `.pem` ou `.key`. As chaves podem voltar com uma instalação direta das dependências que não use `setup:sync`; nesse caso, execute o script de limpeza.
+
+Validação: **431 testes aprovados**, `check:ui`, versões de manifest/projeto/lockfile iguais a 1.7.22 e whitespace sem erros.
+
+Esta manutenção não corrige nem valida a falha atual de conexão Proton relatada após a 1.7.21. Não foram alteradas a sessão pessoal ou as regras da VPN.
 
 ## Tentativa de conexão sem fim — 1.7.21
 
