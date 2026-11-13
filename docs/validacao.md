@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.20**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.21**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Tentativa de conexão sem fim — 1.7.21
+
+Após o relato de conexão permanente com CA-FREE#23, a revisão encontrou dois caminhos que sustentavam o sintoma: operações de conexão aguardadas sem prazo e falhas protegidas apresentadas novamente como “Conectando…”. A etapa exata que falhou na sessão Proton pessoal não foi capturada.
+
+A tentativa agora tem prazo de 30 segundos e invalida respostas atrasadas. Falhas protegidas mantêm o servidor salvo e o bloqueio, mas passam a aparecer como “Conexão não concluída”, com opção de tentar novamente ou escolher outro servidor. O erro de prazo recebe texto traduzido. A recuperação automática aguarda pelo menos 20 segundos entre falhas; uma solicitação explícita permite nova tentativa. A liberação sem VPN continua exigindo confirmação.
+
+As regressões simulam ausência de resposta em leitura do proxy, bloqueio, carregamento/obtenção/validação de credenciais, aplicação do proxy e liberação verificada; também cobrem cancelamento, respostas tardias, recuperação após conexão longa, falha antiga do bloqueio, cooldown e apresentação/restauração do estado público. O cenário de espera indefinida foi reproduzido antes da correção. Não houve novo teste na conta pessoal nem retomada de queda real, captura de tráfego, suspensão ou reinício do perfil autenticado.
+
+Validação final: **431 testes aprovados**, build de produção, TypeScript do worker/interface, `check:ui`, quatro campos de versão iguais a 1.7.21 e whitespace sem erros. O runner nativo no Edge com perfil temporário aprovou os seis cenários de bloqueio/proxy/liberação, com zero pedidos diretos antes da liberação explícita; essa evidência continua restrita ao proxy local isolado e não comprova a recuperação da conta Proton pessoal.
 
 ## Abertura do login Proton 1.7.20
 

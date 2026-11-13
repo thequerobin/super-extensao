@@ -20,7 +20,7 @@
       chrome.runtime.onMessage.addListener((message, sender) => {
         if (message?.channel !== "super-vpn" || message.type !== "changeState" ||
             message.respondTo !== "none" || sender?.id && sender.id !== chrome.runtime.id ||
-            !["connected", "connecting", "disconnected", "logged-out"].includes(message.data?.state)) return;
+            !["connected", "connecting", "blocked", "disconnected", "logged-out"].includes(message.data?.state)) return;
         revision++;
         latest = {signedIn:message.data.state !== "logged-out", state:message.data};
       });

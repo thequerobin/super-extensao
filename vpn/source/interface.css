@@ -95,6 +95,12 @@
   box-shadow: 0 0 0 7px var(--raised);
   margin: 8px 0 12px;
 }
+[data-status="blocked"] .vpn-status-dot {
+  background: var(--danger);
+}
+[data-status="blocked"] .vpn-status {
+  color: var(--danger);
+}
 [data-status="connected"] .vpn-status-dot {
   background: var(--success);
 }

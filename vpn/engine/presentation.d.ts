@@ -4,6 +4,7 @@ export declare function connectionView(current: {
     data?: {
         server?: Record<string, unknown>;
         error?: unknown;
+        blocked?: boolean;
     };
 }, confirmed: boolean, errorMessage?: string): {
     signedIn: boolean;

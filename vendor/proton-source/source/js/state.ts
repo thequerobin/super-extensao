@@ -230,7 +230,7 @@ function present(
 ): void {
 	const error = (
 		state.data.blocked &&
-		!(state.data.error as Error)?.message?.startsWith("VpnTrafficGuard")
+		!(state.data.error as Error)?.message?.match(/^Vpn(TrafficGuard|ConnectionTimedOut)/)
 			? new Error("VpnTrafficBlocked")
 			: state.data.error
 	) as ApiError | Error | ErrorDump | undefined;
@@ -253,7 +253,7 @@ function present(
 			})
 			.catch(() => {});
 	if (phase === "logged-out") setButton("loggedOut");
-	else if (phase === "disconnected")
+	else if (phase === "disconnected" || phase === "blocked")
 		setButton(error ? "error" : "off", error && getErrorAsString(error));
 	else if ((error as ApiError)?.Warning) setButton("warning");
 	else if (phase === "connected")
@@ -338,7 +338,7 @@ const machine = new ConnectionMachine<ProxyServer, Credentials>({
 			code === "missing-server"
 				? c("Error").t`Server not found`
 				: code === "timeout"
-					? "Connection timeout"
+					? "VpnConnectionTimedOut"
 					: c("Error")
 							.t`Not able to control the browser network settings, possibly a permission is missing`,
 		),
@@ -633,7 +633,7 @@ export async function getConnectionSnapshot() {
 		current as unknown as Parameters<typeof connectionView>[0],
 		confirmed,
 		safety.blocked &&
-			!(current.data.error as Error)?.message?.startsWith("VpnTrafficGuard")
+			!(current.data.error as Error)?.message?.match(/^Vpn(TrafficGuard|ConnectionTimedOut)/)
 			? "VpnTrafficBlocked"
 			: current.data.error
 				? getErrorAsString(current.data.error)

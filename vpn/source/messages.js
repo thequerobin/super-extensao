@@ -1,5 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
+  blocked: { "pt-BR": "Conexão não concluída", en: "Connection failed" },
+  VpnConnectionTimedOut: {
+    "pt-BR": "A VPN não confirmou a conexão em 30 segundos. A navegação permanece bloqueada. Tente novamente ou escolha outro servidor.",
+    en: "The VPN did not confirm the connection within 30 seconds. Browsing remains blocked. Try again or choose another server.",
+  },
   protectionDetails: {
     "pt-BR": "Ver proteção e recuperação",
     en: "Protection and recovery",

@@ -9,6 +9,7 @@ import { networkGuard } from "./networkGuard";
 /** Only a closed vocabulary crosses this boundary, never a service response or credential. */
 const reasons = new Set([
 	"VpnTrafficBlocked",
+	"VpnConnectionTimedOut",
 	"VpnTrafficGuardFailed",
 	"VpnTrafficGuardUnavailable",
 	"VpnTrafficGuardProbeBypassed",

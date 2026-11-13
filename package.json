@@ -1,6 +1,6 @@
 {
   "name": "super-extensao",
-  "version": "1.7.20",
+  "version": "1.7.21",
   "private": true,
   "description": "Extensão Chromium com limpeza ao sair, controle de autoplay e proteção da última aba.",
   "scripts": {

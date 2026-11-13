@@ -12,7 +12,7 @@ export interface BroadcastMessage<T extends string = string, K = any> {
 export type ChangeStateMessage = BroadcastMessage<
 	"changeState",
 	{
-		state: "connected" | "connecting" | "logged-out" | "disconnected";
+		state: "connected" | "connecting" | "blocked" | "logged-out" | "disconnected";
 		server?: ProxyServer;
 		error?: ApiError;
 	}

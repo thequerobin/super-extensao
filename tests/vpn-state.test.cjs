@@ -7,7 +7,7 @@ const ts = require('typescript');
 function load(name) {
   const filename = path.resolve(__dirname, '../vpn/engine', name + '.ts'), exports = {};
   const code = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}}).outputText;
-  vm.runInNewContext(code, {exports, Promise, require: id => load(id.replace('./', ''))}, {filename});
+  vm.runInNewContext(code, {exports, Promise, setTimeout, clearTimeout, require: id => load(id.replace('./', ''))}, {filename});
   return exports;
 }
 const {ConnectionMachine} = load('state');
@@ -222,5 +222,64 @@ test('privacy failure cancels in-flight connect and cannot mark blocked traffic 
  const f=fixture(),gate=deferred();f.ports.hold=async()=>{};f.ports.resume=async()=>gate.promise;await f.machine.connect({server:server('a')});await tick();f.machine.networkFailed(Error('proxy failed'));gate.resolve(true);await tick();assert.equal(f.machine.peek().proxyEnabled,false);assert.equal(f.machine.peek().data.blocked,true);assert.ok(!f.events.some(([type])=>type==='connected'));
 });
 test('a still-configured proxy does not bypass blocked recovery and revalidation',async()=>{
- const f=fixture();let releases=0;f.ports.hold=async()=>{};f.ports.resume=async()=>{releases++;return true;};await connect(f);f.machine.networkFailed(Error('transport interrupted'));assert.equal(f.machine.peek().data.blocked,true);await f.machine.refresh();assert.equal(releases,2);assert.equal(f.machine.peek().proxyEnabled,true);
+ const f=fixture();let releases=0;f.ports.hold=async()=>{};f.ports.resume=async()=>{releases++;return true;};await connect(f);f.machine.networkFailed(Error('transport interrupted'));assert.equal(f.machine.peek().data.blocked,true);await f.machine.retryConnection();assert.equal(releases,2);assert.equal(f.machine.peek().proxyEnabled,true);
+});
+
+function fakeTiming(){let id=0;const jobs=new Map();return {set(fn){jobs.set(++id,fn);return id;},clear(id){jobs.delete(id);},expire(){for(const fn of [...jobs.values()])fn();},get size(){return jobs.size;}};}
+
+test('every stalled connection stage expires, preserves blocking and rejects late success',async()=>{
+ for(const stage of ['hasProxy','hold','loadCredentials','getCredentials','credentialsValid','apply','resume']){
+  const f=fixture(),gate=deferred(),timing=fakeTiming();
+  f.ports.timing=timing;f.ports.hold=async()=>{};f.ports.resume=async()=>true;
+  f.ports[stage]=()=>gate.promise;
+  await f.machine.connect({server:server(stage)});await tick();
+  f.advance(30001);timing.expire();await tick();
+  assert.equal(f.machine.peek().name,'on',stage);
+  assert.equal(f.machine.peek().data.blocked,true,stage);
+  assert.equal(f.machine.peek().proxyEnabled,false,stage);
+  assert.equal(f.machine.peek().data.error.message,'timeout',stage);
+  assert.equal(phases(f).at(-1),'blocked',stage);
+  assert.equal(timing.size,0,stage);
+  gate.resolve(stage==='loadCredentials'||stage==='getCredentials'?pair:true);await tick();await tick();
+  assert.ok(!f.events.some(([kind])=>kind==='connected'),stage);
+  assert.ok(!f.events.some(([kind])=>kind==='clear'),stage);
+ }
+});
+
+test('failed protected attempts wait before automatic recovery and an explicit retry can recover',async()=>{
+ const f=fixture();let attempts=0,healthy=false;
+ f.ports.hold=async()=>{};f.ports.resume=async()=>healthy;
+ const apply=f.ports.apply;f.ports.apply=async(...args)=>{attempts++;return apply(...args);};
+ await connect(f);assert.equal(attempts,1);assert.equal(phases(f).at(-1),'blocked');
+ await f.machine.refresh();f.advance(19999);await f.machine.refresh();assert.equal(attempts,1);
+ f.advance(1);await f.machine.refresh();assert.equal(attempts,2);
+ healthy=true;await f.machine.retryConnection();assert.equal(attempts,3);assert.equal(f.machine.peek().proxyEnabled,true);
+});
+
+test('canceling a stalled connection settles observers and clears all deadline timers',async()=>{
+ const f=fixture(),gate=deferred(),timing=fakeTiming();f.ports.timing=timing;f.ports.getCredentials=()=>gate.promise;
+ await f.machine.connect({server:server('a')});await tick();assert.ok(timing.size>0);
+ const pending=f.machine.refresh();f.machine.disconnect();await pending;assert.equal(timing.size,0);
+ gate.resolve(pair);await tick();assert.ok(!f.events.some(([kind])=>kind==='connected'));
+});
+
+
+test('a new recovery attempt gets a fresh deadline after a long healthy connection',async()=>{
+ const f=fixture(),gate=deferred();f.ports.hold=async()=>{};f.ports.resume=async()=>true;
+ await connect(f);f.advance(120000);f.loseProxy();f.ports.loadCredentials=()=>gate.promise;
+ const pending=f.machine.refresh();await tick();f.machine.checkConnectingState();
+ assert.equal(f.machine.peek().data.error,undefined);
+ f.advance(30001);f.machine.checkConnectingState();await pending;
+ assert.equal(f.machine.peek().data.error.message,'timeout');assert.equal(phases(f).at(-1),'blocked');
+ gate.resolve(pair);await tick();
+ assert.equal(f.events.filter(([kind])=>kind==='connected').length,1);
+});
+
+test('a late guard failure from an older attempt does not overwrite a recovered state',async()=>{
+ const f=fixture(),gate=deferred();f.ports.hold=async()=>{};f.ports.resume=async()=>true;
+ await connect(f);let once=true;f.ports.hold=()=>{if(once){once=false;return gate.promise;}return Promise.resolve();};
+ f.machine.networkFailed(Error('interrupted'));await f.machine.retryConnection();
+ assert.equal(f.machine.peek().proxyEnabled,true);
+ gate.reject(Error('old guard error'));await tick();
+ assert.equal(f.machine.peek().data.error,undefined);assert.equal(phases(f).at(-1),'connected');
 });

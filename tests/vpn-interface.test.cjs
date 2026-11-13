@@ -168,6 +168,7 @@ async function boot(initial = snapshot(), options = {}) {
     disconnect: async () => calls.push(["disconnect"]),
     signOut: async () => calls.push(["signout"]),
     checkConnection: async () => calls.push(["check"]),
+    retryConnection: async () => calls.push(["retry-connection"]),
     setToggle: async (name, value) => {
       calls.push(["toggle", name, value]);
       return {
@@ -940,5 +941,35 @@ test('an IO timeout removes the connected claim, offers state retry and recovers
   const retry=ui.w.document.querySelector('.vpn-status-card [data-action="refresh"]');assert.ok(retry);
   ui.engine.load=async()=>initial;retry.click();await tick();
   assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'connected');
+ }finally{await ui.close();}
+});
+
+
+test('a failed connection shows the timeout, retries on request and never releases networking implicitly', async () => {
+ const ui = await boot(snapshot());
+ try {
+  ui.broadcast('changeState', {state:'connecting', server:{name:'CA-FREE#23'}});
+  ui.broadcast('changeState', {state:'blocked', server:{name:'CA-FREE#23'}, error:{message:'VpnConnectionTimedOut'}});
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'blocked');
+  assert.match(ui.w.document.body.textContent,/30 segundos/);
+  assert.match(ui.w.document.body.textContent,/CA-FREE#23/);
+  await ui.click('retry-connection');
+  assert.equal(ui.calls.filter(call=>call[0]==='retry-connection').length,1);
+  assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'blocked');
+  ui.broadcast('changeState',{state:'connected',server:{name:'CA-FREE#23'}});
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'connected');
+  assert.equal(ui.w.document.querySelector('[data-action="retry-connection"]'),null);
+ } finally {await ui.close();}
+});
+
+test('opening a failed connection restores the blocked state and requires confirmation to release',async()=>{
+ const initial=snapshot();initial.state={state:'blocked',server:{name:'CA-FREE#23'},error:{message:'VpnConnectionTimedOut'}};
+ const ui=await boot(initial,{readConnection:async()=>({signedIn:true,state:initial.state})});
+ try{
+  assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status,'blocked');
+  ui.w.confirm=()=>false;await ui.click('disconnect');
+  assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));
+  assert.ok(ui.w.document.querySelector('[data-action="retry-connection"]'));
  }finally{await ui.close();}
 });

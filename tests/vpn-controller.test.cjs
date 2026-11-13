@@ -258,3 +258,13 @@ test('idle wake uses the current engine state after readiness and never restores
   assert.deepEqual(events,['idle','active']);ready.resolve();await tick();
   assert.deepEqual(events,['idle','active','refresh-current']);
 });
+
+
+test('public snapshot distinguishes a failed guarded attempt from an active attempt',()=>{
+ const {connectionView}=load('presentation');
+ const state={name:'on',data:{blocked:true,error:{message:'VpnConnectionTimedOut'},server:{name:'CA-FREE#23'}}};
+ assert.equal(connectionView(state,false,'VpnConnectionTimedOut').state.state,'blocked');
+ assert.equal(connectionView(state,false,'VpnConnectionTimedOut').state.error.message,'VpnConnectionTimedOut');
+ delete state.data.error;
+ assert.equal(connectionView(state,false).state.state,'connecting');
+});

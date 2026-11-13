@@ -20,7 +20,7 @@ export interface MachineState<S> {
     proxyEnabled: boolean;
     data: ConnectionData<S>;
 }
-export type ConnectionPhase = "connecting" | "connected" | "disconnected" | "logged-out";
+export type ConnectionPhase = "connecting" | "blocked" | "connected" | "disconnected" | "logged-out";
 export interface StatePorts<S extends StateServer, C extends CredentialPair> {
     readServer(): Promise<S | undefined>;
     saveServer(server?: S): Promise<unknown>;
@@ -51,6 +51,10 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
     disconnected(error?: unknown): void;
     failed(error: unknown): void;
     now?(): number;
+    timing?: {
+        set(run: () => void, ms: number): unknown;
+        clear(timer: unknown): void;
+    };
 }
 /** Own connection intent, transitions and recovery. Service and browser IO are ports. */
 export declare class ConnectionMachine<S extends StateServer, C extends CredentialPair> {
@@ -69,10 +73,14 @@ export declare class ConnectionMachine<S extends StateServer, C extends Credenti
     private notified;
     private retryRequested;
     private lastRetry;
+    private retryNotBefore;
+    private connectingAt?;
+    private pending;
     constructor(ports: StatePorts<S, C>);
     private now;
     private valid;
     private invalidate;
+    private bounded;
     peek(): MachineState<S> | undefined;
     get(): MachineState<S>;
     ready(): Promise<void>;

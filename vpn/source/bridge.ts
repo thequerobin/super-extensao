@@ -105,7 +105,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
       if (
         !snapshot ||
         typeof snapshot.signedIn !== "boolean" ||
-        !["connected", "connecting", "disconnected", "logged-out"].includes(
+        !["connected", "connecting", "blocked", "disconnected", "logged-out"].includes(
           snapshot.state?.state,
         )
       )
@@ -250,6 +250,9 @@ export function createEngine(initialConnection?: () => Promise<any>) {
       user = undefined;
       connected = false;
     },
+    async retryConnection() {
+      await request("retryProtection");
+    },
     async checkConnection(time: number) {
       await request("connecting", { connectionAttemptTime: time });
     },
@@ -305,7 +308,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
           return;
         if (
           message.type === "changeState" &&
-          ["connected", "connecting", "disconnected", "logged-out"].includes(
+          ["connected", "connecting", "blocked", "disconnected", "logged-out"].includes(
             message.data?.state,
           )
         ) {

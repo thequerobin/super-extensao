@@ -23,6 +23,7 @@ export interface MachineState<S> {
 }
 export type ConnectionPhase =
   | "connecting"
+  | "blocked"
   | "connected"
   | "disconnected"
   | "logged-out";
@@ -56,6 +57,7 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
   disconnected(error?: unknown): void;
   failed(error: unknown): void;
   now?(): number;
+  timing?: { set(run: () => void, ms: number): unknown; clear(timer: unknown): void };
 }
 
 /** Own connection intent, transitions and recovery. Service and browser IO are ports. */
@@ -77,6 +79,9 @@ export class ConnectionMachine<
   private notified = false;
   private retryRequested = false;
   private lastRetry = -Infinity;
+  private retryNotBefore = -Infinity;
+  private connectingAt?: number;
+  private pending = new Set<() => void>();
   constructor(private readonly ports: StatePorts<S, C>) {}
   private now(): number {
     return this.ports.now?.() ?? Date.now();
@@ -86,8 +91,36 @@ export class ConnectionMachine<
   }
   private invalidate(): number {
     const generation = this.lifecycle.advance();
+    for (const cancel of [...this.pending]) cancel();
+    this.connectingAt = undefined;
     this.ports.invalidate();
     return generation;
+  }
+  private bounded<T>(operation: Promise<T>, state: MachineState<S>, generation: number, fallback: T): Promise<T> {
+    // Settle observers even when browser/service IO never replies. Invalidation
+    // revokes late callbacks; it does not bypass the underlying proxy write queue.
+    return new Promise<T>((resolve, reject) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return false;
+        settled = true;
+        if (this.ports.timing) this.ports.timing.clear(timer);
+        else clearTimeout(timer as ReturnType<typeof setTimeout>);
+        this.pending.delete(cancel);
+        return true;
+      };
+      const cancel = () => { if (finish()) resolve(fallback); };
+      const expire = () => {
+        if (!finish()) return;
+        if (this.valid(state, generation) && !state.proxyEnabled)
+          this.connectionFailed(this.ports.error("timeout"));
+        resolve(fallback);
+      };
+      const remaining = Math.max(0, 30000 - (this.now() - (this.connectingAt ?? this.now())));
+      const timer = this.ports.timing ? this.ports.timing.set(expire, remaining) : setTimeout(expire, remaining);
+      this.pending.add(cancel);
+      operation.then(value => { if (finish()) resolve(value); }, error => { if (finish()) reject(error); });
+    });
   }
   peek(): MachineState<S> | undefined {
     return this.state;
@@ -152,6 +185,7 @@ export class ConnectionMachine<
     // this to -Infinity made each automatic switch immediately trigger another.
     this.lastProbe = this.now();
     this.retryRequested = false;
+    this.retryNotBefore = -Infinity;
     this.ports.changed(state);
     this.persistence = this.persistence
       .catch(() => undefined)
@@ -220,6 +254,7 @@ export class ConnectionMachine<
       return;
     }
     const state = this.transition("on", { ...data, starting: true });
+    this.connectingAt = this.now();
     this.notified = previousName === data.server.name;
     this.ports.present("connecting", state);
   }
@@ -255,7 +290,8 @@ export class ConnectionMachine<
     if (state?.name !== "on" || !state.data.server)
       return Promise.resolve(false);
     if (this.attempt?.generation === generation) return this.attempt.promise;
-    const promise = this.apply(state, generation);
+    this.connectingAt ??= this.now();
+    const promise = this.bounded(this.apply(state, generation), state, generation, false);
     this.attempt = { generation, promise };
     void promise
       .finally(() => {
@@ -291,6 +327,7 @@ export class ConnectionMachine<
         throw this.ports.error("proxy-unavailable");
       if (!current()) return false;
       state.proxyEnabled = true;
+      this.connectingAt = undefined;
       delete state.data.blocked;
       delete state.data.starting;
       delete state.data.error;
@@ -308,7 +345,11 @@ export class ConnectionMachine<
       generation = this.lifecycle.capture();
     if (!state) return Promise.resolve();
     if (this.recovery?.generation === generation) return this.recovery.promise;
-    const promise = this.recover(state, generation);
+    if (state.name === "on" && state.data.blocked && this.now() < this.retryNotBefore)
+      return Promise.resolve();
+    if (state.name === "on" && !state.proxyEnabled) this.connectingAt ??= this.now();
+    const operation = this.recover(state, generation);
+    const promise = state.name === "on" ? this.bounded(operation, state, generation, undefined) : operation;
     this.recovery = { generation, promise };
     void promise
       .finally(() => {
@@ -327,6 +368,12 @@ export class ConnectionMachine<
         if (this.cleanupNeeded === state) await this.clearDisconnected(state);
         return;
       }
+      if (state.data.blocked && state.data.error) {
+        delete state.data.error;
+        state.data.starting = true;
+        this.connectingAt = this.now();
+        this.ports.present("connecting", state);
+      }
       const applied = await this.ports.hasProxy();
       if (!current()) return;
       if (this.retryRequested && this.now() - this.lastRetry >= 20000) {
@@ -337,6 +384,7 @@ export class ConnectionMachine<
       state.proxyEnabled =
         applied && !state.data.starting && !state.data.blocked;
       if (!state.proxyEnabled) {
+        this.connectingAt ??= this.now();
         if (this.ports.hold) {
           state.data.blocked = true;
           await this.ports.hold();
@@ -432,12 +480,16 @@ export class ConnectionMachine<
       state.data.error = warning ?? this.ports.networkWarning();
       if (this.ports.hold) {
         this.invalidate();
+        this.retryNotBefore = this.now() + 20000;
         state.proxyEnabled = false;
         state.data.blocked = true;
+        delete state.data.starting;
+        const generation = this.lifecycle.capture();
+        const failureReason = state.data.error;
         void this.ports.hold().catch((failure) => {
-          if (this.state === state) {
+          if (this.valid(state, generation) && state.data.error === failureReason && state.data.blocked) {
             state.data.error = failure;
-            this.ports.present("connecting", state);
+            this.ports.present("blocked", state);
             this.ports.privacyWarning?.(failure);
           }
           this.ports.failed(failure);
@@ -445,7 +497,7 @@ export class ConnectionMachine<
         this.ports.privacyWarning?.(error);
       }
       this.ports.present(
-        state.proxyEnabled ? "connected" : "connecting",
+        state.data.blocked ? "blocked" : state.proxyEnabled ? "connected" : "connecting",
         state,
       );
     }
@@ -454,6 +506,7 @@ export class ConnectionMachine<
   retryConnection(): Promise<void> {
     if (this.state?.name !== "on") return Promise.resolve();
     this.retryRequested = true;
+    this.retryNotBefore = -Infinity;
     return this.refresh();
   }
   checkConnectingState(): void {
@@ -461,11 +514,11 @@ export class ConnectionMachine<
     if (
       state?.name === "on" &&
       !state.proxyEnabled &&
-      this.now() - state.initializedAt > 30000
+      this.connectingAt !== undefined &&
+      this.now() - this.connectingAt > 30000
     ) {
-      // A transient network failure retains the connection intent for the next alarm.
-      if (!state.data.error || !this.ports.isNetworkError(state.data.error))
-        this.connectionFailed(state.data.error || this.ports.error("timeout"));
+      if (this.ports.hold || !this.ports.isNetworkError(state.data.error))
+        this.connectionFailed(this.ports.error("timeout"));
     }
   }
 }

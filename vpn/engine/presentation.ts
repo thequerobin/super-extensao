@@ -2,7 +2,7 @@
 export function connectionView(
   current: {
     name?: string;
-    data?: {server?: Record<string, unknown>; error?: unknown};
+    data?: {server?: Record<string, unknown>; error?: unknown; blocked?: boolean};
   },
   confirmed: boolean,
   errorMessage?: string,
@@ -14,7 +14,9 @@ export function connectionView(
       ? 'disconnected'
       : confirmed
         ? 'connected'
-        : 'connecting';
+        : current.data?.blocked && current.data?.error
+          ? 'blocked'
+          : 'connecting';
   const source =
     signedIn && current.name === 'on' ? current.data?.server : undefined;
   const server =

@@ -56,12 +56,12 @@ export async function mountVpn(root, engine, preferences) {
   const uncertainError = (error) =>
     /^Vpn(Storage|Worker|OperationPending)/.test(error?.message || "");
   const blockedError = (error) =>
-    /^Vpn(Traffic(Blocked|Guard)|NetworkPrediction)/.test(error?.message || "");
+    /^Vpn(Traffic(Blocked|Guard)|ConnectionTimedOut|NetworkPrediction)/.test(error?.message || "");
   const country = (code) => countryName(code, model.locale);
   const status = () =>
     model.connectionUncertain
       ? "unconfirmed"
-      : ["connected", "connecting"].includes(model.state.state)
+      : ["connected", "connecting", "blocked"].includes(model.state.state)
         ? model.state.state
         : "disconnected";
   const active = () => status() !== "disconnected";
@@ -137,7 +137,7 @@ export async function mountVpn(root, engine, preferences) {
         ? model.snapshot.recents || []
         : []
     ).slice(0, 5);
-    return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${model.connectionUncertain ? button(t("retry"), "refresh") : ""}${button(t("choose"), "servers")}</ui-actions></ui-card>
+    return `<ui-card as="section" class="vpn-card ui-card vpn-status-card" data-status="${status()}"><span class="vpn-status-dot" aria-hidden="true"></span><p class="vpn-status" role="status">${e(t(status()))}</p><h2>${e(active() ? server?.name || t("connecting") : t("fastest"))}</h2><p>${e(active() ? [server?.exitCity, country(server?.exitCountry)].filter(Boolean).join(" · ") : t("fastestHelp"))}</p>${status() === "connected" && server?.exitIp ? `<p class="vpn-ip">${e(t("exitIp"))}: <strong>${e(server.exitIp)}</strong></p>` : ""}<ui-actions class="vpn-action-row">${active() ? button(t(status() === "connecting" ? "cancel" : "disconnect"), "disconnect", "", "vpn-primary") : button(t("connect"), "fastest", "", "vpn-primary")}${status() === "blocked" ? button(t("retry"), "retry-connection") : model.connectionUncertain ? button(t("retry"), "refresh") : ""}${button(t("choose"), "servers")}</ui-actions></ui-card>
   ${!active() ? `<div class="vpn-quick">${button(t("random"), "random")}</div>` : ""}
   ${!active() ? serversStatus() : ""}
   ${!model.serversLoading && !model.serversError && free.length ? `<details class="vpn-card ui-card vpn-free" data-free><summary>${e(t("free"))} <span class="vpn-count ui-count">${free.length}</span></summary>${listMarkup(free, "free")}</details>` : ""}
@@ -436,6 +436,9 @@ export async function mountVpn(root, engine, preferences) {
     )
       return;
     void run(async () => {
+      if (action === "retry-connection") {
+        await engine.retryConnection();
+      }
       if (action === "login") {
         await engine.signIn();
       }
@@ -453,7 +456,7 @@ export async function mountVpn(root, engine, preferences) {
           );
         if (
           revision === stateRevision &&
-          !["connected", "connecting"].includes(model.state.state)
+          !["connected", "connecting", "blocked"].includes(model.state.state)
         ) {
           model.state = { state: "connecting" };
           startChecking();
@@ -556,7 +559,7 @@ export async function mountVpn(root, engine, preferences) {
     }
     if (
       type === "changeState" &&
-      ["connected", "connecting", "disconnected", "logged-out"].includes(
+      ["connected", "connecting", "blocked", "disconnected", "logged-out"].includes(
         data?.state,
       )
     ) {
@@ -624,6 +627,8 @@ export async function mountVpn(root, engine, preferences) {
       model.snapshot = { ...model.snapshot, ...connection };
       model.state = connection.state;
       model.loading = false;
+      model.networkBlocked = blockedError(connection.state?.error);
+      model.connectionUncertain = uncertainError(connection.state?.error);
       if (connection.state?.error)
         model.error = errorText(connection.state.error);
     } else if (stateRevision !== initialRevision) {
