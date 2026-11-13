@@ -141,6 +141,7 @@ function stateAdapter(choice) {
  const feature={create:async()=>({getConfig:async()=>({value:true})})};
  const mocks={
   '../../../../vpn/engine/state':{ConnectionMachine:Machine},
+  '../../../../vpn/engine/diagnostics':load('vpn/engine/diagnostics.ts'),
   '../../../../vpn/engine/selection':selection,
   './log/log':{bind:()=>()=>{}},
   './vpn/lastChoice':{getLastChoice:async()=>choice},

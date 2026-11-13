@@ -1,4 +1,5 @@
 import { verifyTunnel } from "../../../../vpn/engine/tunnel-probe";
+import { createConnectionDiagnostics } from "../../../../vpn/engine/diagnostics";
 import { usesVpn } from "../../../../vpn/engine/routing";
 import { networkGuard } from "./vpn/networkGuard";
 import { emitPrivacyWarning } from "./notifications/privacyWarning";
@@ -287,7 +288,11 @@ async function probeServer(
 		);
 }
 
+const diagnostics = createConnectionDiagnostics(entry => console.warn("[Super VPN]", entry));
+(globalThis as typeof globalThis & { getVpnDiagnostics?: () => unknown }).getVpnDiagnostics =
+	() => diagnostics.read();
 const machine = new ConnectionMachine<ProxyServer, Credentials>({
+	diagnostic: (stage, outcome, error) => diagnostics.record(stage, outcome, error),
 	readServer: async () => (await connectedServer.get())?.value,
 	saveServer: (server) => connectedServer.setValue(server),
 	signedIn: async () => !!(await getAccessToken()),
@@ -303,7 +308,8 @@ const machine = new ConnectionMachine<ProxyServer, Credentials>({
 		proxyToServer(server, server.splitTunneling || {}, current),
 	hold: () => networkGuard.block(),
 	resume: async (current) => {
-		if (!current() || !(await hasProxy())) return false;
+		if (!current()) return false;
+		if (!(await hasProxy())) throw new Error("VpnProxyNotApplied");
 		const server = machine.peek()?.data.server;
 		if (!server) return false;
 		const policy = getFixedServerConfig(
@@ -313,7 +319,10 @@ const machine = new ConnectionMachine<ProxyServer, Credentials>({
 		).rules;
 		if (!usesVpn("https://protonvpn.com/", policy))
 			throw new Error("VpnTrafficGuardProbeBypassed");
-		if (!(await verifyTunnel(fetch, current))) return false;
+		if (!(await verifyTunnel(fetch, current))) {
+			if (!current()) return false;
+			throw new Error("VpnTunnelVerificationFailed");
+		}
 		return networkGuard.open(
 			async () => current() && (await hasProxy()) && current(),
 		);

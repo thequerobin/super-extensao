@@ -1,4 +1,5 @@
 import { ConnectionLifecycle } from "./lifecycle";
+import type { ConnectionStage, DiagnosticOutcome } from "./diagnostics";
 
 export interface CredentialPair {
   Username: string;
@@ -57,6 +58,7 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
   disconnected(error?: unknown): void;
   failed(error: unknown): void;
   now?(): number;
+  diagnostic?(stage: ConnectionStage, outcome: DiagnosticOutcome, error?: unknown): void;
   timing?: { set(run: () => void, ms: number): unknown; clear(timer: unknown): void };
 }
 
@@ -82,9 +84,14 @@ export class ConnectionMachine<
   private retryNotBefore = -Infinity;
   private connectingAt?: number;
   private pending = new Set<() => void>();
+  private stage: ConnectionStage = "proxy-read";
   constructor(private readonly ports: StatePorts<S, C>) {}
   private now(): number {
     return this.ports.now?.() ?? Date.now();
+  }
+  private enter(stage: ConnectionStage): void {
+    this.stage = stage;
+    this.ports.diagnostic?.(stage, "started");
   }
   private valid(state: MachineState<S>, generation: number): boolean {
     return this.state === state && this.lifecycle.isCurrent(generation);
@@ -308,11 +315,14 @@ export class ConnectionMachine<
     try {
       if (this.ports.hold) {
         state.data.blocked = true;
+        this.enter("network-block");
         await this.ports.hold();
         if (!current()) return false;
       }
+      this.enter("credentials");
       const credentials = await this.ports.getCredentials();
       if (!current()) return false;
+      this.enter("credentials-validation");
       const validCredentials = await this.ports.credentialsValid();
       if (!current()) return false;
       if (!credentials?.Username || !credentials.Password || !validCredentials)
@@ -321,8 +331,10 @@ export class ConnectionMachine<
         Username: credentials.Username,
         Password: credentials.Password,
       };
+      this.enter("proxy-apply");
       if (!(await this.ports.apply(state.data.server!, current)) || !current())
         return false;
+      this.enter("tunnel-verification");
       if (this.ports.resume && !(await this.ports.resume(current)))
         throw this.ports.error("proxy-unavailable");
       if (!current()) return false;
@@ -331,6 +343,8 @@ export class ConnectionMachine<
       delete state.data.blocked;
       delete state.data.starting;
       delete state.data.error;
+      this.stage = "connected";
+      this.ports.diagnostic?.("connected", "succeeded");
       this.ports.present("connected", state);
       this.ports.connected(state.data.server!, !this.notified);
       this.notified = true;
@@ -374,6 +388,7 @@ export class ConnectionMachine<
         this.connectingAt = this.now();
         this.ports.present("connecting", state);
       }
+      this.enter("proxy-read");
       const applied = await this.ports.hasProxy();
       if (!current()) return;
       if (this.retryRequested && this.now() - this.lastRetry >= 20000) {
@@ -387,10 +402,12 @@ export class ConnectionMachine<
         this.connectingAt ??= this.now();
         if (this.ports.hold) {
           state.data.blocked = true;
+          this.enter("network-block");
           await this.ports.hold();
           if (!current()) return;
         }
         this.ports.present("connecting", state);
+        this.enter("credentials");
         let credentials = await this.ports.loadCredentials();
         if (!current()) return;
         credentials ||= await this.ports.getCredentials();
@@ -470,6 +487,7 @@ export class ConnectionMachine<
     }
     if (this.ports.isNetworkError(error)) this.networkFailed(error);
     else {
+      this.ports.diagnostic?.(this.stage, "failed", error);
       this.disconnect(error);
       this.ports.failed(error);
     }
@@ -477,6 +495,7 @@ export class ConnectionMachine<
   networkFailed(error: unknown, warning?: unknown): void {
     const state = this.state;
     if (state?.name === "on") {
+      this.ports.diagnostic?.(this.stage, "failed", error);
       state.data.error = warning ?? this.ports.networkWarning();
       if (this.ports.hold) {
         this.invalidate();
@@ -489,6 +508,7 @@ export class ConnectionMachine<
         void this.ports.hold().catch((failure) => {
           if (this.valid(state, generation) && state.data.error === failureReason && state.data.blocked) {
             state.data.error = failure;
+            this.ports.diagnostic?.("network-block", "failed", failure);
             this.ports.present("blocked", state);
             this.ports.privacyWarning?.(failure);
           }

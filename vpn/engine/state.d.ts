@@ -1,4 +1,5 @@
 import { ConnectionLifecycle } from "./lifecycle";
+import type { ConnectionStage, DiagnosticOutcome } from "./diagnostics";
 export interface CredentialPair {
     Username: string;
     Password: string;
@@ -51,6 +52,7 @@ export interface StatePorts<S extends StateServer, C extends CredentialPair> {
     disconnected(error?: unknown): void;
     failed(error: unknown): void;
     now?(): number;
+    diagnostic?(stage: ConnectionStage, outcome: DiagnosticOutcome, error?: unknown): void;
     timing?: {
         set(run: () => void, ms: number): unknown;
         clear(timer: unknown): void;
@@ -76,8 +78,10 @@ export declare class ConnectionMachine<S extends StateServer, C extends Credenti
     private retryNotBefore;
     private connectingAt?;
     private pending;
+    private stage;
     constructor(ports: StatePorts<S, C>);
     private now;
+    private enter;
     private valid;
     private invalidate;
     private bounded;

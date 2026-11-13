@@ -167,6 +167,7 @@ function stateFixture() {
   const noop=()=>{};
   const state=vendorLoad('state',{
     '../../../../vpn/engine/state':load('state'),
+    '../../../../vpn/engine/diagnostics':load('diagnostics'),
     './vpn/ConnectionState':{asConnectionStateSwitch:x=>x},
     './log/log':{bind:()=>noop},
     './intervals':{getActivityCheckInterval:()=>10000,getLogicalCheckUpRefreshInterval:()=>60000},

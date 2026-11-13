@@ -230,6 +230,7 @@ function fakeTiming(){let id=0;const jobs=new Map();return {set(fn){jobs.set(++i
 test('every stalled connection stage expires, preserves blocking and rejects late success',async()=>{
  for(const stage of ['hasProxy','hold','loadCredentials','getCredentials','credentialsValid','apply','resume']){
   const f=fixture(),gate=deferred(),timing=fakeTiming();
+  const records=[];f.ports.diagnostic=(stage,outcome)=>records.push({stage,outcome});
   f.ports.timing=timing;f.ports.hold=async()=>{};f.ports.resume=async()=>true;
   f.ports[stage]=()=>gate.promise;
   await f.machine.connect({server:server(stage)});await tick();
@@ -240,6 +241,8 @@ test('every stalled connection stage expires, preserves blocking and rejects lat
   assert.equal(f.machine.peek().data.error.message,'timeout',stage);
   assert.equal(phases(f).at(-1),'blocked',stage);
   assert.equal(timing.size,0,stage);
+  const expected={hasProxy:'proxy-read',hold:'network-block',loadCredentials:'credentials',getCredentials:'credentials',credentialsValid:'credentials-validation',apply:'proxy-apply',resume:'tunnel-verification'};
+  assert.equal(records.find(entry=>entry.outcome==='failed').stage,expected[stage],stage);
   gate.resolve(stage==='loadCredentials'||stage==='getCredentials'?pair:true);await tick();await tick();
   assert.ok(!f.events.some(([kind])=>kind==='connected'),stage);
   assert.ok(!f.events.some(([kind])=>kind==='clear'),stage);

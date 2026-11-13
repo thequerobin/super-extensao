@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 13 de novembro de 2026, referência **1.7.22**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.23**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Diagnóstico local da conexão — 1.7.23
+
+O usuário informou que o console e `getLogs()` não trouxeram registros da falha. O registro legado de serviço está condicionado a `debug`, desativado na configuração de produção. A indicação anterior de que esse comando bastaria para investigar a conexão era incompleta.
+
+Foi acrescentado `getVpnDiagnostics()` ao worker. O comando retorna até 50 eventos recentes, somente com horário, etapa, resultado e código de uma lista fechada. As etapas cobrem leitura/aplicação do proxy, bloqueio, credenciais e sua validação, verificação do túnel e conexão confirmada. Falhas também geram um aviso `[Super VPN]` no console, mesmo com debug desativado. O erro original não é serializado ou enviado ao console; mensagens desconhecidas recebem `VpnConnectionFailed`. Não são coletados tokens, senhas, contas, IPs, servidores ou URLs. O histórico fica apenas na memória do worker e se perde quando ele reinicia; é necessário reproduzir a tentativa após recarregar a extensão.
+
+A recusa da verificação do túnel agora recebe `VpnTunnelVerificationFailed` no diagnóstico; perda da configuração nessa etapa recebe `VpnProxyNotApplied`. A interface continua preservando o bloqueio de rede e sua mensagem genérica. Esta entrega permite identificar a etapa real, mas ainda não confirma a causa da falha da conta Proton pessoal.
+
+Validação: **433 testes aprovados**, build de produção, TypeScript do worker/interface, `check:ui`, versões e whitespace. Os testes cobrem descarte de mensagens sensíveis, limite de 50 eventos, cópias independentes e a etapa correta nas sete esperas simuladas. Em Edge com perfil temporário e resolução de rede bloqueada, o worker compilado expôs `getVpnDiagnostics()` e retornou um array; não houve autenticação nem teste da sessão Proton pessoal.
 
 ## Chaves de teste nas dependências — 1.7.22
 
