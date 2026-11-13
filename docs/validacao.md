@@ -2,13 +2,31 @@
 
 Revisado em 12 de novembro de 2026, referência **1.7.19**. Esta página separa evidência automatizada de verificações ainda pendentes.
 
+## Repetição no Helium: regras por site e recuperação
+
+Ainda em 12 de novembro de 2026, na 1.7.19, o agente retomou o controle e observou a conexão US-FREE#95 recuperada. Com autorização explícita para regras temporárias, foram medidas requisições novas no Helium:
+
+| Configuração | Destino | Resultado externo e indicador |
+| --- | --- | --- |
+| Original: exclusão sem domínios | `www.cloudflare.com/cdn-cgi/trace` | US/MIA, usa VPN |
+| Excluir `cloudflare.com` com subdomínios | `www.cloudflare.com/cdn-cgi/trace` | BR/GRU, não usa VPN |
+| Incluir somente `cloudflare.com` com subdomínios | `www.cloudflare.com/cdn-cgi/trace` e `cloudflare.com/cdn-cgi/trace` | US/MIA, usa VPN nos dois destinos |
+| Mesma inclusão, destino fora da lista | `one.one.one.one/cdn-cgi/trace` | BR/GRU, não usa VPN |
+| Original restaurada: exclusão sem domínios | `one.one.one.one/cdn-cgi/trace` | US/MIA, usa VPN novamente |
+
+As listas de inclusão e exclusão foram deixadas vazias, no modo original de exclusão, com regras ativadas, e a interface confirmou “Regras salvas”. As medições novas tinham timestamps diferentes; não foram consideradas respostas anteriores ainda visíveis durante recargas. Não foram publicados IPs ou dados de conta.
+
+A tentativa anterior teve timeouts e bloqueios depois de salvar regras. Nela, uma navegação para o destino excluído abriu a página local; “Tentar reconectar” manteve o aviso de bloqueio até a página informar “Conexão VPN confirmada”. Houve outras tentativas ainda bloqueadas, antes da recuperação posterior. Esse comportamento observado não identifica a causa nem comprova ausência de tráfego direto durante as transições. Após a recuperação, os casos estáveis da tabela passaram sem alteração de código.
+
+O runner nativo isolado foi repetido no Edge e passou novamente os seis cenários, com `directRequestsBeforeRelease:0`; os nove contratos de `tests/vpn-routing.test.cjs` também passaram. O `pktmon status` retornou **Acesso negado**, inclusive fora da sandbox. Assim, queda real com captura contínua, sockets já abertos, suspensão/reinício completo do perfil autenticado, confirmação/cancelamento da liberação e recursos de terceiros permanecem pendentes. O resultado aprovado das regras se limita aos destinos e estados estáveis da tabela.
+
 ## Proton real no Helium 1.7.19 — validação parcial
 
 Em 12 de novembro de 2026, com fontes do commit `4ae6b9b`, a página de detalhes do Helium confirmou a extensão 1.7.19 carregada da pasta principal. Depois de nova autenticação feita pelo usuário, o painel reconheceu a conta e conectou ao US-FREE#95, em Miami. O diagnóstico Cloudflare mudou da referência sem VPN (BR/GRU) para US/MIA, com outro IP. A troca manual para CA-FREE#30, Montreal, foi seguida por uma terceira medição com IP diferente e localização CA/YUL. O indicador mostrou destino externo usando VPN e páginas internas fora dela.
 
 No servidor dos EUA, o BrowserLeaks exibiu WebRTC “No Leak”, sem endereços WebRTC local/público, e oito resolvedores DNS de Datacamp/CDN77 em Miami. Não houve captura de pacotes, comparação DNS antes/depois nem referência IPv6 independente; esses resultados se limitam às páginas e ao estado saudável observados. Não comprovam proteção em todos os destinos, sockets existentes ou durante falhas.
 
-O agente recarregou a extensão pela página de detalhes para reiniciar seu worker. O controle do computador foi interrompido por não conseguir determinar a URL atual com confiança; o usuário então confirmou **“conectou”**. Essa é evidência relatada de reconexão após recarga, sem comprovação externa posterior do tráfego, do servidor restaurado ou da proteção durante a transição. Os testes de queda, suspensão, reinício completo do navegador, recuperação/liberação e regras por site continuam pendentes. [Registro por cenário e limites](vpn-validacao-pc.md#registro-dos-resultados).
+O agente recarregou a extensão pela página de detalhes para reiniciar seu worker. O controle do computador foi interrompido por não conseguir determinar a URL atual com confiança; o usuário então confirmou **“conectou”**. Essa é evidência relatada de reconexão após recarga, sem comprovação da preservação do servidor ou da proteção durante a transição. A repetição acima acrescenta tráfego observado posteriormente, regras por site e uma recuperação pela página local. [Registro por cenário e limites](vpn-validacao-pc.md#registro-dos-resultados).
 
 Não foram publicados IP residencial, identificador de conta, tokens ou capturas pessoais. Esta rodada registra evidências e mantém a versão 1.7.19; não altera a extensão.
 

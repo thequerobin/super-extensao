@@ -9,7 +9,7 @@ Revisado em **12 de novembro de 2026**, referência **1.7.19**. A rodada Windows
 | 1 | Google Drive/favoritos | Núcleo próprio integrado; sincronização confirmada pelo usuário na 1.6.2 | Dois navegadores reais, falhas/reinícios, grandes volumes e restauração de backups por interface |
 | 2 | Validação em navegador | Testes de execução, recuperação, transporte e interface; interface conferida parcialmente no Helium isolado | Conferir Google Drive com dois perfis de teste e tráfego real da VPN |
 | 3 | Demais sincronizações | Outros provedores e perfis de abas continuam no legado | Migrar um conector por vez e definir propriedade de pastas sobrepostas |
-| 4 | Motor próprio da VPN | 1.7.19: runner nativo aprovado no Edge; conta e medições externas com Proton no Helium; troca EUA/Canadá observada e reconexão após recarga relatada pelo usuário | Medir queda e transições, ampliar IPv6/DNS, testar suspensão/reinício completo, recuperação/liberação e regras por site; ver docs/vpn-validacao-pc.md |
+| 4 | Motor próprio da VPN | 1.7.19: runner nativo aprovado; conta, troca EUA/Canadá, recuperação pela página local e inclusão/exclusão com medições externas no Helium; regras originais restauradas | Medir queda e transições com captura autorizada pelo Windows, ampliar IPv6/DNS, testar suspensão/reinício completo, liberação/cancelamento e recursos de terceiros; ver docs/vpn-validacao-pc.md |
 | Contínua | Interface e manutenção | Catálogo e adaptadores compartilhados entregues em 1.6.8; 154 testes aprovados; fontes das páginas estáticas e estilos validados centralizados | Ampliar a conferência visual de diálogos, contraste, textos longos e alturas do popup |
 
 ## 1. Motor próprio de sincronização
