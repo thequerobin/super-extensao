@@ -28,6 +28,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
       ...globals,
       require(spec) {
         if (spec in mocks) return mocks[spec];
+        if (spec === "../../rules.js") return require(path.join(root, "rules.js"));
         if (spec.endsWith('.cjs')) return require(path.resolve(path.dirname(filename), spec));
         if (spec.startsWith("."))
           return load(
@@ -191,6 +192,7 @@ async function boot(initial = snapshot(), options = {}) {
     w.document.getElementById("vpnPanel"),
     engine,
     preferences,
+    options.browser,
   );
   await tick();
   const click = (action) => {
@@ -973,4 +975,81 @@ test('opening a failed connection restores the blocked state and requires confir
   assert.ok(!ui.calls.some(call=>call[0]==='disconnect'));
   assert.ok(ui.w.document.querySelector('[data-action="retry-connection"]'));
  }finally{await ui.close();}
+});
+
+const bookmarkTree = [{id: "0", children: [{id: "1", title: "Sites", children: [
+  {url: "https://new.example:8443/path?q=private"}, {url: "https://new.example/other"},
+  {url: "javascript:alert(1)"}, {url: "https://user:pass@secret.example"},
+  {id: "2", title: "Subpasta", children: [{url: "https://nested.example"}]},
+]}]}];
+
+test("VPN imports bookmark domains into the draft and selected mode only, then saves explicitly", async () => {
+  const requests = [];
+  const ui = await boot(snapshot(), {browser: {
+    permissions: {request: async value => { requests.push(value); return true; }},
+    bookmarks: {getTree: async () => bookmarkTree},
+  }});
+  try {
+    await ui.app.navigate("features");
+    await ui.click("load-bookmarks");
+    assert.deepEqual(plain(requests), [{permissions: ["bookmarks"]}]);
+    assert.match(ui.w.document.body.textContent, /2 novos · 0 já na lista · 2 links ignorados/);
+    assert.doesNotMatch(ui.w.document.body.textContent, /private|secret.example/);
+    const recursive = ui.w.document.querySelector('[data-field="bookmark-recursive"]');
+    recursive.checked = false; recursive.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
+    assert.match(ui.w.document.body.textContent, /1 novos/);
+    const subdomains = ui.w.document.querySelector('[data-field="subdomains"]');
+    subdomains.checked = false; subdomains.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
+    await ui.click("import-bookmarks");
+    assert.equal(ui.calls.filter(call => call[0] === "split").length, 0);
+    assert.equal(ui.w.document.querySelector('[data-action="import-bookmarks"]').disabled, true);
+    const mode = ui.w.document.querySelector('[data-field="split-mode"]');
+    mode.value = "include"; mode.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
+    await ui.click("import-bookmarks");
+    ui.w.document.querySelector('[data-split]').dispatchEvent(new ui.w.Event("submit", {bubbles: true, cancelable: true}));
+    await tick();
+    const config = ui.calls.find(call => call[0] === "split")[1];
+    assert.deepEqual(config.value, [
+      {domain: "old.example", withSubDomains: false, mode: "include"},
+      {domain: "new.example", withSubDomains: false, mode: "exclude"},
+      {domain: "new.example", withSubDomains: false, mode: "include"},
+    ]);
+  } finally { await ui.close(); }
+});
+
+test("VPN bookmark permission denial and read failures keep the draft untouched", async () => {
+  for (const denied of [true, false]) {
+    const ui = await boot(snapshot(), {browser: {
+      permissions: {request: async () => !denied},
+      bookmarks: {getTree: async () => {throw new Error("Read failed");}},
+    }});
+    try {
+      await ui.app.navigate("features"); await ui.click("load-bookmarks");
+      assert.match(ui.w.document.querySelector('[role="alert"]').textContent, denied ? /não concedido/ : /Não foi possível acessar/);
+      assert.equal(ui.w.document.querySelector('[data-action="import-bookmarks"]'), null);
+      assert.equal(ui.calls.some(call => call[0] === "split"), false);
+    } finally { await ui.close(); }
+  }
+});
+
+test("VPN bookmark preview reuses cleanup traversal with hostname routing semantics", () => {
+  const shared = require(path.join(root, "rules.js"));
+  const {bookmarkFolders, bookmarkPreview} = load("bookmarks.js");
+  const folders = bookmarkFolders(bookmarkTree);
+  assert.equal(folders[1].label, "Sites / Subpasta");
+  assert.deepEqual(plain(shared.bookmarkDomains(bookmarkTree[0].children[0], false)), {domains: ["new.example", "new.example:8443"], skipped: 2});
+  assert.deepEqual(plain(bookmarkPreview(folders[0], true, [{domain: "new.example"}])), {
+    all: ["nested.example", "new.example"], fresh: ["nested.example"], skipped: 2, duplicates: 1,
+  });
+  assert.deepEqual(plain(bookmarkPreview(undefined, true, [])), {all: [], fresh: [], skipped: 0, duplicates: 0});
+});
+
+test("managed VPN split rules cannot request bookmark access", async () => {
+  let requested = false;
+  const initial = snapshot(); initial.splitControllable = false;
+  const ui = await boot(initial, {browser: {permissions: {request: async () => {requested = true; return true;}}}});
+  try {
+    await ui.app.navigate("features"); await ui.click("load-bookmarks");
+    assert.equal(requested, false);
+  } finally { await ui.close(); }
 });

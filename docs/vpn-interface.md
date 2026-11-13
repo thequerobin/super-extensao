@@ -63,3 +63,14 @@ A navegação e a recarga invalidam o cache de action da aba, permitindo reaplic
 O shell pré-consulta `connectionState`, ouvindo eventos enquanto carrega os scripts. O painel selecionado pode iniciar antes da barreira de primeiro frame; `SuperVpnReady` sinaliza que preferências de navegação e o estado leve já foram lidos. A primeira renderização da seção usa o resumo confirmado do worker, sem tratar servidor salvo como “conectando” e sem esperar conta/plano ou servidores. A aba Conexão mantém o cartão estável enquanto as consultas secundárias terminam; carregamento/erro da lista fica na seção Servidores quando já há conexão ativa.
 
 O bootstrap existe apenas na memória deste popup, sem cache persistente de conexão. A consulta usa estado atual e propriedade/configuração efetiva do proxy; eventos mais recentes têm prioridade sobre respostas pendentes. Sem confirmação, a interface mantém um estado neutro, desconectado ou conectando conforme a situação real. Desconectar permanece disponível durante o carregamento dos servidores. A reabertura não envia comandos de conexão.
+
+
+### Importar domínios dos favoritos (1.7.27)
+
+Em VPN → Recursos, escolha o modo de tunelamento dividido (exclusão ou inclusão) e use **Escolher / atualizar pasta de favoritos**. O acesso opcional aos favoritos é solicitado no clique. Selecione a pasta, escolha se inclui subpastas e revise a prévia de novos domínios, itens já presentes e links ignorados. **Importar domínios dos favoritos** preenche o rascunho; **Salvar** aplica a configuração pelo mesmo fluxo usado na edição manual. A importação não ativa o tunelamento dividido nem altera o modo escolhido.
+
+A limpeza e a VPN compartilham a travessia de pastas e a coleta de domínios em `rules.js`. O adaptador da VPN usa apenas o hostname, ignorando caminho, consulta, fragmento e porta. HTTP/HTTPS são aceitos; outros esquemas e URLs com credenciais são ignorados. Duplicados são comparados no modo selecionado; regras existentes e suas opções de subdomínios são preservadas. Novos itens usam a opção de subdomínios do formulário. Pastas e URLs não são gravadas na configuração da VPN: somente as regras de domínio salvas.
+
+A importação é uma cópia, sem acompanhamento de mudanças futuras nos favoritos e sem modificar os favoritos ou as listas da limpeza. No modo exclusão, os domínios importados passam a navegar fora da VPN quando o tunelamento dividido estiver ativo. No modo inclusão, somente os domínios incluídos usam a VPN. Políticas gerenciadas que impedem editar as regras também impedem a importação.
+
+Validação desta alteração: 468 testes aprovados, compilação da interface de produção, verificação TypeScript da interface e checagem dos componentes compartilhados. O acesso aos favoritos foi exercitado com APIs simuladas; não houve teste manual no perfil pessoal do navegador.

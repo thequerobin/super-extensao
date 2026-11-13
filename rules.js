@@ -42,7 +42,7 @@
     if (settings.clearCookies === true) plan.push({method: "removeCookies", options: cookieOptions});
     return plan;
   }
-  function bookmarkDomains(folder, recursive = true) {
+  function bookmarkDomains(folder, recursive = true, normalize = normalizeDomain) {
     const domains = new Set();
     let skipped = 0;
     function visit(node, top) {
@@ -51,7 +51,7 @@
           // Bookmarks must be URLs, never treat javascript:/file: as a hostname.
           const url = new URL(node.url);
           if (!["https:", "http:"].includes(url.protocol)) throw new Error();
-          domains.add(normalizeDomain(url.href));
+          domains.add(normalize(url.href));
         } catch { skipped++; }
       } else if (top || recursive) {
         for (const child of node.children || []) visit(child, false);
@@ -60,16 +60,18 @@
     visit(folder, true);
     return {domains: [...domains].sort(), skipped};
   }
-  function bookmarkFolders(tree) {
+  function bookmarkFolders(tree, includeNodes = false) {
     const folders = [];
     function visit(node, path) {
       if (node.url) return;
       const next = node.title ? [...path, node.title] : path;
-      if (node.id !== "0") folders.push({id: node.id, label: next.join(" / ") || "Favoritos"});
+      if (node.id !== "0") folders.push({id: node.id, label: next.join(" / ") || "Favoritos", ...(includeNodes ? {node} : {})});
       for (const child of node.children || []) visit(child, next);
     }
     tree.forEach(node => visit(node, []));
     return folders;
   }
-  root.ClearRules = {normalizeDomain, normalizeList, removalOptions, removalPlan, bookmarkDomains, bookmarkFolders};
+  const rules = {normalizeDomain, normalizeList, removalOptions, removalPlan, bookmarkDomains, bookmarkFolders};
+  if (typeof module !== "undefined" && module.exports) module.exports = rules;
+  else root.ClearRules = rules;
 })(globalThis);

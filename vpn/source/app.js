@@ -1,6 +1,7 @@
 import { renderUi } from "../../ui/render.cjs";
 /* SPDX-License-Identifier: GPL-3.0-only */
 import { messages } from "./messages";
+import { bookmarkFolders, bookmarkPreview } from "./bookmarks";
 import {
   pages,
   restorePage,
@@ -12,7 +13,7 @@ import {
   escapeHtml as e,
 } from "./model";
 
-export async function mountVpn(root, engine, preferences) {
+export async function mountVpn(root, engine, preferences, browser = globalThis.chrome) {
   const hostNavigation = document.getElementById("vpnSubmenu");
   const model = {
     page: "connection",
@@ -35,6 +36,9 @@ export async function mountVpn(root, engine, preferences) {
     subdomains: true,
     saved: false,
     confirmSignOut: false,
+    bookmarkFolders: null,
+    bookmarkFolder: "",
+    bookmarkRecursive: true,
   };
   let hydrated = false;
   let disposed = false,
@@ -167,6 +171,15 @@ export async function mountVpn(root, engine, preferences) {
     );
     return `<section><div class="vpn-section-heading"><h2>${e(t("servers"))} <span class="vpn-count ui-count">${servers.length}</span></h2>${button(t("refresh"), "refresh")}</div><ui-field class="vpn-field vpn-search ui-search ui-focus-within"><span class="vpn-sr-only">${e(t("search"))}</span><ui-control type="search" data-field="search" placeholder="${e(t("search"))}" value="${e(model.query)}" class="ui-control" /></ui-field><ui-field class="vpn-field"><span class="vpn-sr-only">${e(t("servers"))}</span><ui-control as="select" data-field="server-filter" class="ui-control">${["available", "free", "all", "secureCore"].map((filter) => `<option value="${filter}" ${model.filter === filter ? "selected" : ""}>${e(t(filter))}</option>`).join("")}</ui-control></ui-field>${serversStatus() || listMarkup(servers, "servers")}</section>`;
   }
+  const importPreview = () => bookmarkPreview(
+    model.bookmarkFolders?.find(folder => folder.id === model.bookmarkFolder),
+    model.bookmarkRecursive,
+    domainRules(model.draft, model.draft.mode),
+  );
+  function bookmarkMarkup() {
+    const preview = importPreview();
+    return `<ui-actions>${button(t("chooseBookmarks"), "load-bookmarks")}</ui-actions>${model.bookmarkFolders ? `<section aria-label="${e(t("importBookmarks"))}"><ui-field class="vpn-field">${e(t("bookmarkFolder"))}<ui-control as="select" data-field="bookmark-folder">${model.bookmarkFolders.map(folder => `<option value="${e(folder.id)}" ${folder.id === model.bookmarkFolder ? "selected" : ""}>${e(folder.label)}</option>`).join("")}</ui-control></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="bookmark-recursive" ${model.bookmarkRecursive ? "checked" : ""}> ${e(t("bookmarkRecursive"))}</ui-check><p class="vpn-note" role="status">${e(t("bookmarkPreview").replace("{new}", preview.fresh.length).replace("{existing}", preview.duplicates).replace("{skipped}", preview.skipped))}</p><ul class="vpn-domains">${preview.fresh.map(domain => `<li>${e(domain)}</li>`).join("")}</ul>${button(t("importBookmarks"), "import-bookmarks", preview.fresh.length ? "" : "disabled")}</section>` : ""}<p class="vpn-note">${e(t("bookmarkHelp"))} ${e(t(model.draft.mode === "exclude" ? "bookmarkExclude" : "bookmarkInclude"))}</p>`;
+  }
   function featuresMarkup() {
     const features = model.snapshot.features || {};
     const toggles = [
@@ -185,7 +198,7 @@ export async function mountVpn(root, engine, preferences) {
     const config = model.draft;
     const rules = domainRules(config, config.mode);
     const disabled = model.busy || !model.snapshot.splitControllable;
-    return `<ui-card as="section" class="vpn-card ui-card vpn-toggles"><h2>${e(t("features"))}</h2>${toggles}</ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("split"))}</h2><p class="vpn-note">${e(t("splitHelp"))}</p><form data-split><fieldset ${disabled ? "disabled" : ""}><ui-toggle class="vpn-toggle"><span>${e(t("enableSplit"))}</span><input type="checkbox" role="switch" data-field="split-enabled" ${config.enabled ? "checked" : ""} class="ui-switch"></ui-toggle><ui-field class="vpn-field"><ui-control as="select" data-field="split-mode" aria-label="${e(t("split"))}" class="ui-control"><option value="exclude" ${config.mode === "exclude" ? "selected" : ""}>${e(t("exclude"))}</option><option value="include" ${config.mode === "include" ? "selected" : ""}>${e(t("include"))}</option></ui-control></ui-field><ui-field class="vpn-field">${e(t("domain"))}<ui-actions class="vpn-domain-row"><ui-control type="text" data-field="domain" value="${e(model.domain)}" placeholder="example.com" autocomplete="off" spellcheck="false" class="ui-control" /><ui-button type="button" class="vpn-button ui-button" data-action="add-domain">${e(t("add"))}</ui-button></ui-actions></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="subdomains" ${model.subdomains ? "checked" : ""}> ${e(t("subdomains"))}</ui-check><ul class="vpn-domains">${rules.map((rule) => `<li><span>${e(rule.domain)}${rule.withSubDomains ? `<small>${e(t("subdomains"))}</small>` : ""}</span><ui-button type="button" class="vpn-button ui-button" data-action="remove-domain" data-domain="${e(rule.domain)}" aria-label="${e(t("remove") + " " + rule.domain)}">${e(t("remove"))}</ui-button></li>`).join("")}</ul>${!rules.length ? `<p class="vpn-note">${e(t("noDomains"))}</p>` : ""}${config.mode === "include" && config.enabled && !rules.length ? `<p class="vpn-notice ui-notice ui-notice-warning">${e(t("includeEmpty"))}</p>` : ""}<ui-actions class="vpn-save-row"><span role="status" class="ui-inline-status" data-pending="${model.dirty}">${e(model.saved ? t("saved") : model.dirty ? t("unsaved") : "")}</span><ui-button type="submit" class="vpn-button vpn-primary ui-button ui-button-primary" ${!model.dirty ? "disabled" : ""}>${e(t("save"))}</ui-button></ui-actions></fieldset></form>${!model.snapshot.splitControllable ? `<p class="vpn-note">${e(t("managed"))}</p>` : ""}</ui-card>`;
+    return `<ui-card as="section" class="vpn-card ui-card vpn-toggles"><h2>${e(t("features"))}</h2>${toggles}</ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("split"))}</h2><p class="vpn-note">${e(t("splitHelp"))}</p><form data-split><fieldset ${disabled ? "disabled" : ""}><ui-toggle class="vpn-toggle"><span>${e(t("enableSplit"))}</span><input type="checkbox" role="switch" data-field="split-enabled" ${config.enabled ? "checked" : ""} class="ui-switch"></ui-toggle><ui-field class="vpn-field"><ui-control as="select" data-field="split-mode" aria-label="${e(t("split"))}" class="ui-control"><option value="exclude" ${config.mode === "exclude" ? "selected" : ""}>${e(t("exclude"))}</option><option value="include" ${config.mode === "include" ? "selected" : ""}>${e(t("include"))}</option></ui-control></ui-field><ui-field class="vpn-field">${e(t("domain"))}<ui-actions class="vpn-domain-row"><ui-control type="text" data-field="domain" value="${e(model.domain)}" placeholder="example.com" autocomplete="off" spellcheck="false" class="ui-control" /><ui-button type="button" class="vpn-button ui-button" data-action="add-domain">${e(t("add"))}</ui-button></ui-actions></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="subdomains" ${model.subdomains ? "checked" : ""}> ${e(t("subdomains"))}</ui-check>${bookmarkMarkup()}<ul class="vpn-domains">${rules.map((rule) => `<li><span>${e(rule.domain)}${rule.withSubDomains ? `<small>${e(t("subdomains"))}</small>` : ""}</span><ui-button type="button" class="vpn-button ui-button" data-action="remove-domain" data-domain="${e(rule.domain)}" aria-label="${e(t("remove") + " " + rule.domain)}">${e(t("remove"))}</ui-button></li>`).join("")}</ul>${!rules.length ? `<p class="vpn-note">${e(t("noDomains"))}</p>` : ""}${config.mode === "include" && config.enabled && !rules.length ? `<p class="vpn-notice ui-notice ui-notice-warning">${e(t("includeEmpty"))}</p>` : ""}<ui-actions class="vpn-save-row"><span role="status" class="ui-inline-status" data-pending="${model.dirty}">${e(model.saved ? t("saved") : model.dirty ? t("unsaved") : "")}</span><ui-button type="submit" class="vpn-button vpn-primary ui-button ui-button-primary" ${!model.dirty ? "disabled" : ""}>${e(t("save"))}</ui-button></ui-actions></fieldset></form>${!model.snapshot.splitControllable ? `<p class="vpn-note">${e(t("managed"))}</p>` : ""}</ui-card>`;
   }
   function accountMarkup() {
     const account = model.snapshot.account || {};
@@ -403,6 +416,35 @@ export async function mountVpn(root, engine, preferences) {
       render();
       return;
     }
+    if (action === "load-bookmarks") {
+      if (model.busy || !model.snapshot.splitControllable) return;
+      // Call request before any await to preserve the click's user gesture.
+      let permission;
+      try { permission = browser.permissions.request({permissions: ["bookmarks"]}); }
+      catch { model.error = t("bookmarkFailed"); render(); return; }
+      void run(async () => {
+        if (!await permission) throw new Error("bookmarkDenied");
+        let tree;
+        try { tree = await browser.bookmarks.getTree(); }
+        catch { throw new Error("bookmarkFailed"); }
+        if (disposed || !model.snapshot.signedIn) return;
+        model.bookmarkFolders = bookmarkFolders(tree);
+        if (!model.bookmarkFolders.some(folder => folder.id === model.bookmarkFolder))
+          model.bookmarkFolder = model.bookmarkFolders[0]?.id || "";
+      });
+      return;
+    }
+    if (action === "import-bookmarks") {
+      if (model.busy || !model.snapshot.splitControllable) return;
+      const {fresh} = importPreview();
+      if (!fresh.length) return;
+      model.draft.value.push(...fresh.map(domain => ({domain, withSubDomains: model.subdomains, mode: model.draft.mode})));
+      model.dirty = true;
+      model.saved = false;
+      model.error = "";
+      render();
+      return;
+    }
     if (action === "add-domain") {
       addDomain();
       return;
@@ -470,6 +512,7 @@ export async function mountVpn(root, engine, preferences) {
       if (action === "signout") {
         await engine.signOut();
         model.snapshot = { signedIn: false };
+        model.bookmarkFolders = null;
         model.state = { state: "disconnected" };
         model.dirty = false;
         model.confirmSignOut = false;
@@ -488,6 +531,11 @@ export async function mountVpn(root, engine, preferences) {
   };
   const change = (event) => {
     const field = event.target.dataset.field;
+    if (field === "bookmark-folder" || field === "bookmark-recursive") {
+      if (field === "bookmark-folder") model.bookmarkFolder = event.target.value;
+      else model.bookmarkRecursive = event.target.checked;
+      render();
+    }
     if (field === "server-filter") {
       model.filter = event.target.value;
       model.limits.servers = 50;
@@ -572,6 +620,7 @@ export async function mountVpn(root, engine, preferences) {
       else stopChecking();
       if (data.state === "logged-out") {
         model.snapshot = { signedIn: false };
+        model.bookmarkFolders = null;
         model.dirty = false;
       } else if (!model.snapshot.signedIn && started) {
         void refresh();
