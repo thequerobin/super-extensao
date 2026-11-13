@@ -422,3 +422,36 @@ select:not([multiple]):not([size]) {
   overflow: auto;
   overflow-wrap: anywhere;
 }
+
+/* Editable domain collections: same compact rows and bounded height everywhere. */
+.ui-domain-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 210px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.ui-domain-list:empty { display: none; }
+.ui-domain-list > li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.ui-domain-list > li:last-child { border-bottom: 0; }
+.ui-domain-list > li > span { overflow-wrap: anywhere; min-width: 0; font-size: 12px; }
+.ui-domain-list small { display: block; color: var(--muted); font-size: 10px; }
+.ui-domain-list button.ui-button {
+  background: transparent;
+  border: 0;
+  color: var(--danger);
+  padding: 2px 5px;
+  font-size: 17px;
+  flex-shrink: 0;
+}

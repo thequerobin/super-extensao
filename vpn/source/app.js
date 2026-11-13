@@ -1,6 +1,7 @@
 import { renderUi } from "../../ui/render.cjs";
 /* SPDX-License-Identifier: GPL-3.0-only */
 import { renderBookmarkPreview } from "../../ui/bookmark-preview.js";
+import { renderDomainList } from "../../ui/domain-list.js";
 import { messages } from "./messages";
 import { bookmarkFolders, bookmarkPreview } from "./bookmarks";
 import {
@@ -203,7 +204,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     const config = model.draft;
     const rules = domainRules(config, config.mode);
     const disabled = pending || model.busy || !model.snapshot.splitControllable;
-    return `${resourceStatus}<ui-card as="section" class="vpn-card ui-card vpn-toggles"><h2>${e(t("features"))}</h2>${toggles}</ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("split"))}</h2><p class="vpn-note">${e(t("splitHelp"))}</p><form data-split><fieldset ${disabled ? "disabled" : ""}><ui-toggle class="vpn-toggle"><span>${e(t("enableSplit"))}</span><input type="checkbox" role="switch" data-field="split-enabled" ${config.enabled ? "checked" : ""} class="ui-switch"></ui-toggle><ui-field class="vpn-field"><ui-control as="select" data-field="split-mode" aria-label="${e(t("split"))}" class="ui-control"><option value="exclude" ${config.mode === "exclude" ? "selected" : ""}>${e(t("exclude"))}</option><option value="include" ${config.mode === "include" ? "selected" : ""}>${e(t("include"))}</option></ui-control></ui-field><ui-field class="vpn-field">${e(t("domain"))}<ui-actions class="vpn-domain-row"><ui-control type="text" data-field="domain" value="${e(model.domain)}" placeholder="example.com" autocomplete="off" spellcheck="false" class="ui-control" /><ui-button type="button" class="vpn-button ui-button" data-action="add-domain">${e(t("add"))}</ui-button></ui-actions></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="subdomains" ${model.subdomains ? "checked" : ""}> ${e(t("subdomains"))}</ui-check>${bookmarkMarkup()}<ul class="vpn-domains">${rules.map((rule) => `<li><span>${e(rule.domain)}${rule.withSubDomains ? `<small>${e(t("subdomains"))}</small>` : ""}</span><ui-button type="button" class="vpn-button ui-button" data-action="remove-domain" data-domain="${e(rule.domain)}" aria-label="${e(t("remove") + " " + rule.domain)}">${e(t("remove"))}</ui-button></li>`).join("")}</ul>${!rules.length ? `<p class="vpn-note">${e(t("noDomains"))}</p>` : ""}${config.mode === "include" && config.enabled && !rules.length ? `<p class="vpn-notice ui-notice ui-notice-warning">${e(t("includeEmpty"))}</p>` : ""}<ui-actions class="vpn-save-row"><span role="status" class="ui-inline-status" data-pending="${model.dirty}">${e(model.saved ? t("saved") : model.dirty ? t("unsaved") : "")}</span><ui-button type="submit" class="vpn-button vpn-primary ui-button ui-button-primary" ${!model.dirty ? "disabled" : ""}>${e(t("save"))}</ui-button></ui-actions></fieldset></form>${!pending && !model.snapshot.splitControllable ? `<p class="vpn-note">${e(t("managed"))}</p>` : ""}</ui-card>`;
+    return `${resourceStatus}<ui-card as="section" class="vpn-card ui-card vpn-toggles"><h2>${e(t("features"))}</h2>${toggles}</ui-card><ui-card as="section" class="vpn-card ui-card"><h2>${e(t("split"))}</h2><p class="vpn-note">${e(t("splitHelp"))}</p><form data-split><fieldset ${disabled ? "disabled" : ""}><ui-toggle class="vpn-toggle"><span>${e(t("enableSplit"))}</span><input type="checkbox" role="switch" data-field="split-enabled" ${config.enabled ? "checked" : ""} class="ui-switch"></ui-toggle><ui-field class="vpn-field"><ui-control as="select" data-field="split-mode" aria-label="${e(t("split"))}" class="ui-control"><option value="exclude" ${config.mode === "exclude" ? "selected" : ""}>${e(t("exclude"))}</option><option value="include" ${config.mode === "include" ? "selected" : ""}>${e(t("include"))}</option></ui-control></ui-field><ui-field class="vpn-field">${e(t("domain"))}<ui-actions class="vpn-domain-row"><ui-control type="text" data-field="domain" value="${e(model.domain)}" placeholder="example.com" autocomplete="off" spellcheck="false" class="ui-control" /><ui-button type="button" class="vpn-button ui-button" data-action="add-domain">${e(t("add"))}</ui-button></ui-actions></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="subdomains" ${model.subdomains ? "checked" : ""}> ${e(t("subdomains"))}</ui-check>${bookmarkMarkup()}<ul data-domain-list></ul>${!rules.length ? `<p class="vpn-note">${e(t("noDomains"))}</p>` : ""}${config.mode === "include" && config.enabled && !rules.length ? `<p class="vpn-notice ui-notice ui-notice-warning">${e(t("includeEmpty"))}</p>` : ""}<ui-actions class="vpn-save-row"><span role="status" class="ui-inline-status" data-pending="${model.dirty}">${e(model.saved ? t("saved") : model.dirty ? t("unsaved") : "")}</span><ui-button type="submit" class="vpn-button vpn-primary ui-button ui-button-primary" ${!model.dirty ? "disabled" : ""}>${e(t("save"))}</ui-button></ui-actions></fieldset></form>${!pending && !model.snapshot.splitControllable ? `<p class="vpn-note">${e(t("managed"))}</p>` : ""}</ui-card>`;
   }
   function accountMarkup() {
     const account = model.snapshot.account || {};
@@ -217,6 +218,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     if (!hydrated || disposed) return;
     if (disposed) return;
     const oldScroll = root.scrollTop;
+    const domainListScroll = root.querySelector("[data-domain-list]")?.scrollTop || 0;
     const focusedNavigation = hostNavigation?.contains(document.activeElement)
       ? document.activeElement.dataset.page
       : null;
@@ -237,6 +239,17 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     root.innerHTML = renderUi(
       `<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}${model.networkBlocked ? `<ui-card as="section" class="vpn-card ui-card"><p>${e(t("blockedHelp"))}</p><a class="vpn-button ui-button" href="vpn-blocked.html" target="_blank" rel="noopener">${e(t("protectionDetails"))}</a>${button(t("releaseNetwork"), "disconnect", "", "vpn-danger")}</ui-card>` : ""}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`,
     );
+    const domainList = root.querySelector("[data-domain-list]");
+    if (domainList) {
+      renderDomainList(domainList, domainRules(model.draft, model.draft.mode).map(rule => ({
+        domain: rule.domain, detail: rule.withSubDomains ? t("subdomains") : "",
+      })), {
+        removeLabel: domain => t("remove") + " " + domain,
+        action: "remove-domain",
+        disabled: model.busy || !model.snapshot.splitControllable || model.snapshot.featuresReady === false,
+      });
+      domainList.scrollTop = domainListScroll;
+    }
     const previewCard = root.querySelector("[data-bookmark-preview]");
     if (previewCard) {
       const preview = importPreview();

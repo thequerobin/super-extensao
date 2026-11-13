@@ -28,6 +28,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
       ...globals,
       require(spec) {
         if (spec in mocks) return mocks[spec];
+        if (spec === "../../ui/domain-list.js") return require(path.join(root, "ui/domain-list.js"));
         if (spec === "../../ui/bookmark-preview.js") return require(path.join(root, "ui/bookmark-preview.js"));
         if (spec === "../../rules.js") return require(path.join(root, "rules.js"));
         if (spec.endsWith('.cjs')) return require(path.resolve(path.dirname(filename), spec));
@@ -1101,4 +1102,24 @@ test("confirmed device restrictions remain disabled and labeled after account lo
     assert.equal(ui.w.document.querySelector('[data-feature="autoConnect"]').disabled, true);
     assert.equal(ui.w.document.querySelector('[data-split] fieldset').disabled, true);
   } finally { await ui.close(); }
+});
+
+
+test("VPN shared domain list removes only the selected mode and keeps saving explicit", async () => {
+  const initial = snapshot();
+  initial.split.value.push({domain: "old.example", mode: "exclude", withSubDomains: true});
+  const ui = await boot(initial);
+  try {
+    await ui.app.navigate("features");
+    const list = ui.w.document.querySelector('[data-domain-list]');
+    assert.ok(list.classList.contains('ui-domain-list'));
+    assert.equal(list.querySelector('small').textContent, 'Incluir subdomínios');
+    assert.equal(list.querySelector('button').textContent, '×');
+    await ui.click('remove-domain');
+    assert.equal(ui.calls.filter(call => call[0] === 'split').length, 0);
+    assert.equal(ui.w.document.querySelector('[data-domain-list]').children.length, 0);
+    ui.w.document.querySelector('[data-split]').dispatchEvent(new ui.w.Event('submit', {bubbles: true, cancelable: true}));
+    await tick();
+    assert.deepEqual(ui.calls.find(call => call[0] === 'split')[1].value, [{domain: "old.example", withSubDomains: false, mode: "include"}]);
+  } finally {await ui.close();}
 });

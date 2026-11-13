@@ -88,3 +88,8 @@ Validação: 470 testes aprovados, incluindo falha de carregamento, recuperaçã
 Limpeza e VPN renderizam a prévia com o mesmo componente `ui/bookmark-preview.js` e os mesmos estilos de `ui-components.css`. O cartão mostra a quantidade de novos domínios, o total de domínios únicos na pasta, os já presentes e os links incompatíveis ignorados. A lista mostra todos os domínios coletados e marca os existentes com “(já na lista)”, inclusive quando não há novos domínios. Listas grandes têm rolagem interna com altura máxima de 120 px. PT-BR e inglês são tratados pelo componente comum, com rótulos escritos como texto. O botão de importar continua desativado quando não há novos itens; o salvamento da VPN continua explícito.
 
 Validação da unificação: 472 testes aprovados, compilação da interface e dos estilos dos painéis, TypeScript e checagem dos componentes compartilhados aprovados.
+
+
+Na **1.7.30**, limpeza e VPN usam a mesma lista editável de domínios (`ui/domain-list.js`), com estilos compartilhados, altura máxima de 210 px, rolagem interna e remoção compacta por × com rótulo acessível. A VPN mantém a indicação de subdomínios e o salvamento explícito; a limpeza mantém a gravação automática e listas independentes. Listas pequenas ocupam apenas a altura necessária.
+
+Validação da lista compartilhada: 474 testes aprovados, incluindo remoção por modo sem salvamento automático na VPN, segurança de texto e altura/rolagem do componente; compilação, TypeScript e checagem dos componentes aprovados.

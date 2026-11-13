@@ -58,9 +58,6 @@ body[data-active-tab="sync"] > main > footer { display:none!important; }
 .scope { font-size:11px; color:var(--warning); background:var(--raised); padding:10px 12px; border-radius:8px; margin:10px 0; }
 .list-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:16px 0 7px; font-size:11px; color:var(--muted); }
 .link-button { border:0; background:transparent; padding:4px 0; font-size:11px; }
-.domain-list { list-style:none; padding:0; margin:0; max-height:210px; overflow-y:auto; border:1px solid var(--line); border-radius:8px; }
-.domain-list:empty { display:none; } .domain-list li { display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 11px; border-bottom:1px solid var(--line); background:var(--surface); }
-.domain-list li:last-child { border:0; } .domain-list span { overflow-wrap:anywhere; } .domain-list button { background:transparent; border:0; color:var(--danger); padding:2px 5px; font-size:17px; }
 .empty { text-align:center; color:var(--muted); padding:24px 8px; border:1px dashed var(--line); border-radius:8px; }
 .check-line { display:flex; gap:7px; align-items:center; margin:10px 0; font-size:12px; }
 input[type="checkbox"] { accent-color:var(--accent); }

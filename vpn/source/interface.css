@@ -269,33 +269,6 @@
 .vpn-check input {
   accent-color: var(--accent);
 }
-.vpn-domains {
-  list-style: none;
-  margin: 14px 0 0;
-  padding: 0;
-}
-.vpn-domains li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  padding: 10px 0;
-}
-.vpn-domains li > span {
-  overflow-wrap: anywhere;
-  min-width: 0;
-  font-size: 12px;
-}
-.vpn-domains small {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-}
-.vpn-domains .vpn-button {
-  font-size: 10px;
-  min-height: 28px;
-}
 .vpn-save-row {
   display: flex;
   align-items: center;
@@ -497,11 +470,6 @@
 }
 .vpn-count {
   margin-left: var(--space-1);
-}
-.vpn-domains .vpn-button {
-  font-size: var(--font-description);
-  min-height: 30px;
-  padding: 5px 8px;
 }
 .vpn-provider-note {
   padding: var(--space-3) 0;

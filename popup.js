@@ -95,15 +95,9 @@ async function refreshList(type) {
   const data = await chrome.storage.local.get({[key]:[]});
   const sites = ClearRules.normalizeList(data[key]);
   const list = listElement(type, "domainList");
-  list.replaceChildren();
-  for (const domain of sites) {
-    const li = document.createElement("li");
-    const text = document.createElement("span");
-    text.textContent = domain;
-    const remove = SuperUi.create("button", {className:"ui-button-compact ui-button-danger"});
-    remove.textContent = "×";
-    remove.setAttribute("aria-label", SuperI18n.t("uiRemoveDomain",{domain}));
-    remove.addEventListener("click", handle(async () => {
+  SuperDomainList.renderDomainList(list, sites.map(domain => ({domain})), {
+    removeLabel: domain => SuperI18n.t("uiRemoveDomain", {domain}),
+    onRemove: handle(async (domain, remove) => {
       remove.disabled = true;
       await serializeMutation(async () => {
         const latest = await chrome.storage.local.get({[key]:[]});
@@ -111,9 +105,8 @@ async function refreshList(type) {
       });
       await refreshList(type); await refreshPreview();
       notify(SuperI18n.text("Exceção removida."));
-    }));
-    li.append(text, remove); list.append(li);
-  }
+    }),
+  });
   listElement(type,"listCount").textContent = SuperI18n.t(sites.length===1?"uiDomainsOne":"uiDomainsMany",{count:sites.length});
   listElement(type,"emptyList").hidden = sites.length > 0;
 }
