@@ -593,10 +593,13 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
   assert.equal(progress[0].signedIn, true);
   assert.equal(progress[0].state.state, "connected");
   assert.equal(progress[0].features, undefined);
+  assert.equal(progress[0].featuresReady, false);
   assert.ok(progress[1].features);
+  assert.equal(progress[1].featuresReady, false);
   assert.equal(progress[1].account, undefined);
   assert.equal(progress[1].servers, undefined);
   assert.ok(progress[2].account);
+  assert.equal(progress[2].featuresReady, true);
   assert.equal(progress[2].servers, undefined);
   assert.ok(!JSON.stringify(state).includes("never-expose"));
   assert.ok(!JSON.stringify(state).includes("never-render-this"));
@@ -1051,5 +1054,45 @@ test("managed VPN split rules cannot request bookmark access", async () => {
   try {
     await ui.app.navigate("features"); await ui.click("load-bookmarks");
     assert.equal(requested, false);
+  } finally { await ui.close(); }
+});
+
+
+test("pending account data is not a device policy; failed loading offers retry and recovers settings", async () => {
+  let rejectLoad, attempts = 0;
+  const ready = snapshot(); ready.featuresReady = true;
+  const partial = snapshot(); partial.featuresReady = false; partial.splitControllable = false;
+  for (const feature of Object.values(partial.features)) feature.controllable = false;
+  const ui = await boot(ready, {load: async progress => {
+    if (++attempts > 1) return ready;
+    progress(partial);
+    return new Promise((resolve, reject) => {rejectLoad = reject;});
+  }});
+  try {
+    await ui.app.navigate("features");
+    assert.match(ui.w.document.body.textContent, /Aguardando carregar/);
+    assert.doesNotMatch(ui.w.document.body.textContent, /Controlado pela configuração/);
+    assert.equal(ui.w.document.querySelector('[data-feature="autoConnect"]').disabled, true);
+    rejectLoad(new Error("Account request failed")); await tick();
+    assert.match(ui.w.document.body.textContent, /Não foi possível concluir o carregamento/);
+    assert.match(ui.w.document.body.textContent, /Account request failed/);
+    assert.doesNotMatch(ui.w.document.body.textContent, /Controlado pela configuração/);
+    await ui.click("refresh");
+    assert.equal(ui.w.document.querySelector('[data-feature="autoConnect"]').disabled, false);
+    assert.equal(ui.w.document.querySelector('[data-split] fieldset').disabled, false);
+    assert.doesNotMatch(ui.w.document.body.textContent, /Aguardando carregar|Account request failed/);
+  } finally { await ui.close(); }
+});
+
+test("confirmed device restrictions remain disabled and labeled after account loading", async () => {
+  const initial = snapshot(); initial.featuresReady = true; initial.splitControllable = false;
+  for (const feature of Object.values(initial.features)) feature.controllable = false;
+  const ui = await boot(initial);
+  try {
+    await ui.app.navigate("features");
+    assert.match(ui.w.document.body.textContent, /Controlado pela configuração deste dispositivo/);
+    assert.doesNotMatch(ui.w.document.body.textContent, /Aguardando carregar/);
+    assert.equal(ui.w.document.querySelector('[data-feature="autoConnect"]').disabled, true);
+    assert.equal(ui.w.document.querySelector('[data-split] fieldset').disabled, true);
   } finally { await ui.close(); }
 });

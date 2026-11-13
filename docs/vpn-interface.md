@@ -74,3 +74,10 @@ A limpeza e a VPN compartilham a travessia de pastas e a coleta de domínios em 
 A importação é uma cópia, sem acompanhamento de mudanças futuras nos favoritos e sem modificar os favoritos ou as listas da limpeza. No modo exclusão, os domínios importados passam a navegar fora da VPN quando o tunelamento dividido estiver ativo. No modo inclusão, somente os domínios incluídos usam a VPN. Políticas gerenciadas que impedem editar as regras também impedem a importação.
 
 Validação desta alteração: 468 testes aprovados, compilação da interface de produção, verificação TypeScript da interface e checagem dos componentes compartilhados. O acesso aos favoritos foi exercitado com APIs simuladas; não houve teste manual no perfil pessoal do navegador.
+
+
+### Carregamento dos recursos e restrições (1.7.28)
+
+A interface distingue carregamento da conta/recursos de restrições do dispositivo. Antes da resposta da conta, as opções continuam desativadas, mas indicam que aguardam o carregamento; uma consulta que falhou aparece também em Recursos, com o motivo e botão de tentar novamente. A mensagem de controle pelo dispositivo fica reservada às configurações não editáveis após concluir essa etapa. A correção não remove políticas gerenciadas nem habilita controles antes de obter os dados necessários. Uma falha posterior no catálogo de servidores não volta a bloquear recursos já carregados.
+
+Validação: 470 testes aprovados, incluindo falha de carregamento, recuperação após tentar novamente e preservação de restrições reais; compilação de produção, TypeScript e checagem de componentes aprovados. A causa da falha no perfil do usuário não foi observada diretamente.

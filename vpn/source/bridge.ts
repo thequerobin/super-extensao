@@ -128,7 +128,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
         connected = false;
         return { signedIn: false, state: connection.state };
       }
-      onProgress?.(connection);
+      onProgress?.({...connection, featuresReady: false});
       const [loadedFeatures, recents] = await Promise.all([
         loadAllFeatures(),
         getLastChoices(),
@@ -140,6 +140,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
         features: featureSummary(),
         split: features.splitTunneling.config,
         splitControllable: false,
+        featuresReady: false,
         state: connection.state,
         recents,
       };
@@ -151,6 +152,7 @@ export function createEngine(initialConnection?: () => Promise<any>) {
       const tier = getUserMaxTier(user);
       const ready = {
         ...local,
+        featuresReady: true,
         account: {
           name: user.VPN.Name,
           plan: user.VPN.PlanTitle || user.VPN.PlanName,
