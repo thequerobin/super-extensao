@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Super Extensão",
-  "version": "1.7.19",
+  "version": "1.7.20",
   "description": "Nova guia, sincronização de favoritos, Proton VPN, controle de autoplay e limpeza ao sair.",
   "minimum_chrome_version": "116",
   "default_locale": "pt_BR",

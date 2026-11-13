@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **12 de novembro de 2026**, referência **1.7.19**. A rodada Windows passou 419 testes automatizados e os cenários nativos isolados da VPN e da Nova guia no Edge. Evidências, limites, confirmações anteriores do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
+Revisado em **12 de novembro de 2026**, referência **1.7.20**. A validação da resposta de login Proton passou 423 testes automatizados e verificação nativa isolada sem rede; as rodadas anteriores cobrem regras reais no Helium e cenários isolados da VPN/Nova guia no Edge. Evidências, limites, confirmações do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 

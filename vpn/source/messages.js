@@ -128,6 +128,10 @@ export const messages = {
     "pt-BR": "Entre na conta Proton para conectar.",
     en: "Sign in to your Proton account to connect.",
   },
+  VpnSignInInvalidResponse: {
+    "pt-BR": "Não foi possível obter um endereço válido para entrar na Proton. Tente novamente.",
+    en: "Could not obtain a valid Proton sign-in address. Please try again.",
+  },
   VpnSignInSuperseded: {
     "pt-BR":
       "Este pedido de login foi cancelado por outra ação. Inicie o login novamente.",

@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 12 de novembro de 2026, referência **1.7.19**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 12 de novembro de 2026, referência **1.7.20**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Abertura do login Proton 1.7.20
+
+O usuário relatou `Error in invocation of tabs.create ... No matching signature` ao entrar na Proton. Foi identificado um caminho compatível com esse erro: o transporte aceita envelopes de aviso (`error.Warning`), e `requestFork` tratava qualquer resposta como URL. Assim, um objeto de aviso podia chegar ao helper de abas como propriedades de `tabs.create`. O conteúdo da resposta da sessão real não foi capturado; a causa específica desse relato permanece sem confirmação direta.
+
+A resposta de `beginLogin` agora é validada na fronteira de login. Erros, inclusive avisos, são propagados antes de abrir uma aba; respostas inválidas recebem mensagem traduzida; apenas URL de autorização na origem Proton solicitada chega ao helper. Não são repetidos automaticamente pedidos de login nem alteradas sessões/credenciais.
+
+Os quatro testes novos em `tests/vpn-login-tab.test.cjs` cobrem URL válida, aviso convertido anteriormente em propriedades inválidas da aba, respostas malformadas/origens e caminhos indevidos, e falha nativa após resposta válida. O teste de aviso reproduziu `No matching signature` antes da correção e passou depois. A suíte completa passou **423 testes**, além do build de produção, TypeScript do worker/interface, `check:ui`, consistência das quatro versões e whitespace.
+
+Em Edge headless com perfil temporário e resolução de rede bloqueada, o bundle de produção foi exercitado com APIs nativas de abas e worker real. Apenas o estado inicial da interface foi simulado para exibir Entrar; no caso de sucesso, `beginLogin` usou a resposta real do worker e uma aba foi criada com `{url: string}`. No caso de aviso injetado, a interface mostrou o aviso e `tabs.create` não foi chamado. Não houve autenticação de uma conta pessoal nem retomada dos testes adiados de queda, captura de tráfego, suspensão e reinício do perfil autenticado.
 
 ## Repetição no Helium: regras por site e recuperação
 
