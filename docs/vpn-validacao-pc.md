@@ -4,6 +4,35 @@ Registrado em 12 de novembro de 2026, após a 1.7.17. **Atualizado na 1.7.19: ru
 
 O objetivo é observar o navegador e o tráfego reais, complementando os 397 testes automatizados já aprovados. A validação de uso da 1.7.16 relatada pelo usuário fica preservada; não substitui medições de IP/DNS ou de falhas.
 
+## Pendências de privacidade priorizadas — revisão de 13 de novembro de 2026
+
+Referência de código: **1.7.24**. Esta revisão registra pontos válidos da análise complementar; não executa novos testes nem aprova a proteção sob falhas. Há riscos residuais identificados, mas não há taxa de vazamento medida que sustente classificar sua probabilidade como alta, baixa ou “não desprezível”.
+
+### Alta prioridade
+
+1. **Medir e reduzir a janela de bloqueio.** Medir alteração/perda espontânea do proxy → recebimento do evento → revogação da permissão de sessão `880002` → bloqueio efetivo de requisições. Em `vpn/engine/network-guard.ts`, `block()` entra na fila, aguarda `installBlock()` e só então chama `revoke()`. Como `880002` tem prioridade superior a `880001`, reinstalar o bloqueador não basta enquanto a permissão estiver presente. Avaliar antecipar a revogação sem permitir que uma liberação concorrente reabra o tráfego; validar falhas de API e operações atrasadas. O teste atual de perda de configuração arma o bloqueio antes de limpar o proxy e não mede essa corrida espontânea.
+2. **Capturar tráfego durante falhas reais.** Testar pedidos contínuos durante queda do proxy/rede, troca de Wi-Fi, suspensão/retomada e reinício completo do navegador autenticado. Comparar IP de saída, DNS, IPv4/IPv6 e destinos protegidos, registrando qualquer tráfego direto indevido. O runner local e as medições externas saudáveis já passaram nos cenários registrados, mas não substituem captura contínua; o acesso ao `pktmon` foi negado na rodada anterior.
+3. **Verificar fluxos já estabelecidos.** Distinguir conexões abertas antes de ativar a VPN de conexões estabelecidas pelo proxy. Testar WebSocket, WebRTC, WebTransport, SSE, downloads e uploads existentes ao entrar em bloqueio. A regra DNR não comprova encerramento desses fluxos; uma conexão TCP pelo proxy também não muda automaticamente para conexão direta quando ele cai. Avaliar aviso explícito para recarregar abas. Recarga automática é uma mitigação a estudar, sem garantia universal de encerramento, e pode perder formulários ou interromper operações; não repetir automaticamente POST ou pagamentos.
+
+### Média prioridade
+
+- **Completar cobertura IPv6 e DNS.** O PAC já evita resolver nomes para classificar redes locais. Validar destinos IPv6 literais, DNS de destinos protegidos e exceções, com referência antes/depois e captura sob falha. DNR não controla todo o DNS/IP do sistema. Forçar DoH ou bloquear DNS comum não é uma capacidade geral das APIs atuais da extensão; DoH, isoladamente, também não prova passagem pelo túnel.
+- **Validar comunicação de risco no navegador e no SO.** Já existem ícone vermelho, alerta no painel, solicitação de notificação persistente e página local de bloqueio. Confirmar a apresentação quando notificações forem negadas e avaliar se o aviso explica suficientemente os limites de conexões antigas. A aparência de bloqueio não é evidência de ausência de tráfego.
+
+### Já implementado; manter nos testes de regressão
+
+- Bloqueio antes da limpeza do proxy, observação de `proxy.settings.onChange` e leitura de confirmação. Essas APIs são assíncronas; não há confirmação síncrona nem transação atômica entre proxy e DNR.
+- Bloqueador **dinâmico persistente** `880001`, com permissão **de sessão** `880002` removida no reinício/atualização. Persistência passou no runner isolado; falta completar o cenário autenticado sob observação contínua.
+- WebRTC obrigatório em `disable_non_proxied_udp`, confirmação por `get()` e observação de alterações enquanto a VPN está ativa.
+- Bloqueio de sites excluídos durante emergência, mantendo as exceções documentadas de recuperação da extensão e dos domínios de conta Proton. Um modo adicional que retire essas exceções e exija liberação manual seria uma escolha futura de produto, não uma correção já demonstrada como necessária.
+- Runner `scripts/check-vpn-native.cjs` executado com seis cenários aprovados e zero pedidos diretos antes da liberação explícita. Ele contabiliza pedidos locais e **não contém captura de pacotes**. Já há medições parciais de IP/DNS/WebRTC com Proton real, limitadas aos cenários descritos no registro abaixo.
+
+### Evolução futura
+
+Native Messaging com componente instalado e firewall do sistema pode ampliar o controle para além das APIs do navegador. Exige projeto, instalação e validação próprios; permanece fora das garantias da extensão atual. Para requisito de bloqueio forte no sistema, usar VPN de sistema com kill switch/firewall e validar a configuração com captura de tráfego.
+
+Fontes de contrato das APIs: [ChromeSetting — eventos e operações assíncronas](https://developer.chrome.com/docs/extensions/reference/api/types), [DNR — persistência e precedência](https://developer.chrome.com/docs/extensions/reference/api/declarativeNetRequest), [privacy — WebRTC e previsão de rede](https://developer.chrome.com/docs/extensions/reference/api/privacy). A evidência histórica permanece em [validacao.md](validacao.md) e os limites em [auditoria-vpn.md](auditoria-vpn.md).
+
 ## Preparação na retomada
 
 - [ ] Identificar a pasta do repositório e registrar commit, versão instalada, sistema operacional, navegador e versão.
