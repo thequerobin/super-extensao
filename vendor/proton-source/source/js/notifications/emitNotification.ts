@@ -24,8 +24,8 @@ export function emitNotification(
 
 			const notificationOptions = {
 				type: 'basic',
-				title: 'Proton VPN',
-				iconUrl: '/vpn/img/icon-512.png',
+				title: 'Super Extensão — VPN',
+				iconUrl: '/icons/icon128.png',
 				...options,
 			} as NotificationCreateOptions;
 

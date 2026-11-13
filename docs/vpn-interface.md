@@ -1,4 +1,4 @@
-# Interface própria da VPN — referência 1.7.32
+# Interface própria da VPN — referência 1.7.33
 
 ## Componentização 1.6.8
 
@@ -103,3 +103,6 @@ Carregamento e falhas dos recursos e servidores usam o componente genérico de e
 
 
 Na **1.7.32**, o cartão de conexão mostra **Conectar ao mais rápido** também quando já está conectado. A ação executa novamente a seleção automática existente, respeitando plano e recursos; pode escolher o mesmo servidor. Não exige clicar em Desconectar antes. Durante uma tentativa de conexão, o atalho não aparece; enquanto o catálogo carrega, apresenta erro ou há uma operação em andamento, o botão segue as restrições existentes.
+
+
+Na **1.7.33**, as notificações de conexão e de bloqueio de segurança da VPN usam o ícone da Super Extensão (`icons/icon128.png`). O título padrão das notificações de conexão passa a ser “Super Extensão — VPN”. Avisos já entregues ao sistema podem conservar a aparência anterior; a alteração vale para os novos avisos após recarregar a extensão.

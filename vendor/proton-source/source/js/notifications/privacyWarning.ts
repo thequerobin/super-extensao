@@ -11,7 +11,7 @@ export function emitPrivacyWarning(): void {
 			{
 				type: "basic",
 				title: "Super Extensão — VPN",
-				iconUrl: "/vpn/img/icon-512.png",
+				iconUrl: "/icons/icon128.png",
 				priority: 2,
 				requireInteraction: true,
 				message: pt
