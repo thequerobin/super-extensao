@@ -36,6 +36,8 @@ const words = {
     "Open the extension to sign in or choose a server. This page will not restore an old connection.",
   ],
   refresh: ["Consultar estado", "Check state"],
+  return: ["Voltar à página", "Return to page"],
+  destination: ["Página de destino: ", "Destination: "],
   open: ["Abrir extensão", "Open extension"],
   release: ["Liberar navegação sem VPN", "Release browsing without VPN"],
   confirmTitle: [
@@ -49,20 +51,40 @@ const words = {
   confirm: ["Confirmar liberação sem VPN", "Confirm release without VPN"],
   cancel: ["Manter bloqueio", "Keep blocking"],
   note: [
-    "Após recuperar ou liberar a rede, abra o endereço desejado novamente. Esta página não repete navegações, envios de formulário ou pagamentos.",
-    "After recovery or release, open the desired address again. This page does not replay navigations, form submissions or payments.",
+    "Nada é reaberto automaticamente. Após a VPN voltar, use Voltar à página quando disponível ou abra o endereço novamente. Formulários e pagamentos não são reenviados.",
+    "Nothing reopens automatically. Once the VPN recovers, use Return to page when available or open the address again. Forms and payments are not resubmitted.",
   ],
   failed: [
     "A ação não foi confirmada. Consulte o estado antes de repetir.",
     "The action was not confirmed. Check state before repeating.",
   ],
 };
+export function returnTarget(hash) {
+  if (!hash?.startsWith("#return=")) return undefined;
+  const value = hash.slice("#return=".length);
+  if (!/^https?:\/\//i.test(value) || /[\u0000-\u0020\u007f]/.test(value))
+    return undefined;
+  try {
+    const url = new URL(value);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      url.username ||
+      url.password
+    )
+      return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+}
 export function mountProtection(
   root,
   request,
   preferences,
   timing = globalThis,
+  navigate = (url) => root.ownerDocument.defaultView.location.replace(url),
 ) {
+  const target = returnTarget(root.ownerDocument.defaultView.location.hash);
   let locale = "pt-BR",
     snapshot,
     busy = false,
@@ -75,7 +97,7 @@ export function mountProtection(
   const t = (key) => words[key]?.[locale === "en" ? 1 : 0] || key;
   const find = (id) => root.querySelector("#" + id);
   root.innerHTML =
-    '<p class="brand" id="brand"></p><h1 id="title"></h1><p id="help"></p><p id="reason" class="muted"></p><p id="notice" role="status"></p><p id="error" class="error" role="alert"></p><div class="actions"><button type="button" class="ui-button ui-button-primary" id="retry"></button><button type="button" class="ui-button" id="refresh"></button><a class="ui-button" id="open" target="_blank" rel="noopener"></a></div><div class="actions"><button type="button" class="ui-button ui-button-danger" id="release"></button></div><section class="confirmation" id="confirmation" hidden><h2 id="confirmTitle"></h2><p id="confirmHelp"></p><div class="actions"><button type="button" class="ui-button ui-button-danger" id="confirm"></button><button type="button" class="ui-button" id="cancel"></button></div></section><p class="muted" id="note"></p>';
+    '<p class="brand" id="brand"></p><h1 id="title"></h1><p id="help"></p><p id="reason" class="muted"></p><p id="notice" role="status"></p><p id="error" class="error" role="alert"></p><p id="destination" class="muted" hidden></p><div class="actions"><button type="button" class="ui-button ui-button-primary" id="return" hidden></button><button type="button" class="ui-button ui-button-primary" id="retry"></button><button type="button" class="ui-button" id="refresh"></button><a class="ui-button" id="open" target="_blank" rel="noopener"></a></div><div class="actions"><button type="button" class="ui-button ui-button-danger" id="release"></button></div><section class="confirmation" id="confirmation" hidden><h2 id="confirmTitle"></h2><p id="confirmHelp"></p><div class="actions"><button type="button" class="ui-button ui-button-danger" id="confirm"></button><button type="button" class="ui-button" id="cancel"></button></div></section><p class="muted" id="note"></p>';
   find("open").href = chrome.runtime.getURL("popup.html") + "#vpn";
   function render() {
     if (disposed) return;
@@ -85,6 +107,7 @@ export function mountProtection(
       "brand",
       "retry",
       "refresh",
+      "return",
       "open",
       "release",
       "confirmTitle",
@@ -109,6 +132,12 @@ export function mountProtection(
       : "";
     find("retry").hidden = status !== "blocked" || !snapshot.retryAvailable;
     find("retry").disabled = busy || checking;
+    find("return").hidden = !target || status !== "connected";
+    find("return").disabled = busy || checking;
+    find("destination").hidden = !target;
+    find("destination").textContent = target
+      ? t("destination") + target.host
+      : "";
     find("refresh").disabled = busy || checking;
     find("release").hidden = status === "connected" || status === "released";
     find("release").disabled = busy || checking;
@@ -188,7 +217,38 @@ export function mountProtection(
     // Releasing is only reported after independent worker/DNR confirmation.
     if (!disposed) await refresh();
   }
+  async function returnToPage() {
+    if (
+      disposed ||
+      busy ||
+      checking ||
+      !target ||
+      snapshot?.status !== "connected"
+    )
+      return;
+    revision++;
+    busy = true;
+    error = "";
+    render();
+    try {
+      const value = await request("protectionStatus");
+      if (disposed) return;
+      accept(value);
+      if (snapshot.status === "connected") navigate(target.href);
+    } catch (failure) {
+      if (!disposed) {
+        snapshot = undefined;
+        error = failure?.message || "failed";
+      }
+    } finally {
+      if (!disposed) {
+        busy = false;
+        render();
+      }
+    }
+  }
   find("retry").addEventListener("click", () => void act("retryProtection"));
+  find("return").addEventListener("click", () => void returnToPage());
   find("refresh").addEventListener("click", () => void refresh());
   find("release").addEventListener("click", () => {
     confirm = true;

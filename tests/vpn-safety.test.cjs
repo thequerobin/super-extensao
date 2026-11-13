@@ -14,7 +14,7 @@ test('verification failure after opening revokes allowance and a later attempt c
 test('only explicit current release removes the durable blocker',async()=>{const f=fixture();await f.guard.block();await f.guard.disarm(()=>false);assert.equal(f.shared.armed,true);await f.guard.disarm(()=>true);assert.equal(f.shared.armed,false);assert.equal(f.shared.allowed,false);});
 test('exceptions while opening revoke the session allowance without removing persistent rules',async()=>{const f=fixture();await f.guard.block();f.ports.allow=async()=>{f.shared.allowed=true;throw Error('native');};await assert.rejects(f.guard.open(async()=>true),/native/);assert.equal(f.shared.armed,true);assert.equal(f.shared.allowed,false);});
 function nativeGuard(){let dynamic=[{id:42,priority:1,action:{type:'block'},condition:{urlFilter:'unrelated'}}],session=[];const api={getDynamicRules:async()=>dynamic,getSessionRules:async()=>session,updateDynamicRules:async({removeRuleIds,addRules=[]})=>{dynamic=dynamic.filter(r=>!removeRuleIds.includes(r.id)).concat(JSON.parse(JSON.stringify(addRules)));},updateSessionRules:async({removeRuleIds,addRules=[]})=>{session=session.filter(r=>!removeRuleIds.includes(r.id)).concat(JSON.parse(JSON.stringify(addRules)));}};const {networkGuard,bootstrapNetworkGuard}=load('vendor/proton-source/source/js/vpn/networkGuard.ts',{}, {chrome:{runtime:{id:'own-extension'},declarativeNetRequest:api}});return {guard:networkGuard,bootstrap:bootstrapNetworkGuard,api,dynamic:()=>dynamic,session:()=>session};}
-test('native guard preserves unrelated rules and covers navigation, subresources, WebSocket and recovery exceptions',async()=>{const f=nativeGuard();await f.guard.block();assert.equal(f.dynamic().length,4);const rule=f.dynamic().find(r=>r.id===880001);assert.ok(rule.condition.resourceTypes.includes('main_frame'));assert.equal(rule.condition.excludedResourceTypes,undefined);assert.ok(new RegExp(rule.condition.regexFilter).test('wss://private.test/'));assert.ok(new RegExp(rule.condition.regexFilter).test('https://private.test/'));assert.ok(rule.condition.excludedInitiatorDomains.includes('own-extension'));assert.ok(rule.condition.excludedRequestDomains.includes('account.proton.me'));await f.guard.open(async()=>true);assert.equal(f.session()[0].priority>rule.priority,true);await f.guard.disarm(()=>true);assert.equal(f.dynamic()[0].id,42);assert.equal(f.dynamic().length,1);});
+test('native guard preserves unrelated rules and covers navigation, subresources, WebSocket and recovery exceptions',async()=>{const f=nativeGuard();await f.guard.block();assert.equal(f.dynamic().length,5);const rule=f.dynamic().find(r=>r.id===880001);assert.ok(rule.condition.resourceTypes.includes('main_frame'));assert.equal(rule.condition.excludedResourceTypes,undefined);assert.ok(new RegExp(rule.condition.regexFilter).test('wss://private.test/'));assert.ok(new RegExp(rule.condition.regexFilter).test('https://private.test/'));assert.ok(rule.condition.excludedInitiatorDomains.includes('own-extension'));assert.ok(rule.condition.excludedRequestDomains.includes('account.proton.me'));await f.guard.open(async()=>true);assert.equal(f.session()[0].priority>rule.priority,true);await f.guard.disarm(()=>true);assert.equal(f.dynamic()[0].id,42);assert.equal(f.dynamic().length,1);});
 test('native guard readback ignores property ordering and rejects changed conditions',async()=>{const f=nativeGuard();await f.guard.block();const rule=f.dynamic().find(r=>r.id===880001);rule.condition={resourceTypes:[...rule.condition.resourceTypes].reverse(),excludedRequestDomains:['account.protonvpn.com','account.proton.me'],excludedInitiatorDomains:['own-extension'],regexFilter:rule.condition.regexFilter};assert.equal((await f.guard.status()).armed,true);rule.condition.requestDomains=['only.test'];assert.equal((await f.guard.status()).armed,false);});
 test('native rule quota failures fail closed rather than pretending protection is available',async()=>{const f=nativeGuard();f.api.updateDynamicRules=async()=>{throw Error('quota');};await assert.rejects(f.guard.block(),/GuardFailed/);assert.equal(f.session().length,0);});
 test('tunnel verification uses HTTPS HEAD, no cookies, no credentials and no redirect/cache fallback',async()=>{let called;assert.equal(await verifyTunnel(async(url,init)=>{called={url,init};return new Response(null,{status:200});},()=>true),true);assert.equal(called.url,'https://protonvpn.com/');assert.equal(called.init.method,'HEAD');assert.equal(called.init.credentials,'omit');assert.equal(called.init.redirect,'error');assert.equal(called.init.cache,'no-store');assert.equal(called.init.headers,undefined);});
@@ -83,6 +83,27 @@ test('startup upgrades legacy blocking rules and revokes any old allowance',asyn
 });
 test('readback rejects a modified redirect target rather than confirming protection',async()=>{
  const f=nativeGuard();await f.guard.block();f.dynamic().find(r=>r.id===880004).action.redirect.extensionPath='/other.html';assert.equal((await f.guard.status()).armed,false);await f.bootstrap();assert.equal((await f.guard.status()).blocked,true);
+});
+
+test('only GET blocking redirects carry a return address and both page rules stay below the session allowance',async()=>{
+ const f=nativeGuard();await f.guard.block();
+ const form=f.dynamic().find(r=>r.id===880004),get=f.dynamic().find(r=>r.id===880005);
+ assert.deepEqual(Array.from(form.condition.excludedRequestMethods),['get']);
+ assert.equal(form.action.redirect.extensionPath,'/vpn-blocked.html');
+ assert.deepEqual(Array.from(get.condition.requestMethods),['get']);
+ assert.equal(get.action.redirect.regexSubstitution,'chrome-extension://own-extension/vpn-blocked.html#return=\\0');
+ assert.equal(get.condition.regexFilter,'^https?://.*');
+ await f.guard.open(async()=>true);assert.ok(f.session()[0].priority>get.priority);
+});
+
+test('missing or modified return rules are not accepted and startup revokes old allowances before upgrading',async()=>{
+ for(const change of [rules=>rules.find(r=>r.id===880005).action.redirect.regexSubstitution='https://other.test/',rules=>delete rules.find(r=>r.id===880005).condition.requestMethods]){
+  const f=nativeGuard();await f.guard.block();await f.guard.open(async()=>true);change(f.dynamic());
+  assert.equal((await f.guard.status()).armed,false);await f.bootstrap();assert.equal((await f.guard.status()).blocked,true);
+ }
+ const f=nativeGuard();await f.guard.block();await f.guard.open(async()=>true);
+ await f.api.updateDynamicRules({removeRuleIds:[880005]});assert.equal((await f.guard.status()).armed,false);
+ await f.bootstrap();assert.equal((await f.guard.status()).blocked,true);
 });
 // DNR default masks omit main_frame when the resource arrays are absent/empty.
 function matchesResource(rule,type){return rule.condition.resourceTypes?.length?rule.condition.resourceTypes.includes(type):rule.condition.excludedResourceTypes?.length?!rule.condition.excludedResourceTypes.includes(type):type!=='main_frame';}

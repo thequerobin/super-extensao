@@ -1,6 +1,16 @@
 # Validação da Super Extensão
 
-Revisado em 13 de novembro de 2026, referência **1.7.25**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.26**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Retorno à página após recuperação da VPN — 1.7.26
+
+A página de bloqueio oferece **Voltar à página** quando existe destino válido e a VPN está confirmada. O clique revalida o estado com o worker antes de navegar na mesma aba. A regra 880005 preserva o endereço de navegações GET no fragmento local da página; 880004 mantém o bloqueio/redirecionamento dos demais métodos sem destino de retorno. Páginas antigas ou abertas sem destino continuam sem botão. Não há retorno automático nem repetição de corpos POST, formulários ou pagamentos; a liberação explícita sem VPN também não habilita o atalho.
+
+**464 testes aprovados**, incluindo sete cenários novos de retorno, queda/erro durante a confirmação do clique, descarte da página, destino inseguro, separação de métodos e readback/atualização das regras. Build de produção, TypeScript do worker/interface e `check:ui` aprovados. A interface mostra somente o host do destino; o endereço completo fica no fragmento local, que pode integrar o histórico, sem gravação em storage ou logs.
+
+Teste nativo focado no **Windows / Edge 157.0.4341.46**, perfil temporário e servidor HTTP local: regras DNR reais preservaram caminho, parâmetros escapados e âncora; nenhum pedido de navegação chegou ao servidor antes do clique; a página mostrou o botão após confirmação simulada do guard e retornou por GET ao clicar. Um POST interceptado abriu a página sem destino, não chegou ao servidor e continuou sem botão após liberação do guard. A apresentação visual da página conectada foi conferida. Reprodução em `scripts/check-vpn-return-native.cjs`; não usa conta pessoal ou conexão Proton real.
+
+O runner Playwright anterior foi ampliado para oito cenários, incluindo retorno e POST, mas não foi executado nesta rodada: Playwright não está instalado na raiz local. A evidência nativa desta entrega corresponde ao runner focado via DevTools. A rodada não certifica ausência de vazamentos e mantém pendentes os testes de falha da conta real.
 
 ## Conta, plano e configurações no núcleo próprio — 1.7.25
 

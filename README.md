@@ -4,7 +4,7 @@
 
 Extensão pessoal para Helium e navegadores Chromium, com Nova guia, sincronização de favoritos, VPN no navegador, limpeza ao sair, controle de autoplay e proteção da última aba.
 
-**Versão instalada: 1.7.25.** Documentação revisada em 13 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
+**Versão instalada: 1.7.26.** Documentação revisada em 13 de novembro de 2026. Temas escuro, claro e sistema; idiomas PT-BR e inglês compartilhados entre os módulos. Requer Chromium 116 ou superior, conforme o manifest.
 
 Para investigar uma falha da VPN, abra `chrome://extensions`, localize a Super Extensão e inspecione o **service worker**. Na aba Console, reproduza a tentativa e execute `getVpnDiagnostics()`. Os últimos 50 eventos registram somente horário, etapa, resultado e código conhecido, sem credenciais ou dados da conta; falhas novas também aparecem como avisos `[Super VPN]`. Esse histórico é temporário e reinicia com o worker. `getLogs()` é o registro legado, dependente de debug, e pode estar vazio.
 
@@ -56,6 +56,8 @@ Os perfis existentes são aproveitados, incluindo cache e mapeamentos quando con
 Veja [a interface e a compatibilidade](docs/sync-interface.md) e [o escopo do novo motor](docs/sync-engine.md). Perfis exportados podem conter credenciais; guarde esses arquivos como configurações privadas. Backup de perfis não equivale a backup dos favoritos.
 
 ### VPN
+
+Na **1.7.26**, a página de bloqueio oferece **Voltar à página** depois que a VPN é confirmada. O clique confere novamente a conexão e reabre o endereço na mesma aba; não há retorno automático. O atalho aparece para novas navegações GET interceptadas após atualizar. Páginas de bloqueio antigas, abertas manualmente ou originadas de POST não oferecem o botão; formulários e pagamentos não são reenviados.
 
 A **1.7.25** extrai consulta/cache de conta, política Free/pago e resolução das configurações de recursos para o núcleo próprio. Preserva as chaves e preferências existentes, ordena remoção do cache no logout e descarta respostas de uma sessão anterior. Endpoints, formatos, traduções e adaptadores Proton continuam presentes. O worker compilado foi validado em perfil temporário com dados fictícios; falta repetir a conta real.
 

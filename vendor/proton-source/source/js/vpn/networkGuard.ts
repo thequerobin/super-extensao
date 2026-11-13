@@ -2,7 +2,8 @@ import { NetworkGuard } from "../../../../../vpn/engine/network-guard";
 const blockId = 880001,
 	allowId = 880002,
 	transportId = 880003,
-	pageId = 880004;
+	pageId = 880004,
+	returnPageId = 880005;
 const transportRule: chrome.declarativeNetRequest.Rule = {
 	id: transportId,
 	priority: 11000,
@@ -98,19 +99,44 @@ const pageRule: chrome.declarativeNetRequest.Rule = {
 		regexFilter: "^https?://",
 		excludedRequestDomains: condition.excludedRequestDomains,
 		resourceTypes: ["main_frame"],
+		excludedRequestMethods: ["get"],
 	},
 };
-const samePage = (item: chrome.declarativeNetRequest.Rule) => {
+// Only ordinary GET navigations carry a return address. Never retain a form body.
+const returnPageRule: chrome.declarativeNetRequest.Rule = {
+	id: returnPageId,
+	priority: 10002,
+	action: {
+		type: "redirect",
+		redirect: {
+			regexSubstitution: `chrome-extension://${chrome.runtime.id}/vpn-blocked.html#return=\\0`,
+		},
+	},
+	condition: {
+		regexFilter: "^https?://.*",
+		excludedRequestDomains: condition.excludedRequestDomains,
+		resourceTypes: ["main_frame"],
+		requestMethods: ["get"],
+	},
+};
+const samePage = (
+	item: chrome.declarativeNetRequest.Rule,
+	expected = pageRule,
+) => {
 	const c = item.condition;
 	return (
-		item.id === pageId &&
+		item.id === expected.id &&
 		item.priority === 10002 &&
 		item.action.type === "redirect" &&
 		Object.keys(item.action).length === 2 &&
-		item.action.redirect?.extensionPath === "/vpn-blocked.html" &&
-		Object.keys(item.action.redirect).length === 1 &&
-		c.regexFilter === pageRule.condition.regexFilter &&
+		JSON.stringify(item.action.redirect) ===
+			JSON.stringify(expected.action.redirect) &&
+		c.regexFilter === expected.condition.regexFilter &&
 		c.resourceTypes?.join(",") === "main_frame" &&
+		JSON.stringify(c.requestMethods) ===
+			JSON.stringify(expected.condition.requestMethods) &&
+		JSON.stringify(c.excludedRequestMethods) ===
+			JSON.stringify(expected.condition.excludedRequestMethods) &&
 		!c.excludedInitiatorDomains &&
 		JSON.stringify([...(c.excludedRequestDomains || [])].sort()) ===
 			JSON.stringify([...(condition.excludedRequestDomains || [])].sort()) &&
@@ -120,6 +146,8 @@ const samePage = (item: chrome.declarativeNetRequest.Rule) => {
 				"excludedInitiatorDomains",
 				"excludedRequestDomains",
 				"resourceTypes",
+				"requestMethods",
+				"excludedRequestMethods",
 				"isUrlFilterCaseSensitive",
 			].includes(key),
 		)
@@ -135,7 +163,8 @@ const read = async () => {
 		]);
 		const armed =
 			dynamic.some((item) => same(item, blockId, 10000, "block")) &&
-			dynamic.some(samePage) &&
+			dynamic.some((item) => samePage(item)) &&
+			dynamic.some((item) => samePage(item, returnPageRule)) &&
 			dynamic.some(
 				(item) =>
 					item.id === transportId &&
@@ -155,8 +184,13 @@ export const networkGuard = new NetworkGuard({
 	async installBlock() {
 		try {
 			await api().updateDynamicRules({
-				removeRuleIds: [blockId, transportId, pageId],
-				addRules: [rule(blockId, 10000, "block"), transportRule, pageRule],
+				removeRuleIds: [blockId, transportId, pageId, returnPageId],
+				addRules: [
+					rule(blockId, 10000, "block"),
+					transportRule,
+					pageRule,
+					returnPageRule,
+				],
 			});
 		} catch {
 			throw new Error("VpnTrafficGuardFailed");
@@ -164,7 +198,7 @@ export const networkGuard = new NetworkGuard({
 	},
 	async removeBlock() {
 		await api().updateDynamicRules({
-			removeRuleIds: [blockId, transportId, pageId],
+			removeRuleIds: [blockId, transportId, pageId, returnPageId],
 		});
 	},
 	async allow() {
@@ -182,6 +216,10 @@ export const networkGuard = new NetworkGuard({
 /** Upgrade legacy durable rules before any restoration; never retain an old allowance. */
 export async function bootstrapNetworkGuard(): Promise<void> {
 	const dynamic = await api().getDynamicRules();
-	if (dynamic.some((item) => [blockId, transportId, pageId].includes(item.id)))
+	if (
+		dynamic.some((item) =>
+			[blockId, transportId, pageId, returnPageId].includes(item.id),
+		)
+	)
 		await networkGuard.block();
 }

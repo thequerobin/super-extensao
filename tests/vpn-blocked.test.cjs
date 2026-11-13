@@ -4,19 +4,77 @@ const {JSDOM}=require('jsdom');const load=require('./helpers/load-ts.cjs');
 const root=path.resolve(__dirname,'..');const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 const blocked={status:'blocked',retryAvailable:true,signedIn:true,reason:'VpnTrafficBlocked'};
-function fixture(){
- const dom=new JSDOM(fs.readFileSync(path.join(root,'vpn-blocked.html'),'utf8'),{url:'https://extension.test/vpn-blocked.html'}),w=dom.window;
+function fixture(hash = ''){
+ const dom=new JSDOM(fs.readFileSync(path.join(root,'vpn-blocked.html'),'utf8'),{url:'https://extension.test/vpn-blocked.html'+hash}),w=dom.window;
  const exports={};const file=path.join(root,'vpn/source/blocked.js');
  const messages={VpnTrafficBlocked:{'pt-BR':'Rede pausada',en:'Network paused'}};
- vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,chrome:{runtime:{getURL:p=>'chrome-extension://test/'+p}},require:id=>({messages})});
- let reply=async()=>blocked,locale,theme,disposed=0,poll;const calls=[];
+ vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,URL,chrome:{runtime:{getURL:p=>'chrome-extension://test/'+p}},require:id=>({messages})});
+ let reply=async()=>blocked,locale,theme,disposed=0,poll;const calls=[],navigations=[];
  const request=async type=>{calls.push(type);return reply(type);};
- const app=exports.mountProtection(w.document.querySelector('main'),request,{locale:{watch(fn){locale=fn;fn('pt-BR');return ()=>disposed++;}},bindTheme(node){theme=node;return ()=>disposed++;}},{setInterval(fn){poll=fn;return 1;},clearInterval(){disposed++;}});
+ const app=exports.mountProtection(w.document.querySelector('main'),request,{locale:{watch(fn){locale=fn;fn('pt-BR');return ()=>disposed++;}},bindTheme(node){theme=node;return ()=>disposed++;}},{setInterval(fn){poll=fn;return 1;},clearInterval(){disposed++;}},url=>navigations.push(url));
  const $=id=>w.document.getElementById(id);
- return {w,app,$,calls,setReply:fn=>{reply=fn;},locale:value=>locale(value),poll:()=>poll(),dispose:()=>{app.dispose();w.close();},get disposed(){return disposed;},get theme(){return theme;}};
+ return {w,app,$,calls,navigations,setReply:fn=>{reply=fn;},locale:value=>locale(value),poll:()=>poll(),dispose:()=>{app.dispose();w.close();},get disposed(){return disposed;},get theme(){return theme;}};
 }
 test('local blocking page reads live state without reconnecting or releasing on load',async()=>{
  const f=fixture();try{await tick();assert.deepEqual(f.calls,['protectionStatus']);assert.equal(f.$('protection').dataset.status,'blocked');assert.equal(f.$('retry').hidden,false);assert.match(f.$('help').textContent,/excluídos/);assert.equal(f.$('confirmation').hidden,true);}finally{f.dispose();}
+});
+
+test('return address stays local and is offered only after a confirmed VPN, without automatic navigation',async()=>{
+ const f=fixture('#return=https://page.test/path?q=a%26b&token=private#section');
+ try{
+  await tick();assert.equal(f.$('return').hidden,true);assert.equal(f.navigations.length,0);
+  assert.equal(f.$('destination').textContent,'Página de destino: page.test');
+  assert.ok(!f.w.document.body.textContent.includes('private'));
+  f.setReply(async()=>({...blocked,status:'connected',retryAvailable:false}));
+  await f.app.refresh();assert.equal(f.$('return').hidden,false);assert.equal(f.$('return').textContent,'Voltar à página');
+  assert.equal(f.navigations.length,0);f.locale('en');assert.equal(f.$('return').textContent,'Return to page');
+  const before=f.calls.length;f.$('return').click();await tick();
+  assert.deepEqual(f.calls.slice(before),['protectionStatus']);
+  assert.deepEqual(f.navigations,['https://page.test/path?q=a%26b&token=private#section']);
+  assert.equal(f.calls.includes('disconnect'),false);
+ }finally{f.dispose();}
+});
+
+test('a new fault or unknown state at click time prevents returning even after a connected screen',async()=>{
+ for(const status of ['blocked','unconfirmed','released']){
+  const f=fixture('#return=https://page.test/');
+  try{
+   await tick();f.setReply(async()=>({...blocked,status:'connected'}));await f.app.refresh();
+   f.setReply(async()=>({...blocked,status}));f.$('return').click();await tick();
+   assert.equal(f.navigations.length,0);assert.equal(f.$('return').hidden,true);
+  }finally{f.dispose();}
+ }
+});
+
+test('return never navigates on worker failure or resends the click while verification is pending',async()=>{
+ const f=fixture('#return=https://page.test/');
+ try{
+  await tick();f.setReply(async()=>({...blocked,status:'connected'}));await f.app.refresh();
+  const gate=deferred();f.setReply(()=>gate.promise);const before=f.calls.length;
+  f.$('return').click();f.$('return').click();await tick();assert.equal(f.$('return').disabled,true);
+  assert.deepEqual(f.calls.slice(before),['protectionStatus']);
+  gate.reject(Error('VpnWorkerTimedOut'));await tick();assert.equal(f.navigations.length,0);
+  assert.equal(f.$('protection').dataset.status,'unconfirmed');
+ }finally{f.dispose();}
+});
+
+test('a pending return check cannot navigate after the blocking page has been disposed',async()=>{
+ const f=fixture('#return=https://page.test/');
+ try{
+  await tick();f.setReply(async()=>({...blocked,status:'connected'}));await f.app.refresh();
+  const gate=deferred();f.setReply(()=>gate.promise);f.$('return').click();await tick();
+  f.app.dispose();gate.resolve({...blocked,status:'connected'});await tick();assert.equal(f.navigations.length,0);
+ }finally{f.dispose();}
+});
+
+test('manual blocking pages and unsafe destinations have no return action even with the VPN connected',async()=>{
+ for(const hash of ['', '#return=javascript:alert(1)', '#return=data:text/html,test', '#return=chrome://settings', '#return=https://user:password@page.test/', '#return=//page.test/', '#return=https:page.test']){
+  const f=fixture(hash);
+  try{
+   await tick();f.setReply(async()=>({...blocked,status:'connected'}));await f.app.refresh();
+   assert.equal(f.$('return').hidden,true);f.$('return').click();await tick();assert.equal(f.navigations.length,0);
+  }finally{f.dispose();}
+ }
 });
 test('reconnect keeps blocking when recovery is still waiting and only a confirmed snapshot reports success',async()=>{
  const f=fixture();try{await tick();f.$('retry').click();await tick();assert.ok(f.calls.includes('retryProtection'));assert.equal(f.$('protection').dataset.status,'blocked');assert.match(f.$('notice').textContent,/bloqueio permanece/);
