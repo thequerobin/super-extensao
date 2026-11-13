@@ -174,24 +174,24 @@ test('failed session refresh also marks the auth budget so outer clients cannot 
  await assert.rejects(f.client.json('vpn/v2'),error=>error.authRetried===true&&error.httpStatus===401);assert.equal(f.refreshes.length,1);
 });
 
-test('account adapters respect a consumed transport auth retry but keep their legacy fallback for unhandled 401',async()=>{
+test('account adapters respect a consumed transport auth retry and refresh an unhandled 401 once',async()=>{
  for(const name of ['getUser','getPmUser'])for(const consumed of [true,false]){
   let refreshes=0,calls=0;const error={httpStatus:401,Code:401,Error:'expired',authRetried:consumed};const user={ID:'user',VPN:{MaxTier:0}};
   const run=promise=>Promise.resolve(promise).catch(()=>{});
   const mocks={
    '../../api':{fetchJson:async()=>{if(++calls===1)throw error;return user;},isUnauthorizedError:e=>e.httpStatus===401},
-   '../readSession':{readSession:async()=>({uid:'A'})},'../refreshToken':{refreshToken:async()=>{refreshes++;}},'../getAccessToken':{getAccessToken:async()=> 'token'},
+   '../readSession':{readSession:async()=>({uid:'A'})},'../sessionStore':{sessionStore:{capture:()=>0}},'../refreshToken':{refreshToken:async()=>{refreshes++;}},'../getAccessToken':{getAccessToken:async()=> 'token'},
    '../../tools/getCacheAge':{getCacheAge:()=>1000000},'../../tools/activity':{getElapsedMillisecondsSinceLastActivity:async()=>0},
    '../../tools/getRuntime':{getRuntime:()=>({sendMessage:async()=>{}})},'../../tools/milliSeconds':{milliSeconds:{fromSeconds:n=>n*1000,fromHours:n=>n*3600000}},
    '../../state':{isLoggedIn:()=>true,logIn:()=>{}},'./getPmUser':{fetchPmUser:async()=>{}},'../../tools/triggerPromise':{triggerPromise:run,catchPromise:run},
-   '../../vpn/checkNetwork':{checkNetwork:()=>{}},'./storedUser':{storedUser:{setValue:async()=>{}}},'./loadCachedUser':{loadCachedUser:async()=>({})},
+   '../../vpn/checkNetwork':{checkNetwork:()=>{}},'./storedUser':{storedUser:{set:async()=>{}}},'./loadCachedUser':{loadCachedUser:async()=>({})},
    './User':{isUserResult:()=>false},'./PmUser':{isPmUserResult:()=>false},'./storedPmUser':{storedPmUser:{load:async()=>({}),set:async()=>{}}},
    '../../tools/GroupResponder':{GroupResponder:class{handle(fn){return fn();}}},
    '../../intervals':{getIdleThreshold:()=>1e9,getUserBlockingUpdateTTL:()=>0,getUserTTL:()=>100,getPmUserTTL:()=>100},
    '../../messaging/MessageType':{BackgroundData:{USER:'user'}},
   };
-  const exports={},filename=path.resolve(__dirname,'../vendor/proton-source/source/js/account/user',name+'.ts');
-  vm.runInNewContext(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports,Promise,Date,require:id=>{if(!mocks[id])return require('./helpers/load-ts.cjs')(path.resolve(path.dirname(filename),id+'.ts'));return mocks[id];}},{filename});
+  const filename=path.resolve(__dirname,'../vendor/proton-source/source/js/account/user',name+'.ts');
+  const exports=require('./helpers/load-ts.cjs')(filename,{},mocks);
   if(consumed){await assert.rejects(exports[name](true));assert.equal(refreshes,0);assert.equal(calls,1);}
   else{assert.equal((await exports[name](true)).ID,'user');assert.equal(refreshes,1);assert.equal(calls,2);}
  }

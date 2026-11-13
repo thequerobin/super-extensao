@@ -3,5 +3,5 @@ import {sessionDataStorageType, storage} from '../../tools/storage';
 import type {PmUser, PmUserResult} from './PmUser';
 
 export const storedPmUser = storage.item<
-	Partial<Timed<{user: PmUser | PmUserResult}>>
+	Partial<Timed<{user: PmUser | PmUserResult}>> & {owner?: string}
 >('pmUser', sessionDataStorageType);

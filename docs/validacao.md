@@ -1,6 +1,20 @@
 # Validação da Super Extensão
 
-Revisado em 13 de novembro de 2026, referência **1.7.24**. Esta página separa evidência automatizada de verificações ainda pendentes.
+Revisado em 13 de novembro de 2026, referência **1.7.25**. Esta página separa evidência automatizada de verificações ainda pendentes.
+
+## Conta, plano e configurações no núcleo próprio — 1.7.25
+
+A consulta/cache dos perfis VPN e da conta principal passa a `vpn/engine/account.ts`. O núcleo controla frescor, atualização em segundo plano, agrupamento de consultas por conta/geração, reautenticação e invalidação no logout. Gravações são aguardadas e remoções ficam ordenadas depois de escritas iniciadas. As chaves existentes e os caches legados continuam legíveis; novas gravações incluem `owner` com o UID já presente na sessão local, sem registrar esse dado no console. As restrições de plano e servidor usam funções próprias, com validação de tiers finitos e não negativos.
+
+Na revisão foram corrigidos o filtro invertido das tentativas antigas de atualização forçada e a possibilidade de esconder um 401 por meio do cache. Atualização forçada de conta Free fica limitada a 20 tentativas por intervalo de frescor; renovação de autenticação respeita o orçamento já consumido pelo transporte. Respostas de conta trocada ou de um login anterior, inclusive com o mesmo UID e outra geração, não podem publicar sucesso ou restaurar cache após logout.
+
+`vpn/engine/features.ts` assume carregamento agrupado de políticas e precedência entre instrução do dispositivo, preferência do usuário e padrão. Erros de armazenamento gerenciado não são convertidos em configuração permissiva. Os adaptadores conservam endpoints, formatos, traduções, flags e defaults específicos dos recursos; WebRTC obrigatório permanece. A extração não remove todo o código Proton.
+
+Validação automatizada: **457 testes aprovados**, sendo 21 novos cenários de conta/configuração. Incluem caches legados, atualização Free/pago, resposta atrasada após logout, remoção durante gravação, troca de conta/login, falha de persistência, limite de atualização forçada, orçamento de autenticação e precedência/falha de políticas. Os contratos existentes de HTTP e interface foram adaptados para carregar o núcleo real. Build de produção, TypeScript do worker/interface, `check:ui`, whitespace e os quatro campos de versão iguais a 1.7.25 aprovados.
+
+Validação nativa isolada: `node scripts/check-vpn-account-native.cjs` aprovado no **Windows / Edge 157.0.4341.46 / Node 24.20.0**, com perfil temporário, resolução externa bloqueada e respostas HTTP fictícias. Verificados: inicialização do worker de produção, leitura do cache legado, atualização de plano Free para pago, normalização da resposta da conta principal e persistência do vínculo de conta nos dois caches. O runner aguarda os contextos reais do worker e da página antes de consultar as APIs e remove seu perfil temporário ao terminar. Não usa Playwright nem conta pessoal.
+
+Esta rodada não autentica nem conecta à Proton real, não mede pacotes e não amplia a certificação de privacidade. Repetir conta/plano/recursos e conexão na sessão pessoal após recarregar a extensão continua pendente, assim como os testes de falha descritos em [vpn-validacao-pc.md](vpn-validacao-pc.md). [Arquitetura e reprodução](vpn-engine.md#conta-plano-e-configurações-próprias--1725).
 
 ## Previsão de rede já desativada por outra extensão — 1.7.24
 

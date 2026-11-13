@@ -1,6 +1,6 @@
-# Motor da VPN — núcleo próprio, 1.7.13
+# Motor da VPN — núcleo próprio, 1.7.25
 
-Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton. WebRTC e a coordenação do login foram extraídos na 1.7.12, completando as extrações funcionais previstas. A página oficial, os cabeçalhos/formatos/endpoints e utilitários de compatibilidade continuam em adaptadores. Isso não remove todo o código vendor nem substitui a revisão minuciosa em navegador.
+Revisado em 13 de novembro de 2026. A Super Extensão controla as regras, as gravações do proxy, a máquina de estados, a restauração, a invalidação de operações, os despertares de recuperação e a persistência/renovação de tokens por módulos próprios em `vpn/engine`. O serviço continua sendo Proton. WebRTC e a coordenação do login foram extraídos na 1.7.12; consulta/cache de conta, política de plano e resolução de configurações passam ao núcleo próprio na 1.7.25. A página oficial, os cabeçalhos/formatos/endpoints e utilitários de compatibilidade continuam em adaptadores. Isso não remove todo o código vendor nem substitui a revisão minuciosa em navegador.
 
 ## Responsabilidades ativas
 
@@ -18,6 +18,8 @@ Revisado em 12 de novembro de 2026. A Super Extensão controla as regras, as gra
 | Autenticação do proxy | `vpn/authHandler.ts` adaptado | Somente desafio de proxy do host e porta atuais; uma resposta por desafio; revalida estado após obter credenciais |
 | WebRTC | `vpn/engine/webrtc.ts` + `chromium-privacy.ts` | Fila e política próprias, confirmação de propriedade/valor; leituras/escritas/clear regulares observam erros nativos |
 | Catálogo e seleção | `vpn/engine/catalog.ts` + `selection.ts`, `vpn/serverCatalog.ts` como adaptador | Cache com identidade de conta, TTL, refresh agrupado, ranking estável e escolha manual/automática próprios; endpoints v1/v2 e decodificação de status preservados no adaptador |
+| Conta e plano | `vpn/engine/account.ts` + `account/user/accountProfile.ts`, `getUser.ts` e `getPmUser.ts` como adaptadores | Consulta agrupada, cache, atualização em segundo plano, limite de atualização forçada, restrições Free/pago, reautenticação e descarte de respostas antigas próprios |
+| Configurações de recursos | `vpn/engine/features.ts` + `vpn/features/getFeatureConfig.ts` e `FeatureWrapper.ts` como adaptadores | Precedência entre política do dispositivo, preferência do usuário e padrão; leitura de política agrupada e falha recuperável, sem transformar erro de leitura em permissão |
 
 Os caminhos que não começam com `vpn/engine` são relativos a `vendor/proton-source/source/js/`. A interface própria permanece em `vpn/source`.
 
@@ -212,3 +214,15 @@ Os testes de regressão avaliam a seleção por tipo e prioridade: bloqueado →
 ## Manutenção de dependências — 1.7.17
 
 A atualização compatível e os artefatos foram validados após instalação limpa. O empacotador deixa de extrair arquivos ou executar shell; a configuração desativada do Sentry foi testada com o cliente atualizado. Node mínimo da compilação VPN: 24.11.0. Versões, licenças declaradas e os alertas restantes das ferramentas estão em [vpn-dependencias.md](vpn-dependencias.md). A validação de IP/DNS/tráfego permanece separada da auditoria npm.
+
+## Conta, plano e configurações próprias — 1.7.25
+
+AccountProfile, em vpn/engine/account.ts, coordena os perfis VPN e de conta principal com portas independentes de Chromium/Proton. O adaptador continua fornecendo os endpoints vpn/v2 e core/v4/users?Locale=1, a normalização de respostas e o armazenamento existente. O núcleo agrupa consultas por conta/geração, aguarda a gravação do cache, aplica TTL e atualização em segundo plano, limita atualizações forçadas a 20 por intervalo de frescor e usa a rotação de tokens existente. Um 401 cujo transporte já consumiu a tentativa de renovação não dispara outra nem fica escondido por um cache antigo.
+
+Logout invalida consultas imediatamente e ordena a remoção depois de gravações iniciadas. Troca de conta ou nova geração de login impede publicar a resposta anterior. As chaves superVpn:user e superVpn:pmUser e o conteúdo dos perfis são preservados. Novas gravações acrescentam owner (UID da conta, somente no armazenamento local, sem logs); caches antigos sem esse campo continuam legíveis. Um cache com owner de outra conta é ignorado pelo leitor próprio. Isso não transforma um cache antigo sem identificação em prova de pertencimento à conta atual.
+
+FeatureConfigStore e ConfiguredFeature, em vpn/engine/features.ts, resolvem política do dispositivo, preferência do usuário e padrão. A política gerenciada continua tendo precedência sobre o arquivo empacotado, inclusive quando vazia. Apenas indisponibilidade conhecida da área gerenciada permite fallback; timeout/falha de leitura são propagados e uma consulta posterior pode tentar novamente. Políticas não controláveis ignoram a preferência do usuário. Traduções, nomes dos recursos, flags de disponibilidade, defaults específicos e acesso ao armazenamento continuam nas fachadas. A política obrigatória de WebRTC continua prevalecendo.
+
+A restrição de servidores Free/pagos usa accountTier/hasPaidAccess/canAccessServer; tiers inválidos não elevam o plano. Endpoints, modelos de resposta, página de login, catálogo/status binário, mensagens, traduções, utilitários e a estrutura de build ainda têm componentes Proton. Esta etapa extrai decisões de conta/configuração e não equivale à remoção integral do fornecedor.
+
+O runner reproduzível scripts/check-vpn-account-native.cjs usa o worker de produção em Edge/Chromium com perfil temporário, respostas fictícias e resolução externa bloqueada. Requer Node com WebSocket global (a execução registrada usou Node 24.20.0); CHROMIUM_PATH pode indicar outro executável compatível. Execute node scripts/check-vpn-account-native.cjs. Verifica inicialização, leitura do cache legado, atualização Free para pago, normalização da conta principal e persistência do owner. Não usa conta pessoal, não conecta à Proton e não mede tráfego ou privacidade. Resultados em [validacao.md](validacao.md).

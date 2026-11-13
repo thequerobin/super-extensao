@@ -1,6 +1,6 @@
 # Próximos passos da Super Extensão
 
-Revisado em **13 de novembro de 2026**, referência **1.7.24**. Corrigida a rejeição da previsão de rede já desativada por outra extensão; falta repetir a conexão Proton pessoal após atualizar. O worker agora fornece diagnóstico local da conexão por `getVpnDiagnostics()`, independente do debug legado. A instalação das dependências de sincronização agora remove as chaves de teste que geravam avisos no Chromium. O fluxo de conexão agora tem prazo e estado de falha com bloqueio preservado; a recuperação na sessão Proton pessoal ainda precisa ser conferida. A validação anterior da resposta de login Proton passou 423 testes automatizados e verificação nativa isolada sem rede; as rodadas anteriores cobrem regras reais no Helium e cenários isolados da VPN/Nova guia no Edge. Evidências, limites, confirmações do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
+Revisado em **13 de novembro de 2026**, referência **1.7.25**. Consulta/cache de conta, política Free/pago e resolução das configurações de recursos agora usam núcleos próprios, com teste do worker compilado em Edge e dados fictícios. Endpoints, formatos e fachadas de compatibilidade permanecem. A conexão Proton pessoal ainda precisa ser repetida após a correção da previsão de rede da 1.7.24. Evidências, limites, confirmações do usuário e validações ainda pendentes estão separados em [docs/validacao.md](docs/validacao.md).
 
 ## Estado e prioridade
 
@@ -93,6 +93,7 @@ Detalhes, limites e caminhos dos backups: [docs/sync-engine.md](docs/sync-engine
 - [x] Extrair transporte HTTP: prazo/cancelamento, JSON/binário, erros, Retry-After e repetição de leituras após refresh (1.7.10).
 - [x] Extrair catálogo, cache, ranking, seleção manual/automática e failover para módulos próprios; preservar escolha manual na recuperação (1.7.11).
 - [x] Extrair WebRTC e coordenação do login: estado temporário, validade, consumo único, guarda de sessão e escritas de privacidade próprias (1.7.12).
+- [x] Extrair consulta/cache de conta, controle de plano e resolução de configurações de recursos, mantendo os adaptadores e os dados existentes (1.7.25).
 - [x] Criar testes de contrato para a primeira substituição, incluindo PAC após Babel/minificação.
 - [x] Estender contratos para o controlador, gerações, alarmes e persistência/rotação de tokens (1.7.0).
 - [x] Manter a chave/formato de sessão ao substituir persistência e renovação; invalidar fork/refresh após logout (1.7.0).

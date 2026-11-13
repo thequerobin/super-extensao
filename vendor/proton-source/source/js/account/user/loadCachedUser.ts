@@ -12,5 +12,6 @@ export const loadCachedUser = async () => {
 	return cache as {
 		time?: number;
 		user?: User;
+		owner?: string;
 	};
 };

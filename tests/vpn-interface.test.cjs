@@ -500,8 +500,9 @@ test("adapter retains Proton sign-in, tier checks, namespaced messages and activ
     ).outputText,
     {
       exports: actualAccess,
-      require() {
-        return { getUserMaxTier: getTier };
+      require(id) {
+        assert.equal(id, '../../../../../vpn/engine/account');
+        return require('./helpers/load-ts.cjs')(path.join(root, 'vpn/engine/account.ts'));
       },
     },
   );

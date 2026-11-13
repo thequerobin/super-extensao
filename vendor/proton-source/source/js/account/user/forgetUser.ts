@@ -1,6 +1,8 @@
-import {triggerPromise} from '../../tools/triggerPromise';
-import {storedUser} from './storedUser';
-import {storedPmUser} from './storedPmUser';
+import { triggerPromise } from "../../tools/triggerPromise";
+import { accountProfile } from "./getUser";
+import { pmAccountProfile } from "./getPmUser";
 
 export const forgetUser = () =>
-	triggerPromise(Promise.all([storedUser.remove(), storedPmUser.remove()]));
+	triggerPromise(
+		Promise.all([accountProfile.forget(), pmAccountProfile.forget()]),
+	);
