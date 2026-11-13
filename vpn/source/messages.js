@@ -6,7 +6,6 @@ export const messages = {
   bookmarkFolder: {"pt-BR": "Pasta de favoritos", "en": "Bookmarks folder"},
   bookmarkRecursive: {"pt-BR": "Incluir subpastas", "en": "Include subfolders"},
   importBookmarks: {"pt-BR": "Importar domínios dos favoritos", "en": "Import bookmark domains"},
-  bookmarkPreview: {"pt-BR": "{new} novos · {existing} já na lista · {skipped} links ignorados", "en": "{new} new · {existing} already listed · {skipped} links skipped"},
   bookmarkHelp: {"pt-BR": "A importação copia apenas domínios HTTP/HTTPS e não altera os favoritos. Mudanças futuras na pasta não atualizam esta lista. Revise e clique em Salvar para aplicar. A opção de subdomínios acima vale para os novos itens.", "en": "Import copies only HTTP/HTTPS domains without changing bookmarks. Future folder changes do not update this list. Review and click Save to apply. The subdomains option above applies to new entries."},
   bookmarkExclude: {"pt-BR": "No modo de exclusão, estes sites navegarão fora da VPN quando o tunelamento dividido estiver ativo.", "en": "In exclusion mode, these sites will bypass the VPN when split tunneling is enabled."},
   bookmarkInclude: {"pt-BR": "No modo de inclusão, somente os sites incluídos usarão a VPN quando o tunelamento dividido estiver ativo.", "en": "In inclusion mode, only included sites will use the VPN when split tunneling is enabled."},

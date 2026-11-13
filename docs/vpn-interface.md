@@ -81,3 +81,10 @@ Validação desta alteração: 468 testes aprovados, compilação da interface d
 A interface distingue carregamento da conta/recursos de restrições do dispositivo. Antes da resposta da conta, as opções continuam desativadas, mas indicam que aguardam o carregamento; uma consulta que falhou aparece também em Recursos, com o motivo e botão de tentar novamente. A mensagem de controle pelo dispositivo fica reservada às configurações não editáveis após concluir essa etapa. A correção não remove políticas gerenciadas nem habilita controles antes de obter os dados necessários. Uma falha posterior no catálogo de servidores não volta a bloquear recursos já carregados.
 
 Validação: 470 testes aprovados, incluindo falha de carregamento, recuperação após tentar novamente e preservação de restrições reais; compilação de produção, TypeScript e checagem de componentes aprovados. A causa da falha no perfil do usuário não foi observada diretamente.
+
+
+### Prévia compartilhada com a limpeza (1.7.29)
+
+Limpeza e VPN renderizam a prévia com o mesmo componente `ui/bookmark-preview.js` e os mesmos estilos de `ui-components.css`. O cartão mostra a quantidade de novos domínios, o total de domínios únicos na pasta, os já presentes e os links incompatíveis ignorados. A lista mostra todos os domínios coletados e marca os existentes com “(já na lista)”, inclusive quando não há novos domínios. Listas grandes têm rolagem interna com altura máxima de 120 px. PT-BR e inglês são tratados pelo componente comum, com rótulos escritos como texto. O botão de importar continua desativado quando não há novos itens; o salvamento da VPN continua explícito.
+
+Validação da unificação: 472 testes aprovados, compilação da interface e dos estilos dos painéis, TypeScript e checagem dos componentes compartilhados aprovados.

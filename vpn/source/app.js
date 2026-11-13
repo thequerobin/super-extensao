@@ -1,5 +1,6 @@
 import { renderUi } from "../../ui/render.cjs";
 /* SPDX-License-Identifier: GPL-3.0-only */
+import { renderBookmarkPreview } from "../../ui/bookmark-preview.js";
 import { messages } from "./messages";
 import { bookmarkFolders, bookmarkPreview } from "./bookmarks";
 import {
@@ -178,7 +179,7 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
   );
   function bookmarkMarkup() {
     const preview = importPreview();
-    return `<ui-actions>${button(t("chooseBookmarks"), "load-bookmarks")}</ui-actions>${model.bookmarkFolders ? `<section aria-label="${e(t("importBookmarks"))}"><ui-field class="vpn-field">${e(t("bookmarkFolder"))}<ui-control as="select" data-field="bookmark-folder">${model.bookmarkFolders.map(folder => `<option value="${e(folder.id)}" ${folder.id === model.bookmarkFolder ? "selected" : ""}>${e(folder.label)}</option>`).join("")}</ui-control></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="bookmark-recursive" ${model.bookmarkRecursive ? "checked" : ""}> ${e(t("bookmarkRecursive"))}</ui-check><p class="vpn-note" role="status">${e(t("bookmarkPreview").replace("{new}", preview.fresh.length).replace("{existing}", preview.duplicates).replace("{skipped}", preview.skipped))}</p><ul class="vpn-domains">${preview.fresh.map(domain => `<li>${e(domain)}</li>`).join("")}</ul>${button(t("importBookmarks"), "import-bookmarks", preview.fresh.length ? "" : "disabled")}</section>` : ""}<p class="vpn-note">${e(t("bookmarkHelp"))} ${e(t(model.draft.mode === "exclude" ? "bookmarkExclude" : "bookmarkInclude"))}</p>`;
+    return `<ui-actions>${button(t("chooseBookmarks"), "load-bookmarks")}</ui-actions>${model.bookmarkFolders ? `<section aria-label="${e(t("importBookmarks"))}"><ui-field class="vpn-field">${e(t("bookmarkFolder"))}<ui-control as="select" data-field="bookmark-folder">${model.bookmarkFolders.map(folder => `<option value="${e(folder.id)}" ${folder.id === model.bookmarkFolder ? "selected" : ""}>${e(folder.label)}</option>`).join("")}</ui-control></ui-field><ui-check class="vpn-check"><input type="checkbox" data-field="bookmark-recursive" ${model.bookmarkRecursive ? "checked" : ""}> ${e(t("bookmarkRecursive"))}</ui-check><ui-card class="import-preview" data-bookmark-preview></ui-card>${button(t("importBookmarks"), "import-bookmarks", preview.fresh.length ? "" : "disabled")}</section>` : ""}<p class="vpn-note">${e(t("bookmarkHelp"))} ${e(t(model.draft.mode === "exclude" ? "bookmarkExclude" : "bookmarkInclude"))}</p>`;
   }
   function featuresMarkup() {
     const features = model.snapshot.features || {};
@@ -236,6 +237,11 @@ export async function mountVpn(root, engine, preferences, browser = globalThis.c
     root.innerHTML = renderUi(
       `<div class="vpn-app">${hostNavigation ? "" : navigationMarkup()}<p class="vpn-error ui-notice ui-notice-error" role="alert" ${model.error ? "" : "hidden"}>${e(model.error)}</p>${model.loading ? `<p class="vpn-empty" role="status">${e(t("loading"))}</p>` : !model.snapshot.signedIn ? `<ui-card as="section" class="vpn-card ui-card vpn-welcome"><div class="vpn-shield" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg></div><h2>${e(t("loginTitle"))}</h2><p>${e(t("loginHelp"))}</p>${button(t("login"), "login", "", "vpn-primary")}${button(t("reloadLogin"), "refresh")}</ui-card>` : { connection: connectionMarkup, servers: serverMarkup, features: featuresMarkup, account: accountMarkup }[model.page]()}${model.networkBlocked ? `<ui-card as="section" class="vpn-card ui-card"><p>${e(t("blockedHelp"))}</p><a class="vpn-button ui-button" href="vpn-blocked.html" target="_blank" rel="noopener">${e(t("protectionDetails"))}</a>${button(t("releaseNetwork"), "disconnect", "", "vpn-danger")}</ui-card>` : ""}<footer class="vpn-provider-note ui-footer-note">${e(t("provider"))}</footer></div>`,
     );
+    const previewCard = root.querySelector("[data-bookmark-preview]");
+    if (previewCard) {
+      const preview = importPreview();
+      renderBookmarkPreview(previewCard, {domains: preview.all, fresh: preview.fresh, skipped: preview.skipped}, model.locale);
+    }
     if (hostNavigation) {
       hostNavigation.innerHTML = renderUi(navigationMarkup());
       if (focusedNavigation)

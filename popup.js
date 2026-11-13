@@ -135,14 +135,9 @@ async function refreshPreview() {
   const data = await chrome.storage.local.get({[key]:[]});
   const existing = new Set(ClearRules.normalizeList(data[key]));
   const fresh = preview.domains.filter(domain => !existing.has(domain));
-  $("previewCount").textContent = SuperI18n.t(fresh.length===1?"uiNewDomainsOne":"uiNewDomainsMany",{count:fresh.length});
-  $("previewDetail").textContent = SuperI18n.t("uiPreview",{total:preview.domains.length,existing:preview.domains.length-fresh.length,skipped:preview.skipped});
-  $("previewDomains").replaceChildren();
-  for (const domain of preview.domains) {
-    const li = document.createElement("li");
-    li.textContent = domain + (existing.has(domain) ? SuperI18n.t("uiAlreadyListed") : "");
-    $("previewDomains").append(li);
-  }
+  SuperBookmarkPreview.renderBookmarkPreview($("previewCount").parentElement,
+    {domains: preview.domains, fresh, skipped: preview.skipped}, SuperI18n.locale,
+    {count: "previewCount", detail: "previewDetail", domains: "previewDomains"});
   $("importBookmarks").disabled = fresh.length === 0;
 }
 async function loadBookmarks() {

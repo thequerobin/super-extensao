@@ -28,6 +28,7 @@ function load(file, mocks = {}, globals = {}, cache = new Map()) {
       ...globals,
       require(spec) {
         if (spec in mocks) return mocks[spec];
+        if (spec === "../../ui/bookmark-preview.js") return require(path.join(root, "ui/bookmark-preview.js"));
         if (spec === "../../rules.js") return require(path.join(root, "rules.js"));
         if (spec.endsWith('.cjs')) return require(path.resolve(path.dirname(filename), spec));
         if (spec.startsWith("."))
@@ -996,16 +997,21 @@ test("VPN imports bookmark domains into the draft and selected mode only, then s
     await ui.app.navigate("features");
     await ui.click("load-bookmarks");
     assert.deepEqual(plain(requests), [{permissions: ["bookmarks"]}]);
-    assert.match(ui.w.document.body.textContent, /2 novos · 0 já na lista · 2 links ignorados/);
+    assert.match(ui.w.document.body.textContent, /2 novos domínios/);
     assert.doesNotMatch(ui.w.document.body.textContent, /private|secret.example/);
     const recursive = ui.w.document.querySelector('[data-field="bookmark-recursive"]');
     recursive.checked = false; recursive.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
-    assert.match(ui.w.document.body.textContent, /1 novos/);
+    assert.match(ui.w.document.body.textContent, /1 novo domínio/);
     const subdomains = ui.w.document.querySelector('[data-field="subdomains"]');
     subdomains.checked = false; subdomains.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
     await ui.click("import-bookmarks");
     assert.equal(ui.calls.filter(call => call[0] === "split").length, 0);
     assert.equal(ui.w.document.querySelector('[data-action="import-bookmarks"]').disabled, true);
+    const preview = ui.w.document.querySelector('[data-bookmark-preview]');
+    assert.match(preview.textContent, /0 novos domínios/);
+    assert.match(preview.textContent, /1 únicos nesta pasta · 1 já na lista · 2 links incompatíveis ignorados/);
+    assert.equal(preview.querySelector('li').textContent, "new.example (já na lista)");
+    assert.equal(preview.classList.contains("ui-bookmark-preview"), true);
     const mode = ui.w.document.querySelector('[data-field="split-mode"]');
     mode.value = "include"; mode.dispatchEvent(new ui.w.Event("change", {bubbles: true}));
     await ui.click("import-bookmarks");

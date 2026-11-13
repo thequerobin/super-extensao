@@ -403,3 +403,22 @@ select:not([multiple]):not([size]) {
   background-size: 12px 12px !important;
   background-repeat: no-repeat !important;
 }
+
+/* Same preview card in cleanup and VPN, including long bookmark collections. */
+.ui-bookmark-preview {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
+  margin: 14px 0 10px;
+  padding: var(--card-padding);
+  box-shadow: none;
+}
+.ui-bookmark-preview.ui-card > p { color: var(--muted); font-size: 11px; margin: 4px 0 0; }
+.ui-bookmark-preview.ui-card > ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 11px;
+  max-height: 120px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
