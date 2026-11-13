@@ -1137,3 +1137,17 @@ test('VPN cannot release networking after the connection changes during confirma
     assert.equal(ui.w.document.querySelector('.vpn-status-card').dataset.status, 'connected');
   } finally {await ui.close();}
 });
+
+
+test('connected VPN can select fastest again without an explicit disconnect or a forced different server', async () => {
+  const initial = snapshot();initial.state={state:'connected',server:{name:'US-FREE#86',exitCountry:'US'}};
+  const ui = await boot(initial);
+  try {
+    assert.equal(ui.w.document.querySelector('.vpn-status-card [data-action="fastest"]').textContent, 'Conectar ao mais rápido');
+    await ui.click('fastest');
+    assert.deepEqual(ui.calls.filter(call => call[0] === 'connect'), [['connect', undefined, 'fastest']]);
+    assert.equal(ui.calls.some(call => call[0] === 'disconnect'), false);
+    ui.broadcast('changeState', {state:'connecting'});
+    assert.equal(ui.w.document.querySelector('.vpn-status-card [data-action="fastest"]'), null);
+  } finally {await ui.close();}
+});

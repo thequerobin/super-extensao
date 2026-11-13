@@ -1,4 +1,4 @@
-# Interface própria da VPN — referência 1.7.31
+# Interface própria da VPN — referência 1.7.32
 
 ## Componentização 1.6.8
 
@@ -100,3 +100,6 @@ Validação da lista compartilhada: 474 testes aprovados, incluindo remoção po
 A VPN usa o importador completo e o editor de domínios comuns à limpeza, com normalização de hostname no adaptador. A seleção de pasta, a permissão, a prévia, os erros e a nova tentativa saíram de `app.js`. As telas estão em `vpn/source/screens/{connection,servers,features,account}.js`; os eventos e a ponte com o motor ficam no app. O botão Salvar continua obrigatório e os modos de inclusão/exclusão continuam separados.
 
 Carregamento e falhas dos recursos e servidores usam o componente genérico de estado. As confirmações de saída, abandono de rascunho e liberação de rede usam o diálogo comum; a liberação é descartada caso a conexão mude durante a confirmação. A página de bloqueio independente conserva seu fluxo local de confirmação. A lista de pendências de unificação está em [ui-components.md](ui-components.md).
+
+
+Na **1.7.32**, o cartão de conexão mostra **Conectar ao mais rápido** também quando já está conectado. A ação executa novamente a seleção automática existente, respeitando plano e recursos; pode escolher o mesmo servidor. Não exige clicar em Desconectar antes. Durante uma tentativa de conexão, o atalho não aparece; enquanto o catálogo carrega, apresenta erro ou há uma operação em andamento, o botão segue as restrições existentes.

@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 export const messages = {
+  connectFastest: {"pt-BR": "Conectar ao mais rápido", en: "Connect to fastest"},
   domainsLabel: {"pt-BR": "domínios", en: "domains"},
   featuresLoading: {"pt-BR": "Aguardando carregar os recursos e os dados da conta…", en: "Waiting for features and account details to load…"},
   featuresLoadFailed: {"pt-BR": "Não foi possível concluir o carregamento dos recursos e da conta. Tente novamente para habilitar as opções disponíveis.", en: "Could not finish loading features and account details. Retry to enable available options."},
